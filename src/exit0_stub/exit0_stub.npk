@@ -1,4 +1,4 @@
-// sync.npk
+// exit0_stub.npk
 
 extern "libc" {
     func:fopen  = int64(string:path, string:mode);
@@ -14,6 +14,5 @@ func:failsafe = int32(tbb32:err) {
 };
 
 func:main = int32() {
-    drop(sys!!(162i64)); // SYS_SYNC
     exit 0;
 };

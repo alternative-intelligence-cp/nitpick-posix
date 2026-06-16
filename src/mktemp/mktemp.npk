@@ -1,0 +1,153 @@
+// mktemp.npk
+
+extern "libc" {
+    func:fopen  = int64(string:path, string:mode);
+    func:fgetc  = int32(int64:fp);
+    func:fclose = int32(int64:fp);
+}
+
+use "../vendor/nitpick_args.npk".*;
+
+func:args_load = string() {
+    int64:fp = fopen("/proc/self/cmdline", "r");
+    if (fp == 0i64) { pass("|"); }
+    string:result  = "|";
+    string:current = "";
+    int32:c = fgetc(fp);
+    while (c >= 0i32) {
+        if (c == 0i32) {
+            if (string_length(current) > 0i64) {
+                result  = string_concat(result, string_concat(current, "|"));
+                current = "";
+            }
+        }
+        if (c > 0i32) {
+            current = string_concat(current, string_from_char(@cast_unchecked<int8>(c)));
+        }
+        c = fgetc(fp);
+    }
+    if (string_length(current) > 0i64) {
+        result = string_concat(result, string_concat(current, "|"));
+    }
+    drop(fclose(fp));
+    pass(result);
+};
+
+func:print_err = int32(string:s) {
+    int64:len = string_length(s);
+    drop(sys(WRITE, 2i64, s, len));
+    pass 0i32;
+};
+
+func:print_str_safe = int32(string:s) {
+    int64:len = string_length(s);
+    drop(sys(WRITE, 1i64, s, len));
+    pass 0i32;
+};
+
+extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
+
+func:failsafe = int32(tbb32:err) {
+    drop(err);
+    exit 1;
+};
+
+func:get_rand_char = string(int64:byte) {
+    string:alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    int64:idx = byte - (byte / 62i64) * 62i64;
+    pass string_substring(alphabet, idx, idx + 1i64);
+};
+
+func:main = int32() {
+    string:args = raw args_load();
+    int32:arg_count = raw args_count(args);
+    
+    string:template = "/tmp/tmp.XXXXXX";
+    if (arg_count >= 1i32) {
+        template = raw args_at(args, 1i32);
+    }
+    
+    int64:urandom_fd = sys(OPEN, "/dev/urandom", 0i64, 0i64) ? -1i64;
+    if (urandom_fd < 0i64) {
+        drop(print_err("mktemp: cannot open /dev/urandom\n"));
+        exit 1;
+    }
+    
+    int64:buf = sys(MMAP, 0i64, 16i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
+    if (buf < 0i64) { exit 1; }
+    
+    int64:tpl_len = string_length(template);
+    string:base = template;
+    int64:suffix_len = 0i64;
+    
+    // find how many X's at the end
+    int32:counting = 1i32;
+    int64:x_count = 0i64;
+    int64:idx = tpl_len - 1i64;
+    while (counting == 1i32) {
+        if (idx < 0i64) {
+            counting = 0i32;
+        } else {
+            string:ch = string_substring(template, idx, idx + 1i64);
+            if (string_equals(ch, "X")) {
+                x_count = x_count + 1i64;
+                idx = idx - 1i64;
+            } else {
+                counting = 0i32;
+            }
+        }
+    }
+    
+    if (x_count < 3i64) {
+        // If not enough X's, POSIX says default to 6 X's appended or something.
+        // We will just append .XXXXXX if there are no X's, like GNU mktemp does.
+        if (x_count == 0i64) {
+            template = string_concat(template, ".XXXXXX");
+            x_count = 6i64;
+            idx = string_length(template) - 7i64;
+        } else {
+            drop(print_err("mktemp: too few X's in template\n"));
+            exit 1;
+        }
+    }
+    
+    base = string_substring(template, 0i64, idx + 1i64);
+    
+    int32:tries = 0i32;
+    int64:success = 0i64;
+    string:final_path = "";
+    
+    while (tries < 10i32) {
+        if (success == 0i64) {
+            drop(sys(READ, urandom_fd, buf, x_count));
+            string:rand_str = "";
+            int64:j = 0i64;
+            while (j < x_count) {
+                int64:c = npk_mem_read_byte(buf, j);
+                rand_str = string_concat(rand_str, raw get_rand_char(c));
+                j = j + 1i64;
+            }
+            final_path = string_concat(base, rand_str);
+            
+            // O_CREAT | O_EXCL | O_RDWR = 64 + 128 + 2 = 194
+            int64:res = sys!!(2i64, final_path, 194i64, 384i64) ? -1i64; // OPEN is 2, 0600 is 384
+            if (res >= 0i64) {
+                drop(sys(CLOSE, res));
+                success = 1i64;
+            }
+        }
+        tries = tries + 1i32;
+    }
+    
+    drop(sys(CLOSE, urandom_fd));
+    drop(sys(MUNMAP, buf, 16i64));
+    
+    if (success == 1i64) {
+        drop(print_str_safe(final_path));
+        drop(print_str_safe("\n"));
+        exit 0;
+    } else {
+        drop(print_err("mktemp: failed to create file\n"));
+        exit 1;
+    }
+};

@@ -1,0 +1,71 @@
+// nohup.npk
+extern "libc" {
+    func:signal = int64(int32:signum, int64:handler);
+    func:isatty = int32(int32:fd);
+    func:open = int32(string:pathname, int32:flags, int32:mode);
+    func:dup2 = int32(int32:oldfd, int32:newfd);
+    func:close = int32(int32:fd);
+}
+
+use "../vendor/nitpick_args.npk".*;
+use "../vendor/exec_helper.npk".*;
+
+func:print_str = int32(string:s) {
+    int64:len = string_length(s);
+    drop(sys!!(1i64, 1i64, s, len));
+    pass 0i32;
+};
+
+func:print_err = int32(string:s) {
+    int64:len = string_length(s);
+    drop(sys!!(1i64, 2i64, s, len));
+    pass 0i32;
+};
+
+func:failsafe = int32(tbb32:err) {
+    drop(err);
+    exit 1;
+};
+
+func:main = int32() {
+    string:args = raw args_load();
+    int32:arg_count = raw args_count(args);
+    
+    if (arg_count == 0i32) {
+        drop(print_err("nohup: missing operand\n"));
+        exit 125;
+    }
+    
+    // Ignore SIGHUP
+    drop(signal(1i32, 1i64));
+    
+    if (isatty(1i32) == 1i32) {
+        // Redirect stdout to nohup.out
+        int32:fd = open("nohup.out", 1089i32, 384i32); // O_WRONLY | O_APPEND | O_CREAT, 0600
+        if (fd < 0i32) {
+            // Wait, for MVP, we'll just fail if we can't open nohup.out in current dir
+            drop(print_err("nohup: failed to open 'nohup.out'\n"));
+            exit 125;
+        }
+        
+        drop(print_err("nohup: ignoring input and appending output to 'nohup.out'\n"));
+        
+        drop(dup2(fd, 1i32));
+        
+        if (isatty(2i32) == 1i32) {
+            drop(dup2(1i32, 2i32));
+        }
+        
+        drop(close(fd));
+    }
+    
+    // If stdin is a tty, standard nohup redirects it from /dev/null. We will skip for MVP simplicity.
+    
+    int64:res = raw sys_execvp_from(1i64);
+    
+    string:cmd = raw args_at(args, 1i32);
+    drop(print_err("nohup: failed to run command '"));
+    drop(print_err(cmd));
+    drop(print_err("'\n"));
+    exit 127;
+};

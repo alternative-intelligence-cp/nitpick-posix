@@ -1,0 +1,136 @@
+// kill.npk
+
+extern "libc" {
+    func:fopen  = int64(string:path, string:mode);
+    func:fgetc  = int32(int64:fp);
+    func:fclose = int32(int64:fp);
+}
+
+use "../vendor/nitpick_args.npk".*;
+
+func:args_load = string() {
+    int64:fp = fopen("/proc/self/cmdline", "r");
+    if (fp == 0i64) { pass("|"); }
+    string:result  = "|";
+    string:current = "";
+    int32:c = fgetc(fp);
+    while (c >= 0i32) {
+        if (c == 0i32) {
+            if (string_length(current) > 0i64) {
+                result  = string_concat(result, string_concat(current, "|"));
+                current = "";
+            }
+        }
+        if (c > 0i32) {
+            current = string_concat(current, string_from_char(@cast_unchecked<int8>(c)));
+        }
+        c = fgetc(fp);
+    }
+    if (string_length(current) > 0i64) {
+        result = string_concat(result, string_concat(current, "|"));
+    }
+    drop(fclose(fp));
+    pass(result);
+};
+
+func:print_err = int32(string:s) {
+    int64:len = string_length(s);
+    drop(sys(WRITE, 2i64, s, len));
+    pass 0i32;
+};
+
+func:print_str_safe = int32(string:s) {
+    int64:len = string_length(s);
+    drop(sys(WRITE, 1i64, s, len));
+    pass 0i32;
+};
+
+func:failsafe = int32(tbb32:err) {
+    drop(err);
+    exit 1;
+};
+
+func:parse_int = int64(string:s) {
+    int64:len = string_length(s);
+    int64:i = 0i64;
+    int64:val = 0i64;
+    int32:sign = 1i32;
+    if (len > 0i64) {
+        string:c = string_substring(s, 0i64, 1i64);
+        if (string_equals(c, "-")) {
+            sign = -1i32;
+            i = 1i64;
+        }
+    }
+    while (i < len) {
+        string:c = string_substring(s, i, i + 1i64);
+        int64:digit = -1i64;
+        if (string_equals(c, "0")) { digit = 0i64; }
+        if (string_equals(c, "1")) { digit = 1i64; }
+        if (string_equals(c, "2")) { digit = 2i64; }
+        if (string_equals(c, "3")) { digit = 3i64; }
+        if (string_equals(c, "4")) { digit = 4i64; }
+        if (string_equals(c, "5")) { digit = 5i64; }
+        if (string_equals(c, "6")) { digit = 6i64; }
+        if (string_equals(c, "7")) { digit = 7i64; }
+        if (string_equals(c, "8")) { digit = 8i64; }
+        if (string_equals(c, "9")) { digit = 9i64; }
+        
+        if (digit >= 0i64) {
+            val = val * 10i64 + digit;
+        } else {
+            // Error! Just return what we have
+            i = len;
+        }
+        i = i + 1i64;
+    }
+    if (sign == -1i32) {
+        val = 0i64 - val; // wait we don't need negatives for kill usually except process groups
+    }
+    pass val;
+};
+
+func:main = int32() {
+    string:args = raw args_load();
+    int32:arg_count = raw args_count(args);
+    
+    if (arg_count < 1i32) {
+        drop(print_err("kill: usage: kill [-s sigspec | -n signum | -sigspec] pid | jobspec ... or kill -l [sigspec]\n"));
+        exit 1;
+    }
+    
+    int64:sig = 15i64; // SIGTERM
+    int64:pid = 0i64;
+    
+    string:arg1 = raw args_at(args, 1i32);
+    if (string_length(arg1) > 1i64) {
+        string:c = string_substring(arg1, 0i64, 1i64);
+        if (string_equals(c, "-")) {
+            string:nsig = string_substring(arg1, 1i64, string_length(arg1));
+            int64:parsed_sig = raw parse_int(nsig);
+            if (parsed_sig > 0i64) {
+                sig = parsed_sig;
+            }
+            if (arg_count >= 2i32) {
+                pid = raw parse_int(raw args_at(args, 2i32));
+            } else {
+                drop(print_err("kill: missing pid\n"));
+                exit 1;
+            }
+        } else {
+            pid = raw parse_int(arg1);
+        }
+    } else {
+        pid = raw parse_int(arg1);
+    }
+    
+    int64:res = sys!!(62i64, pid, sig) ? -1i64; // SYS_KILL
+    if (res < 0i64) {
+        drop(print_err("kill: ("));
+        drop(print_err(arg1));
+        drop(print_err(") - No such process\n"));
+        exit 1;
+    }
+    
+    exit 0;
+};

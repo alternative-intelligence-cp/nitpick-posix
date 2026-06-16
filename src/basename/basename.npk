@@ -1,0 +1,138 @@
+// basename.npk
+
+extern "libc" {
+    func:fopen  = int64(string:path, string:mode);
+    func:fgetc  = int32(int64:fp);
+    func:fclose = int32(int64:fp);
+}
+
+use "../vendor/nitpick_args.npk".*;
+
+func:args_load = string() {
+    int64:fp = fopen("/proc/self/cmdline", "r");
+    if (fp == 0i64) { pass("|"); }
+    string:result  = "|";
+    string:current = "";
+    int32:c = fgetc(fp);
+    while (c >= 0i32) {
+        if (c == 0i32) {
+            if (string_length(current) > 0i64) {
+                result  = string_concat(result, string_concat(current, "|"));
+                current = "";
+            }
+        }
+        if (c > 0i32) {
+            current = string_concat(current, string_from_char(@cast_unchecked<int8>(c)));
+        }
+        c = fgetc(fp);
+    }
+    if (string_length(current) > 0i64) {
+        result = string_concat(result, string_concat(current, "|"));
+    }
+    drop(fclose(fp));
+    pass(result);
+};
+
+func:print_str_safe = int32(string:s) {
+    int64:len = string_length(s);
+    drop(sys(WRITE, 1i64, s, len));
+    pass 0i32;
+};
+
+func:print_err = int32(string:s) {
+    int64:len = string_length(s);
+    drop(sys(WRITE, 2i64, s, len));
+    pass 0i32;
+};
+
+func:failsafe = int32(tbb32:err) {
+    drop(err);
+    exit 1;
+};
+
+func:main = int32() {
+    string:args = raw args_load();
+    int32:arg_count = raw args_count(args);
+    
+    if (arg_count < 1i32) {
+        drop(print_err("basename: missing operand\n"));
+        exit 1;
+    }
+    
+    string:path = raw args_at(args, 1i32);
+    string:suffix = "";
+    if (arg_count >= 2i32) {
+        suffix = raw args_at(args, 2i32);
+    }
+    
+    int64:len = string_length(path);
+    if (len == 0i64) {
+        drop(print_str_safe("\n"));
+        exit 0;
+    }
+    
+    // strip trailing slashes
+    
+    // Re-do trailing slash logic cleanly
+    int64:real_end = len - 1i64;
+    int32:found_end = 0i32;
+    int64:i = len - 1i64;
+    while (i >= 0i64) {
+        if (found_end == 0i32) {
+            string:ch = string_substring(path, i, i + 1i64);
+            if (string_equals(ch, "/") == false) {
+                real_end = i;
+                found_end = 1i32;
+            }
+        }
+        i = i - 1i64;
+    }
+    
+    if (found_end == 0i32) {
+        // all slashes!
+        drop(print_str_safe("/\n"));
+        exit 0;
+    }
+    
+    // now find the start
+    int64:real_start = 0i64;
+    int32:found_start = 0i32;
+    i = real_end;
+    while (i >= 0i64) {
+        if (found_start == 0i32) {
+            string:ch = string_substring(path, i, i + 1i64);
+            if (string_equals(ch, "/")) {
+                real_start = i + 1i64;
+                found_start = 1i32;
+            }
+        }
+        i = i - 1i64;
+    }
+    
+    string:base = string_substring(path, real_start, real_end + 1i64);
+    
+    // check suffix
+    int64:base_len = string_length(base);
+    int64:suf_len = string_length(suffix);
+    if (suf_len > 0i64) {
+        if (base_len > suf_len) {
+            string:base_suf = string_substring(base, base_len - suf_len, base_len);
+            if (string_equals(base_suf, suffix)) {
+                base = string_substring(base, 0i64, base_len - suf_len);
+            }
+        } else {
+            if (base_len == suf_len) {
+                if (string_equals(base, suffix)) {
+                    // if base is exactly suffix, basename usually leaves it alone? 
+                    // No, wait, `basename .txt .txt` prints `.txt` actually? Wait, `basename a a` -> `a`. Yes, it leaves it alone if the entire string is the suffix.
+                    // Wait, `basename .txt .txt` prints `.txt`.
+                    // So we do nothing if base_len == suf_len.
+                }
+            }
+        }
+    }
+    
+    drop(print_str_safe(base));
+    drop(print_str_safe("\n"));
+    exit 0;
+};

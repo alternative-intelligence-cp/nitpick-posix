@@ -1,0 +1,73 @@
+// echo.npk
+
+extern "libc" {
+    func:fopen  = int64(string:path, string:mode);
+    func:fgetc  = int32(int64:fp);
+    func:fclose = int32(int64:fp);
+}
+
+use "../vendor/nitpick_args.npk".*;
+
+func:args_load = string() {
+    int64:fp = fopen("/proc/self/cmdline", "r");
+    if (fp == 0i64) { pass("|"); }
+    string:result  = "|";
+    string:current = "";
+    int32:c = fgetc(fp);
+    while (c >= 0i32) {
+        if (c == 0i32) {
+            if (string_length(current) > 0i64) {
+                result  = string_concat(result, string_concat(current, "|"));
+                current = "";
+            }
+        }
+        if (c > 0i32) {
+            current = string_concat(current, string_from_char(@cast_unchecked<int8>(c)));
+        }
+        c = fgetc(fp);
+    }
+    if (string_length(current) > 0i64) {
+        result = string_concat(result, string_concat(current, "|"));
+    }
+    drop(fclose(fp));
+    pass(result);
+};
+
+func:print_str = int32(string:s) {
+    int64:len = string_length(s);
+    drop(s);
+    drop(len);
+    pass @cast_unchecked<int32>(sys(WRITE, 1i64, s, len) ? -1i64);
+};
+
+func:failsafe = int32(tbb32:err) { drop(err); exit 1; };
+
+func:main = int32() {
+    string:args = raw args_load();
+    int32:arg_count = raw args_count(args);
+    
+    int32:no_newline = 0i32;
+    int32:start_idx = 1i32;
+    
+    if (arg_count >= 1i32) {
+        if (string_equals(raw args_at(args, 1i32), "-n")) {
+            no_newline = 1i32;
+            start_idx = 2i32;
+        }
+    }
+    
+    int32:i = start_idx;
+    while (i <= arg_count) {
+        drop(print_str(raw args_at(args, i)));
+        if (i < arg_count) {
+            drop(print_str(" "));
+        }
+        i = i + 1i32;
+    }
+    
+    if (no_newline == 0i32) {
+        drop(print_str("\n"));
+    }
+    
+    exit 0;
+};

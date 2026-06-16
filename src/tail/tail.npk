@@ -1,0 +1,154 @@
+// tail.npk
+
+extern "libc" {
+    func:fopen  = int64(string:path, string:mode);
+    func:fgetc  = int32(int64:fp);
+    func:fclose = int32(int64:fp);
+}
+
+use "../vendor/nitpick_args.npk".*;
+
+func:args_load = string() {
+    int64:fp = fopen("/proc/self/cmdline", "r");
+    if (fp == 0i64) { pass("|"); }
+    string:result  = "|";
+    string:current = "";
+    int32:c = fgetc(fp);
+    while (c >= 0i32) {
+        if (c == 0i32) {
+            if (string_length(current) > 0i64) {
+                result  = string_concat(result, string_concat(current, "|"));
+                current = "";
+            }
+        }
+        if (c > 0i32) {
+            current = string_concat(current, string_from_char(@cast_unchecked<int8>(c)));
+        }
+        c = fgetc(fp);
+    }
+    if (string_length(current) > 0i64) {
+        result = string_concat(result, string_concat(current, "|"));
+    }
+    drop(fclose(fp));
+    pass(result);
+};
+
+func:print_str_safe = int32(string:s) {
+    int64:len = string_length(s);
+    drop(sys(WRITE, 1i64, s, len));
+    pass 0i32;
+};
+
+func:print_err = int32(string:s) {
+    int64:len = string_length(s);
+    drop(sys(WRITE, 2i64, s, len));
+    pass 0i32;
+};
+
+extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
+
+func:failsafe = int32(tbb32:err) {
+    drop(err);
+    exit 1;
+};
+
+func:main = int32() {
+    string:args = raw args_load();
+    int32:arg_count = raw args_count(args);
+    
+    int64:n_lines = 10i64; // default
+    int32:file_idx = -1i32;
+    
+    int32:i = 1i32;
+    while (i <= arg_count) {
+        string:arg = raw args_at(args, i);
+        if (string_equals(arg, "-n")) {
+            if (i + 1i32 <= arg_count) {
+                string:val = raw args_at(args, i + 1i32);
+                n_lines = @cast_unchecked<int64>(raw args_get_int(raw args_make2("tail", val), "tail", 10i32));
+                i = i + 1i32;
+            }
+        } else {
+            file_idx = i;
+        }
+        i = i + 1i32;
+    }
+    
+    int64:fd = 0i64;
+    if (file_idx != -1i32) {
+        string:file = raw args_at(args, file_idx);
+        fd = sys(OPEN, file, 0i64, 0i64) ? -1i64;
+        if (fd < 0i64) {
+            drop(print_err("tail: cannot open '"));
+            drop(print_err(file));
+            drop(print_err("'\n"));
+            exit 1;
+        }
+    }
+    
+    // allocate 1MB buffer
+    int64:buf_size = 1048576i64;
+    int64:buf = sys(MMAP, 0i64, buf_size, 3i64, 34i64, -1i64, 0i64) ? -1i64;
+    if (buf < 0i64) { exit 1; }
+    
+    int64:total_read = 0i64;
+    int32:running = 1i32;
+    
+    // read entire file (up to 1MB)
+    while (running == 1i32) {
+        if (total_read >= buf_size) {
+            running = 0i32;
+            // ideally we'd implement a ring buffer, but for this simple version we cap at 1MB
+        } else {
+            int64:n = sys(READ, fd, buf + total_read, buf_size - total_read) ? -1i64;
+            if (n <= 0i64) {
+                running = 0i32;
+            } else {
+                total_read = total_read + n;
+            }
+        }
+    }
+    
+    if (total_read == 0i64) {
+        exit 0;
+    }
+    
+    // find the 10th newline from the end
+    int64:lines_found = 0i64;
+    int64:start_idx = 0i64;
+    
+    int64:j = total_read - 1i64;
+    
+    // ignore very last newline if it's the last char
+    if (npk_mem_read_byte(buf, j) == 10i64) {
+        j = j - 1i64;
+    }
+    
+    while (j >= 0i64) {
+        int64:c = npk_mem_read_byte(buf, j);
+        if (c == 10i64) {
+            lines_found = lines_found + 1i64;
+            if (lines_found == n_lines) {
+                start_idx = j + 1i64;
+                // exit loop
+                j = -1i64;
+            }
+        }
+        if (j >= 0i64) {
+            j = j - 1i64;
+        }
+    }
+    
+    // print from start_idx to total_read
+    if (start_idx < total_read) {
+        drop(sys(WRITE, 1i64, buf + start_idx, total_read - start_idx));
+    }
+    
+    if (fd != 0i64) {
+        drop(sys(CLOSE, fd));
+    }
+    
+    drop(sys(MUNMAP, buf, buf_size));
+    
+    exit 0;
+};

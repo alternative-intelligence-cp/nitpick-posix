@@ -1,0 +1,139 @@
+// stat.npk
+
+extern "libc" {
+    func:fopen  = int64(string:path, string:mode);
+    func:fgetc  = int32(int64:fp);
+    func:fclose = int32(int64:fp);
+}
+
+use "../vendor/nitpick_args.npk".*;
+
+func:args_load = string() {
+    int64:fp = fopen("/proc/self/cmdline", "r");
+    if (fp == 0i64) { pass("|"); }
+    string:result  = "|";
+    string:current = "";
+    int32:c = fgetc(fp);
+    while (c >= 0i32) {
+        if (c == 0i32) {
+            if (string_length(current) > 0i64) {
+                result  = string_concat(result, string_concat(current, "|"));
+                current = "";
+            }
+        }
+        if (c > 0i32) {
+            current = string_concat(current, string_from_char(@cast_unchecked<int8>(c)));
+        }
+        c = fgetc(fp);
+    }
+    if (string_length(current) > 0i64) {
+        result = string_concat(result, string_concat(current, "|"));
+    }
+    drop(fclose(fp));
+    pass(result);
+};
+
+func:print_str_safe = int32(string:s) {
+    int64:len = string_length(s);
+    drop(sys(WRITE, 1i64, s, len));
+    pass 0i32;
+};
+
+func:print_err = int32(string:s) {
+    int64:len = string_length(s);
+    drop(sys(WRITE, 2i64, s, len));
+    pass 0i32;
+};
+
+extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
+
+func:mem_read_64 = int64(int64:ptr, int64:offset) {
+    int64:res = 0i64;
+    int64:i = 0i64;
+    while (i < 8i64) {
+        int64:b = npk_mem_read_byte(ptr, offset + i);
+        res = res | (b << (i * 8i64));
+        i = i + 1i64;
+    }
+    pass res;
+};
+
+func:mem_read_32 = int64(int64:ptr, int64:offset) {
+    int64:res = 0i64;
+    int64:i = 0i64;
+    while (i < 4i64) {
+        int64:b = npk_mem_read_byte(ptr, offset + i);
+        res = res | (b << (i * 8i64));
+        i = i + 1i64;
+    }
+    pass res;
+};
+
+func:failsafe = int32(tbb32:err) {
+    drop(err);
+    exit 1;
+};
+
+func:main = int32() {
+    string:args = raw args_load();
+    int32:arg_count = raw args_count(args);
+    
+    if (arg_count < 1i32) {
+        drop(print_err("stat: missing operand\n"));
+        exit 1;
+    }
+    
+    string:file = raw args_at(args, 1i32);
+    
+    int64:buf = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
+    if (buf < 0i64) { exit 1; }
+    
+    // NEWFSTATAT(dirfd, pathname, statbuf, flags)
+    // -100 is AT_FDCWD
+    int64:res = sys(NEWFSTATAT, -100i64, file, buf, 0i64) ? -1i64;
+    if (res < 0i64) {
+        drop(print_err("stat: cannot stat '"));
+        drop(print_err(file));
+        drop(print_err("'\n"));
+        exit 1;
+    }
+    
+    // Parse stat buffer (Linux x86_64 struct stat)
+    int64:st_dev = raw mem_read_64(buf, 0i64);
+    int64:st_ino = raw mem_read_64(buf, 8i64);
+    int64:st_nlink = raw mem_read_64(buf, 16i64);
+    int64:st_mode = raw mem_read_32(buf, 24i64);
+    int64:st_uid = raw mem_read_32(buf, 28i64);
+    int64:st_gid = raw mem_read_32(buf, 32i64);
+    // 36 padding
+    int64:st_rdev = raw mem_read_64(buf, 40i64);
+    int64:st_size = raw mem_read_64(buf, 48i64);
+    int64:st_blksize = raw mem_read_64(buf, 56i64);
+    int64:st_blocks = raw mem_read_64(buf, 64i64);
+    
+    drop(print_str_safe("  File: "));
+    drop(print_str_safe(file));
+    drop(print_str_safe("\n  Size: "));
+    drop(print_str_safe(string_from_int(st_size)));
+    drop(print_str_safe("\tBlocks: "));
+    drop(print_str_safe(string_from_int(st_blocks)));
+    drop(print_str_safe("\tIO Block: "));
+    drop(print_str_safe(string_from_int(st_blksize)));
+    drop(print_str_safe("\nDevice: "));
+    drop(print_str_safe(string_from_int(st_dev)));
+    drop(print_str_safe("\tInode: "));
+    drop(print_str_safe(string_from_int(st_ino)));
+    drop(print_str_safe("\tLinks: "));
+    drop(print_str_safe(string_from_int(st_nlink)));
+    drop(print_str_safe("\nAccess: ("));
+    // Octal mode representation isn't trivial without octal formatter, just print decimal
+    drop(print_str_safe(string_from_int(st_mode)));
+    drop(print_str_safe(")  Uid: ("));
+    drop(print_str_safe(string_from_int(st_uid)));
+    drop(print_str_safe(")   Gid: ("));
+    drop(print_str_safe(string_from_int(st_gid)));
+    drop(print_str_safe(")\n"));
+    
+    drop(sys(MUNMAP, buf, 4096i64));
+    exit 0;
+};

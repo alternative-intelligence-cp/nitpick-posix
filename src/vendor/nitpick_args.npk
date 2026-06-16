@@ -1,0 +1,140 @@
+// nitpick-args v0.2.0 — CLI argument parsing for Nitpick
+
+extern "libc" { func:string_length = int64(string:s); }
+
+func:_args_token = string(string:args, int32:n) {
+    int64:len = string_length(args);
+    int64:start = 1i64;
+    int32:remaining = n;
+    string:rest = "";
+    int64:sep = 0i64;
+
+    if (len < 2i64) { pass(""); }
+
+    while (remaining >= 0i32) {
+        rest = string_substring(args, start, len);
+        sep = string_index_of(rest, "|");
+        if (sep < 0i64) { pass(""); }
+        if (remaining == 0i32) { pass(string_substring(rest, 0i64, sep)); }
+        remaining = remaining - 1i32;
+        start = start + sep + 1i64;
+    }
+    pass("");
+};
+
+pub func:args_has = bool(string:args, string:flag) {
+    string:needle = string_concat("|", string_concat(flag, "|"));
+    pass(string_contains(args, needle));
+};
+
+pub func:args_get = string(string:args, string:key) {
+    string:needle = string_concat("|", string_concat(key, "|"));
+    int64:pos = string_index_of(args, needle);
+    int64:value_start = pos + string_length(needle);
+    int64:len = string_length(args);
+    string:rest = "";
+    int64:sep = 0i64;
+
+    if (pos < 0i64) { pass(""); }
+    if (value_start >= len) { pass(""); }
+
+    rest = string_substring(args, value_start, len);
+    sep = string_index_of(rest, "|");
+    if (sep <= 0i64) { pass(""); }
+    pass(string_substring(rest, 0i64, sep));
+};
+
+pub func:args_get_or = string(string:args, string:key, string:default_val) {
+    string:result = raw args_get(args, key);
+    if (string_length(result) == 0i64) { pass(default_val); }
+    pass(result);
+};
+
+pub func:args_get_int = int32(string:args, string:key, int32:default_val) {
+    string:val = raw args_get_or(args, key, "");
+    int32:res = 0i32;
+    int32:sign = 1i32;
+    int64:i = 0i64;
+    int64:len = string_length(val);
+    string:c0 = "";
+    string:c = "";
+
+    if (len == 0i64) { pass default_val; }
+
+    c0 = string_substring(val, 0i64, 1i64);
+    if (string_equals(c0, "-")) { sign = 0i32 - 1i32; i = 1i64; }
+    while (i < len) {
+        c = string_substring(val, i, i + 1i64);
+        res = res * 10i32;
+        if (string_equals(c, "1")) { res = res + 1i32; }
+        if (string_equals(c, "2")) { res = res + 2i32; }
+        if (string_equals(c, "3")) { res = res + 3i32; }
+        if (string_equals(c, "4")) { res = res + 4i32; }
+        if (string_equals(c, "5")) { res = res + 5i32; }
+        if (string_equals(c, "6")) { res = res + 6i32; }
+        if (string_equals(c, "7")) { res = res + 7i32; }
+        if (string_equals(c, "8")) { res = res + 8i32; }
+        if (string_equals(c, "9")) { res = res + 9i32; }
+        i = i + 1i64;
+    }
+    pass res * sign;
+};
+
+pub func:args_at = string(string:args, int32:n) { pass(raw _args_token(args, n)); };
+pub func:args_program = string(string:args) { pass(raw _args_token(args, 0i32)); };
+
+pub func:args_count = int32(string:args) {
+    int64:len   = string_length(args);
+    int64:pipes = 0i64;
+    int64:i     = 0i64;
+    int64:count = 0i64;
+    string:ch = "";
+
+    while (i < len) {
+        ch = string_substring(args, i, i + 1i64);
+        if (string_equals(ch, "|")) { pipes = pipes + 1i64; }
+        i = i + 1i64;
+    }
+    count = pipes - 2i64;
+    if (count < 0i64) { pass(0i32); }
+    pass(@cast_unchecked<int32>(count));
+};
+
+// ── Smart Parser (V2) ────────────────────────────────────────────────────────
+
+pub struct:ArgParser = {
+    string:keys;   
+    string:descs;  
+    string:types;  
+};
+
+pub func:Parser_create = ArgParser() {
+    ArgParser:p;
+    p.keys = "|"; p.descs = "|"; p.types = "|";
+    pass p;
+};
+
+pub func:Parser_add_flag = ArgParser(ArgParser:p, string:key, string:desc) {
+    ArgParser:out = p;
+    out.keys = string_concat(out.keys, string_concat(key, "|"));
+    out.descs = string_concat(out.descs, string_concat(desc, "|"));
+    out.types = string_concat(out.types, "flag|");
+    pass out;
+};
+
+pub func:Parser_add_option = ArgParser(ArgParser:p, string:key, string:desc) {
+    ArgParser:out = p;
+    out.keys = string_concat(out.keys, string_concat(key, "|"));
+    out.descs = string_concat(out.descs, string_concat(desc, "|"));
+    out.types = string_concat(out.types, "opt|");
+    pass out;
+};
+
+
+// ── Builder helpers ──
+pub func:args_make1 = string(string:a0) { pass(string_concat("|", string_concat(a0, "|"))); };
+pub func:args_make2 = string(string:a0, string:a1) { string:b = raw args_make1(a0); pass(string_concat(b, string_concat(a1, "|"))); };
+pub func:args_make3 = string(string:a0, string:a1, string:a2) { string:b = raw args_make2(a0, a1); pass(string_concat(b, string_concat(a2, "|"))); };
+pub func:args_make4 = string(string:a0, string:a1, string:a2, string:a3) { string:b = raw args_make3(a0, a1, a2); pass(string_concat(b, string_concat(a3, "|"))); };
+pub func:args_make5 = string(string:a0, string:a1, string:a2, string:a3, string:a4) { string:b = raw args_make4(a0, a1, a2, a3); pass(string_concat(b, string_concat(a4, "|"))); };
+pub func:args_make6 = string(string:a0, string:a1, string:a2, string:a3, string:a4, string:a5) { string:b = raw args_make5(a0, a1, a2, a3, a4); pass(string_concat(b, string_concat(a5, "|"))); };

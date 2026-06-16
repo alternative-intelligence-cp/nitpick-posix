@@ -1,0 +1,63 @@
+// stdbuf.npk
+use "../vendor/nitpick_args.npk".*;
+use "../vendor/exec_helper.npk".*;
+
+func:print_err = int32(string:s) {
+    int64:len = string_length(s);
+    drop(sys!!(1i64, 2i64, s, len));
+    pass 0i32;
+};
+
+func:failsafe = int32(tbb32:err) {
+    drop(err);
+    exit 1;
+};
+
+func:main = int32() {
+    string:args = raw args_load();
+    int32:arg_count = raw args_count(args);
+    
+    if (arg_count < 2i32) {
+        drop(print_err("stdbuf: missing operand\n"));
+        exit 125;
+    }
+    
+    // For MVP, we just find the command index
+    // It's usually after all -i, -o, -e options
+    int64:cmd_idx = 1i64;
+    int32:running = 1i32;
+    while (running == 1i32) {
+        if (cmd_idx > @cast_unchecked<int64>(arg_count)) {
+            running = 0i32;
+        } else {
+            string:arg = raw args_at(args, @cast_unchecked<int32>(cmd_idx));
+            if (string_equals(arg, "-i") || string_equals(arg, "-o") || string_equals(arg, "-e")) {
+                cmd_idx = cmd_idx + 2i64; // skip flag and value
+            } else {
+                if (string_length(arg) >= 2i64) {
+                    string:pfx = string_substring(arg, 0i64, 2i64);
+                    if (string_equals(pfx, "-i") || string_equals(pfx, "-o") || string_equals(pfx, "-e")) {
+                        cmd_idx = cmd_idx + 1i64; // combined flag, e.g. -i0
+                    } else {
+                        running = 0i32;
+                    }
+                } else {
+                    running = 0i32;
+                }
+            }
+        }
+    }
+    
+    if (cmd_idx > @cast_unchecked<int64>(arg_count)) {
+        drop(print_err("stdbuf: missing operand\n"));
+        exit 125;
+    }
+    
+    int64:res = raw sys_execvp_from(cmd_idx);
+    
+    string:cmd = raw args_at(args, @cast_unchecked<int32>(cmd_idx));
+    drop(print_err("stdbuf: failed to run command '"));
+    drop(print_err(cmd));
+    drop(print_err("'\n"));
+    exit 127;
+};

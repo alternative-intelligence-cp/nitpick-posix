@@ -1,0 +1,119 @@
+// tr.npk
+
+use "../vendor/nitpick_args.npk".*;
+
+extern "libc" {
+    func:fopen  = int64(string:path, string:mode);
+    func:fgetc  = int32(int64:fp);
+    func:fclose = int32(int64:fp);
+}
+
+func:args_load = string() {
+    int64:fp = fopen("/proc/self/cmdline", "r");
+    if (fp == 0i64) { pass("|"); }
+    string:result  = "|";
+    string:current = "";
+    int32:c = fgetc(fp);
+    while (c >= 0i32) {
+        if (c == 0i32) {
+            if (string_length(current) > 0i64) {
+                result  = string_concat(result, string_concat(current, "|"));
+                current = "";
+            }
+        }
+        if (c > 0i32) {
+            current = string_concat(current, string_from_char(@cast_unchecked<int8>(c)));
+        }
+        c = fgetc(fp);
+    }
+    if (string_length(current) > 0i64) {
+        result = string_concat(result, string_concat(current, "|"));
+    }
+    drop(fclose(fp));
+    pass(result);
+};
+
+func:print_err = int32(string:s) {
+    int64:len = string_length(s);
+    drop(sys(WRITE, 2i64, s, len));
+    pass 0i32;
+};
+
+extern func:npk_mem_read_byte  = int64(int64:ptr, int64:offset);
+extern func:npk_mem_write_byte = int32(int64:ptr, int64:offset, int64:val);
+
+func:failsafe = int32(tbb32:err) {
+    drop(err);
+    exit 1;
+};
+
+func:main = int32() {
+    string:args = raw args_load();
+    int32:arg_count = raw args_count(args);
+    
+    if (arg_count < 2i32) {
+        drop(print_err("tr: missing operand\n"));
+        exit 1;
+    }
+    
+    string:set1 = raw args_at(args, 1i32);
+    string:set2 = raw args_at(args, 2i32);
+    
+    int64:len1 = string_length(set1);
+    int64:len2 = string_length(set2);
+    
+    if (len1 == 0i64) { exit 0; }
+    if (len2 == 0i64) { exit 0; }
+    
+    int64:buf_size = 1048576i64; // 1MB buffer
+    int64:buf = sys(MMAP, 0i64, buf_size, 3i64, 34i64, -1i64, 0i64) ? -1i64;
+    if (buf < 0i64) { exit 1; }
+    
+    int32:running = 1i32;
+    int64:fd = 0i64; // stdin
+    
+    while (running == 1i32) {
+        int64:n = sys(READ, fd, buf, buf_size) ? -1i64;
+        if (n <= 0i64) {
+            running = 0i32;
+        } else {
+            int64:j = 0i64;
+            while (j < n) {
+                int64:c = npk_mem_read_byte(buf, j);
+                int64:i = 0i64;
+                int32:matched = 0i32;
+                while (i < len1) {
+                    string:c1 = string_char_at(set1, i);
+                    // get ascii of c1
+                    // simple char comparison
+                    string:sc = string_from_char(@cast_unchecked<int8>(c));
+                    if (string_equals(c1, sc)) {
+                        // replace it
+                        int64:idx2 = i;
+                        if (idx2 >= len2) {
+                            idx2 = len2 - 1i64;
+                        }
+                        string:c2 = string_char_at(set2, idx2);
+                        // find its ascii
+                        int64:k = 1i64;
+                        while (k < 256i64) {
+                            if (string_equals(c2, string_from_char(@cast_unchecked<int8>(k)))) {
+                                drop(npk_mem_write_byte(buf, j, k));
+                                k = 300i64;
+                            }
+                            k = k + 1i64;
+                        }
+                        i = len1; // break
+                        matched = 1i32;
+                    }
+                    i = i + 1i64;
+                }
+                j = j + 1i64;
+            }
+            drop(sys(WRITE, 1i64, buf, n));
+        }
+    }
+    
+    drop(sys(MUNMAP, buf, buf_size));
+    exit 0;
+};

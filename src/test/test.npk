@@ -1,0 +1,148 @@
+// test.npk
+
+extern "libc" {
+    func:fopen  = int64(string:path, string:mode);
+    func:fgetc  = int32(int64:fp);
+    func:fclose = int32(int64:fp);
+}
+
+use "../vendor/nitpick_args.npk".*;
+
+func:args_load = string() {
+    int64:fp = fopen("/proc/self/cmdline", "r");
+    if (fp == 0i64) { pass("|"); }
+    string:result  = "|";
+    string:current = "";
+    int32:c = fgetc(fp);
+    while (c >= 0i32) {
+        if (c == 0i32) {
+            if (string_length(current) > 0i64) {
+                result  = string_concat(result, string_concat(current, "|"));
+                current = "";
+            }
+        }
+        if (c > 0i32) {
+            current = string_concat(current, string_from_char(@cast_unchecked<int8>(c)));
+        }
+        c = fgetc(fp);
+    }
+    if (string_length(current) > 0i64) {
+        result = string_concat(result, string_concat(current, "|"));
+    }
+    drop(fclose(fp));
+    pass(result);
+};
+
+func:failsafe = int32(tbb32:err) {
+    drop(err);
+    exit 2;
+};
+
+extern func:npk_mem_read_int32 = int32(int64:ptr, int64:offset);
+
+func:main = int32() {
+    string:args = raw args_load();
+    int32:arg_count = raw args_count(args);
+    
+    // POSIX test: exit 0 for true, 1 for false, >1 for error
+    
+    // If command name was '[', then last arg must be ']'
+    // But we'll ignore that for simplicity or handle it implicitly if we want.
+    // Actually, we'll just ignore it since nitpick args doesn't easily expose arg[0].
+    
+    // remove trailing ']' if it exists
+    if (arg_count > 0i32) {
+        string:last_arg = raw args_at(args, arg_count);
+        if (string_equals(last_arg, "]")) {
+            arg_count = arg_count - 1i32;
+        }
+    }
+    
+    if (arg_count == 0i32) {
+        exit 1; // test with no args is false
+    }
+    
+    if (arg_count == 1i32) {
+        string:s = raw args_at(args, 1i32);
+        if (string_length(s) > 0i64) { exit 0; } else { exit 1; }
+    }
+    
+    if (arg_count == 2i32) {
+        string:op = raw args_at(args, 1i32);
+        string:s = raw args_at(args, 2i32);
+        
+        if (string_equals(op, "-z")) {
+            if (string_length(s) == 0i64) { exit 0; } else { exit 1; }
+        }
+        if (string_equals(op, "-n")) {
+            if (string_length(s) > 0i64) { exit 0; } else { exit 1; }
+        }
+        
+        if (string_equals(op, "-e")) {
+            int64:buf = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
+            int64:res = sys!!(4i64, s, buf) ? -1i64; // SYS_STAT
+            drop(sys(MUNMAP, buf, 4096i64));
+            if (res >= 0i64) { exit 0; } else { exit 1; }
+        }
+        
+        if (string_equals(op, "-d")) {
+            int64:buf = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
+            int64:res = sys!!(4i64, s, buf) ? -1i64; // SYS_STAT
+            if (res >= 0i64) {
+                int32:mode = npk_mem_read_int32(buf, 24i64); // st_mode is at offset 24
+                drop(sys(MUNMAP, buf, 4096i64));
+                int32:isdir = 0i32;
+                // S_IFMT is 0170000 = 61440. S_IFDIR is 0040000 = 16384.
+                // Since no bitwise AND, we can do division and modulo.
+                // mode = mode / 4096 (shifting 12 bits right). S_IFDIR is 4. S_IFMT is 15.
+                int32:m = mode / 4096i32;
+                int32:m_type = m - (m / 16i32) * 16i32; // mode & 15
+                if (m_type == 4i32) { isdir = 1i32; }
+                if (isdir == 1i32) { exit 0; } else { exit 1; }
+            } else {
+                drop(sys(MUNMAP, buf, 4096i64));
+                exit 1;
+            }
+        }
+        
+        if (string_equals(op, "-f")) {
+            int64:buf = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
+            int64:res = sys!!(4i64, s, buf) ? -1i64; // SYS_STAT
+            if (res >= 0i64) {
+                int32:mode = npk_mem_read_int32(buf, 24i64); // st_mode is at offset 24
+                drop(sys(MUNMAP, buf, 4096i64));
+                int32:isreg = 0i32;
+                int32:m = mode / 4096i32;
+                int32:m_type = m - (m / 16i32) * 16i32; // mode & 15
+                // S_IFREG is 0100000 = 32768 => 8
+                if (m_type == 8i32) { isreg = 1i32; }
+                if (isreg == 1i32) { exit 0; } else { exit 1; }
+            } else {
+                drop(sys(MUNMAP, buf, 4096i64));
+                exit 1;
+            }
+        }
+        
+        exit 1; // unknown unary op
+    }
+    
+    if (arg_count == 3i32) {
+        string:arg1 = raw args_at(args, 1i32);
+        string:op = raw args_at(args, 2i32);
+        string:arg2 = raw args_at(args, 3i32);
+        
+        if (string_equals(op, "=")) {
+            if (string_equals(arg1, arg2)) { exit 0; } else { exit 1; }
+        }
+        
+        if (string_equals(op, "!=")) {
+            if (string_equals(arg1, arg2)) { exit 1; } else { exit 0; }
+        }
+        
+        // Assume false for unknown binary op
+        exit 1;
+    }
+    
+    // Posix test logic for more args is complex.
+    exit 1;
+};

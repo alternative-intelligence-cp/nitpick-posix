@@ -1,0 +1,255 @@
+// groups.npk
+
+extern "libc" {
+    func:fopen  = int64(string:path, string:mode);
+    func:fgetc  = int32(int64:fp);
+    func:fclose = int32(int64:fp);
+}
+
+use "../vendor/nitpick_args.npk".*;
+
+func:args_load = string() {
+    int64:fp = fopen("/proc/self/cmdline", "r");
+    if (fp == 0i64) { pass("|"); }
+    string:result  = "|";
+    string:current = "";
+    int32:c = fgetc(fp);
+    while (c >= 0i32) {
+        if (c == 0i32) {
+            if (string_length(current) > 0i64) {
+                result  = string_concat(result, string_concat(current, "|"));
+                current = "";
+            }
+        }
+        if (c > 0i32) {
+            current = string_concat(current, string_from_char(@cast_unchecked<int8>(c)));
+        }
+        c = fgetc(fp);
+    }
+    if (string_length(current) > 0i64) {
+        result = string_concat(result, string_concat(current, "|"));
+    }
+    drop(fclose(fp));
+    pass(result);
+};
+
+func:print_err = int32(string:s) {
+    int64:len = string_length(s);
+    drop(sys(WRITE, 2i64, s, len));
+    pass 0i32;
+};
+
+func:print_str_safe = int32(string:s) {
+    int64:len = string_length(s);
+    drop(sys(WRITE, 1i64, s, len));
+    pass 0i32;
+};
+
+func:failsafe = int32(tbb32:err) {
+    drop(err);
+    exit 1;
+};
+
+func:contains = int32(string:haystack, string:needle) {
+    // Basic comma-separated containment check
+    // "root,randy,bin" -> search for "randy"
+    // Since string splitting is hard, we just check if it contains the substring.
+    // In nitpick we don't have string_contains!
+    // We have string_substring.
+    int64:len_h = string_length(haystack);
+    int64:len_n = string_length(needle);
+    if (len_n == 0i64) { pass 1i32; }
+    if (len_h < len_n) { pass 0i32; }
+    
+    int64:i = 0i64;
+    while (i <= len_h - len_n) {
+        string:sub = string_substring(haystack, i, i + len_n);
+        if (string_equals(sub, needle)) {
+            // make sure it's bounded by commas or ends
+            int32:valid = 1i32;
+            if (i > 0i64) {
+                if (string_equals(string_substring(haystack, i - 1i64, i), ",")) {
+                } else {
+                    valid = 0i32;
+                }
+            }
+            if (i + len_n < len_h) {
+                if (string_equals(string_substring(haystack, i + len_n, i + len_n + 1i64), ",")) {
+                } else {
+                    valid = 0i32;
+                }
+            }
+            if (valid == 1i32) {
+                pass 1i32;
+            }
+        }
+        i = i + 1i64;
+    }
+    pass 0i32;
+};
+
+func:main = int32() {
+    string:args = raw args_load();
+    int32:arg_count = raw args_count(args);
+    
+    string:target_user = "";
+    int64:target_gid = -1i64;
+    
+    if (arg_count >= 1i32) {
+        target_user = raw args_at(args, 1i32);
+        // We'd have to find their primary GID from /etc/passwd
+        int64:fp_pw = fopen("/etc/passwd", "r");
+        if (fp_pw != 0i64) {
+            int32:running = 1i32;
+            while (running == 1i32) {
+                string:line = "";
+                int32:c = fgetc(fp_pw);
+                if (c < 0i32) {
+                    running = 0i32;
+                } else {
+                    while (c >= 0i32) {
+                        if (c == 10i32) { c = -1i32; }
+                        else {
+                            line = string_concat(line, string_from_char(@cast_unchecked<int8>(c)));
+                            c = fgetc(fp_pw);
+                        }
+                    }
+                    // parse line: user:x:uid:gid:...
+                    int64:len = string_length(line);
+                    int64:j = 0i64;
+                    int64:col = 0i64;
+                    string:u = "";
+                    string:g = "";
+                    while (j < len) {
+                        string:ch = string_substring(line, j, j+1i64);
+                        if (string_equals(ch, ":")) {
+                            col = col + 1i64;
+                        } else {
+                            if (col == 0i64) { u = string_concat(u, ch); }
+                            if (col == 3i64) { g = string_concat(g, ch); }
+                        }
+                        j = j + 1i64;
+                    }
+                    if (string_equals(u, target_user)) {
+                        target_gid = string_to_int(g);
+                        running = 0i32;
+                    }
+                }
+            }
+            drop(fclose(fp_pw));
+        }
+    } else {
+        int64:uid = sys(GETUID) ? -1i64;
+        string:uid_str = string_from_int(uid);
+        
+        int64:fp_pw = fopen("/etc/passwd", "r");
+        if (fp_pw != 0i64) {
+            int32:running = 1i32;
+            while (running == 1i32) {
+                string:line = "";
+                int32:c = fgetc(fp_pw);
+                if (c < 0i32) {
+                    running = 0i32;
+                } else {
+                    while (c >= 0i32) {
+                        if (c == 10i32) { c = -1i32; }
+                        else {
+                            line = string_concat(line, string_from_char(@cast_unchecked<int8>(c)));
+                            c = fgetc(fp_pw);
+                        }
+                    }
+                    int64:len = string_length(line);
+                    int64:j = 0i64;
+                    int64:col = 0i64;
+                    string:u = "";
+                    string:i_uid = "";
+                    string:g = "";
+                    while (j < len) {
+                        string:ch = string_substring(line, j, j+1i64);
+                        if (string_equals(ch, ":")) {
+                            col = col + 1i64;
+                        } else {
+                            if (col == 0i64) { u = string_concat(u, ch); }
+                            if (col == 2i64) { i_uid = string_concat(i_uid, ch); }
+                            if (col == 3i64) { g = string_concat(g, ch); }
+                        }
+                        j = j + 1i64;
+                    }
+                    if (string_equals(i_uid, uid_str)) {
+                        target_user = u;
+                        target_gid = string_to_int(g);
+                        running = 0i32;
+                    }
+                }
+            }
+            drop(fclose(fp_pw));
+        }
+    }
+    
+    if (string_length(target_user) == 0i64) {
+        drop(print_err("groups: cannot find user\n"));
+        exit 1;
+    }
+    
+    drop(print_str_safe(target_user));
+    drop(print_str_safe(" : "));
+    
+    int64:fp = fopen("/etc/group", "r");
+    if (fp == 0i64) {
+        drop(print_err("groups: cannot open /etc/group\n"));
+        exit 1;
+    }
+    
+    int32:running2 = 1i32;
+    int32:first = 1i32;
+    
+    while (running2 == 1i32) {
+        string:line = "";
+        int32:c = fgetc(fp);
+        if (c < 0i32) {
+            running2 = 0i32;
+        } else {
+            while (c >= 0i32) {
+                if (c == 10i32) { c = -1i32; }
+                else {
+                    line = string_concat(line, string_from_char(@cast_unchecked<int8>(c)));
+                    c = fgetc(fp);
+                }
+            }
+            // parse line: group_name:password:GID:user_list
+            int64:len = string_length(line);
+            int64:j = 0i64;
+            int64:col = 0i64;
+            string:g_name = "";
+            string:g_id = "";
+            string:g_list = "";
+            while (j < len) {
+                string:ch = string_substring(line, j, j+1i64);
+                if (string_equals(ch, ":")) {
+                    col = col + 1i64;
+                } else {
+                    if (col == 0i64) { g_name = string_concat(g_name, ch); }
+                    if (col == 2i64) { g_id = string_concat(g_id, ch); }
+                    if (col == 3i64) { g_list = string_concat(g_list, ch); }
+                }
+                j = j + 1i64;
+            }
+            
+            if (string_to_int(g_id) == target_gid) {
+                if (first == 0i32) { drop(print_str_safe(" ")); }
+                drop(print_str_safe(g_name));
+                first = 0i32;
+            } else {
+                if (raw contains(g_list, target_user) == 1i32) {
+                    if (first == 0i32) { drop(print_str_safe(" ")); }
+                    drop(print_str_safe(g_name));
+                    first = 0i32;
+                }
+            }
+        }
+    }
+    
+    drop(print_str_safe("\n"));
+    drop(fclose(fp));
+    exit 0;
+};

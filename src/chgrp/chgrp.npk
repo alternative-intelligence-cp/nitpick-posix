@@ -1,0 +1,123 @@
+// chgrp.npk
+
+extern "libc" {
+    func:fopen  = int64(string:path, string:mode);
+    func:fgetc  = int32(int64:fp);
+    func:fclose = int32(int64:fp);
+}
+
+use "../vendor/nitpick_args.npk".*;
+
+func:args_load = string() {
+    int64:fp = fopen("/proc/self/cmdline", "r");
+    if (fp == 0i64) { pass("|"); }
+    string:result  = "|";
+    string:current = "";
+    int32:c = fgetc(fp);
+    while (c >= 0i32) {
+        if (c == 0i32) {
+            if (string_length(current) > 0i64) {
+                result  = string_concat(result, string_concat(current, "|"));
+                current = "";
+            }
+        }
+        if (c > 0i32) {
+            current = string_concat(current, string_from_char(@cast_unchecked<int8>(c)));
+        }
+        c = fgetc(fp);
+    }
+    if (string_length(current) > 0i64) {
+        result = string_concat(result, string_concat(current, "|"));
+    }
+    drop(fclose(fp));
+    pass(result);
+};
+
+func:print_err = int32(string:s) {
+    int64:len = string_length(s);
+    drop(sys(WRITE, 2i64, s, len));
+    pass 0i32;
+};
+
+func:failsafe = int32(tbb32:err) {
+    drop(err);
+    exit 1;
+};
+
+func:main = int32() {
+    string:args = raw args_load();
+    int32:arg_count = raw args_count(args);
+    
+    if (arg_count < 2i32) {
+        drop(print_err("chgrp: missing operand\n"));
+        exit 1;
+    }
+    
+    string:group_str = raw args_at(args, 1i32);
+    int64:target_gid = -1i64;
+    
+    int64:fp = fopen("/etc/group", "r");
+    if (fp != 0i64) {
+        int32:running = 1i32;
+        while (running == 1i32) {
+            string:line = "";
+            int32:c = fgetc(fp);
+            if (c < 0i32) {
+                running = 0i32;
+            } else {
+                while (c >= 0i32) {
+                    if (c == 10i32) { c = -1i32; }
+                    else {
+                        line = string_concat(line, string_from_char(@cast_unchecked<int8>(c)));
+                        c = fgetc(fp);
+                    }
+                }
+                
+                int64:len = string_length(line);
+                int64:j = 0i64;
+                int64:col = 0i64;
+                string:g_name = "";
+                string:g_id = "";
+                
+                while (j < len) {
+                    string:ch = string_substring(line, j, j+1i64);
+                    if (string_equals(ch, ":")) {
+                        col = col + 1i64;
+                    } else {
+                        if (col == 0i64) { g_name = string_concat(g_name, ch); }
+                        if (col == 2i64) { g_id = string_concat(g_id, ch); }
+                    }
+                    j = j + 1i64;
+                }
+                
+                if (string_equals(g_name, group_str)) {
+                    target_gid = string_to_int(g_id);
+                    running = 0i32;
+                }
+            }
+        }
+        drop(fclose(fp));
+    }
+    
+    if (target_gid == -1i64) {
+        target_gid = string_to_int(group_str);
+    }
+    
+    int32:i = 2i32;
+    int32:ret = 0i32;
+    
+    while (i <= arg_count) {
+        string:file = raw args_at(args, i);
+        // SYS_CHOWN is 92
+        int64:res = sys!!(92i64, file, -1i64, target_gid) ? -1i64;
+        if (res < 0i64) {
+            drop(print_err("chgrp: changing group of '"));
+            drop(print_err(file));
+            drop(print_err("' failed\n"));
+            ret = 1i32;
+        }
+        i = i + 1i32;
+    }
+    
+    exit ret;
+};

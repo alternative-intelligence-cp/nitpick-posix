@@ -1,0 +1,110 @@
+// uptime.npk
+
+extern "libc" {
+    func:fopen  = int64(string:path, string:mode);
+    func:fgetc  = int32(int64:fp);
+    func:fclose = int32(int64:fp);
+}
+
+func:print_err = int32(string:s) {
+    int64:len = string_length(s);
+    drop(sys(WRITE, 2i64, s, len));
+    pass 0i32;
+};
+
+func:print_str_safe = int32(string:s) {
+    int64:len = string_length(s);
+    drop(sys(WRITE, 1i64, s, len));
+    pass 0i32;
+};
+
+func:failsafe = int32(tbb32:err) {
+    drop(err);
+    exit 1;
+};
+
+func:read_first_word = string(string:path) {
+    int64:fp = fopen(path, "r");
+    if (fp == 0i64) { pass(""); }
+    string:res = "";
+    int32:c = fgetc(fp);
+    while (c >= 0i32) {
+        if (c == 32i32) {
+            c = -1i32; // break on space
+        } else {
+            if (c == 10i32) {
+                c = -1i32; // break on newline
+            } else {
+                res = string_concat(res, string_from_char(@cast_unchecked<int8>(c)));
+                c = fgetc(fp);
+            }
+        }
+    }
+    drop(fclose(fp));
+    pass(res);
+};
+
+func:read_loadavg = string(string:path) {
+    int64:fp = fopen(path, "r");
+    if (fp == 0i64) { pass(""); }
+    string:res = "";
+    int64:words = 0i64;
+    int32:c = fgetc(fp);
+    while (c >= 0i32) {
+        if (c == 32i32) {
+            words = words + 1i64;
+            if (words == 3i64) {
+                c = -1i32; // break after 3 words
+            } else {
+                res = string_concat(res, ", ");
+                c = fgetc(fp);
+            }
+        } else {
+            if (c == 10i32) {
+                c = -1i32;
+            } else {
+                res = string_concat(res, string_from_char(@cast_unchecked<int8>(c)));
+                c = fgetc(fp);
+            }
+        }
+    }
+    drop(fclose(fp));
+    pass(res);
+};
+
+func:main = int32() {
+    string:uptime_str = raw read_first_word("/proc/uptime");
+    // it's a float like 1234.56. we just truncate at the dot.
+    int64:dot_pos = string_index_of(uptime_str, ".");
+    if (dot_pos > 0i64) {
+        uptime_str = string_substring(uptime_str, 0i64, dot_pos);
+    }
+    
+    int64:up_sec = string_to_int(uptime_str);
+    int64:days = up_sec / 86400i64;
+    int64:hours = (up_sec - (up_sec / 86400i64) * 86400i64) / 3600i64;
+    int64:rem = up_sec - (up_sec / 86400i64) * 86400i64;
+    int64:mins = (rem - (rem / 3600i64) * 3600i64) / 60i64;
+    
+    drop(print_str_safe(" up "));
+    if (days > 0i64) {
+        drop(print_str_safe(string_from_int(days)));
+        drop(print_str_safe(" days, "));
+    }
+    
+    drop(print_str_safe(string_from_int(hours)));
+    drop(print_str_safe(":"));
+    if (mins < 10i64) {
+        drop(print_str_safe("0"));
+    }
+    drop(print_str_safe(string_from_int(mins)));
+    
+    string:load = raw read_loadavg("/proc/loadavg");
+    if (string_length(load) > 0i64) {
+        drop(print_str_safe(",  load average: "));
+        drop(print_str_safe(load));
+    }
+    
+    drop(print_str_safe("\n"));
+    exit 0;
+};

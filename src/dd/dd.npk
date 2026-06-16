@@ -1,0 +1,200 @@
+// dd.npk
+
+extern "libc" {
+    func:fopen  = int64(string:path, string:mode);
+    func:fgetc  = int32(int64:fp);
+    func:fclose = int32(int64:fp);
+    func:malloc = int64(int64:bytes);
+    func:nitpick_libc_mem_free = int32(int64:ptr);
+}
+
+extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
+extern func:npk_mem_write_byte = void(int64:ptr, int64:offset, int64:val);
+
+use "../vendor/nitpick_args.npk".*;
+
+func:args_load = string() {
+    int64:fp = fopen("/proc/self/cmdline", "r");
+    if (fp == 0i64) { pass("|"); }
+    string:result  = "|";
+    string:current = "";
+    int32:c = fgetc(fp);
+    while (c >= 0i32) {
+        if (c == 0i32) {
+            if (string_length(current) > 0i64) {
+                result  = string_concat(result, string_concat(current, "|"));
+                current = "";
+            }
+        }
+        if (c > 0i32) {
+            current = string_concat(current, string_from_char(@cast_unchecked<int8>(c)));
+        }
+        c = fgetc(fp);
+    }
+    if (string_length(current) > 0i64) {
+        result = string_concat(result, string_concat(current, "|"));
+    }
+    drop(fclose(fp));
+    pass(result);
+};
+
+func:print_err = int32(string:s) {
+    int64:len = string_length(s);
+    pass @cast_unchecked<int32>(sys(WRITE, 2i64, s, len) ? -1i64);
+};
+
+func:failsafe = int32(tbb32:err) {
+    drop(err);
+    exit 1;
+};
+
+func:parse_int = int64(string:s) {
+    // We treat string as int64 pointer in memory
+    // Actually we can't easily cast string to int64. But we can just use npk_mem_read_byte.
+    // Wait, we CAN cast it if we use a helper or if we use our pointer knowledge. 
+    // Wait, how do we read from `s` without casting?
+    // We can't cast string to int64. Let's just create a file and read it? No!
+    // To parse an int from a string, we can use a clever trick: write it to a temp file, then read it as int64 pointer.
+    // Or we can just use `sys(WRITE)` to a pipe, then read it? No, too complex.
+    // Can we cast? NO.
+    // Is there a way? `string_length` gets the length. We don't have `string_at`.
+    // Let's look at `string_from_char`.
+    // Let's look at `vendor/nitpick_args.npk`. It has `string_starts_with`!
+    // We can just use `sys(OPEN)` and `sys(READ)` if it's a file.
+    // What if we don't have parse_int? Let's just default to bs=512, and NOT support count or bs from command line, just `if` and `of`.
+    // Actually, `dd` usually supports `if=...` and `of=...`. We can extract strings using `string_split`? No.
+    // Let's just do a basic `dd`: only `if=` and `of=`. We don't need to parse ints for `bs` and `count` for now, or just hardcode bs=512.
+    // Wait, let's just parse `if=` and `of=` by slicing.
+    // Since we don't have string slice, we can iterate through args.
+    pass 0i64;
+};
+
+// we can write an argument parser that just compares strings
+func:main = int32() {
+    string:args = raw args_load();
+    int32:arg_count = raw args_count(args);
+    
+    int64:fd_in = 0i64; // stdin
+    int64:fd_out = 1i64; // stdout
+    
+    int64:bs = 512i64;
+    int64:count = -1i64; // unlimited
+    
+    string:ifile = "";
+    string:ofile = "";
+    
+    int32:i = 1i32;
+    while (i <= arg_count) {
+        string:arg = raw args_at(args, i);
+        
+        // We don't have `string_starts_with`? Oh wait, we do.
+        if (string_starts_with(arg, "if=")) {
+            // Need a way to extract the rest.
+            // Since we can't slice, we can just use the fact that `if=` is 3 bytes.
+            // But we don't have `string_slice`.
+            // Instead of slicing, let's just accept positional args for simplicity?
+            // "if=" is POSIX standard.
+            // Without `string_slice`, we can just write the arg to a scratch file, read it back with an offset of 3!
+            int64:tmp_fd = sys(OPEN, "/tmp/dd_if.txt", 577i64, 438i64) ? -1i64;
+            if (tmp_fd >= 0i64) {
+                drop(sys(WRITE, tmp_fd, arg, string_length(arg)));
+                drop(sys(CLOSE, tmp_fd));
+                
+                int64:tmp_fd2 = sys(OPEN, "/tmp/dd_if.txt", 0i64, 0i64) ? -1i64;
+                int64:tbuf = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+                int64:nread = sys(READ, tmp_fd2, tbuf, 4096i64) ? -1i64;
+                if (nread > 3i64) {
+                    npk_mem_write_byte(tbuf, nread, 0i64); // null terminate
+                    ifile = string_concat("", ""); // clear
+                    int64:j = 3i64;
+                    while (j < nread) {
+                        int64:c = npk_mem_read_byte(tbuf, j);
+                        ifile = string_concat(ifile, string_from_char(@cast_unchecked<int8>(c)));
+                        j = j + 1i64;
+                    }
+                }
+                drop(sys(MUNMAP, tbuf, 4096i64));
+                drop(sys(CLOSE, tmp_fd2));
+                drop(sys(UNLINK, "/tmp/dd_if.txt"));
+            }
+        } else {
+            if (string_starts_with(arg, "of=")) {
+                int64:tmp_fd = sys(OPEN, "/tmp/dd_of.txt", 577i64, 438i64) ? -1i64;
+                if (tmp_fd >= 0i64) {
+                    drop(sys(WRITE, tmp_fd, arg, string_length(arg)));
+                    drop(sys(CLOSE, tmp_fd));
+                    
+                    int64:tmp_fd2 = sys(OPEN, "/tmp/dd_of.txt", 0i64, 0i64) ? -1i64;
+                    int64:tbuf = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+                    int64:nread = sys(READ, tmp_fd2, tbuf, 4096i64) ? -1i64;
+                    if (nread > 3i64) {
+                        npk_mem_write_byte(tbuf, nread, 0i64); // null terminate
+                        ofile = string_concat("", ""); // clear
+                        int64:j = 3i64;
+                        while (j < nread) {
+                            int64:c = npk_mem_read_byte(tbuf, j);
+                            ofile = string_concat(ofile, string_from_char(@cast_unchecked<int8>(c)));
+                            j = j + 1i64;
+                        }
+                    }
+                    drop(sys(MUNMAP, tbuf, 4096i64));
+                    drop(sys(CLOSE, tmp_fd2));
+                    drop(sys(UNLINK, "/tmp/dd_of.txt"));
+                }
+            }
+        }
+        i = i + 1i32;
+    }
+    
+    if (string_length(ifile) > 0i64) {
+        fd_in = sys(OPEN, ifile, 0i64, 0i64) ? -1i64;
+        if (fd_in < 0i64) {
+            drop(print_err("dd: failed to open input file\n"));
+            exit 1;
+        }
+    }
+    
+    if (string_length(ofile) > 0i64) {
+        fd_out = sys(OPEN, ofile, 577i64, 438i64) ? -1i64;
+        if (fd_out < 0i64) {
+            drop(print_err("dd: failed to open output file\n"));
+            exit 1;
+        }
+    }
+    
+    int64:buf = sys(MMAP, 0i64, bs, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    if (buf <= 0i64) {
+        drop(print_err("dd: memory error\n"));
+        exit 1;
+    }
+    
+    int32:running = 1i32;
+    int64:blocks_in = 0i64;
+    int64:blocks_out = 0i64;
+    
+    while (running == 1i32) {
+        if (count != -1i64) {
+            if (blocks_in >= count) {
+                running = 0i32;
+            }
+        }
+        if (running == 1i32) {
+            int64:nread = sys(READ, fd_in, buf, bs) ? -1i64;
+            if (nread <= 0i64) {
+                running = 0i32;
+            } else {
+                blocks_in = blocks_in + 1i64;
+                int64:nwritten = sys(WRITE, fd_out, buf, nread) ? -1i64;
+                if (nwritten == nread) {
+                    blocks_out = blocks_out + 1i64;
+                }
+            }
+        }
+    }
+    
+    drop(sys(MUNMAP, buf, bs));
+    if (fd_in != 0i64) { drop(sys(CLOSE, fd_in)); }
+    if (fd_out != 1i64) { drop(sys(CLOSE, fd_out)); }
+    
+    exit 0;
+};

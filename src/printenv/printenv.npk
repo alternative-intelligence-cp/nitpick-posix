@@ -1,0 +1,114 @@
+// printenv.npk
+
+extern "libc" {
+    func:fopen  = int64(string:path, string:mode);
+    func:fgetc  = int32(int64:fp);
+    func:fclose = int32(int64:fp);
+}
+
+use "../vendor/nitpick_args.npk".*;
+
+func:args_load = string() {
+    int64:fp = fopen("/proc/self/cmdline", "r");
+    if (fp == 0i64) { pass("|"); }
+    string:result  = "|";
+    string:current = "";
+    int32:c = fgetc(fp);
+    while (c >= 0i32) {
+        if (c == 0i32) {
+            if (string_length(current) > 0i64) {
+                result  = string_concat(result, string_concat(current, "|"));
+                current = "";
+            }
+        }
+        if (c > 0i32) {
+            current = string_concat(current, string_from_char(@cast_unchecked<int8>(c)));
+        }
+        c = fgetc(fp);
+    }
+    if (string_length(current) > 0i64) {
+        result = string_concat(result, string_concat(current, "|"));
+    }
+    drop(fclose(fp));
+    pass(result);
+};
+
+func:print_str_safe = int32(string:s) {
+    int64:len = string_length(s);
+    drop(sys(WRITE, 1i64, s, len));
+    pass 0i32;
+};
+
+func:print_err = int32(string:s) {
+    int64:len = string_length(s);
+    drop(sys(WRITE, 2i64, s, len));
+    pass 0i32;
+};
+
+func:failsafe = int32(tbb32:err) {
+    drop(err);
+    exit 1;
+};
+
+func:main = int32() {
+    string:args = raw args_load();
+    int32:arg_count = raw args_count(args);
+    
+    int64:fp = fopen("/proc/self/environ", "r");
+    if (fp == 0i64) {
+        exit 1;
+    }
+    
+    if (arg_count <= 1i32) {
+        // print all
+        string:current = "";
+        int32:c = fgetc(fp);
+        while (c >= 0i32) {
+            if (c == 0i32) {
+                if (string_length(current) > 0i64) {
+                    drop(print_str_safe(current));
+                    drop(print_str_safe("\n"));
+                    current = "";
+                }
+            } else {
+                current = string_concat(current, string_from_char(@cast_unchecked<int8>(c)));
+            }
+            c = fgetc(fp);
+        }
+    } else {
+        // print specific vars
+        int32:i = 2i32; // wait, args start at 1, so 2 is the second arg (first after program name)
+        // Wait, args_count includes program name? Yes, wait, `args_at(args, 1i32)` is program name?
+        // Wait, `args_at` is 1-indexed. `args_at(args, 1)` is program name?
+        // Actually, `args_count(args)` says how many pipe-separated segments. The first is program name.
+        // So program name is at 1. Variables are at 2, 3...
+        
+        // Let's store target variable in memory for now, just 1 argument supported for simplicity.
+        string:target = raw args_at(args, 2i32);
+        string:target_prefix = string_concat(target, "=");
+        int64:target_len = string_length(target_prefix);
+        
+        string:current = "";
+        int32:c = fgetc(fp);
+        while (c >= 0i32) {
+            if (c == 0i32) {
+                if (string_length(current) > 0i64) {
+                    if (string_starts_with(current, target_prefix)) {
+                        string:val = string_substring(current, target_len, string_length(current));
+                        drop(print_str_safe(val));
+                        drop(print_str_safe("\n"));
+                        exit 0; // stop after first find for simplicity
+                    }
+                    current = "";
+                }
+            } else {
+                current = string_concat(current, string_from_char(@cast_unchecked<int8>(c)));
+            }
+            c = fgetc(fp);
+        }
+        exit 1; // not found
+    }
+    
+    drop(fclose(fp));
+    exit 0;
+};

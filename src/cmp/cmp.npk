@@ -1,0 +1,127 @@
+// cmp.npk
+
+extern "libc" {
+    func:fopen  = int64(string:path, string:mode);
+    func:fgetc  = int32(int64:fp);
+    func:fclose = int32(int64:fp);
+}
+
+use "../vendor/nitpick_args.npk".*;
+
+func:args_load = string() {
+    int64:fp = fopen("/proc/self/cmdline", "r");
+    if (fp == 0i64) { pass("|"); }
+    string:result  = "|";
+    string:current = "";
+    int32:c = fgetc(fp);
+    while (c >= 0i32) {
+        if (c == 0i32) {
+            if (string_length(current) > 0i64) {
+                result  = string_concat(result, string_concat(current, "|"));
+                current = "";
+            }
+        }
+        if (c > 0i32) {
+            current = string_concat(current, string_from_char(@cast_unchecked<int8>(c)));
+        }
+        c = fgetc(fp);
+    }
+    if (string_length(current) > 0i64) {
+        result = string_concat(result, string_concat(current, "|"));
+    }
+    drop(fclose(fp));
+    pass(result);
+};
+
+func:print_err = int32(string:s) {
+    int64:len = string_length(s);
+    drop(sys(WRITE, 2i64, s, len));
+    pass 0i32;
+};
+
+func:print_str_safe = int32(string:s) {
+    int64:len = string_length(s);
+    drop(sys(WRITE, 1i64, s, len));
+    pass 0i32;
+};
+
+func:failsafe = int32(tbb32:err) {
+    drop(err);
+    exit 1;
+};
+
+func:main = int32() {
+    string:args = raw args_load();
+    int32:arg_count = raw args_count(args);
+    
+    if (arg_count < 2i32) {
+        drop(print_err("cmp: missing operand\n"));
+        exit 2;
+    }
+    
+    string:file1 = raw args_at(args, 1i32);
+    string:file2 = raw args_at(args, 2i32);
+    
+    int64:fp1 = fopen(file1, "r");
+    if (fp1 == 0i64) {
+        drop(print_err("cmp: cannot open '"));
+        drop(print_err(file1));
+        drop(print_err("'\n"));
+        exit 2;
+    }
+    
+    int64:fp2 = fopen(file2, "r");
+    if (fp2 == 0i64) {
+        drop(print_err("cmp: cannot open '"));
+        drop(print_err(file2));
+        drop(print_err("'\n"));
+        exit 2;
+    }
+    
+    int32:running = 1i32;
+    int64:byte_num = 1i64;
+    int64:line_num = 1i64;
+    
+    while (running == 1i32) {
+        int32:c1 = fgetc(fp1);
+        int32:c2 = fgetc(fp2);
+        
+        if (c1 != c2) {
+            if (c1 < 0i32) {
+                drop(print_str_safe("cmp: EOF on "));
+                drop(print_str_safe(file1));
+                drop(print_str_safe("\n"));
+                exit 1;
+            }
+            if (c2 < 0i32) {
+                drop(print_str_safe("cmp: EOF on "));
+                drop(print_str_safe(file2));
+                drop(print_str_safe("\n"));
+                exit 1;
+            }
+            
+            drop(print_str_safe(file1));
+            drop(print_str_safe(" "));
+            drop(print_str_safe(file2));
+            drop(print_str_safe(" differ: byte "));
+            drop(print_str_safe(string_from_int(byte_num)));
+            drop(print_str_safe(", line "));
+            drop(print_str_safe(string_from_int(line_num)));
+            drop(print_str_safe("\n"));
+            exit 1;
+        }
+        
+        if (c1 < 0i32) {
+            running = 0i32; // Both EOF
+        } else {
+            if (c1 == 10i32) {
+                line_num = line_num + 1i64;
+            }
+            byte_num = byte_num + 1i64;
+        }
+    }
+    
+    drop(fclose(fp1));
+    drop(fclose(fp2));
+    exit 0;
+};

@@ -1,0 +1,51 @@
+// hostname.npk
+
+func:print_str_safe = int32(string:s) {
+    int64:len = string_length(s);
+    drop(sys(WRITE, 1i64, s, len));
+    pass 0i32;
+};
+
+extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
+
+func:read_string = string(int64:ptr, int64:offset, int64:max_len) {
+    string:res = "";
+    int64:i = 0i64;
+    int32:running = 1i32;
+    while (running == 1i32) {
+        if (i >= max_len) {
+            running = 0i32;
+        } else {
+            int64:b = npk_mem_read_byte(ptr, offset + i);
+            if (b == 0i64) {
+                running = 0i32;
+            } else {
+                res = string_concat(res, string_from_char(@cast_unchecked<int8>(b)));
+                i = i + 1i64;
+            }
+        }
+    }
+    pass res;
+};
+
+func:failsafe = int32(tbb32:err) {
+    drop(err);
+    exit 1;
+};
+
+func:main = int32() {
+    int64:buf = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
+    if (buf < 0i64) { exit 1; }
+    
+    int64:res = sys!!(UNAME, buf) ? -1i64;
+    if (res < 0i64) { exit 1; }
+    
+    // offset 65 is 'nodename' in struct utsname (x86_64 linux)
+    string:node_name = raw read_string(buf, 65i64, 65i64);
+    
+    drop(print_str_safe(node_name));
+    drop(print_str_safe("\n"));
+    
+    drop(sys(MUNMAP, buf, 4096i64));
+    exit 0;
+};

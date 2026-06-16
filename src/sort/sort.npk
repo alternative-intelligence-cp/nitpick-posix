@@ -1,0 +1,281 @@
+// sort.npk
+
+extern "libc" {
+    func:fopen  = int64(string:path, string:mode);
+    func:fgetc  = int32(int64:fp);
+    func:fclose = int32(int64:fp);
+    func:malloc = int64(int64:bytes);
+    func:nitpick_libc_mem_free = int32(int64:ptr);
+}
+
+extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
+extern func:npk_mem_write_byte = void(int64:ptr, int64:offset, int64:val);
+
+use "../vendor/nitpick_args.npk".*;
+use "../vendor/singly.npk".*;
+
+func:args_load = string() {
+    int64:fp = fopen("/proc/self/cmdline", "r");
+    if (fp == 0i64) { pass("|"); }
+    string:result  = "|";
+    string:current = "";
+    int32:c = fgetc(fp);
+    while (c >= 0i32) {
+        if (c == 0i32) {
+            if (string_length(current) > 0i64) {
+                result  = string_concat(result, string_concat(current, "|"));
+                current = "";
+            }
+        }
+        if (c > 0i32) {
+            current = string_concat(current, string_from_char(@cast_unchecked<int8>(c)));
+        }
+        c = fgetc(fp);
+    }
+    if (string_length(current) > 0i64) {
+        result = string_concat(result, string_concat(current, "|"));
+    }
+    drop(fclose(fp));
+    pass(result);
+};
+
+func:print_err = int32(string:s) {
+    int64:len = string_length(s);
+    pass @cast_unchecked<int32>(sys(WRITE, 2i64, s, len) ? -1i64);
+};
+
+func:print_out = int32(string:s) {
+    int64:len = string_length(s);
+    pass @cast_unchecked<int32>(sys(WRITE, 1i64, s, len) ? -1i64);
+};
+
+func:ptr_to_string = string(int64:ptr) {
+    string:s = "";
+    int64:i = 0i64;
+    while (npk_mem_read_byte(ptr, i) != 0i64) {
+        int64:c = npk_mem_read_byte(ptr, i);
+        s = string_concat(s, string_from_char(@cast_unchecked<int8>(c)));
+        i = i + 1i64;
+    }
+    pass s;
+};
+
+func:str_clone = int64(int64:s) {
+    int64:len = 0i64;
+    while (npk_mem_read_byte(s, len) != 0i64) {
+        len = len + 1i64;
+    }
+    int64:copy = malloc(len + 1i64);
+    int64:i = 0i64;
+    while (i < len) {
+        npk_mem_write_byte(copy, i, npk_mem_read_byte(s, i));
+        i = i + 1i64;
+    }
+    npk_mem_write_byte(copy, len, 0i64);
+    pass copy;
+};
+
+func:strcmp = int32(int64:s1, int64:s2) {
+    int64:i = 0i64;
+    while (1i32 == 1i32) {
+        int64:c1 = npk_mem_read_byte(s1, i);
+        int64:c2 = npk_mem_read_byte(s2, i);
+        if (c1 != c2) {
+            if (c1 < c2) { pass -1i32; }
+            pass 1i32;
+        }
+        if (c1 == 0i64) { pass 0i32; }
+        i = i + 1i64;
+    }
+    pass 0i32;
+};
+
+func:failsafe = int32(tbb32:err) {
+    drop(err);
+    exit 1;
+};
+
+func:main = int32() {
+    string:args = raw args_load();
+    int32:arg_count = raw args_count(args);
+    
+    int64:sl = raw SList.create();
+
+    // Collect files
+    int64:files = raw SList.create();
+    int32:i = 1i32;
+    while (i <= arg_count) {
+        string:arg = raw args_at(args, i);
+        if (string_starts_with(arg, "-") == false) {
+            // we must create a copy in an int64 pointer to store in files
+            string:arg_s = string_concat(arg, string_from_char(@cast_unchecked<int8>(0i32)));
+            // Can't cast string to int64 directly, let's open the file!
+            int64:fd = sys(OPEN, arg, 0i64, 0i64) ? -1i64;
+            if (fd >= 0i64) {
+                drop(SList.push_back(files, fd));
+            } else {
+                drop(print_err("sort: cannot open '"));
+                drop(print_err(arg));
+                drop(print_err("'\n"));
+                exit 1;
+            }
+        }
+        i = i + 1i32;
+    }
+
+    if (raw SList.is_empty(files) == 1i32) {
+        drop(SList.push_back(files, 0i64)); // stdin
+    }
+
+    // Read all lines
+    while (raw SList.is_empty(files) == 0i32) {
+        int64:fd = raw SList.pop_front(files);
+        
+        int64:buf = sys(MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+        if (buf <= 0i64) { exit 1; }
+        
+        int32:running = 1i32;
+        int64:line_buf = malloc(65536i64); // max line length 64k
+        int64:line_len = 0i64;
+
+        while (running == 1i32) {
+            int64:nread = sys(READ, fd, buf, 65536i64) ? -1i64;
+            if (nread <= 0i64) {
+                running = 0i32;
+            } else {
+                int64:pos = 0i64;
+                while (pos < nread) {
+                    int64:c = npk_mem_read_byte(buf, pos);
+                    npk_mem_write_byte(line_buf, line_len, c);
+                    line_len = line_len + 1i64;
+                    if (c == 10i64) { // '\n'
+                        npk_mem_write_byte(line_buf, line_len, 0i64);
+                        drop(SList.push_back(sl, raw str_clone(line_buf)));
+                        line_len = 0i64;
+                    }
+                    pos = pos + 1i64;
+                }
+            }
+        }
+
+        if (line_len > 0i64) {
+            npk_mem_write_byte(line_buf, line_len, 0i64);
+            drop(SList.push_back(sl, raw str_clone(line_buf)));
+        }
+
+        drop(nitpick_libc_mem_free(line_buf));
+        drop(sys(MUNMAP, buf, 65536i64));
+        if (fd > 0i64) { drop(sys(CLOSE, fd)); }
+    }
+    
+    drop(SList.destroy(files));
+
+    // Sort the list (Selection Sort)
+    int64:size = raw SList.len(sl);
+    if (size > 1i64) {
+        int64:arr = malloc(size * 8i64);
+        int64:idx = 0i64;
+        while (raw SList.is_empty(sl) == 0i32) {
+            int64:ptr = raw SList.pop_front(sl);
+            // write int64 ptr to arr + idx*8
+            int64:b0 = ptr & 255i64;
+            int64:b1 = (ptr >> 8i64) & 255i64;
+            int64:b2 = (ptr >> 16i64) & 255i64;
+            int64:b3 = (ptr >> 24i64) & 255i64;
+            int64:b4 = (ptr >> 32i64) & 255i64;
+            int64:b5 = (ptr >> 40i64) & 255i64;
+            int64:b6 = (ptr >> 48i64) & 255i64;
+            int64:b7 = (ptr >> 56i64) & 255i64;
+            npk_mem_write_byte(arr, idx * 8i64 + 0i64, b0);
+            npk_mem_write_byte(arr, idx * 8i64 + 1i64, b1);
+            npk_mem_write_byte(arr, idx * 8i64 + 2i64, b2);
+            npk_mem_write_byte(arr, idx * 8i64 + 3i64, b3);
+            npk_mem_write_byte(arr, idx * 8i64 + 4i64, b4);
+            npk_mem_write_byte(arr, idx * 8i64 + 5i64, b5);
+            npk_mem_write_byte(arr, idx * 8i64 + 6i64, b6);
+            npk_mem_write_byte(arr, idx * 8i64 + 7i64, b7);
+            idx = idx + 1i64;
+        }
+
+        // Bubble sort for simplicity
+        int64:i_s = 0i64;
+        while (i_s < size) {
+            int64:j_s = 0i64;
+            while (j_s < (size - 1i64 - i_s)) {
+                // read arr[j_s]
+                int64:p1_b0 = npk_mem_read_byte(arr, j_s * 8i64 + 0i64);
+                int64:p1_b1 = npk_mem_read_byte(arr, j_s * 8i64 + 1i64);
+                int64:p1_b2 = npk_mem_read_byte(arr, j_s * 8i64 + 2i64);
+                int64:p1_b3 = npk_mem_read_byte(arr, j_s * 8i64 + 3i64);
+                int64:p1_b4 = npk_mem_read_byte(arr, j_s * 8i64 + 4i64);
+                int64:p1_b5 = npk_mem_read_byte(arr, j_s * 8i64 + 5i64);
+                int64:p1_b6 = npk_mem_read_byte(arr, j_s * 8i64 + 6i64);
+                int64:p1_b7 = npk_mem_read_byte(arr, j_s * 8i64 + 7i64);
+                int64:p1 = p1_b0 | (p1_b1 << 8i64) | (p1_b2 << 16i64) | (p1_b3 << 24i64) | (p1_b4 << 32i64) | (p1_b5 << 40i64) | (p1_b6 << 48i64) | (p1_b7 << 56i64);
+
+                // read arr[j_s+1]
+                int64:p2_b0 = npk_mem_read_byte(arr, (j_s + 1i64) * 8i64 + 0i64);
+                int64:p2_b1 = npk_mem_read_byte(arr, (j_s + 1i64) * 8i64 + 1i64);
+                int64:p2_b2 = npk_mem_read_byte(arr, (j_s + 1i64) * 8i64 + 2i64);
+                int64:p2_b3 = npk_mem_read_byte(arr, (j_s + 1i64) * 8i64 + 3i64);
+                int64:p2_b4 = npk_mem_read_byte(arr, (j_s + 1i64) * 8i64 + 4i64);
+                int64:p2_b5 = npk_mem_read_byte(arr, (j_s + 1i64) * 8i64 + 5i64);
+                int64:p2_b6 = npk_mem_read_byte(arr, (j_s + 1i64) * 8i64 + 6i64);
+                int64:p2_b7 = npk_mem_read_byte(arr, (j_s + 1i64) * 8i64 + 7i64);
+                int64:p2 = p2_b0 | (p2_b1 << 8i64) | (p2_b2 << 16i64) | (p2_b3 << 24i64) | (p2_b4 << 32i64) | (p2_b5 << 40i64) | (p2_b6 << 48i64) | (p2_b7 << 56i64);
+
+                if (raw strcmp(p1, p2) > 0i32) {
+                    // swap
+                    npk_mem_write_byte(arr, j_s * 8i64 + 0i64, p2_b0);
+                    npk_mem_write_byte(arr, j_s * 8i64 + 1i64, p2_b1);
+                    npk_mem_write_byte(arr, j_s * 8i64 + 2i64, p2_b2);
+                    npk_mem_write_byte(arr, j_s * 8i64 + 3i64, p2_b3);
+                    npk_mem_write_byte(arr, j_s * 8i64 + 4i64, p2_b4);
+                    npk_mem_write_byte(arr, j_s * 8i64 + 5i64, p2_b5);
+                    npk_mem_write_byte(arr, j_s * 8i64 + 6i64, p2_b6);
+                    npk_mem_write_byte(arr, j_s * 8i64 + 7i64, p2_b7);
+
+                    npk_mem_write_byte(arr, (j_s + 1i64) * 8i64 + 0i64, p1_b0);
+                    npk_mem_write_byte(arr, (j_s + 1i64) * 8i64 + 1i64, p1_b1);
+                    npk_mem_write_byte(arr, (j_s + 1i64) * 8i64 + 2i64, p1_b2);
+                    npk_mem_write_byte(arr, (j_s + 1i64) * 8i64 + 3i64, p1_b3);
+                    npk_mem_write_byte(arr, (j_s + 1i64) * 8i64 + 4i64, p1_b4);
+                    npk_mem_write_byte(arr, (j_s + 1i64) * 8i64 + 5i64, p1_b5);
+                    npk_mem_write_byte(arr, (j_s + 1i64) * 8i64 + 6i64, p1_b6);
+                    npk_mem_write_byte(arr, (j_s + 1i64) * 8i64 + 7i64, p1_b7);
+                }
+                j_s = j_s + 1i64;
+            }
+            i_s = i_s + 1i64;
+        }
+
+        // Add back to list
+        int64:k = 0i64;
+        while (k < size) {
+            int64:p_b0 = npk_mem_read_byte(arr, k * 8i64 + 0i64);
+            int64:p_b1 = npk_mem_read_byte(arr, k * 8i64 + 1i64);
+            int64:p_b2 = npk_mem_read_byte(arr, k * 8i64 + 2i64);
+            int64:p_b3 = npk_mem_read_byte(arr, k * 8i64 + 3i64);
+            int64:p_b4 = npk_mem_read_byte(arr, k * 8i64 + 4i64);
+            int64:p_b5 = npk_mem_read_byte(arr, k * 8i64 + 5i64);
+            int64:p_b6 = npk_mem_read_byte(arr, k * 8i64 + 6i64);
+            int64:p_b7 = npk_mem_read_byte(arr, k * 8i64 + 7i64);
+            int64:p = p_b0 | (p_b1 << 8i64) | (p_b2 << 16i64) | (p_b3 << 24i64) | (p_b4 << 32i64) | (p_b5 << 40i64) | (p_b6 << 48i64) | (p_b7 << 56i64);
+            drop(SList.push_back(sl, p));
+            k = k + 1i64;
+        }
+        drop(nitpick_libc_mem_free(arr));
+    }
+
+    // Print sorted
+    while (raw SList.is_empty(sl) == 0i32) {
+        int64:ptr = raw SList.pop_front(sl);
+        string:s = raw ptr_to_string(ptr);
+        drop(print_out(s));
+        drop(nitpick_libc_mem_free(ptr));
+    }
+
+    drop(SList.destroy(sl));
+    
+    exit 0;
+};

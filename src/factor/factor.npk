@@ -1,0 +1,91 @@
+// factor.npk
+
+extern "libc" {
+    func:fopen  = int64(string:path, string:mode);
+    func:fgetc  = int32(int64:fp);
+    func:fclose = int32(int64:fp);
+}
+
+use "../vendor/nitpick_args.npk".*;
+
+func:args_load = string() {
+    int64:fp = fopen("/proc/self/cmdline", "r");
+    if (fp == 0i64) { pass("|"); }
+    string:result  = "|";
+    string:current = "";
+    int32:c = fgetc(fp);
+    while (c >= 0i32) {
+        if (c == 0i32) {
+            if (string_length(current) > 0i64) {
+                result  = string_concat(result, string_concat(current, "|"));
+                current = "";
+            }
+        }
+        if (c > 0i32) {
+            current = string_concat(current, string_from_char(@cast_unchecked<int8>(c)));
+        }
+        c = fgetc(fp);
+    }
+    if (string_length(current) > 0i64) {
+        result = string_concat(result, string_concat(current, "|"));
+    }
+    drop(fclose(fp));
+    pass(result);
+};
+
+func:print_err = int32(string:s) {
+    int64:len = string_length(s);
+    drop(sys(WRITE, 2i64, s, len));
+    pass 0i32;
+};
+
+func:print_str_safe = int32(string:s) {
+    int64:len = string_length(s);
+    drop(sys(WRITE, 1i64, s, len));
+    pass 0i32;
+};
+
+func:failsafe = int32(tbb32:err) {
+    drop(err);
+    exit 1;
+};
+
+func:main = int32() {
+    string:args = raw args_load();
+    int32:arg_count = raw args_count(args);
+    
+    if (arg_count < 1i32) {
+        drop(print_err("factor: missing operand\n"));
+        exit 1;
+    }
+    
+    int32:i = 1i32;
+    while (i <= arg_count) {
+        string:arg = raw args_at(args, i);
+        int64:n = string_to_int(arg);
+        
+        drop(print_str_safe(arg));
+        drop(print_str_safe(":"));
+        
+        if (n > 1i64) {
+            int64:d = 2i64;
+            while (n > 1i64) {
+                int64:rem = n - (n / d) * d;
+                if (rem == 0i64) {
+                    drop(print_str_safe(" "));
+                    drop(print_str_safe(string_from_int(d)));
+                    n = n / d;
+                } else {
+                    d = d + 1i64;
+                    if (d * d > n) {
+                        d = n;
+                    }
+                }
+            }
+        }
+        drop(print_str_safe("\n"));
+        i = i + 1i32;
+    }
+    
+    exit 0;
+};

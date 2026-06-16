@@ -1,0 +1,104 @@
+// nl.npk
+
+extern "libc" {
+    func:fopen  = int64(string:path, string:mode);
+    func:fgetc  = int32(int64:fp);
+    func:fclose = int32(int64:fp);
+}
+
+use "../vendor/nitpick_args.npk".*;
+
+func:args_load = string() {
+    int64:fp = fopen("/proc/self/cmdline", "r");
+    if (fp == 0i64) { pass("|"); }
+    string:result  = "|";
+    string:current = "";
+    int32:c = fgetc(fp);
+    while (c >= 0i32) {
+        if (c == 0i32) {
+            if (string_length(current) > 0i64) {
+                result  = string_concat(result, string_concat(current, "|"));
+                current = "";
+            }
+        }
+        if (c > 0i32) {
+            current = string_concat(current, string_from_char(@cast_unchecked<int8>(c)));
+        }
+        c = fgetc(fp);
+    }
+    if (string_length(current) > 0i64) {
+        result = string_concat(result, string_concat(current, "|"));
+    }
+    drop(fclose(fp));
+    pass(result);
+};
+
+func:print_err = int32(string:s) {
+    int64:len = string_length(s);
+    drop(sys(WRITE, 2i64, s, len));
+    pass 0i32;
+};
+
+func:print_str_safe = int32(string:s) {
+    int64:len = string_length(s);
+    drop(sys(WRITE, 1i64, s, len));
+    pass 0i32;
+};
+
+func:failsafe = int32(tbb32:err) {
+    drop(err);
+    exit 1;
+};
+
+func:main = int32() {
+    string:args = raw args_load();
+    int32:arg_count = raw args_count(args);
+    
+    int64:fp = 0i64;
+    
+    if (arg_count >= 1i32) {
+        string:file = raw args_at(args, 1i32);
+        fp = fopen(file, "r");
+        if (fp == 0i64) {
+            drop(print_err("nl: cannot open '"));
+            drop(print_err(file));
+            drop(print_err("'\n"));
+            exit 1;
+        }
+    } else {
+        // how to do stdin with libc?
+        // stdin is fd 0, so fdopen(0, "r")
+        // but let's just implement files for now since we don't have fdopen.
+        drop(print_err("nl: must specify a file\n"));
+        exit 1;
+    }
+    
+    int32:running = 1i32;
+    int64:line_num = 1i64;
+    
+    while (running == 1i32) {
+        string:line = "";
+        int32:c = fgetc(fp);
+        if (c < 0i32) {
+            running = 0i32;
+        } else {
+            while (c >= 0i32) {
+                if (c == 10i32) {
+                    c = -1i32; // break
+                } else {
+                    line = string_concat(line, string_from_char(@cast_unchecked<int8>(c)));
+                    c = fgetc(fp);
+                }
+            }
+            drop(print_str_safe("     "));
+            drop(print_str_safe(string_from_int(line_num)));
+            drop(print_str_safe("\t"));
+            drop(print_str_safe(line));
+            drop(print_str_safe("\n"));
+            line_num = line_num + 1i64;
+        }
+    }
+    
+    drop(fclose(fp));
+    exit 0;
+};

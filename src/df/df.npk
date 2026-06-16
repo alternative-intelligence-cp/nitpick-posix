@@ -1,0 +1,159 @@
+// df.npk
+
+extern "libc" {
+    func:fopen  = int64(string:path, string:mode);
+    func:fgetc  = int32(int64:fp);
+    func:fclose = int32(int64:fp);
+}
+
+use "../vendor/nitpick_args.npk".*;
+
+func:args_load = string() {
+    int64:fp = fopen("/proc/self/cmdline", "r");
+    if (fp == 0i64) { pass("|"); }
+    string:result  = "|";
+    string:current = "";
+    int32:c = fgetc(fp);
+    while (c >= 0i32) {
+        if (c == 0i32) {
+            if (string_length(current) > 0i64) {
+                result  = string_concat(result, string_concat(current, "|"));
+                current = "";
+            }
+        }
+        if (c > 0i32) {
+            current = string_concat(current, string_from_char(@cast_unchecked<int8>(c)));
+        }
+        c = fgetc(fp);
+    }
+    if (string_length(current) > 0i64) {
+        result = string_concat(result, string_concat(current, "|"));
+    }
+    drop(fclose(fp));
+    pass(result);
+};
+
+func:print_err = int32(string:s) {
+    int64:len = string_length(s);
+    drop(sys(WRITE, 2i64, s, len));
+    pass 0i32;
+};
+
+func:print_str_safe = int32(string:s) {
+    int64:len = string_length(s);
+    drop(sys(WRITE, 1i64, s, len));
+    pass 0i32;
+};
+
+extern func:npk_mem_read_int64 = int64(int64:ptr, int64:offset);
+
+func:failsafe = int32(tbb32:err) {
+    drop(err);
+    exit 1;
+};
+
+func:pad_left = string(string:s, int64:width) {
+    int64:len = string_length(s);
+    string:res = "";
+    while (len < width) {
+        res = string_concat(res, " ");
+        len = len + 1i64;
+    }
+    pass string_concat(res, s);
+};
+
+func:pad_right = string(string:s, int64:width) {
+    int64:len = string_length(s);
+    string:res = s;
+    while (len < width) {
+        res = string_concat(res, " ");
+        len = len + 1i64;
+    }
+    pass res;
+};
+
+func:main = int32() {
+    string:args = raw args_load();
+    int32:arg_count = raw args_count(args);
+    
+    int64:buf = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
+    if (buf < 0i64) { exit 1; }
+    
+    drop(print_str_safe("Filesystem     1K-blocks      Used Available Use% Mounted on\n"));
+    
+    int32:i = 1i32;
+    int32:has_args = 0i32;
+    
+    if (arg_count >= 1i32) {
+        has_args = 1i32;
+    }
+    
+    if (has_args == 0i32) {
+        // default /
+        int64:res = sys!!(137i64, "/", buf) ? -1i64; // SYS_STATFS
+        if (res >= 0i64) {
+            int64:bsize = npk_mem_read_int64(buf, 8i64);
+            int64:blocks = npk_mem_read_int64(buf, 16i64);
+            int64:bfree = npk_mem_read_int64(buf, 24i64);
+            int64:bavail = npk_mem_read_int64(buf, 32i64);
+            
+            int64:kblocks = blocks * bsize / 1024i64;
+            int64:kavail = bavail * bsize / 1024i64;
+            int64:kused = (blocks - bfree) * bsize / 1024i64;
+            
+            int64:use_pct = 0i64;
+            if ((kused + kavail) > 0i64) {
+                // ceiling for use%
+                use_pct = (kused * 100i64 + (kused + kavail - 1i64)) / (kused + kavail);
+            }
+            
+            string:fs = raw pad_right("-", 14i64);
+            string:kb = raw pad_left(string_from_int(kblocks), 10i64);
+            string:us = raw pad_left(string_from_int(kused), 10i64);
+            string:av = raw pad_left(string_from_int(kavail), 10i64);
+            string:pc = raw pad_left(string_concat(string_from_int(use_pct), "%"), 5i64);
+            string:mo = " /";
+            
+            drop(print_str_safe(string_concat(fs, string_concat(" ", string_concat(kb, string_concat(" ", string_concat(us, string_concat(" ", string_concat(av, string_concat(" ", string_concat(pc, mo)))))))))));
+            drop(print_str_safe("\n"));
+        }
+    } else {
+        while (i <= arg_count) {
+            string:path = raw args_at(args, i);
+            int64:res = sys!!(137i64, path, buf) ? -1i64;
+            if (res >= 0i64) {
+                int64:bsize = npk_mem_read_int64(buf, 8i64);
+                int64:blocks = npk_mem_read_int64(buf, 16i64);
+                int64:bfree = npk_mem_read_int64(buf, 24i64);
+                int64:bavail = npk_mem_read_int64(buf, 32i64);
+                
+                int64:kblocks = blocks * bsize / 1024i64;
+                int64:kavail = bavail * bsize / 1024i64;
+                int64:kused = (blocks - bfree) * bsize / 1024i64;
+                
+                int64:use_pct = 0i64;
+                if ((kused + kavail) > 0i64) {
+                    use_pct = (kused * 100i64 + (kused + kavail - 1i64)) / (kused + kavail);
+                }
+                
+                string:fs = raw pad_right(path, 14i64);
+                string:kb = raw pad_left(string_from_int(kblocks), 10i64);
+                string:us = raw pad_left(string_from_int(kused), 10i64);
+                string:av = raw pad_left(string_from_int(kavail), 10i64);
+                string:pc = raw pad_left(string_concat(string_from_int(use_pct), "%"), 5i64);
+                string:mo = string_concat(" ", path);
+                
+                drop(print_str_safe(string_concat(fs, string_concat(" ", string_concat(kb, string_concat(" ", string_concat(us, string_concat(" ", string_concat(av, string_concat(" ", string_concat(pc, mo)))))))))));
+                drop(print_str_safe("\n"));
+            } else {
+                drop(print_err("df: '"));
+                drop(print_err(path));
+                drop(print_err("': No such file or directory\n"));
+            }
+            i = i + 1i32;
+        }
+    }
+    
+    drop(sys(MUNMAP, buf, 4096i64));
+    exit 0;
+};

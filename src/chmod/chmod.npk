@@ -1,0 +1,93 @@
+// chmod.npk
+
+extern "libc" {
+    func:fopen  = int64(string:path, string:mode);
+    func:fgetc  = int32(int64:fp);
+    func:fclose = int32(int64:fp);
+}
+
+use "../vendor/nitpick_args.npk".*;
+
+func:args_load = string() {
+    int64:fp = fopen("/proc/self/cmdline", "r");
+    if (fp == 0i64) { pass("|"); }
+    string:result  = "|";
+    string:current = "";
+    int32:c = fgetc(fp);
+    while (c >= 0i32) {
+        if (c == 0i32) {
+            if (string_length(current) > 0i64) {
+                result  = string_concat(result, string_concat(current, "|"));
+                current = "";
+            }
+        }
+        if (c > 0i32) {
+            current = string_concat(current, string_from_char(@cast_unchecked<int8>(c)));
+        }
+        c = fgetc(fp);
+    }
+    if (string_length(current) > 0i64) {
+        result = string_concat(result, string_concat(current, "|"));
+    }
+    drop(fclose(fp));
+    pass(result);
+};
+
+func:print_err = int32(string:s) {
+    int64:len = string_length(s);
+    drop(s);
+    drop(len);
+    pass @cast_unchecked<int32>(sys(WRITE, 2i64, s, len) ? -1i64);
+};
+
+func:failsafe = int32(tbb32:err) {
+    drop(err);
+    exit 1;
+};
+
+func:parse_octal = int64(string:s) {
+    int64:len = string_length(s);
+    int64:mode = 0i64;
+    int64:i = 0i64;
+    while (i < len) {
+        string:c_str = string_substring(s, i, i + 1i64);
+        int64:c_val = string_to_int(c_str);
+        if (c_val >= 0i64) {
+            if (c_val <= 7i64) {
+                mode = (mode * 8i64) + c_val;
+            }
+        }
+        i = i + 1i64;
+    }
+    pass mode;
+};
+
+func:main = int32() {
+    string:args = raw args_load();
+    int32:arg_count = raw args_count(args);
+    
+    if (arg_count < 2i32) {
+        drop(print_err("usage: chmod <octal_mode> <file>\n"));
+        exit 1;
+    }
+    
+    string:mode_str = raw args_at(args, 1i32);
+    int64:mode = raw parse_octal(mode_str);
+    
+    int32:i = 2i32;
+    int32:exit_status = 0i32;
+    while (i <= arg_count) {
+        string:file = raw args_at(args, i);
+        // CHMOD takes string path and int64 mode
+        int64:res = sys!!(CHMOD, file, mode) ? -1i64;
+        if (res < 0i64) {
+            drop(print_err("chmod: cannot access '"));
+            drop(print_err(file));
+            drop(print_err("'\n"));
+            exit_status = 1i32;
+        }
+        i = i + 1i32;
+    }
+    
+    exit exit_status;
+};

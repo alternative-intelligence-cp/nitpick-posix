@@ -1,0 +1,111 @@
+// shred.npk
+
+extern "libc" {
+    func:fopen  = int64(string:path, string:mode);
+    func:fgetc  = int32(int64:fp);
+    func:fclose = int32(int64:fp);
+}
+
+use "../vendor/nitpick_args.npk".*;
+
+func:args_load = string() {
+    int64:fp = fopen("/proc/self/cmdline", "r");
+    if (fp == 0i64) { pass("|"); }
+    string:result  = "|";
+    string:current = "";
+    int32:c = fgetc(fp);
+    while (c >= 0i32) {
+        if (c == 0i32) {
+            if (string_length(current) > 0i64) {
+                result  = string_concat(result, string_concat(current, "|"));
+                current = "";
+            }
+        }
+        if (c > 0i32) {
+            current = string_concat(current, string_from_char(@cast_unchecked<int8>(c)));
+        }
+        c = fgetc(fp);
+    }
+    if (string_length(current) > 0i64) {
+        result = string_concat(result, string_concat(current, "|"));
+    }
+    drop(fclose(fp));
+    pass(result);
+};
+
+func:print_err = int32(string:s) {
+    int64:len = string_length(s);
+    drop(sys(WRITE, 2i64, s, len));
+    pass 0i32;
+};
+
+func:failsafe = int32(tbb32:err) {
+    drop(err);
+    exit 1;
+};
+
+extern func:npk_mem_read_int64 = int64(int64:ptr, int64:offset);
+
+func:main = int32() {
+    string:args = raw args_load();
+    int32:arg_count = raw args_count(args);
+    
+    if (arg_count < 1i32) {
+        drop(print_err("shred: missing file operand\n"));
+        exit 1;
+    }
+    
+    int64:stat_buf = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
+    int64:zero_buf = sys(MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? -1i64; // anonymous mmap gives 0s
+    if (stat_buf < 0i64) { exit 1; }
+    if (zero_buf < 0i64) { exit 1; }
+    
+    int32:i = 1i32;
+    int32:ret = 0i32;
+    
+    while (i <= arg_count) {
+        string:file = raw args_at(args, i);
+        int64:res = sys!!(4i64, file, stat_buf) ? -1i64; // SYS_STAT
+        if (res < 0i64) {
+            drop(print_err("shred: cannot stat '"));
+            drop(print_err(file));
+            drop(print_err("'\n"));
+            ret = 1i32;
+        } else {
+            int64:size = npk_mem_read_int64(stat_buf, 48i64); // st_size is 48 offset
+            int64:fd = sys(OPEN, file, 2i64, 0i64) ? -1i64; // O_RDWR = 2
+            if (fd < 0i64) {
+                drop(print_err("shred: cannot open '"));
+                drop(print_err(file));
+                drop(print_err("'\n"));
+                ret = 1i32;
+            } else {
+                int32:pass_idx = 0i32;
+                while (pass_idx < 3i32) { // 3 passes
+                    drop(sys!!(8i64, fd, 0i64, 0i64)); // SYS_LSEEK to 0, SEEK_SET=0
+                    int64:written = 0i64;
+                    while (written < size) {
+                        int64:to_write = size - written;
+                        if (to_write > 65536i64) {
+                            to_write = 65536i64;
+                        }
+                        int64:w = sys(WRITE, fd, zero_buf, to_write) ? -1i64;
+                        if (w <= 0i64) {
+                            // break
+                            written = size;
+                        } else {
+                            written = written + w;
+                        }
+                    }
+                    pass_idx = pass_idx + 1i32;
+                }
+                drop(sys(CLOSE, fd));
+            }
+        }
+        i = i + 1i32;
+    }
+    
+    drop(sys(MUNMAP, stat_buf, 4096i64));
+    drop(sys(MUNMAP, zero_buf, 65536i64));
+    exit ret;
+};

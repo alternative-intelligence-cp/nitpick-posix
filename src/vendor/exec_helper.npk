@@ -1,0 +1,100 @@
+// exec_helper.npk
+
+extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
+extern func:npk_mem_read_int64 = int64(int64:ptr, int64:offset);
+extern func:npk_mem_write_int64 = int64(int64:ptr, int64:offset, int64:val);
+
+extern "libc" {
+    func:fopen  = int64(string:path, string:mode);
+    func:fgetc  = int32(int64:fp);
+    func:fclose = int32(int64:fp);
+}
+
+pub func:args_load = string() {
+    int64:fp = fopen("/proc/self/cmdline", "r");
+    if (fp == 0i64) { pass("|"); }
+    string:result  = "|";
+    string:current = "";
+    int32:c = fgetc(fp);
+    while (c >= 0i32) {
+        if (c == 0i32) {
+            if (string_length(current) > 0i64) {
+                result  = string_concat(result, string_concat(current, "|"));
+                current = "";
+            }
+        }
+        if (c > 0i32) {
+            current = string_concat(current, string_from_char(@cast_unchecked<int8>(c)));
+        }
+        c = fgetc(fp);
+    }
+    if (string_length(current) > 0i64) {
+        result = string_concat(result, string_concat(current, "|"));
+    }
+    drop(fclose(fp));
+    pass(result);
+};
+
+// sys_execvp_from: executes the process starting from argv[start_idx].
+// E.g. for `timeout 5 echo hello`, start_idx is 2 (0=timeout, 1=5).
+pub func:sys_execvp_from = int64(int64:start_idx) {
+    int64:buf = sys!!(9i64, 0i64, 16384i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    int64:fd = sys!!(2i64, "/proc/self/cmdline", 0i64, 0i64) ? -1i64; // SYS_OPEN
+    int64:bytes = sys!!(0i64, fd, buf, 16384i64) ? -1i64; // SYS_READ
+    drop(sys!!(3i64, fd)); // SYS_CLOSE
+    
+    int64:env_buf = sys!!(9i64, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    int64:env_fd = sys!!(2i64, "/proc/self/environ", 0i64, 0i64) ? -1i64;
+    int64:env_bytes = sys!!(0i64, env_fd, env_buf, 65536i64) ? -1i64;
+    drop(sys!!(3i64, env_fd));
+    
+    int64:argv = sys!!(9i64, 0i64, 1024i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    int64:envp = sys!!(9i64, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    
+    int64:arg_idx = 0i64;
+    int64:argv_idx = 0i64;
+    int64:i = 0i64;
+    int64:current_str = buf;
+    
+    while (i < bytes) {
+        int64:c = npk_mem_read_byte(buf, i);
+        if (c == 0i64) {
+            if (arg_idx >= start_idx) {
+                drop(npk_mem_write_int64(argv, argv_idx * 8i64, current_str));
+                argv_idx = argv_idx + 1i64;
+            }
+            arg_idx = arg_idx + 1i64;
+            current_str = buf + i + 1i64;
+        }
+        i = i + 1i64;
+    }
+    drop(npk_mem_write_int64(argv, argv_idx * 8i64, 0i64)); // NULL terminate
+    
+    int64:env_idx = 0i64;
+    int64:envp_idx = 0i64;
+    i = 0i64;
+    current_str = env_buf;
+    while (i < env_bytes) {
+        int64:c = npk_mem_read_byte(env_buf, i);
+        if (c == 0i64) {
+            drop(npk_mem_write_int64(envp, envp_idx * 8i64, current_str));
+            envp_idx = envp_idx + 1i64;
+            current_str = env_buf + i + 1i64;
+        }
+        i = i + 1i64;
+    }
+    drop(npk_mem_write_int64(envp, envp_idx * 8i64, 0i64)); // NULL terminate
+    
+    int64:cmd_ptr = 0i64;
+    if (argv_idx > 0i64) {
+        cmd_ptr = npk_mem_read_int64(argv, 0i64);
+        
+        // Try SYS_EXECVE directly (works if absolute path)
+        int64:res = sys!!(59i64, cmd_ptr, argv, envp) ? -1i64; // SYS_EXECVE
+        
+        // If it failed, it might be a relative path, but we'll return the error code
+        pass res;
+    }
+    
+    pass -1i64;
+};

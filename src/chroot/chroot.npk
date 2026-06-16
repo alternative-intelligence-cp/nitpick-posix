@@ -1,0 +1,88 @@
+// chroot.npk
+
+extern "libc" {
+    func:fopen  = int64(string:path, string:mode);
+    func:fgetc  = int32(int64:fp);
+    func:fclose = int32(int64:fp);
+}
+
+use "../vendor/nitpick_args.npk".*;
+
+func:args_load = string() {
+    int64:fp = fopen("/proc/self/cmdline", "r");
+    if (fp == 0i64) { pass("|"); }
+    string:result  = "|";
+    string:current = "";
+    int32:c = fgetc(fp);
+    while (c >= 0i32) {
+        if (c == 0i32) {
+            if (string_length(current) > 0i64) {
+                result  = string_concat(result, string_concat(current, "|"));
+                current = "";
+            }
+        }
+        if (c > 0i32) {
+            current = string_concat(current, string_from_char(@cast_unchecked<int8>(c)));
+        }
+        c = fgetc(fp);
+    }
+    if (string_length(current) > 0i64) {
+        result = string_concat(result, string_concat(current, "|"));
+    }
+    drop(fclose(fp));
+    pass(result);
+};
+
+func:print_err = int32(string:s) {
+    int64:len = string_length(s);
+    drop(sys(WRITE, 2i64, s, len));
+    pass 0i32;
+};
+
+func:print_str_safe = int32(string:s) {
+    int64:len = string_length(s);
+    drop(sys(WRITE, 1i64, s, len));
+    pass 0i32;
+};
+
+func:failsafe = int32(tbb32:err) {
+    drop(err);
+    exit 1;
+};
+
+func:main = int32() {
+    string:args = raw args_load();
+    int32:arg_count = raw args_count(args);
+    
+    if (arg_count < 1i32) {
+        drop(print_err("chroot: missing operand\n"));
+        exit 1;
+    }
+    
+    string:newroot = raw args_at(args, 1i32);
+    
+    int64:res = sys!!(161i64, newroot) ? -1i64; // SYS_CHROOT
+    if (res < 0i64) {
+        drop(print_err("chroot: cannot change root directory to '"));
+        drop(print_err(newroot));
+        drop(print_err("'\n"));
+        exit 1;
+    }
+    
+    drop(sys!!(80i64, "/")); // SYS_CHDIR
+    
+    string:cmd = "/bin/sh";
+    if (arg_count > 1i32) {
+        cmd = raw args_at(args, 2i32);
+    }
+    
+    int64:exec_res = sys!!(59i64, cmd, 0i64, 0i64) ? -1i64; // SYS_EXECVE
+    if (exec_res < 0i64) {
+        drop(print_err("chroot: failed to run command '"));
+        drop(print_err(cmd));
+        drop(print_err("'\n"));
+        exit 127;
+    }
+    
+    exit 0;
+};

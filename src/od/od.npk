@@ -1,0 +1,179 @@
+// od.npk
+
+extern "libc" {
+    func:fopen  = int64(string:path, string:mode);
+    func:fgetc  = int32(int64:fp);
+    func:fclose = int32(int64:fp);
+}
+
+use "../vendor/nitpick_args.npk".*;
+
+func:args_load = string() {
+    int64:fp = fopen("/proc/self/cmdline", "r");
+    if (fp == 0i64) { pass("|"); }
+    string:result  = "|";
+    string:current = "";
+    int32:c = fgetc(fp);
+    while (c >= 0i32) {
+        if (c == 0i32) {
+            if (string_length(current) > 0i64) {
+                result  = string_concat(result, string_concat(current, "|"));
+                current = "";
+            }
+        }
+        if (c > 0i32) {
+            current = string_concat(current, string_from_char(@cast_unchecked<int8>(c)));
+        }
+        c = fgetc(fp);
+    }
+    if (string_length(current) > 0i64) {
+        result = string_concat(result, string_concat(current, "|"));
+    }
+    drop(fclose(fp));
+    pass(result);
+};
+
+func:print_err = int32(string:s) {
+    int64:len = string_length(s);
+    drop(sys(WRITE, 2i64, s, len));
+    pass 0i32;
+};
+
+func:print_str_safe = int32(string:s) {
+    int64:len = string_length(s);
+    drop(sys(WRITE, 1i64, s, len));
+    pass 0i32;
+};
+
+func:failsafe = int32(tbb32:err) {
+    drop(err);
+    exit 1;
+};
+
+func:hex_char = string(int32:nibble) {
+    if (nibble == 0i32) { pass "0"; }
+    if (nibble == 1i32) { pass "1"; }
+    if (nibble == 2i32) { pass "2"; }
+    if (nibble == 3i32) { pass "3"; }
+    if (nibble == 4i32) { pass "4"; }
+    if (nibble == 5i32) { pass "5"; }
+    if (nibble == 6i32) { pass "6"; }
+    if (nibble == 7i32) { pass "7"; }
+    if (nibble == 8i32) { pass "8"; }
+    if (nibble == 9i32) { pass "9"; }
+    if (nibble == 10i32) { pass "a"; }
+    if (nibble == 11i32) { pass "b"; }
+    if (nibble == 12i32) { pass "c"; }
+    if (nibble == 13i32) { pass "d"; }
+    if (nibble == 14i32) { pass "e"; }
+    if (nibble == 15i32) { pass "f"; }
+    pass "0";
+};
+
+func:hex_byte = string(int32:byte) {
+    int32:hi = byte / 16i32;
+    int32:lo = byte - hi * 16i32;
+    pass string_concat(raw hex_char(hi), raw hex_char(lo));
+};
+
+func:hex_addr = string(int64:addr) {
+    string:res = "";
+    int32:i = 0i32;
+    while (i < 8i32) {
+        int64:nib = addr - (addr / 16i64) * 16i64;
+        res = string_concat(raw hex_char(@cast_unchecked<int32>(nib)), res);
+        addr = addr / 16i64;
+        i = i + 1i32;
+    }
+    pass res;
+};
+
+extern func:npk_mem_write_byte = int64(int64:ptr, int64:offset, int64:val);
+extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
+
+func:main = int32() {
+    string:args = raw args_load();
+    int32:arg_count = raw args_count(args);
+    
+    int64:fp = 0i64;
+    
+    if (arg_count >= 1i32) {
+        string:file = raw args_at(args, arg_count); // last arg
+        fp = fopen(file, "r");
+        if (fp == 0i64) {
+            drop(print_err("od: cannot open '"));
+            drop(print_err(file));
+            drop(print_err("'\n"));
+            exit 1;
+        }
+    } else {
+        drop(print_err("od: reading stdin not implemented\n"));
+        exit 1;
+    }
+    
+    int64:addr = 0i64;
+    int32:running = 1i32;
+    
+    int64:buf = sys(MMAP, 0i64, 16i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
+    if (buf < 0i64) { exit 1; }
+    
+    while (running == 1i32) {
+        int32:read_count = 0i32;
+        int32:inner_run = 1i32;
+        while (inner_run == 1i32) {
+            if (read_count >= 16i32) {
+                inner_run = 0i32;
+            } else {
+                int32:c = fgetc(fp);
+                if (c < 0i32) {
+                    running = 0i32;
+                    inner_run = 0i32;
+                } else {
+                    drop(npk_mem_write_byte(buf, @cast_unchecked<int64>(read_count), @cast_unchecked<int64>(c)));
+                    read_count = read_count + 1i32;
+                }
+            }
+        }
+        
+        if (read_count > 0i32) {
+            string:line = raw hex_addr(addr);
+            line = string_concat(line, "  ");
+            
+            string:ascii = "";
+            
+            int32:i = 0i32;
+            while (i < 16i32) {
+                if (i < read_count) {
+                    int32:b = @cast_unchecked<int32>(npk_mem_read_byte(buf, @cast_unchecked<int64>(i)));
+                    line = string_concat(line, raw hex_byte(b));
+                    line = string_concat(line, " ");
+                    
+                    if (b >= 32i32) {
+                        if (b <= 126i32) {
+                            ascii = string_concat(ascii, string_from_char(@cast_unchecked<int8>(b)));
+                        } else { ascii = string_concat(ascii, "."); }
+                    } else { ascii = string_concat(ascii, "."); }
+                } else {
+                    line = string_concat(line, "   ");
+                }
+                
+                if (i == 7i32) { line = string_concat(line, " "); }
+                i = i + 1i32;
+            }
+            
+            line = string_concat(line, " |");
+            line = string_concat(line, ascii);
+            line = string_concat(line, "|\n");
+            
+            drop(print_str_safe(line));
+            addr = addr + @cast_unchecked<int64>(read_count);
+        }
+    }
+    
+    drop(print_str_safe(raw hex_addr(addr)));
+    drop(print_str_safe("\n"));
+    
+    drop(fclose(fp));
+    drop(sys(MUNMAP, buf, 16i64));
+    exit 0;
+};

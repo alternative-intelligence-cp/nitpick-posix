@@ -1,0 +1,22 @@
+// pwd.npk
+
+func:print_err = int32(string:s) {
+    int64:len = string_length(s);
+    drop(s);
+    drop(len);
+    pass @cast_unchecked<int32>(sys(WRITE, 2i64, s, len) ? -1i64);
+};
+
+func:failsafe = int32(tbb32:err) {
+    drop(err);
+    drop(print_err("pwd: error getting current working directory\n"));
+    exit 1;
+};
+
+func:main = int32() {
+    string:cwd = raw sys(GETCWD);
+    int64:len = string_length(cwd);
+    drop(sys(WRITE, 1i64, cwd, len));
+    drop(sys(WRITE, 1i64, "\n", 1i64));
+    exit 0;
+};

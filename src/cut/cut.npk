@@ -1,0 +1,162 @@
+// cut.npk
+
+extern "libc" {
+    func:fopen  = int64(string:path, string:mode);
+    func:fgetc  = int32(int64:fp);
+    func:fclose = int32(int64:fp);
+}
+
+use "../vendor/nitpick_args.npk".*;
+
+func:args_load = string() {
+    int64:fp = fopen("/proc/self/cmdline", "r");
+    if (fp == 0i64) { pass("|"); }
+    string:result  = "|";
+    string:current = "";
+    int32:c = fgetc(fp);
+    while (c >= 0i32) {
+        if (c == 0i32) {
+            if (string_length(current) > 0i64) {
+                result  = string_concat(result, string_concat(current, "|"));
+                current = "";
+            }
+        }
+        if (c > 0i32) {
+            current = string_concat(current, string_from_char(@cast_unchecked<int8>(c)));
+        }
+        c = fgetc(fp);
+    }
+    if (string_length(current) > 0i64) {
+        result = string_concat(result, string_concat(current, "|"));
+    }
+    drop(fclose(fp));
+    pass(result);
+};
+
+func:print_err = int32(string:s) {
+    int64:len = string_length(s);
+    drop(sys(WRITE, 2i64, s, len));
+    pass 0i32;
+};
+
+extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
+
+func:failsafe = int32(tbb32:err) {
+    drop(err);
+    exit 1;
+};
+
+func:char_to_ascii = int64(string:s) {
+    if (string_length(s) == 0i64) { pass 0i64; }
+    string:first_char = string_char_at(s, 0i64);
+    int64:i = 1i64;
+    while (i < 256i64) {
+        if (string_equals(first_char, string_from_char(@cast_unchecked<int8>(i)))) {
+            pass i;
+        }
+        i = i + 1i64;
+    }
+    pass 0i64;
+};
+
+func:main = int32() {
+    string:args = raw args_load();
+    int32:arg_count = raw args_count(args);
+    
+    int64:target_field = 0i64;
+    int64:delim = 9i64; // default is TAB
+    int32:file_idx = -1i32;
+    
+    int32:i = 1i32;
+    while (i <= arg_count) {
+        string:arg = raw args_at(args, i);
+        if (string_equals(arg, "-d")) {
+            if (i + 1i32 <= arg_count) {
+                string:val = raw args_at(args, i + 1i32);
+                if (string_length(val) > 0i64) {
+                    delim = raw char_to_ascii(val);
+                }
+                i = i + 1i32;
+            }
+        } else {
+            if (string_starts_with(arg, "-d")) {
+                string:val = string_substring(arg, 2i64, string_length(arg));
+                if (string_length(val) > 0i64) {
+                    delim = raw char_to_ascii(val);
+                }
+            } else {
+                if (string_equals(arg, "-f")) {
+                    if (i + 1i32 <= arg_count) {
+                        string:val = raw args_at(args, i + 1i32);
+                        target_field = string_to_int(val);
+                        i = i + 1i32;
+                    }
+                } else {
+                    if (string_starts_with(arg, "-f")) {
+                        string:val = string_substring(arg, 2i64, string_length(arg));
+                        target_field = string_to_int(val);
+                    } else {
+                        file_idx = i;
+                    }
+                }
+            }
+        }
+        i = i + 1i32;
+    }
+    
+    if (target_field == 0i64) {
+        drop(print_err("cut: you must specify a list of bytes, characters, or fields\n"));
+        exit 1;
+    }
+    
+    int64:fd = 0i64;
+    if (file_idx != -1i32) {
+        string:file = raw args_at(args, file_idx);
+        fd = sys(OPEN, file, 0i64, 0i64) ? -1i64;
+        if (fd < 0i64) {
+            drop(print_err("cut: cannot open '"));
+            drop(print_err(file));
+            drop(print_err("'\n"));
+            exit 1;
+        }
+    }
+    
+    int64:buf_size = 1048576i64; // 1MB buffer
+    int64:buf = sys(MMAP, 0i64, buf_size, 3i64, 34i64, -1i64, 0i64) ? -1i64;
+    if (buf < 0i64) { exit 1; }
+    
+    int64:current_field = 1i64;
+    int32:running = 1i32;
+    
+    while (running == 1i32) {
+        int64:n = sys(READ, fd, buf, buf_size) ? -1i64;
+        if (n <= 0i64) {
+            running = 0i32;
+        } else {
+            int64:j = 0i64;
+            while (j < n) {
+                int64:c = npk_mem_read_byte(buf, j);
+                if (c == 10i64) {
+                    drop(sys(WRITE, 1i64, buf + j, 1i64));
+                    current_field = 1i64;
+                } else {
+                    if (c == delim) {
+                        current_field = current_field + 1i64;
+                    } else {
+                        if (current_field == target_field) {
+                            drop(sys(WRITE, 1i64, buf + j, 1i64));
+                        }
+                    }
+                }
+                j = j + 1i64;
+            }
+        }
+    }
+    
+    if (fd != 0i64) {
+        drop(sys(CLOSE, fd));
+    }
+    drop(sys(MUNMAP, buf, buf_size));
+    
+    exit 0;
+};

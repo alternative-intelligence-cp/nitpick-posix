@@ -1,0 +1,44 @@
+// users.npk
+
+extern "libc" {
+    func:getpwuid = int64(int64:uid);
+}
+
+extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
+extern func:npk_mem_read_int64 = int64(int64:ptr, int64:offset);
+
+func:print_str = int32(string:s) {
+    int64:len = string_length(s);
+    drop(sys!!(1i64, 1i64, s, len));
+    pass 0i32;
+};
+
+func:failsafe = int32(tbb32:err) {
+    drop(err);
+    exit 1;
+};
+
+func:main = int32() {
+    int64:uid = sys!!(102i64) ? -1i64; // SYS_GETEUID
+    int64:pwd = getpwuid(uid);
+    if (pwd == 0i64) {
+        drop(print_str("unknown\n"));
+    } else {
+        int64:pw_name_ptr = npk_mem_read_int64(pwd, 0i64);
+        string:user = "";
+        int64:i = 0i64;
+        int32:running = 1i32;
+        while (running == 1i32) {
+            int64:c = npk_mem_read_byte(pw_name_ptr, i);
+            if (c == 0i64) {
+                running = 0i32;
+            } else {
+                user = string_concat(user, string_from_char(@cast_unchecked<int8>(c)));
+                i = i + 1i64;
+            }
+        }
+        drop(print_str(user));
+        drop(print_str("\n"));
+    }
+    exit 0;
+};

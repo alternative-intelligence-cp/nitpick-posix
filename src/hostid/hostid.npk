@@ -1,0 +1,52 @@
+// hostid.npk
+
+extern "libc" {
+    func:gethostid = int64();
+}
+
+extern func:npk_mem_write_byte = int64(int64:ptr, int64:offset, int64:val);
+
+func:print_str = int32(string:s) {
+    int64:len = string_length(s);
+    drop(sys!!(1i64, 1i64, s, len));
+    pass 0i32;
+};
+
+func:write_hex = int32(int64:buf, int64:val, int64:len) {
+    int64:i = len - 1i64;
+    while (i >= 0i64) {
+        int64:nibble = val & 15i64;
+        val = val >> 4i64;
+        int64:c = 0i64;
+        if (nibble < 10i64) {
+            c = 48i64 + nibble;
+        } else {
+            c = 97i64 + (nibble - 10i64);
+        }
+        drop(npk_mem_write_byte(buf, i, c));
+        i = i - 1i64;
+    }
+    pass 0i32;
+};
+
+func:failsafe = int32(tbb32:err) {
+    drop(err);
+    exit 1;
+};
+
+func:main = int32() {
+    int64:id = gethostid();
+    
+    int64:out_buf = sys!!(9i64, 0i64, 16i64, 3i64, 34i64, -1i64, 0i64) ? 0i64; // MMAP
+    if (out_buf <= 0i64) { exit 1; }
+    
+    // hostid is usually printed as 8 hex digits
+    drop(write_hex(out_buf, id, 8i64));
+    drop(npk_mem_write_byte(out_buf, 8i64, 10i64)); // \n
+    
+    drop(sys!!(1i64, 1i64, out_buf, 9i64)); // WRITE
+    
+    drop(sys!!(11i64, out_buf, 16i64)); // MUNMAP
+    
+    exit 0;
+};

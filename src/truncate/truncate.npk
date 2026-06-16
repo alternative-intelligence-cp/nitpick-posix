@@ -1,0 +1,87 @@
+// truncate.npk
+
+extern "libc" {
+    func:fopen  = int64(string:path, string:mode);
+    func:fgetc  = int32(int64:fp);
+    func:fclose = int32(int64:fp);
+}
+
+use "../vendor/nitpick_args.npk".*;
+
+func:args_load = string() {
+    int64:fp = fopen("/proc/self/cmdline", "r");
+    if (fp == 0i64) { pass("|"); }
+    string:result  = "|";
+    string:current = "";
+    int32:c = fgetc(fp);
+    while (c >= 0i32) {
+        if (c == 0i32) {
+            if (string_length(current) > 0i64) {
+                result  = string_concat(result, string_concat(current, "|"));
+                current = "";
+            }
+        }
+        if (c > 0i32) {
+            current = string_concat(current, string_from_char(@cast_unchecked<int8>(c)));
+        }
+        c = fgetc(fp);
+    }
+    if (string_length(current) > 0i64) {
+        result = string_concat(result, string_concat(current, "|"));
+    }
+    drop(fclose(fp));
+    pass(result);
+};
+
+func:print_err = int32(string:s) {
+    int64:len = string_length(s);
+    drop(sys(WRITE, 2i64, s, len));
+    pass 0i32;
+};
+
+func:failsafe = int32(tbb32:err) {
+    drop(err);
+    exit 1;
+};
+
+func:main = int32() {
+    string:args = raw args_load();
+    int32:arg_count = raw args_count(args);
+    
+    int64:size = -1i64;
+    int32:i = 1i32;
+    int32:has_file = 0i32;
+    int32:ret = 0i32;
+    
+    while (i <= arg_count) {
+        string:arg = raw args_at(args, i);
+        if (string_equals(arg, "-s")) {
+            i = i + 1i32;
+            if (i <= arg_count) {
+                size = string_to_int(raw args_at(args, i));
+            }
+        } else {
+            if (size == -1i64) {
+                drop(print_err("truncate: missing size\n"));
+                exit 1;
+            }
+            has_file = 1i32;
+            // SYS_TRUNCATE is 76
+            int64:res = sys!!(76i64, arg, size) ? -1i64;
+            if (res < 0i64) {
+                drop(print_err("truncate: cannot open '"));
+                drop(print_err(arg));
+                drop(print_err("' for writing\n"));
+                ret = 1i32;
+            }
+        }
+        i = i + 1i32;
+    }
+    
+    if (has_file == 0i32) {
+        drop(print_err("truncate: missing file operand\n"));
+        exit 1;
+    }
+    
+    exit ret;
+};

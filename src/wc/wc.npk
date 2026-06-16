@@ -1,0 +1,245 @@
+// wc.npk
+
+extern "libc" {
+    func:fopen  = int64(string:path, string:mode);
+    func:fgetc  = int32(int64:fp);
+    func:fclose = int32(int64:fp);
+}
+
+extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
+extern func:npk_mem_write_byte = int64(int64:ptr, int64:offset, int64:val);
+
+use "../vendor/nitpick_args.npk".*;
+
+func:args_load = string() {
+    int64:fp = fopen("/proc/self/cmdline", "r");
+    if (fp == 0i64) { pass("|"); }
+    string:result  = "|";
+    string:current = "";
+    int32:c = fgetc(fp);
+    while (c >= 0i32) {
+        if (c == 0i32) {
+            if (string_length(current) > 0i64) {
+                result  = string_concat(result, string_concat(current, "|"));
+                current = "";
+            }
+        }
+        if (c > 0i32) {
+            current = string_concat(current, string_from_char(@cast_unchecked<int8>(c)));
+        }
+        c = fgetc(fp);
+    }
+    if (string_length(current) > 0i64) {
+        result = string_concat(result, string_concat(current, "|"));
+    }
+    drop(fclose(fp));
+    pass(result);
+};
+
+func:print_err = int32(string:s) {
+    int64:len = string_length(s);
+    drop(s);
+    drop(len);
+    pass @cast_unchecked<int32>(sys(WRITE, 2i64, s, len) ? -1i64);
+};
+
+func:print_str = int32(string:s) {
+    int64:len = string_length(s);
+    drop(s);
+    drop(len);
+    pass @cast_unchecked<int32>(sys(WRITE, 1i64, s, len) ? -1i64);
+};
+
+func:write_num = int64(int64:out_buf, int64:out_idx, int64:num) {
+    int64:idx = out_idx;
+    int64:d1 = num % 10i64;
+    int64:n = num / 10i64;
+    int64:d2 = n % 10i64; n = n / 10i64;
+    int64:d3 = n % 10i64; n = n / 10i64;
+    int64:d4 = n % 10i64; n = n / 10i64;
+    int64:d5 = n % 10i64; n = n / 10i64;
+    int64:d6 = n % 10i64; n = n / 10i64;
+    int64:d7 = n % 10i64; 
+    
+    if (num >= 1000000i64) { drop(npk_mem_write_byte(out_buf, idx, 48i64 + d7)); } else { drop(npk_mem_write_byte(out_buf, idx, 32i64)); } idx = idx + 1i64;
+    if (num >= 100000i64) { drop(npk_mem_write_byte(out_buf, idx, 48i64 + d6)); } else { drop(npk_mem_write_byte(out_buf, idx, 32i64)); } idx = idx + 1i64;
+    if (num >= 10000i64) { drop(npk_mem_write_byte(out_buf, idx, 48i64 + d5)); } else { drop(npk_mem_write_byte(out_buf, idx, 32i64)); } idx = idx + 1i64;
+    if (num >= 1000i64) { drop(npk_mem_write_byte(out_buf, idx, 48i64 + d4)); } else { drop(npk_mem_write_byte(out_buf, idx, 32i64)); } idx = idx + 1i64;
+    if (num >= 100i64) { drop(npk_mem_write_byte(out_buf, idx, 48i64 + d3)); } else { drop(npk_mem_write_byte(out_buf, idx, 32i64)); } idx = idx + 1i64;
+    if (num >= 10i64) { drop(npk_mem_write_byte(out_buf, idx, 48i64 + d2)); } else { drop(npk_mem_write_byte(out_buf, idx, 32i64)); } idx = idx + 1i64;
+    drop(npk_mem_write_byte(out_buf, idx, 48i64 + d1)); idx = idx + 1i64;
+    
+    drop(npk_mem_write_byte(out_buf, idx, 32i64)); idx = idx + 1i64;
+
+    pass idx;
+};
+
+func:failsafe = int32(tbb32:err) {
+    drop(err);
+    exit 1;
+};
+
+func:main = int32() {
+    string:args = raw args_load();
+    int32:arg_count = raw args_count(args);
+    
+    int32:flag_l = 0i32;
+    int32:flag_w = 0i32;
+    int32:flag_c = 0i32;
+
+    int32:i = 1i32;
+    int32:num_files = 0i32;
+
+    while (i <= arg_count) {
+        string:arg = raw args_at(args, i);
+        int64:len = string_length(arg);
+        if (len > 1i64) {
+            if (string_equals(string_substring(arg, 0i64, 1i64), "-")) {
+                int64:j = 1i64;
+                while (j < len) {
+                    string:ch = string_substring(arg, j, j + 1i64);
+                    if (string_equals(ch, "l")) { flag_l = 1i32; }
+                    if (string_equals(ch, "w")) { flag_w = 1i32; }
+                    if (string_equals(ch, "c")) { flag_c = 1i32; }
+                    if (string_equals(ch, "m")) { flag_c = 1i32; }
+                    j = j + 1i64;
+                }
+            } else {
+                num_files = num_files + 1i32;
+            }
+        } else {
+            num_files = num_files + 1i32;
+        }
+        i = i + 1i32;
+    }
+
+    if (flag_l == 0i32) {
+        if (flag_w == 0i32) {
+            if (flag_c == 0i32) {
+                flag_l = 1i32;
+                flag_w = 1i32;
+                flag_c = 1i32;
+            }
+        }
+    }
+
+    int64:buf = sys(MMAP, 0i64, 8192i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    if (buf <= 0i64) { exit 1; }
+    
+    int64:out_buf = sys(MMAP, 0i64, 128i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    if (out_buf <= 0i64) { exit 1; }
+
+    int32:exit_status = 0i32;
+    
+    int64:tot_lines = 0i64;
+    int64:tot_words = 0i64;
+    int64:tot_bytes = 0i64;
+
+    i = 1i32;
+    int32:n_iters = arg_count;
+    if (num_files == 0i32) { n_iters = 1i32; }
+
+    int32:files_processed = 0i32;
+
+    while (i <= n_iters) {
+        string:filename = "-";
+        int32:is_flag = 0i32;
+
+        if (num_files > 0i32) {
+            filename = raw args_at(args, i);
+            int64:flen = string_length(filename);
+            if (flen > 1i64) {
+                if (string_equals(string_substring(filename, 0i64, 1i64), "-")) {
+                    is_flag = 1i32;
+                }
+            }
+        }
+
+        if (is_flag == 0i32) {
+            int64:fd = 0i64;
+            if (string_equals(filename, "-") == false) {
+                fd = sys(OPEN, filename, 0i64, 0i64) ? -1i64;
+            }
+
+            if (fd < 0i64) {
+                drop(print_err("wc: "));
+                drop(print_err(filename));
+                drop(print_err(": No such file or directory\n"));
+                exit_status = 1i32;
+            } else {
+                files_processed = files_processed + 1i32;
+                
+                int64:file_lines = 0i64;
+                int64:file_words = 0i64;
+                int64:file_bytes = 0i64;
+                int32:in_word = 0i32;
+                
+                int32:running = 1i32;
+                while (running == 1i32) {
+                    int64:bytes_read = sys(READ, fd, buf, 8192i64) ? -1i64;
+                    if (bytes_read <= 0i64) {
+                        running = 0i32;
+                    } else {
+                        file_bytes = file_bytes + bytes_read;
+                        int64:in_idx = 0i64;
+                        while (in_idx < bytes_read) {
+                            int64:c = npk_mem_read_byte(buf, in_idx);
+                            
+                            if (c == 10i64) { file_lines = file_lines + 1i64; }
+                            
+                            int32:is_space = 0i32;
+                            if (c == 32i64) { is_space = 1i32; }
+                            if (c == 10i64) { is_space = 1i32; }
+                            if (c == 9i64)  { is_space = 1i32; }
+                            if (c == 13i64) { is_space = 1i32; }
+                            if (c == 11i64) { is_space = 1i32; }
+                            if (c == 12i64) { is_space = 1i32; }
+                            
+                            if (is_space == 1i32) {
+                                in_word = 0i32;
+                            } else {
+                                if (in_word == 0i32) {
+                                    in_word = 1i32;
+                                    file_words = file_words + 1i64;
+                                }
+                            }
+                            in_idx = in_idx + 1i64;
+                        }
+                    }
+                }
+                
+                if (fd != 0i64) { drop(sys(CLOSE, fd)); }
+                
+                tot_lines = tot_lines + file_lines;
+                tot_words = tot_words + file_words;
+                tot_bytes = tot_bytes + file_bytes;
+                
+                int64:out_idx = 0i64;
+                if (flag_l == 1i32) { out_idx = raw write_num(out_buf, out_idx, file_lines); }
+                if (flag_w == 1i32) { out_idx = raw write_num(out_buf, out_idx, file_words); }
+                if (flag_c == 1i32) { out_idx = raw write_num(out_buf, out_idx, file_bytes); }
+                
+                drop(sys(WRITE, 1i64, out_buf, out_idx));
+                if (string_equals(filename, "-") == false) {
+                    drop(print_str(filename));
+                }
+                drop(print_str("\n"));
+            }
+        }
+        i = i + 1i32;
+    }
+    
+    if (files_processed > 1i32) {
+        int64:out_idx = 0i64;
+        if (flag_l == 1i32) { out_idx = raw write_num(out_buf, out_idx, tot_lines); }
+        if (flag_w == 1i32) { out_idx = raw write_num(out_buf, out_idx, tot_words); }
+        if (flag_c == 1i32) { out_idx = raw write_num(out_buf, out_idx, tot_bytes); }
+        
+        drop(sys(WRITE, 1i64, out_buf, out_idx));
+        drop(print_str("total\n"));
+    }
+
+    drop(sys(MUNMAP, out_buf, 128i64));
+    drop(sys(MUNMAP, buf, 8192i64));
+    exit exit_status;
+};

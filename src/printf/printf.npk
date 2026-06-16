@@ -1,0 +1,130 @@
+// printf.npk
+
+extern "libc" {
+    func:fopen  = int64(string:path, string:mode);
+    func:fgetc  = int32(int64:fp);
+    func:fclose = int32(int64:fp);
+}
+
+use "../vendor/nitpick_args.npk".*;
+
+func:args_load = string() {
+    int64:fp = fopen("/proc/self/cmdline", "r");
+    if (fp == 0i64) { pass("|"); }
+    string:result  = "|";
+    string:current = "";
+    int32:c = fgetc(fp);
+    while (c >= 0i32) {
+        if (c == 0i32) {
+            if (string_length(current) > 0i64) {
+                result  = string_concat(result, string_concat(current, "|"));
+                current = "";
+            }
+        }
+        if (c > 0i32) {
+            current = string_concat(current, string_from_char(@cast_unchecked<int8>(c)));
+        }
+        c = fgetc(fp);
+    }
+    if (string_length(current) > 0i64) {
+        result = string_concat(result, string_concat(current, "|"));
+    }
+    drop(fclose(fp));
+    pass(result);
+};
+
+func:print_err = int32(string:s) {
+    int64:len = string_length(s);
+    drop(sys(WRITE, 2i64, s, len));
+    pass 0i32;
+};
+
+func:print_str_safe = int32(string:s) {
+    int64:len = string_length(s);
+    drop(sys(WRITE, 1i64, s, len));
+    pass 0i32;
+};
+
+func:failsafe = int32(tbb32:err) {
+    drop(err);
+    exit 1;
+};
+
+func:main = int32() {
+    string:args = raw args_load();
+    int32:arg_count = raw args_count(args);
+    
+    if (arg_count < 1i32) {
+        drop(print_err("printf: missing operand\n"));
+        exit 1;
+    }
+    
+    string:format = raw args_at(args, 1i32);
+    int32:arg_idx = 2i32;
+    int64:len = string_length(format);
+    int64:i = 0i64;
+    
+    while (i < len) {
+        string:c = string_substring(format, i, i + 1i64);
+        
+        if (string_equals(c, "\\")) {
+            i = i + 1i64;
+            if (i < len) {
+                string:nc = string_substring(format, i, i + 1i64);
+                if (string_equals(nc, "n")) {
+                    drop(print_str_safe("\n"));
+                } else {
+                    if (string_equals(nc, "t")) {
+                        drop(print_str_safe("\t"));
+                    } else {
+                        if (string_equals(nc, "\\")) {
+                            drop(print_str_safe("\\"));
+                        } else {
+                            drop(print_str_safe("\\"));
+                            drop(print_str_safe(nc));
+                        }
+                    }
+                }
+            } else {
+                drop(print_str_safe("\\"));
+            }
+        } else {
+            if (string_equals(c, "%")) {
+                i = i + 1i64;
+                if (i < len) {
+                    string:nc = string_substring(format, i, i + 1i64);
+                    if (string_equals(nc, "%")) {
+                        drop(print_str_safe("%"));
+                    } else {
+                        if (string_equals(nc, "s")) {
+                            if (arg_idx <= arg_count) {
+                                drop(print_str_safe(raw args_at(args, arg_idx)));
+                                arg_idx = arg_idx + 1i32;
+                            }
+                        } else {
+                            if (string_equals(nc, "d")) {
+                                if (arg_idx <= arg_count) {
+                                    drop(print_str_safe(raw args_at(args, arg_idx)));
+                                    arg_idx = arg_idx + 1i32;
+                                } else {
+                                    drop(print_str_safe("0"));
+                                }
+                            } else {
+                                drop(print_str_safe("%"));
+                                drop(print_str_safe(nc));
+                            }
+                        }
+                    }
+                } else {
+                    drop(print_str_safe("%"));
+                }
+            } else {
+                drop(print_str_safe(c));
+            }
+        }
+        
+        i = i + 1i64;
+    }
+    
+    exit 0;
+};

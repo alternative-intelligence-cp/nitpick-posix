@@ -1,0 +1,142 @@
+// nice.npk
+extern "libc" {
+    func:getpriority = int32(int32:which, int32:who);
+    func:setpriority = int32(int32:which, int32:who, int32:prio);
+}
+
+use "../vendor/nitpick_args.npk".*;
+use "../vendor/exec_helper.npk".*;
+
+func:print_str = int32(string:s) {
+    int64:len = string_length(s);
+    drop(sys!!(1i64, 1i64, s, len));
+    pass 0i32;
+};
+
+func:print_err = int32(string:s) {
+    int64:len = string_length(s);
+    drop(sys!!(1i64, 2i64, s, len));
+    pass 0i32;
+};
+
+func:print_int = int32(int64:val) {
+    if (val == 0i64) {
+        drop(print_str("0\n"));
+        pass 0i32;
+    }
+    if (val < 0i64) {
+        drop(print_str("-"));
+        val = 0i64 - val;
+    }
+    string:res = "";
+    while (val > 0i64) {
+        int64:d = val % 10i64;
+        res = string_concat(string_from_char(@cast_unchecked<int8>(48i64 + d)), res);
+        val = val / 10i64;
+    }
+    drop(print_str(res));
+    drop(print_str("\n"));
+    pass 0i32;
+};
+
+func:failsafe = int32(tbb32:err) {
+    drop(err);
+    exit 1;
+};
+
+func:main = int32() {
+    string:args = raw args_load();
+    int32:arg_count = raw args_count(args);
+    
+    if (arg_count == 0i32) {
+        int32:prio = getpriority(0i32, 0i32);
+        drop(print_int(@cast_unchecked<int64>(prio)));
+        exit 0;
+    }
+    
+    int32:adjustment = 10i32;
+    int64:cmd_idx = 1i64;
+    
+    string:arg1 = raw args_at(args, 1i32);
+    if (string_equals(arg1, "-n")) {
+        string:n_str = raw args_at(args, 2i32);
+        
+        int32:sign = 1i32;
+        int64:start = 0i64;
+        if (string_equals(string_substring(n_str, 0i64, 1i64), "-")) { sign = 0i32 - 1i32; start = 1i64; }
+        
+        int32:val = 0i32;
+        int64:i = start;
+        int64:len = string_length(n_str);
+        while (i < len) {
+            string:c = string_substring(n_str, i, i + 1i64);
+            val = val * 10i32;
+            if (string_equals(c, "1")) { val = val + 1i32; }
+            if (string_equals(c, "2")) { val = val + 2i32; }
+            if (string_equals(c, "3")) { val = val + 3i32; }
+            if (string_equals(c, "4")) { val = val + 4i32; }
+            if (string_equals(c, "5")) { val = val + 5i32; }
+            if (string_equals(c, "6")) { val = val + 6i32; }
+            if (string_equals(c, "7")) { val = val + 7i32; }
+            if (string_equals(c, "8")) { val = val + 8i32; }
+            if (string_equals(c, "9")) { val = val + 9i32; }
+            i = i + 1i64;
+        }
+        adjustment = val * sign;
+        
+        cmd_idx = 3i64;
+    } else {
+        // Check for -N syntax
+        if (string_length(arg1) > 1i64) {
+            if (string_equals(string_substring(arg1, 0i64, 1i64), "-")) {
+                // If it's a number after -, e.g. -5, it's adjustment 5.
+                // Or --5 is adjustment -5?
+                // For MVP, just assume if it's -n it's covered above, otherwise it's command.
+                // Wait, if it's just `nice -5 cmd`, the first argument is `-5`.
+                string:d = string_substring(arg1, 1i64, 2i64);
+                if (string_equals(d, "-") || string_equals(d, "0") || string_equals(d, "1") || string_equals(d, "2") || string_equals(d, "3") || string_equals(d, "4") || string_equals(d, "5") || string_equals(d, "6") || string_equals(d, "7") || string_equals(d, "8") || string_equals(d, "9")) {
+                    // It's a nice adjustment directly. E.g. arg1 = "-5", so adjustment = 5
+                    // But `args_get_int` won't work on arg1 directly if it doesn't have a key.
+                    // Let's implement a simple parse_int for arg1.
+                    int32:sign = 1i32;
+                    int64:start = 1i64;
+                    if (string_equals(d, "-")) { sign = 0i32 - 1i32; start = 2i64; }
+                    
+                    int32:val = 0i32;
+                    int64:i = start;
+                    int64:len = string_length(arg1);
+                    while (i < len) {
+                        string:c = string_substring(arg1, i, i + 1i64);
+                        val = val * 10i32;
+                        if (string_equals(c, "1")) { val = val + 1i32; }
+                        if (string_equals(c, "2")) { val = val + 2i32; }
+                        if (string_equals(c, "3")) { val = val + 3i32; }
+                        if (string_equals(c, "4")) { val = val + 4i32; }
+                        if (string_equals(c, "5")) { val = val + 5i32; }
+                        if (string_equals(c, "6")) { val = val + 6i32; }
+                        if (string_equals(c, "7")) { val = val + 7i32; }
+                        if (string_equals(c, "8")) { val = val + 8i32; }
+                        if (string_equals(c, "9")) { val = val + 9i32; }
+                        i = i + 1i64;
+                    }
+                    adjustment = val * sign;
+                    cmd_idx = 2i64;
+                }
+            }
+        }
+    }
+    
+    if (cmd_idx > @cast_unchecked<int64>(arg_count)) {
+        drop(print_err("nice: a command must be given with an adjustment\n"));
+        exit 125;
+    }
+    
+    int32:prio = getpriority(0i32, 0i32);
+    int32:new_prio = prio + adjustment;
+    drop(setpriority(0i32, 0i32, new_prio));
+    
+    int64:res = raw sys_execvp_from(cmd_idx);
+    
+    drop(print_err("nice: failed to execute\n"));
+    exit 127;
+};
