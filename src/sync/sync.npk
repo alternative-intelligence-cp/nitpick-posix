@@ -1,0 +1,24 @@
+// sync.npk — POSIX sync(1) utility
+//
+// Flushes kernel write-back caches to storage, ensuring all pending disk
+// writes are committed before the process exits.
+//
+// Usage:
+//   sync
+//
+// Uses the native sys(SYNC) syscall directly — syscall #162 on x86-64 Linux.
+// SYNC is a safe-tier syscall in Nitpick; no libc shim or helper import needed.
+// The kernel's sync(2) always succeeds on Linux (returns 0).
+
+func:failsafe = int32(tbb32:err) {
+    drop(err);
+    exit 1;
+};
+
+func:main = int32() {
+    // sys(SYNC) flushes all dirty pages in the kernel write-back cache.
+    // On Linux, sync(2) is documented to always return 0.
+    Result<int64>:r = sys(SYNC);
+    drop(r ? -1i64);
+    exit 0;
+};
