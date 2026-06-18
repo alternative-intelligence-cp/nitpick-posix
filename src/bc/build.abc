@@ -1,0 +1,10 @@
+[project]
+name = "bc"
+version = "0.1.0"
+
+[target.bc]
+type = "binary"
+sources = ["main.npk"]
+deps = []
+flags = ["-L${ENV.NITPICK_WORKSPACE}/nitpick-libc/shim", "-lnitpick_libc_mem", "-lnitpick_libc_math"]
+include_paths = ["${ENV.NITPICK_WORKSPACE}/nitpick-libc/src"]
