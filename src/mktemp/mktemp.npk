@@ -8,6 +8,7 @@ extern "libc" {
     func:nitpick_libc_mem_free = int32(int64:ptr);
 }
 
+use "../vendor/sys_constants.npk".*;
 use "../vendor/nitpick_args.npk".*;
 use "../vendor/io_utils.npk".*;
 
@@ -120,7 +121,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
             final_path = string_concat(base, rand_str);
             
             // O_CREAT | O_EXCL | O_RDWR = 64 + 128 + 2 = 194
-            int64:res = sys!!(2i64, final_path, 194i64, 384i64) ? -1i64; // OPEN is 2, 0600 is 384
+            int64:res = sys!!(SYS_OPEN, final_path, 194i64, 384i64) ? -1i64; // OPEN is 2, 0600 is 384
             if (res >= 0i64) {
                 drop(sys(CLOSE, res));
                 success = 1i64;

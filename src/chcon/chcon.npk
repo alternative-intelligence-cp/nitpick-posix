@@ -1,4 +1,5 @@
 // chcon.npk
+use "../vendor/sys_constants.npk".*;
 use "../vendor/nitpick_args.npk".*;
 use "../vendor/exec_helper.npk".*;
 use "../vendor/io_utils.npk".*;
@@ -6,7 +7,7 @@ use "../vendor/io_utils.npk".*;
 
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys!!(1i64, 2i64, s, len));
+    drop(sys!!(SYS_WRITE, 2i64, s, len));
     pass 0i32;
 };
 

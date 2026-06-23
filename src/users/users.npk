@@ -1,4 +1,5 @@
 // users.npk
+use "../vendor/sys_constants.npk".*;
 use "../vendor/io_utils.npk".*;
 
 
@@ -11,7 +12,7 @@ extern func:npk_mem_read_int64 = int64(int64:ptr, int64:offset);
 
 func:print_str = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys!!(1i64, 1i64, s, len));
+    drop(sys!!(SYS_WRITE, 1i64, s, len));
     pass 0i32;
 };
 

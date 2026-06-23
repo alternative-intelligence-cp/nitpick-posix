@@ -6,6 +6,7 @@ extern "libc" {
     func:fclose = int32(int64:fp);
 }
 
+use "../vendor/sys_constants.npk".*;
 use "../vendor/nitpick_args.npk".*;
 use "../vendor/io_utils.npk".*;
 
@@ -41,7 +42,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     
     string:newroot = raw args_at(args, 1i32);
     
-    int64:res = sys!!(161i64, newroot) ? -1i64; // SYS_CHROOT
+    int64:res = sys!!(SYS_CHROOT, newroot) ? -1i64; // SYS_CHROOT
     if (res < 0i64) {
         drop(print_err("chroot: cannot change root directory to '"));
         drop(print_err(newroot));
@@ -49,14 +50,14 @@ func:main = int32(int32:argc, wild int8->:argv) {
         exit 1;
     }
     
-    drop(sys!!(80i64, "/")); // SYS_CHDIR
+    drop(sys!!(SYS_CHDIR, "/")); // SYS_CHDIR
     
     string:cmd = "/bin/sh";
     if (arg_count > 1i32) {
         cmd = raw args_at(args, 2i32);
     }
     
-    int64:exec_res = sys!!(59i64, cmd, 0i64, 0i64) ? -1i64; // SYS_EXECVE
+    int64:exec_res = sys!!(SYS_EXECVE, cmd, 0i64, 0i64) ? -1i64; // SYS_EXECVE
     if (exec_res < 0i64) {
         drop(print_err("chroot: failed to run command '"));
         drop(print_err(cmd));

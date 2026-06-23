@@ -8,6 +8,7 @@ extern "libc" {
     func:nitpick_libc_mem_free = int32(int64:ptr);
 }
 
+use "../vendor/sys_constants.npk".*;
 use "../vendor/nitpick_args.npk".*;
 use "../vendor/io_utils.npk".*;
 
@@ -50,7 +51,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     
     while (i <= arg_count) {
         string:file = raw args_at(args, i);
-        int64:res = sys!!(4i64, file, stat_buf) ? -1i64; // SYS_STAT
+        int64:res = sys!!(SYS_STAT, file, stat_buf) ? -1i64; // SYS_STAT
         if (res < 0i64) {
             drop(print_err("shred: cannot stat '"));
             drop(print_err(file));

@@ -6,6 +6,7 @@ extern "libc" {
     func:fclose = int32(int64:fp);
 }
 
+use "../vendor/sys_constants.npk".*;
 use "../vendor/nitpick_args.npk".*;
 use "../vendor/io_utils.npk".*;
 
@@ -40,7 +41,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
         string:file = raw args_at(args, i);
         // S_IFIFO | 0666 = 4096 + 438 = 4534
         // SYS_MKNOD is 133
-        int64:res = sys!!(133i64, file, 4534i64, 0i64) ? -1i64;
+        int64:res = sys!!(SYS_MKNOD, file, 4534i64, 0i64) ? -1i64;
         if (res < 0i64) {
             drop(print_err("mkfifo: cannot create fifo '"));
             drop(print_err(file));

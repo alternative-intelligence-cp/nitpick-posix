@@ -10,6 +10,7 @@ extern "libc" {
 
 extern func:npk_mem_write_byte = void(int64:ptr, int64:offset, int64:val);
 
+use "../vendor/sys_constants.npk".*;
 use "../vendor/nitpick_args.npk".*;
 use "../vendor/singly.npk".*;
 use "../vendor/io_utils.npk".*;
@@ -112,7 +113,7 @@ func:copy_file = int32(string:src_path, string:dst_path) {
 
 func:copy_recursive = int32(string:src, string:dst, int32:recursive) {
     int64:statbuf = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
-    int64:res = sys!!(4i64, src, statbuf) ? -1i64; // STAT
+    int64:res = sys!!(SYS_STAT, src, statbuf) ? -1i64; // STAT
     if (res < 0i64) {
         drop(print_err("cp: cannot stat '"));
         drop(print_err(src));
@@ -138,7 +139,7 @@ func:copy_recursive = int32(string:src, string:dst, int32:recursive) {
         }
 
         // Try to create directory
-        drop(sys!!(83i64, dst, 493i64)); // MKDIR 0755
+        drop(sys!!(SYS_MKDIR, dst, 493i64)); // MKDIR 0755
         
         int64:fd = sys(OPEN, src, 65536i64, 0i64) ? -1i64;
         if (fd < 0i64) {

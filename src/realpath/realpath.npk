@@ -6,6 +6,7 @@ extern "libc" {
     func:fclose = int32(int64:fp);
 }
 
+use "../vendor/sys_constants.npk".*;
 use "../vendor/nitpick_args.npk".*;
 use "../vendor/io_utils.npk".*;
 
@@ -34,7 +35,7 @@ extern func:npk_mem_read_int32 = int32(int64:ptr, int64:offset);
 
 func:get_cwd = string() {
     int64:buf = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
-    int64:res = sys!!(79i64, buf, 4096i64) ? -1i64; // SYS_GETCWD
+    int64:res = sys!!(SYS_GETCWD, buf, 4096i64) ? -1i64; // SYS_GETCWD
     string:cwd = "";
     if (res >= 0i64) {
         int64:i = 0i64;
@@ -69,7 +70,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
         string:path = raw args_at(args, i);
         
         int64:buf = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
-        int64:res = sys!!(4i64, path, buf) ? -1i64; // SYS_STAT
+        int64:res = sys!!(SYS_STAT, path, buf) ? -1i64; // SYS_STAT
         int32:isdir = 0i32;
         
         if (res >= 0i64) {
@@ -91,11 +92,11 @@ func:main = int32(int32:argc, wild int8->:argv) {
         if (isdir == 1i32) {
             // Save original cwd
             string:orig_cwd = raw get_cwd();
-            drop(sys!!(80i64, path)); // SYS_CHDIR
+            drop(sys!!(SYS_CHDIR, path)); // SYS_CHDIR
             string:cwd = raw get_cwd();
             drop(print_str_safe(cwd));
             drop(print_str_safe("\n"));
-            drop(sys!!(80i64, orig_cwd)); // restore
+            drop(sys!!(SYS_CHDIR, orig_cwd)); // restore
         } else {
             if (isdir == 0i32) {
                 // It's a file.
@@ -132,7 +133,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
                 }
                 
                 string:orig_cwd = raw get_cwd();
-                int64:cd_res = sys!!(80i64, dirname) ? -1i64;
+                int64:cd_res = sys!!(SYS_CHDIR, dirname) ? -1i64;
                 if (cd_res >= 0i64) {
                     string:cwd = raw get_cwd();
                     if (string_equals(cwd, "/")) {
@@ -141,7 +142,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
                         drop(print_str_safe(string_concat(cwd, string_concat("/", basename))));
                     }
                     drop(print_str_safe("\n"));
-                    drop(sys!!(80i64, orig_cwd));
+                    drop(sys!!(SYS_CHDIR, orig_cwd));
                 } else {
                     drop(print_err("realpath: '"));
                     drop(print_err(path));

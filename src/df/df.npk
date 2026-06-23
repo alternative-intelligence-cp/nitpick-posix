@@ -6,6 +6,7 @@ extern "libc" {
     func:fclose = int32(int64:fp);
 }
 
+use "../vendor/sys_constants.npk".*;
 use "../vendor/nitpick_args.npk".*;
 use "../vendor/io_utils.npk".*;
 
@@ -70,7 +71,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     
     if (has_args == 0i32) {
         // default /
-        int64:res = sys!!(137i64, "/", buf) ? -1i64; // SYS_STATFS
+        int64:res = sys!!(SYS_STATFS, "/", buf) ? -1i64; // SYS_STATFS
         if (res >= 0i64) {
             int64:bsize = npk_mem_read_int64(buf, 8i64);
             int64:blocks = npk_mem_read_int64(buf, 16i64);
@@ -100,7 +101,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     } else {
         while (i <= arg_count) {
             string:path = raw args_at(args, i);
-            int64:res = sys!!(137i64, path, buf) ? -1i64;
+            int64:res = sys!!(SYS_STATFS, path, buf) ? -1i64;
             if (res >= 0i64) {
                 int64:bsize = npk_mem_read_int64(buf, 8i64);
                 int64:blocks = npk_mem_read_int64(buf, 16i64);

@@ -6,6 +6,7 @@ extern "libc" {
     func:fclose = int32(int64:fp);
 }
 
+use "../vendor/sys_constants.npk".*;
 use "../vendor/nitpick_args.npk".*;
 use "../vendor/io_utils.npk".*;
 
@@ -36,7 +37,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     string:old_file = raw args_at(args, 1i32);
     string:new_file = raw args_at(args, 2i32);
     
-    int64:res = sys!!(86i64, old_file, new_file) ? -1i64; // SYS_LINK is 86
+    int64:res = sys!!(SYS_LINK, old_file, new_file) ? -1i64; // SYS_LINK is 86
     
     if (res < 0i64) {
         drop(print_err("link: cannot create link '"));

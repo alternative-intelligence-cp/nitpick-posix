@@ -6,6 +6,7 @@ extern "libc" {
     func:fclose = int32(int64:fp);
 }
 
+use "../vendor/sys_constants.npk".*;
 use "../vendor/nitpick_args.npk".*;
 use "../vendor/io_utils.npk".*;
 
@@ -91,7 +92,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     if (exit_status == 0i32) {
         // SYS_CHMOD = 90
         // Mode = 0755 = 493 decimal
-        int64:chmod_res = sys!!(90i64, dst_path, 493i64) ? -1i64;
+        int64:chmod_res = sys!!(SYS_CHMOD, dst_path, 493i64) ? -1i64;
         if (chmod_res < 0i64) {
             drop(print_err("install: failed to change permissions\n"));
             exit 1;

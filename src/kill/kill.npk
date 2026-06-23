@@ -6,6 +6,7 @@ extern "libc" {
     func:fclose = int32(int64:fp);
 }
 
+use "../vendor/sys_constants.npk".*;
 use "../vendor/nitpick_args.npk".*;
 use "../vendor/io_utils.npk".*;
 
@@ -104,7 +105,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
         pid = raw parse_int(arg1);
     }
     
-    int64:res = sys!!(62i64, pid, sig) ? -1i64; // SYS_KILL
+    int64:res = sys!!(SYS_KILL, pid, sig) ? -1i64; // SYS_KILL
     if (res < 0i64) {
         drop(print_err("kill: ("));
         drop(print_err(arg1));

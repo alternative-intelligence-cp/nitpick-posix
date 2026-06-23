@@ -9,6 +9,7 @@ extern "libc" {
 
 extern func:npk_mem_write_byte = void(int64:ptr, int64:offset, int64:val);
 
+use "../vendor/sys_constants.npk".*;
 use "../vendor/nitpick_args.npk".*;
 use "../vendor/singly.npk".*;
 use "../vendor/io_utils.npk".*;
@@ -57,7 +58,7 @@ func:failsafe = int32(tbb32:err) {
 
 func:rm_recursive = int32(string:path, int32:recursive) {
     int64:statbuf = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
-    int64:res = sys!!(4i64, path, statbuf) ? -1i64; // STAT
+    int64:res = sys!!(SYS_STAT, path, statbuf) ? -1i64; // STAT
     if (res < 0i64) {
         res = sys!!(6i64, path, statbuf) ? -1i64; // LSTAT fallback
         if (res < 0i64) {
@@ -156,7 +157,7 @@ func:rm_recursive = int32(string:path, int32:recursive) {
         drop(SList.destroy(sl));
 
         // Delete the empty directory itself
-        int64:rmdir_res = sys!!(84i64, path) ? -1i64; // RMDIR
+        int64:rmdir_res = sys!!(SYS_RMDIR, path) ? -1i64; // RMDIR
         if (rmdir_res < 0i64) {
             drop(print_err("rm: cannot remove directory '"));
             drop(print_err(path));

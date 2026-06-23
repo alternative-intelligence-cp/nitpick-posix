@@ -6,6 +6,7 @@ extern "libc" {
     func:fclose = int32(int64:fp);
 }
 
+use "../vendor/sys_constants.npk".*;
 use "../vendor/nitpick_args.npk".*;
 use "../vendor/io_utils.npk".*;
 
@@ -47,7 +48,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     }
     
     if (found == 1i32) {
-        int64:exec_res = sys!!(59i64, cmd, 0i64, 0i64) ? -1i64; // SYS_EXECVE
+        int64:exec_res = sys!!(SYS_EXECVE, cmd, 0i64, 0i64) ? -1i64; // SYS_EXECVE
         if (exec_res < 0i64) {
             drop(print_err("failed to run command '"));
             drop(print_err(cmd));

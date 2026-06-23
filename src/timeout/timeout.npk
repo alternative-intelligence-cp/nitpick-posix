@@ -8,6 +8,7 @@ extern "libc" {
 
 extern func:npk_mem_write_byte = int64(int64:ptr, int64:offset, int64:val);
 
+use "../vendor/sys_constants.npk".*;
 use "../vendor/nitpick_args.npk".*;
 use "../vendor/exec_helper.npk".*;
 use "../vendor/io_utils.npk".*;
@@ -18,7 +19,7 @@ extern func:npk_mem_read_int32 = int32(int64:ptr, int64:offset);
 
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys!!(1i64, 2i64, s, len)); // SYS_WRITE to stderr
+    drop(sys!!(SYS_WRITE, 2i64, s, len)); // SYS_WRITE to stderr
     pass 0i32;
 };
 
@@ -86,7 +87,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     
     string:cmd = raw args_at(args, 2i32);
     
-    int64:pid = sys!!(57i64) ? -1i64; // SYS_FORK
+    int64:pid = sys!!(SYS_FORK) ? -1i64; // SYS_FORK
     
     if (pid == 0i64) {
         // Child: execve
@@ -100,7 +101,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     } else {
         if (pid > 0i64) {
             // Parent: poll every 10ms
-            int64:ts_buf = sys!!(9i64, 0i64, 16i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+            int64:ts_buf = sys!!(SYS_MMAP, 0i64, 16i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
             drop(npk_mem_write_byte(ts_buf, 0i64, 0i64)); // 0 sec
             // 10,000,000 ns = 10 ms = 0x00989680
             drop(npk_mem_write_byte(ts_buf, 8i64, 128i64));
@@ -108,7 +109,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
             drop(npk_mem_write_byte(ts_buf, 10i64, 152i64));
             drop(npk_mem_write_byte(ts_buf, 11i64, 0i64));
             
-            int64:status_buf = sys!!(9i64, 0i64, 8i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+            int64:status_buf = sys!!(SYS_MMAP, 0i64, 8i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
             
             int32:running = 1i32;
             int64:polls = 0i64;
@@ -118,7 +119,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
             
             int32:exit_status = 0i32;
             while (running == 1i32) {
-                int64:res = sys!!(61i64, pid, status_buf, 1i64, 0i64) ? -1i64; // wait4 with WNOHANG
+                int64:res = sys!!(SYS_WAIT4, pid, status_buf, 1i64, 0i64) ? -1i64; // wait4 with WNOHANG
                 if (res == pid) {
                     child_exited = 1i32;
                     running = 0i32;
@@ -133,11 +134,11 @@ func:main = int32(int32:argc, wild int8->:argv) {
                     } else {
                         polls = polls + 1i64;
                         if (polls > max_polls) {
-                            drop(sys!!(62i64, pid, 15i64)); // SYS_KILL SIGTERM
-                            drop(sys!!(61i64, pid, status_buf, 0i64, 0i64)); // wait4 blocking to reap
+                            drop(sys!!(SYS_KILL, pid, 15i64)); // SYS_KILL SIGTERM
+                            drop(sys!!(SYS_WAIT4, pid, status_buf, 0i64, 0i64)); // wait4 blocking to reap
                             running = 0i32;
-                            drop(sys!!(11i64, ts_buf, 16i64));
-                            drop(sys!!(11i64, status_buf, 8i64));
+                            drop(sys!!(SYS_MUNMAP, ts_buf, 16i64));
+                            drop(sys!!(SYS_MUNMAP, status_buf, 8i64));
                             exit 124; // standard timeout exit code
                         } else {
                             drop(sys!!(35i64, ts_buf, 0i64)); // nanosleep
@@ -145,8 +146,8 @@ func:main = int32(int32:argc, wild int8->:argv) {
                     }
                 }
             }
-            drop(sys!!(11i64, ts_buf, 16i64));
-            drop(sys!!(11i64, status_buf, 8i64));
+            drop(sys!!(SYS_MUNMAP, ts_buf, 16i64));
+            drop(sys!!(SYS_MUNMAP, status_buf, 8i64));
             
             if (child_exited == 1i32) {
                 exit exit_status;
