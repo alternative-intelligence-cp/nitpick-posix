@@ -3,18 +3,11 @@
 extern func:npk_mem_read_string = string(int64:ptr, int64:max_len);
 extern func:npk_mem_write_byte = void(int64:ptr, int64:offset, int64:val);
 
-extern "libc" {
-    func:malloc = int64(int64:bytes);
-    func:nitpick_libc_mem_free = int32(int64:ptr);
-}
-
 use "../vendor/nitpick_args.npk".*;
 use "../vendor/io_utils.npk".*;
 use "../vendor/sys_constants.npk".*;
 
-
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
-
 
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
@@ -45,9 +38,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
         exit 0;
     }
     
-    // allocate array of file pointers (up to 256 files)
-    int64:fp_array = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
-    if (fp_array < 0i64) { exit 1; }
+    int64:fp_array = @cast_unchecked<int64>(alloc(@cast_unchecked<int64>(arg_count) * 8i64));
     
     int64:n_files = 0i64;
     int32:i = 1i32;
@@ -76,7 +67,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
             int64:fp = npk_mem_read_int64(fp_array, j * 8i64);
             if (fp != 0i64) {
                 // read a line
-                int64:buf = malloc(65536i64);
+                int64:buf = @cast_unchecked<int64>(alloc(65536i64));
                 int64:len = 0i64;
                 int32:c = raw io_buf_getc(fp);
                 if (c < 0i32) {
@@ -101,7 +92,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
                     string:line = npk_mem_read_string(buf, len);
                     drop(print_str_safe(line));
                 }
-                drop(nitpick_libc_mem_free(buf));
+                free(@cast_unchecked<any->>(buf));
             }
             if (j < n_files - 1i64) {
                 drop(print_str_safe("\t"));
@@ -116,6 +107,6 @@ func:main = int32(int32:argc, wild int8->:argv) {
         }
     }
     
-    drop(sys!!(SYS_MUNMAP, fp_array, 4096i64));
+    free(@cast_unchecked<any->>(fp_array));
     exit 0;
 };

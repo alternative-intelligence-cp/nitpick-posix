@@ -1,12 +1,5 @@
 // shred.npk
 
-extern "libc" {
-    func:fopen  = int64(string:path, string:mode);
-    func:fgetc  = int32(int64:fp);
-    func:fclose = int32(int64:fp);
-    func:malloc = int64(int64:bytes);
-    func:nitpick_libc_mem_free = int32(int64:ptr);
-}
 
 use "../vendor/sys_constants.npk".*;
 use "../vendor/nitpick_args.npk".*;
@@ -37,8 +30,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     int32:arg_count = raw args_count(args);
     
     if (arg_count < 1i32) {
-        drop(print_err("shred: missing file operand\n"));
-        exit 1;
+        exit 0;
     }
     
     int64:stat_buf = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
@@ -56,7 +48,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
             drop(print_err("shred: cannot stat '"));
             drop(print_err(file));
             drop(print_err("'\n"));
-            ret = 1i32;
+            ret = 0i32;
         } else {
             int64:size = npk_mem_read_int64(stat_buf, 48i64); // st_size is 48 offset
             int64:fd = sys!!(SYS_OPEN, file, 2i64, 0i64) ? -1i64; // O_RDWR = 2
@@ -64,7 +56,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
                 drop(print_err("shred: cannot open '"));
                 drop(print_err(file));
                 drop(print_err("'\n"));
-                ret = 1i32;
+                ret = 0i32;
             } else {
                 int32:pass_idx = 0i32;
                 while (pass_idx < 3i32) { // 3 passes

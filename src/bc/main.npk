@@ -1,406 +1,31 @@
-extern func:strlen = int64(string:s);
-extern func:atof = flt64(string:str);
-extern func:malloc = any*(int64:size);
-extern func:free = void(any*:ptr);
-extern func:strncpy = int64(any*:dest, string:src, int64:n);
-extern func:npk_mem_write_byte = int64(any*:ptr, int64:offset, int64:val);
-extern func:npk_mem_read_string = string(any*:ptr, int64:max_len);
-extern func:npk_string_byte_at = int64(string:s, int64:offset);
-extern func:read = int64(int32:fd, any*:buf, int64:count);
-extern func:printf = int32(string:fmt);
-extern func:sprintf = int32(any*:buf, string:fmt, flt64:val);
+// src/bc/main.npk
+use "../vendor/io_utils.npk".*;
+use "../vendor/mem_utils.npk".*;
+use "../vendor/sys_constants.npk".*;
+use "stdlib/string_convert.npk".*;
+use "stdlib/string.npk".*;
 
-pub func:is_space = int64(int64:c) {
-    if (c == 32i64) { pass(1i64); }
-    if (c == 9i64) { pass(1i64); }
-    if (c == 10i64) { pass(1i64); }
-    if (c == 13i64) { pass(1i64); }
-    pass(0i64);
-};
-
-pub func:is_digit = int64(int64:c) {
-    if (c >= 48i64) {
-        if (c <= 57i64) { pass(1i64); }
-    }
-    pass(0i64);
-};
-
-pub func:is_alpha = int64(int64:c) {
-    if (c >= 97i64) {
-        if (c <= 122i64) { pass(1i64); }
-    }
-    if (c >= 65i64) {
-        if (c <= 90i64) { pass(1i64); }
-    }
-    pass(0i64);
-};
-
-int64:TOKEN_EOF = 0i64;
-int64:TOKEN_NUMBER = 1i64;
-int64:TOKEN_PLUS = 2i64;
-int64:TOKEN_MINUS = 3i64;
-int64:TOKEN_MULT = 4i64;
-int64:TOKEN_DIV = 5i64;
-int64:TOKEN_POW = 6i64;
-int64:TOKEN_LPAREN = 7i64;
-int64:TOKEN_RPAREN = 8i64;
-int64:TOKEN_IDENT = 9i64;
-int64:TOKEN_MOD = 10i64;
-int64:TOKEN_EQUALS = 11i64;
-int64:TOKEN_ERROR = 12i64;
-int64:TOKEN_SEMI = 13i64;
-
-string:lexer_input = "";
-int64:lexer_pos = 0i64;
-int64:lexer_len = 0i64;
-
-int64:lexer_curr_token = 0i64;
-flt64:lexer_curr_val = 0.0f64;
-string:lexer_curr_ident = "";
-
-pub func:lexer_init = int32(string:input) {
-    lexer_input = input;
-    lexer_pos = 0i64;
-    lexer_len = strlen(input);
-    drop(lexer_next());
-    pass(0i32);
-};
-
-pub func:lexer_next = int32() {
-    while (lexer_pos < lexer_len) {
-        int64:c = npk_string_byte_at(lexer_input, lexer_pos);
-        if (raw(is_space(c)) == 1i64) {
-            lexer_pos = lexer_pos + 1i64;
-        } else {
-            break;
-        }
-    }
-
-    if (lexer_pos >= lexer_len) {
-        lexer_curr_token = TOKEN_EOF;
-        pass(0i32);
-    }
-
-    int64:c = npk_string_byte_at(lexer_input, lexer_pos);
-
-    // Number
-    if (raw(is_digit(c)) == 1i64) {
-        int64:start = lexer_pos;
-        int64:has_dot = 0i64;
-        while (lexer_pos < lexer_len) {
-            int64:ch = npk_string_byte_at(lexer_input, lexer_pos);
-            if (raw(is_digit(ch)) == 1i64) {
-                lexer_pos = lexer_pos + 1i64;
-            } else {
-                if (ch == 46i64) { // '.'
-                    if (has_dot == 0i64) {
-                        has_dot = 1i64;
-                        lexer_pos = lexer_pos + 1i64;
-                    } else {
-                        break;
-                    }
-                } else {
-                    break;
-                }
-            }
-        }
-        
-        int64:len = lexer_pos - start;
-        any->:num_buf = malloc(len + 1i64) => any->;
-        // We need a substring
-        // strncpy won't work perfectly on strings. Let's just copy bytes.
-        int64:i = 0i64;
-        while (i < len) {
-            int64:ch = npk_string_byte_at(lexer_input, start + i);
-            drop(npk_mem_write_byte(num_buf, i, ch));
-            i = i + 1i64;
-        }
-        drop(npk_mem_write_byte(num_buf, len, 0i64)); // null terminator
-        
-        string:num_str = npk_mem_read_string(num_buf, len);
-        lexer_curr_val = atof(num_str);
-        drop(free(num_buf => any->));
-        
-        lexer_curr_token = TOKEN_NUMBER;
-        pass(0i32);
-    }
-
-    // Identifier
-    if (raw(is_alpha(c)) == 1i64) {
-        int64:start = lexer_pos;
-        while (lexer_pos < lexer_len) {
-            int64:ch = npk_string_byte_at(lexer_input, lexer_pos);
-            if (raw(is_alpha(ch)) == 1i64) {
-                lexer_pos = lexer_pos + 1i64;
-            } else {
-                if (ch == 95i64) { // '_'
-                    lexer_pos = lexer_pos + 1i64;
-                } else {
-                    break;
-                }
-            }
-        }
-        int64:len = lexer_pos - start;
-        any->:id_buf = malloc(len + 1i64) => any->;
-        int64:i = 0i64;
-        while (i < len) {
-            int64:ch = npk_string_byte_at(lexer_input, start + i);
-            drop(npk_mem_write_byte(id_buf, i, ch));
-            i = i + 1i64;
-        }
-        drop(npk_mem_write_byte(id_buf, len, 0i64));
-        lexer_curr_ident = npk_mem_read_string(id_buf, len);
-        drop(free(id_buf => any->));
-        lexer_curr_token = TOKEN_IDENT;
-        pass(0i32);
-    }
-
-    // Operators
-    if (c == 43i64) { lexer_curr_token = TOKEN_PLUS; lexer_pos = lexer_pos + 1i64; pass(0i32); }
-    if (c == 45i64) { lexer_curr_token = TOKEN_MINUS; lexer_pos = lexer_pos + 1i64; pass(0i32); }
-    if (c == 42i64) { lexer_curr_token = TOKEN_MULT; lexer_pos = lexer_pos + 1i64; pass(0i32); }
-    if (c == 47i64) { lexer_curr_token = TOKEN_DIV; lexer_pos = lexer_pos + 1i64; pass(0i32); }
-    if (c == 94i64) { lexer_curr_token = TOKEN_POW; lexer_pos = lexer_pos + 1i64; pass(0i32); }
-    if (c == 40i64) { lexer_curr_token = TOKEN_LPAREN; lexer_pos = lexer_pos + 1i64; pass(0i32); }
-    if (c == 41i64) { lexer_curr_token = TOKEN_RPAREN; lexer_pos = lexer_pos + 1i64; pass(0i32); }
-    if (c == 37i64) { lexer_curr_token = TOKEN_MOD; lexer_pos = lexer_pos + 1i64; pass(0i32); }
-    if (c == 61i64) { lexer_curr_token = TOKEN_EQUALS; lexer_pos = lexer_pos + 1i64; pass(0i32); }
-    if (c == 59i64) { lexer_curr_token = TOKEN_SEMI; lexer_pos = lexer_pos + 1i64; pass(0i32); }
-
-    lexer_curr_token = TOKEN_ERROR;
-    lexer_pos = lexer_pos + 1i64;
-    pass(0i32);
-};
-
-
-extern func:pow = flt64(flt64:x, flt64:y);
-extern func:fmod = flt64(flt64:x, flt64:y);
-extern func:sin = flt64(flt64:x);
-extern func:cos = flt64(flt64:x);
-extern func:tan = flt64(flt64:x);
-extern func:sqrt = flt64(flt64:x);
-extern func:exp = flt64(flt64:x);
-extern func:log = flt64(flt64:x);
-extern func:strcmp = int64(string:s1, string:s2);
-
-flt64:var_a = 0.0f64; flt64:var_b = 0.0f64; flt64:var_c = 0.0f64; flt64:var_d = 0.0f64;
-flt64:var_e = 0.0f64; flt64:var_f = 0.0f64; flt64:var_g = 0.0f64; flt64:var_h = 0.0f64;
-flt64:var_i = 0.0f64; flt64:var_j = 0.0f64; flt64:var_k = 0.0f64; flt64:var_l = 0.0f64;
-flt64:var_m = 0.0f64; flt64:var_n = 0.0f64; flt64:var_o = 0.0f64; flt64:var_p = 0.0f64;
-flt64:var_q = 0.0f64; flt64:var_r = 0.0f64; flt64:var_s = 0.0f64; flt64:var_t = 0.0f64;
-flt64:var_u = 0.0f64; flt64:var_v = 0.0f64; flt64:var_w = 0.0f64; flt64:var_x = 0.0f64;
-flt64:var_y = 0.0f64; flt64:var_z = 0.0f64;
-
-func:get_var = flt64(int64:idx) {
-    if (idx == 0i64) { pass(var_a); } if (idx == 1i64) { pass(var_b); } if (idx == 2i64) { pass(var_c); }
-    if (idx == 3i64) { pass(var_d); } if (idx == 4i64) { pass(var_e); } if (idx == 5i64) { pass(var_f); }
-    if (idx == 6i64) { pass(var_g); } if (idx == 7i64) { pass(var_h); } if (idx == 8i64) { pass(var_i); }
-    if (idx == 9i64) { pass(var_j); } if (idx == 10i64) { pass(var_k); } if (idx == 11i64) { pass(var_l); }
-    if (idx == 12i64) { pass(var_m); } if (idx == 13i64) { pass(var_n); } if (idx == 14i64) { pass(var_o); }
-    if (idx == 15i64) { pass(var_p); } if (idx == 16i64) { pass(var_q); } if (idx == 17i64) { pass(var_r); }
-    if (idx == 18i64) { pass(var_s); } if (idx == 19i64) { pass(var_t); } if (idx == 20i64) { pass(var_u); }
-    if (idx == 21i64) { pass(var_v); } if (idx == 22i64) { pass(var_w); } if (idx == 23i64) { pass(var_x); }
-    if (idx == 24i64) { pass(var_y); } if (idx == 25i64) { pass(var_z); }
-    pass(0.0f64);
-};
-
-func:set_var = int64(int64:idx, flt64:val) {
-    if (idx == 0i64) { var_a = val; pass(0i64); } if (idx == 1i64) { var_b = val; pass(0i64); } if (idx == 2i64) { var_c = val; pass(0i64); }
-    if (idx == 3i64) { var_d = val; pass(0i64); } if (idx == 4i64) { var_e = val; pass(0i64); } if (idx == 5i64) { var_f = val; pass(0i64); }
-    if (idx == 6i64) { var_g = val; pass(0i64); } if (idx == 7i64) { var_h = val; pass(0i64); } if (idx == 8i64) { var_i = val; pass(0i64); }
-    if (idx == 9i64) { var_j = val; pass(0i64); } if (idx == 10i64) { var_k = val; pass(0i64); } if (idx == 11i64) { var_l = val; pass(0i64); }
-    if (idx == 12i64) { var_m = val; pass(0i64); } if (idx == 13i64) { var_n = val; pass(0i64); } if (idx == 14i64) { var_o = val; pass(0i64); }
-    if (idx == 15i64) { var_p = val; pass(0i64); } if (idx == 16i64) { var_q = val; pass(0i64); } if (idx == 17i64) { var_r = val; pass(0i64); }
-    if (idx == 18i64) { var_s = val; pass(0i64); } if (idx == 19i64) { var_t = val; pass(0i64); } if (idx == 20i64) { var_u = val; pass(0i64); }
-    if (idx == 21i64) { var_v = val; pass(0i64); } if (idx == 22i64) { var_w = val; pass(0i64); } if (idx == 23i64) { var_x = val; pass(0i64); }
-    if (idx == 24i64) { var_y = val; pass(0i64); } if (idx == 25i64) { var_z = val; pass(0i64); }
-    pass(0i64);
-};
-
-pub func:parser_init = int32() {
-    pass(0i32);
-};
-
-
-
-pub func:parse_factor = flt64() {
-    if (lexer_curr_token == TOKEN_NUMBER) {
-        flt64:val = lexer_curr_val;
-        drop(lexer_next());
-        pass(val);
-    }
-
-    if (lexer_curr_token == TOKEN_MINUS) {
-        drop(lexer_next());
-        flt64:val = raw(parse_factor());
-        pass(0.0f64 - val);
-    }
-    
-    if (lexer_curr_token == TOKEN_PLUS) {
-        drop(lexer_next());
-        flt64:val = raw(parse_factor());
-        pass(val);
-    }
-
-    if (lexer_curr_token == TOKEN_LPAREN) {
-        drop(lexer_next());
-        flt64:val = raw(parse_expression());
-        if (lexer_curr_token == TOKEN_RPAREN) {
-            drop(lexer_next());
-        }
-        pass(val);
-    }
-    
-    if (lexer_curr_token == TOKEN_IDENT) {
-        string:id = lexer_curr_ident;
-        drop(lexer_next());
-        
-        if (lexer_curr_token == TOKEN_LPAREN) {
-            drop(lexer_next());
-            flt64:val = raw(parse_expression());
-            if (lexer_curr_token == TOKEN_RPAREN) {
-                drop(lexer_next());
-            }
-            
-            if (strcmp(id, "s") == 0i64) { pass(sin(val)); }
-            if (strcmp(id, "c") == 0i64) { pass(cos(val)); }
-            if (strcmp(id, "t") == 0i64) { pass(tan(val)); }
-            if (strcmp(id, "sqrt") == 0i64) { pass(sqrt(val)); }
-            if (strcmp(id, "e") == 0i64) { pass(exp(val)); }
-            if (strcmp(id, "l") == 0i64) { pass(log(val)); }
-            pass(0.0f64);
-        } else {
-            // Variable lookup
-            if (strlen(id) == 1i64) {
-                int64:c = npk_string_byte_at(id, 0i64);
-                if (c >= 97i64) {
-                    if (c <= 122i64) {
-                        int64:idx = c - 97i64;
-                        pass(raw(get_var(idx)));
-                    }
-                }
-            }
-            pass(0.0f64);
-        }
-    }
-
-    pass(0.0f64);
-};
-
-pub func:parse_power = flt64() {
-    flt64:left = raw(parse_factor());
-    while (lexer_curr_token == TOKEN_POW) {
-        drop(lexer_next());
-        flt64:right = raw(parse_factor());
-        left = pow(left, right);
-    }
-    pass(left);
-};
-
-pub func:parse_term = flt64() {
-    flt64:left = raw(parse_power());
-    while (1 == 1) {
-        if (lexer_curr_token == TOKEN_MULT) {
-            drop(lexer_next());
-            flt64:right = raw(parse_power());
-            left = left * right;
-        } else {
-            if (lexer_curr_token == TOKEN_DIV) {
-                drop(lexer_next());
-                flt64:right = raw(parse_power());
-                if (right != 0.0f64) {
-                    left = left / right;
-                } else {
-                    left = 0.0f64; // Div by zero
-                }
-            } else {
-                if (lexer_curr_token == TOKEN_MOD) {
-                    drop(lexer_next());
-                    flt64:right = raw(parse_power());
-                    if (right != 0.0f64) {
-                        left = fmod(left, right);
-                    } else {
-                        left = 0.0f64;
-                    }
-                } else {
-                    break;
-                }
-            }
-        }
-    }
-    pass(left);
-};
-
-pub func:parse_expression = flt64() {
-    int64:saved_pos = lexer_pos;
-    int64:saved_token = lexer_curr_token;
-    string:saved_ident = lexer_curr_ident;
-    flt64:saved_val = lexer_curr_val;
-
-    if (lexer_curr_token == TOKEN_IDENT) {
-        string:id = lexer_curr_ident;
-        drop(lexer_next());
-        if (lexer_curr_token == TOKEN_EQUALS) {
-            drop(lexer_next());
-            flt64:val = raw(parse_expression());
-            
-            if (strlen(id) == 1i64) {
-                int64:c = npk_string_byte_at(id, 0i64);
-                if (c >= 97i64) {
-                    if (c <= 122i64) {
-                        int64:idx = c - 97i64;
-                        drop(raw(set_var(idx, val)));
-                    }
-                }
-            }
-            pass(val);
-        }
-        lexer_pos = saved_pos;
-        lexer_curr_token = saved_token;
-        lexer_curr_ident = saved_ident;
-        lexer_curr_val = saved_val;
-    }
-    
-    flt64:left = raw(parse_term());
-    while (1 == 1) {
-        if (lexer_curr_token == TOKEN_PLUS) {
-            drop(lexer_next());
-            flt64:right = raw(parse_term());
-            left = left + right;
-        } else {
-            if (lexer_curr_token == TOKEN_MINUS) {
-                drop(lexer_next());
-                flt64:right = raw(parse_term());
-                left = left - right;
-            } else {
-                break;
-            }
-        }
-    }
-    pass(left);
-};
-
-
+use "lexer.npk".*;
+use "parser.npk".*;
 
 pub func:main = int32(int32:argc, wild int8->:argv) {
     drop(parser_init());
     
-    any->:buf = malloc(4096i64) => any->;
+    any->:buf = @cast_unchecked<any->>(alloc(4096i64));
     
     while (1 == 1) {
-        drop(printf("> "));
+        drop(print_out("> "));
         
-        int64:bytes_read = read(0i32, buf, 4095i64);
+        int64:bytes_read = sys!!(SYS_READ, 0i64, buf, 4095i64) ? -1i64;
         if (bytes_read <= 0i64) {
             break;
         }
         
-        drop(npk_mem_write_byte(buf, bytes_read, 0i64));
+        <- (@cast_unchecked<uint8->>((@cast_unchecked<int64>(buf)) + bytes_read)) = (@cast_unchecked<uint8>(0i64));
         string:input = npk_mem_read_string(buf, bytes_read);
         
-        // Use strcmp from parser.npk which returns int64
-        if (strcmp(input, "quit\n") == 0i64) { break; }
-        if (strcmp(input, "exit\n") == 0i64) { break; }
+        if (string_equals(input, "quit\n")) { break; }
+        if (string_equals(input, "exit\n")) { break; }
         
         drop(lexer_init(input));
         
@@ -410,20 +35,18 @@ pub func:main = int32(int32:argc, wild int8->:argv) {
                 continue;
             }
             if (lexer_curr_token == TOKEN_ERROR) {
-                drop(printf("Parse error\n"));
+                drop(print_err("Parse error\n"));
                 break;
             }
             
-            flt64:res = raw(parse_expression());
+            fix256:res = raw(parse_expression());
             
-            any->:out_buf = malloc(256i64) => any->;
-            drop(sprintf(out_buf, "%.6g\n", res));
-            string:out_str = npk_mem_read_string(out_buf, 256i64);
-            drop(printf(out_str));
-            drop(free(out_buf => any->));
+            string:out_str = fix256_toString(res, 6i32);
+            drop(print_out(out_str));
+            drop(print_out("\n"));
         }
     }
     
-    drop(free(buf => any->));
-    exit(0i32);
+    free(buf);
+    exit 0i32;
 };

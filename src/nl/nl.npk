@@ -1,10 +1,5 @@
 // nl.npk
 
-extern "libc" {
-    func:fopen  = int64(string:path, string:mode);
-    func:fgetc  = int32(int64:fp);
-    func:fclose = int32(int64:fp);
-}
 
 use "../vendor/nitpick_args.npk".*;
 use "../vendor/io_utils.npk".*;
@@ -35,31 +30,29 @@ func:main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     
-    int64:fp = 0i64;
-    
+    int64:fd = 0i64;
     if (arg_count >= 1i32) {
         string:file = raw args_at(args, 1i32);
-        fp = fopen(file, "r");
-        if (fp == 0i64) {
-            drop(print_err("nl: cannot open '"));
-            drop(print_err(file));
-            drop(print_err("'\n"));
-            exit 1;
+        if (string_equals(file, "-")) {
+            fd = 0i64;
+        } else {
+            fd = sys!!(SYS_OPEN, file, 0i64, 0i64) ? -1i64;
+            if (fd < 0i64) {
+                drop(print_err("nl: cannot open '"));
+                drop(print_err(file));
+                drop(print_err("'\n"));
+                exit 1;
+            }
         }
-    } else {
-        // how to do stdin with libc?
-        // stdin is fd 0, so fdopen(0, "r")
-        // but let's just implement files for now since we don't have fdopen.
-        drop(print_err("nl: must specify a file\n"));
-        exit 1;
     }
+    int64:fp = raw io_buf_new(fd);
     
     int32:running = 1i32;
     int64:line_num = 1i64;
     
     while (running == 1i32) {
         string:line = "";
-        int32:c = fgetc(fp);
+        int32:c = raw io_buf_getc(fp);
         if (c < 0i32) {
             running = 0i32;
         } else {
@@ -68,7 +61,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
                     c = -1i32; // break
                 } else {
                     line = string_concat(line, string_from_char(@cast_unchecked<int8>(c)));
-                    c = fgetc(fp);
+                    c = raw io_buf_getc(fp);
                 }
             }
             drop(print_str_safe("     "));
@@ -80,6 +73,6 @@ func:main = int32(int32:argc, wild int8->:argv) {
         }
     }
     
-    drop(fclose(fp));
+    if (fd != 0i64) { drop(sys!!(SYS_CLOSE, fd)); } drop(raw io_buf_free(fp));
     exit 0;
 };

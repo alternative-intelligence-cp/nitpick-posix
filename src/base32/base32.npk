@@ -40,17 +40,21 @@ func:main = int32(int32:argc, wild int8->:argv) {
     
     if (arg_count >= 1i32) {
         string:file = raw args_at(args, 1i32);
-        int64:fd = sys!!(SYS_OPEN, file, 0i64, 0i64) ? -1i64;
-        if (fd < 0i64) {
-            drop(print_err("base32: cannot open '"));
-            drop(print_err(file));
-            drop(print_err("'\n"));
-            exit 1;
+        int64:fd = 0i64;
+        if (string_equals(file, "-")) {
+            fd = 0i64;
+        } else {
+            fd = sys!!(SYS_OPEN, file, 0i64, 0i64) ? -1i64;
+            if (fd < 0i64) {
+                drop(print_err("base32: cannot open '"));
+                drop(print_err(file));
+                drop(print_err("'\n"));
+                exit 1;
+            }
         }
         fp = raw io_buf_new(fd);
     } else {
-        drop(print_err("base32: reading stdin not implemented\n"));
-        exit 1;
+        fp = raw io_buf_new(0i64);
     }
     
     int32:running = 1i32;

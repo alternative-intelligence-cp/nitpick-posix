@@ -41,20 +41,22 @@ func:main = int32(int32:argc, wild int8->:argv) {
     
     int64:fp = 0i64;
     
+    int64:fd = 0i64;
     if (arg_count >= 1i32) {
         string:file = raw args_at(args, 1i32);
-        int64:fd = sys!!(SYS_OPEN, file, 0i64, 0i64) ? -1i64;
-        if (fd < 0i64) {
-            drop(print_err("fmt: cannot open '"));
-            drop(print_err(file));
-            drop(print_err("'\n"));
-            exit 1;
+        if (string_equals(file, "-")) {
+            fd = 0i64;
+        } else {
+            fd = sys!!(SYS_OPEN, file, 0i64, 0i64) ? -1i64;
+            if (fd < 0i64) {
+                drop(print_err("fmt: cannot open '"));
+                drop(print_err(file));
+                drop(print_err("'\n"));
+                exit 1;
+            }
         }
-        fp = raw io_buf_new(fd);
-    } else {
-        drop(print_err("fmt: reading stdin not implemented\n"));
-        exit 1;
     }
+    fp = raw io_buf_new(fd);
     
     int64:col = 0i64;
     int32:c = raw io_buf_getc(fp);
@@ -103,8 +105,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
         drop(print_str_safe("\n"));
     }
     
-    int64:fd_fp = (<- (@cast_unchecked<int64->>(fp + 0i64)));
-    drop(sys!!(SYS_CLOSE, fd_fp));
+    if (fd != 0i64) { drop(sys!!(SYS_CLOSE, fd)); }
     drop(raw io_buf_free(fp));
     exit 0;
 };

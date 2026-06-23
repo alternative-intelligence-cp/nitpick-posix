@@ -1,18 +1,9 @@
 // chgrp.npk
 
-extern "libc" {
-    func:fopen  = int64(string:path, string:mode);
-    func:fgetc  = int32(int64:fp);
-    func:fclose = int32(int64:fp);
-}
-
 use "../vendor/sys_constants.npk".*;
 use "../vendor/nitpick_args.npk".*;
 use "../vendor/io_utils.npk".*;
-
-
-extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
-
+use "../vendor/pwd_utils.npk".*;
 
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
@@ -35,53 +26,13 @@ func:main = int32(int32:argc, wild int8->:argv) {
     }
     
     string:group_str = raw args_at(args, 1i32);
-    int64:target_gid = -1i64;
-    
-    int64:fp = fopen("/etc/group", "r");
-    if (fp != 0i64) {
-        int32:running = 1i32;
-        while (running == 1i32) {
-            string:line = "";
-            int32:c = fgetc(fp);
-            if (c < 0i32) {
-                running = 0i32;
-            } else {
-                while (c >= 0i32) {
-                    if (c == 10i32) { c = -1i32; }
-                    else {
-                        line = string_concat(line, string_from_char(@cast_unchecked<int8>(c)));
-                        c = fgetc(fp);
-                    }
-                }
-                
-                int64:len = string_length(line);
-                int64:j = 0i64;
-                int64:col = 0i64;
-                string:g_name = "";
-                string:g_id = "";
-                
-                while (j < len) {
-                    string:ch = string_substring(line, j, j+1i64);
-                    if (string_equals(ch, ":")) {
-                        col = col + 1i64;
-                    } else {
-                        if (col == 0i64) { g_name = string_concat(g_name, ch); }
-                        if (col == 2i64) { g_id = string_concat(g_id, ch); }
-                    }
-                    j = j + 1i64;
-                }
-                
-                if (string_equals(g_name, group_str)) {
-                    target_gid = string_to_int(g_id);
-                    running = 0i32;
-                }
-            }
-        }
-        drop(fclose(fp));
-    }
+    int64:target_gid = raw resolve_gid(group_str);
     
     if (target_gid == -1i64) {
-        target_gid = string_to_int(group_str);
+        drop(print_err("chgrp: invalid group: '"));
+        drop(print_err(group_str));
+        drop(print_err("'\n"));
+        exit 1;
     }
     
     int32:i = 2i32;

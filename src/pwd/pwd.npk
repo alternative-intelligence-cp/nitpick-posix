@@ -34,7 +34,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
         if (len >= 4096i64) {
             running = 0i32;
         } else {
-            int64:c = (<- (@cast_unchecked<uint8->>(@cast_unchecked<int64>(buf) + len))) => int64;
+            int64:c = @cast_unchecked<int64>((<- (@cast_unchecked<uint8->>(@cast_unchecked<int64>(buf) + len))));
             if (c == 0i64) {
                 running = 0i32;
             } else {

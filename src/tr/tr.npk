@@ -3,6 +3,7 @@
 use "../vendor/nitpick_args.npk".*;
 use "../vendor/io_utils.npk".*;
 use "../vendor/sys_constants.npk".*;
+use "../vendor/mem_utils.npk".*;
 
 
 extern "libc" {
@@ -82,8 +83,8 @@ func:main = int32(int32:argc, wild int8->:argv) {
         i_set = i_set + 1i64;
     }
     
-    int64:buf_size = 1048576i64; // 1MB buffer
-    int64:buf = sys!!(SYS_MMAP, 0i64, buf_size, 3i64, 34i64, -1i64, 0i64) ? -1i64;
+    int64:buf_size = 65536i64; // 1MB buffer
+    int64:buf = @cast_unchecked<int64>(alloc(buf_size));
     if (buf < 0i64) { exit 1; }
     
     int32:running = 1i32;
@@ -108,6 +109,6 @@ func:main = int32(int32:argc, wild int8->:argv) {
     }
     
     drop(sys!!(SYS_MUNMAP, tr_map, 256i64));
-    drop(sys!!(SYS_MUNMAP, buf, buf_size));
+    free(@cast_unchecked<any->>(buf));
     exit 0;
 };

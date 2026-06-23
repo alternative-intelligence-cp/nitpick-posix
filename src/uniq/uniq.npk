@@ -47,20 +47,22 @@ func:main = int32(int32:argc, wild int8->:argv) {
         i = arg_count + 1i32; // break
     }
     
+    int64:fd = 0i64;
     if (file_idx != -1i32) {
         string:file = raw args_at(args, file_idx);
-        int64:fd = sys!!(SYS_OPEN, file, 0i64, 0i64) ? -1i64;
-        if (fd >= 0i64) { fp = raw io_buf_new(fd); } else { fp = 0i64; }
-        if (fp == 0i64) {
-            drop(print_err("uniq: cannot open '"));
-            drop(print_err(file));
-            drop(print_err("'\n"));
-            exit 1;
+        if (string_equals(file, "-")) {
+            fd = 0i64;
+        } else {
+            fd = sys!!(SYS_OPEN, file, 0i64, 0i64) ? -1i64;
+            if (fd < 0i64) {
+                drop(print_err("uniq: cannot open '"));
+                drop(print_err(file));
+                drop(print_err("'\n"));
+                exit 1;
+            }
         }
-    } else {
-        drop(print_err("uniq: reading stdin not implemented\n"));
-        exit 1;
     }
+    fp = raw io_buf_new(fd);
     
     string:prev_line = "";
     int32:first = 1i32;
@@ -104,8 +106,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
         drop(nitpick_libc_mem_free(buf));
     }
     
-    int64:fd_fp = (<- (@cast_unchecked<int64->>(fp + 0i64)));
-    drop(sys!!(SYS_CLOSE, fd_fp));
+    if (fd != 0i64) { drop(sys!!(SYS_CLOSE, fd)); }
     drop(raw io_buf_free(fp));
     exit 0;
 };

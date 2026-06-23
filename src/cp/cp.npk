@@ -113,7 +113,7 @@ func:copy_file = int32(string:src_path, string:dst_path) {
 
 func:copy_recursive = int32(string:src, string:dst, int32:recursive) {
     int64:statbuf = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
-    int64:res = sys!!(SYS_STAT, src, statbuf) ? -1i64; // STAT
+    int64:res = sys!!(6i64, src, statbuf) ? -1i64; // LSTAT first
     if (res < 0i64) {
         drop(print_err("cp: cannot stat '"));
         drop(print_err(src));

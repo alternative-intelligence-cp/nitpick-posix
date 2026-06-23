@@ -14,6 +14,7 @@ extern "libc" {
 use "../vendor/nitpick_args.npk".*;
 use "../vendor/io_utils.npk".*;
 use "../vendor/sys_constants.npk".*;
+use "../vendor/mem_utils.npk".*;
 
 
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
@@ -75,8 +76,8 @@ func:main = int32(int32:argc, wild int8->:argv) {
         }
     }
     
-    int64:buf_size = 1048576i64; // 1MB buffer
-    int64:buf = sys!!(SYS_MMAP, 0i64, buf_size, 3i64, 34i64, -1i64, 0i64) ? -1i64;
+    int64:buf_size = 65536i64; // 1MB buffer
+    int64:buf = @cast_unchecked<int64>(alloc(buf_size));
     if (buf < 0i64) { exit 1; }
     
     int64:col = 0i64;
@@ -123,7 +124,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     if (fd != 0i64) {
         drop(sys!!(SYS_CLOSE, fd));
     }
-    drop(sys!!(SYS_MUNMAP, buf, buf_size));
+    free(@cast_unchecked<any->>(buf));
     
     exit 0;
 };

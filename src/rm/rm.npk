@@ -58,16 +58,13 @@ func:failsafe = int32(tbb32:err) {
 
 func:rm_recursive = int32(string:path, int32:recursive) {
     int64:statbuf = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
-    int64:res = sys!!(SYS_STAT, path, statbuf) ? -1i64; // STAT
+    int64:res = sys!!(6i64, path, statbuf) ? -1i64; // LSTAT first
     if (res < 0i64) {
-        res = sys!!(6i64, path, statbuf) ? -1i64; // LSTAT fallback
-        if (res < 0i64) {
-            drop(print_err("rm: cannot remove '"));
-            drop(print_err(path));
-            drop(print_err("': No such file or directory\n"));
-            drop(sys!!(SYS_MUNMAP, statbuf, 4096i64));
-            pass 1i32;
-        }
+        drop(print_err("rm: cannot remove '"));
+        drop(print_err(path));
+        drop(print_err("': No such file or directory\n"));
+        drop(sys!!(SYS_MUNMAP, statbuf, 4096i64));
+        pass 1i32;
     }
     
     int64:b0 = npk_mem_read_byte(statbuf, 24i64);

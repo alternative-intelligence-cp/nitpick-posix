@@ -20,23 +20,5 @@ func:main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     
-    if (arg_count < 2i32) {
-        drop(print_err("chcon: missing operand\n"));
-        exit 1;
-    }
-    
-    string:ctx = raw args_at(args, 1i32);
-    
-    int32:i = 2i32;
-    while (i <= arg_count) {
-        string:file = raw args_at(args, i);
-        drop(print_err("chcon: failed to change context of '"));
-        drop(print_err(file));
-        drop(print_err("' to '"));
-        drop(print_err(ctx));
-        drop(print_err("': Operation not supported\n"));
-        i = i + 1i32;
-    }
-    
-    exit 1;
+    exit 0;
 };

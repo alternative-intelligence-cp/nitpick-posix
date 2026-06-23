@@ -12,7 +12,7 @@ pub func:args_load_native = string(int32:argc, wild int8->:argv) {
         int64:ptr_to_str = (@cast_unchecked<int64->>(argv_ptr + (@cast_unchecked<int64>(i) * 8i64)))[0];
         int64:ptr = ptr_to_str;
         int64:len = 0i64;
-        while ((<- (@cast_unchecked<uint8->>(ptr + len))) => int64 != 0i64) {
+        while (@cast_unchecked<int64>((<- (@cast_unchecked<uint8->>(ptr + len)))) != 0i64) {
             len = len + 1i64;
         }
         string:s = npk_mem_read_string(ptr, len);

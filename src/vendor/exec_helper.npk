@@ -124,25 +124,25 @@ pub func:sys_execvp_from = int64(int64:start_idx) {
             while (1i32 == 1i32) {
                 int64:tc = npk_mem_read_byte(path_ptr, tok_i);
                 if (tc == 0i64 || tc == 58i64) { break; } // null or ':'
-                <- (@cast_unchecked<uint8->>(pathbuf + j)) = (tc => uint8);
+                <- (@cast_unchecked<uint8->>(pathbuf + j)) = (@cast_unchecked<uint8>(tc));
                 j = j + 1i64;
                 tok_i = tok_i + 1i64;
             }
             
             // Add trailing slash if needed
             if (j > 0i64 && npk_mem_read_byte(pathbuf, j - 1i64) != 47i64) {
-                <- (@cast_unchecked<uint8->>(pathbuf + j)) = (47i64 => uint8);
+                <- (@cast_unchecked<uint8->>(pathbuf + j)) = (@cast_unchecked<uint8>(47i64));
                 j = j + 1i64;
             }
             
             // Append cmd
             int64:k = 0i64;
             while (k < cmd_len) {
-                <- (@cast_unchecked<uint8->>(pathbuf + j)) = (npk_mem_read_byte(cmd_ptr, k) => uint8);
+                <- (@cast_unchecked<uint8->>(pathbuf + j)) = (npk_mem_read_byte@cast_unchecked<uint8>((cmd_ptr, k)));
                 j = j + 1i64;
                 k = k + 1i64;
             }
-            <- (@cast_unchecked<uint8->>(pathbuf + j)) = (0i64 => uint8);
+            <- (@cast_unchecked<uint8->>(pathbuf + j)) = (@cast_unchecked<uint8>(0i64));
             
             int64:res_stat = sys!!(SYS_STAT, pathbuf, statbuf) ? -1i64;
             if (res_stat == 0i64) {
