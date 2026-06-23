@@ -13,6 +13,7 @@ extern func:npk_mem_write_byte = void(int64:ptr, int64:offset, int64:val);
 use "../vendor/nitpick_args.npk".*;
 use "../vendor/singly.npk".*;
 use "../vendor/io_utils.npk".*;
+use "../vendor/sys_constants.npk".*;
 
 
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
@@ -20,12 +21,12 @@ extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
-    pass @cast_unchecked<int32>(sys(WRITE, 2i64, s, len) ? -1i64);
+    pass @cast_unchecked<int32>(sys!!(SYS_WRITE, 2i64, s, len) ? -1i64);
 };
 
 func:print_out = int32(string:s) {
     int64:len = string_length(s);
-    pass @cast_unchecked<int32>(sys(WRITE, 1i64, s, len) ? -1i64);
+    pass @cast_unchecked<int32>(sys!!(SYS_WRITE, 1i64, s, len) ? -1i64);
 };
 
 func:ptr_to_string = string(int64:ptr) {
@@ -76,7 +77,7 @@ func:failsafe = int32(tbb32:err) {
 
 func:read_lines = int64(string:filename) {
     int64:sl = raw SList.create();
-    int64:fd = sys(OPEN, filename, 0i64, 0i64) ? -1i64;
+    int64:fd = sys!!(SYS_OPEN, filename, 0i64, 0i64) ? -1i64;
     if (fd < 0i64) {
         drop(print_err("comm: cannot open '"));
         drop(print_err(filename));
@@ -84,7 +85,7 @@ func:read_lines = int64(string:filename) {
         pass 0i64;
     }
 
-    int64:buf = sys(MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    int64:buf = sys!!(SYS_MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
     if (buf <= 0i64) { pass 0i64; }
     
     int32:running = 1i32;
@@ -92,7 +93,7 @@ func:read_lines = int64(string:filename) {
     int64:line_len = 0i64;
 
     while (running == 1i32) {
-        int64:nread = sys(READ, fd, buf, 65536i64) ? -1i64;
+        int64:nread = sys!!(SYS_READ, fd, buf, 65536i64) ? -1i64;
         if (nread <= 0i64) {
             running = 0i32;
         } else {
@@ -117,8 +118,8 @@ func:read_lines = int64(string:filename) {
     }
 
     drop(nitpick_libc_mem_free(line_buf));
-    drop(sys(MUNMAP, buf, 65536i64));
-    drop(sys(CLOSE, fd));
+    drop(sys!!(SYS_MUNMAP, buf, 65536i64));
+    drop(sys!!(SYS_CLOSE, fd));
     pass sl;
 };
 

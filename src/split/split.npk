@@ -8,6 +8,7 @@ extern "libc" {
 
 use "../vendor/nitpick_args.npk".*;
 use "../vendor/io_utils.npk".*;
+use "../vendor/sys_constants.npk".*;
 
 
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
@@ -15,13 +16,13 @@ extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys(WRITE, 2i64, s, len));
+    drop(sys!!(SYS_WRITE, 2i64, s, len));
     pass 0i32;
 };
 
 func:print_str_safe = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys(WRITE, 1i64, s, len));
+    drop(sys!!(SYS_WRITE, 1i64, s, len));
     pass 0i32;
 };
 
@@ -62,7 +63,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
         exit 1;
     }
     
-    int64:fd_in = sys(OPEN, in_file, 0i64, 0i64) ? -1i64;
+    int64:fd_in = sys!!(SYS_OPEN, in_file, 0i64, 0i64) ? -1i64;
     if (fd_in < 0i64) {
         drop(print_err("split: cannot open '"));
         drop(print_err(in_file));
@@ -71,7 +72,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     }
     
     int64:buf_size = 1048576i64; // 1MB buffer
-    int64:buf = sys(MMAP, 0i64, buf_size, 3i64, 34i64, -1i64, 0i64) ? -1i64;
+    int64:buf = sys!!(SYS_MMAP, 0i64, buf_size, 3i64, 34i64, -1i64, 0i64) ? -1i64;
     if (buf < 0i64) { exit 1; }
     
     int64:lines_in_current = 0i64;
@@ -82,7 +83,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     
     int32:running = 1i32;
     while (running == 1i32) {
-        int64:n = sys(READ, fd_in, buf, buf_size) ? -1i64;
+        int64:n = sys!!(SYS_READ, fd_in, buf, buf_size) ? -1i64;
         if (n <= 0i64) {
             running = 0i32;
         } else {
@@ -93,7 +94,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
                 if (fd_out == -1i64) {
                     string:fname = string_concat(prefix, string_concat(string_from_char(@cast_unchecked<int8>(idx1)), string_from_char(@cast_unchecked<int8>(idx2))));
                     // O_CREAT | O_WRONLY | O_TRUNC = 64 | 1 | 512 = 577
-                    fd_out = sys(OPEN, fname, 577i64, 420i64) ? -1i64; // 420 is 0644 octal
+                    fd_out = sys!!(SYS_OPEN, fname, 577i64, 420i64) ? -1i64; // 420 is 0644 octal
                     idx2 = idx2 + 1i32;
                     if (idx2 > 122i32) {
                         idx2 = 97i32;
@@ -105,8 +106,8 @@ func:main = int32(int32:argc, wild int8->:argv) {
                 if (c == 10i64) {
                     lines_in_current = lines_in_current + 1i64;
                     if (lines_in_current == lines_per_file) {
-                        drop(sys(WRITE, fd_out, buf + start, j - start + 1i64));
-                        drop(sys(CLOSE, fd_out));
+                        drop(sys!!(SYS_WRITE, fd_out, buf + start, j - start + 1i64));
+                        drop(sys!!(SYS_CLOSE, fd_out));
                         fd_out = -1i64;
                         lines_in_current = 0i64;
                         start = j + 1i64;
@@ -116,17 +117,17 @@ func:main = int32(int32:argc, wild int8->:argv) {
             }
             if (fd_out != -1i64) {
                 if (j > start) {
-                    drop(sys(WRITE, fd_out, buf + start, j - start));
+                    drop(sys!!(SYS_WRITE, fd_out, buf + start, j - start));
                 }
             }
         }
     }
     
     if (fd_out != -1i64) {
-        drop(sys(CLOSE, fd_out));
+        drop(sys!!(SYS_CLOSE, fd_out));
     }
-    drop(sys(CLOSE, fd_in));
-    drop(sys(MUNMAP, buf, buf_size));
+    drop(sys!!(SYS_CLOSE, fd_in));
+    drop(sys!!(SYS_MUNMAP, buf, buf_size));
     
     exit 0;
 };

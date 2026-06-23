@@ -12,6 +12,7 @@ extern func:npk_mem_write_byte = void(int64:ptr, int64:offset, int64:val);
 
 use "../vendor/nitpick_args.npk".*;
 use "../vendor/io_utils.npk".*;
+use "../vendor/sys_constants.npk".*;
 
 
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
@@ -19,7 +20,7 @@ extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
-    pass @cast_unchecked<int32>(sys(WRITE, 2i64, s, len) ? -1i64);
+    pass @cast_unchecked<int32>(sys!!(SYS_WRITE, 2i64, s, len) ? -1i64);
 };
 
 func:failsafe = int32(tbb32:err) {
@@ -28,37 +29,21 @@ func:failsafe = int32(tbb32:err) {
 };
 
 func:parse_int = int64(string:s) {
-    int64:res = 0i64;
     int64:len = string_length(s);
-    int64:i = 0i64;
+    if (len == 0i64) { pass 0i64; }
+    
     int64:mult = 1i64;
-    while (i < len) {
-        string:ch = string_substring(s, i, i + 1i64);
-        int64:d = -1i64;
-        if (string_equals(ch, "0")) { d = 0i64; }
-        if (string_equals(ch, "1")) { d = 1i64; }
-        if (string_equals(ch, "2")) { d = 2i64; }
-        if (string_equals(ch, "3")) { d = 3i64; }
-        if (string_equals(ch, "4")) { d = 4i64; }
-        if (string_equals(ch, "5")) { d = 5i64; }
-        if (string_equals(ch, "6")) { d = 6i64; }
-        if (string_equals(ch, "7")) { d = 7i64; }
-        if (string_equals(ch, "8")) { d = 8i64; }
-        if (string_equals(ch, "9")) { d = 9i64; }
-        if (d >= 0i64) {
-            res = (res * 10i64) + d;
-        } else {
-            if (string_equals(ch, "K")) { mult = 1024i64; }
-            if (string_equals(ch, "k")) { mult = 1024i64; }
-            if (string_equals(ch, "M")) { mult = 1048576i64; }
-            if (string_equals(ch, "m")) { mult = 1048576i64; }
-            if (string_equals(ch, "G")) { mult = 1073741824i64; }
-            if (string_equals(ch, "g")) { mult = 1073741824i64; }
-            i = len; // break loop
-        }
-        i = i + 1i64;
-    }
-    pass res * mult;
+    string:last = string_substring(s, len - 1i64, len);
+    
+    if (string_equals(last, "K")) { mult = 1024i64; s = string_substring(s, 0i64, len - 1i64); }
+    if (string_equals(last, "k")) { mult = 1024i64; s = string_substring(s, 0i64, len - 1i64); }
+    if (string_equals(last, "M")) { mult = 1048576i64; s = string_substring(s, 0i64, len - 1i64); }
+    if (string_equals(last, "m")) { mult = 1048576i64; s = string_substring(s, 0i64, len - 1i64); }
+    if (string_equals(last, "G")) { mult = 1073741824i64; s = string_substring(s, 0i64, len - 1i64); }
+    if (string_equals(last, "g")) { mult = 1073741824i64; s = string_substring(s, 0i64, len - 1i64); }
+    
+    int64:val = string_to_int(s);
+    pass val * mult;
 };
 
 // we can write an argument parser that just compares strings
@@ -99,7 +84,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     }
     
     if (string_length(ifile) > 0i64) {
-        fd_in = sys(OPEN, ifile, 0i64, 0i64) ? -1i64;
+        fd_in = sys!!(SYS_OPEN, ifile, 0i64, 0i64) ? -1i64;
         if (fd_in < 0i64) {
             drop(print_err("dd: failed to open input file\n"));
             exit 1;
@@ -107,14 +92,14 @@ func:main = int32(int32:argc, wild int8->:argv) {
     }
     
     if (string_length(ofile) > 0i64) {
-        fd_out = sys(OPEN, ofile, 577i64, 438i64) ? -1i64;
+        fd_out = sys!!(SYS_OPEN, ofile, 577i64, 438i64) ? -1i64;
         if (fd_out < 0i64) {
             drop(print_err("dd: failed to open output file\n"));
             exit 1;
         }
     }
     
-    int64:buf = sys(MMAP, 0i64, bs, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    int64:buf = sys!!(SYS_MMAP, 0i64, bs, 3i64, 34i64, -1i64, 0i64) ? 0i64;
     if (buf <= 0i64) {
         drop(print_err("dd: memory error\n"));
         exit 1;
@@ -131,12 +116,12 @@ func:main = int32(int32:argc, wild int8->:argv) {
             }
         }
         if (running == 1i32) {
-            int64:nread = sys(READ, fd_in, buf, bs) ? -1i64;
+            int64:nread = sys!!(SYS_READ, fd_in, buf, bs) ? -1i64;
             if (nread <= 0i64) {
                 running = 0i32;
             } else {
                 blocks_in = blocks_in + 1i64;
-                int64:nwritten = sys(WRITE, fd_out, buf, nread) ? -1i64;
+                int64:nwritten = sys!!(SYS_WRITE, fd_out, buf, nread) ? -1i64;
                 if (nwritten == nread) {
                     blocks_out = blocks_out + 1i64;
                 }
@@ -144,9 +129,9 @@ func:main = int32(int32:argc, wild int8->:argv) {
         }
     }
     
-    drop(sys(MUNMAP, buf, bs));
-    if (fd_in != 0i64) { drop(sys(CLOSE, fd_in)); }
-    if (fd_out != 1i64) { drop(sys(CLOSE, fd_out)); }
+    drop(sys!!(SYS_MUNMAP, buf, bs));
+    if (fd_in != 0i64) { drop(sys!!(SYS_CLOSE, fd_in)); }
+    if (fd_out != 1i64) { drop(sys!!(SYS_CLOSE, fd_out)); }
     
     exit 0;
 };

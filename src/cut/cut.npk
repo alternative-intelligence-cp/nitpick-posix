@@ -13,6 +13,7 @@ extern "libc" {
 
 use "../vendor/nitpick_args.npk".*;
 use "../vendor/io_utils.npk".*;
+use "../vendor/sys_constants.npk".*;
 
 
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
@@ -20,7 +21,7 @@ extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys(WRITE, 2i64, s, len));
+    drop(sys!!(SYS_WRITE, 2i64, s, len));
     pass 0i32;
 };
 
@@ -95,7 +96,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     int64:fd = 0i64;
     if (file_idx != -1i32) {
         string:file = raw args_at(args, file_idx);
-        fd = sys(OPEN, file, 0i64, 0i64) ? -1i64;
+        fd = sys!!(SYS_OPEN, file, 0i64, 0i64) ? -1i64;
         if (fd < 0i64) {
             drop(print_err("cut: cannot open '"));
             drop(print_err(file));
@@ -105,7 +106,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     }
     
     int64:buf_size = 1048576i64; // 1MB buffer
-    int64:buf = sys(MMAP, 0i64, buf_size, 3i64, 34i64, -1i64, 0i64) ? -1i64;
+    int64:buf = sys!!(SYS_MMAP, 0i64, buf_size, 3i64, 34i64, -1i64, 0i64) ? -1i64;
     if (buf < 0i64) { exit 1; }
     
     int64:current_field = 1i64;
@@ -115,7 +116,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     int64:out_len = 0i64;
     
     while (running == 1i32) {
-        int64:n = sys(READ, fd, buf, buf_size) ? -1i64;
+        int64:n = sys!!(SYS_READ, fd, buf, buf_size) ? -1i64;
         if (n <= 0i64) {
             running = 0i32;
         } else {
@@ -125,7 +126,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
                 if (c == 10i64) {
                     npk_mem_write_byte(out_buf, out_len, 10i64);
                     out_len = out_len + 1i64;
-                    if (out_len >= 65536i64) { drop(sys(WRITE, 1i64, out_buf, out_len)); out_len = 0i64; }
+                    if (out_len >= 65536i64) { drop(sys!!(SYS_WRITE, 1i64, out_buf, out_len)); out_len = 0i64; }
                     current_field = 1i64;
                 } else {
                     if (c == delim) {
@@ -134,7 +135,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
                         if (current_field == target_field) {
                             npk_mem_write_byte(out_buf, out_len, c);
                             out_len = out_len + 1i64;
-                            if (out_len >= 65536i64) { drop(sys(WRITE, 1i64, out_buf, out_len)); out_len = 0i64; }
+                            if (out_len >= 65536i64) { drop(sys!!(SYS_WRITE, 1i64, out_buf, out_len)); out_len = 0i64; }
                         }
                     }
                 }
@@ -144,14 +145,14 @@ func:main = int32(int32:argc, wild int8->:argv) {
     }
     
     if (out_len > 0i64) {
-        drop(sys(WRITE, 1i64, out_buf, out_len));
+        drop(sys!!(SYS_WRITE, 1i64, out_buf, out_len));
     }
     drop(nitpick_libc_mem_free(out_buf));
     
     if (fd != 0i64) {
-        drop(sys(CLOSE, fd));
+        drop(sys!!(SYS_CLOSE, fd));
     }
-    drop(sys(MUNMAP, buf, buf_size));
+    drop(sys!!(SYS_MUNMAP, buf, buf_size));
     
     exit 0;
 };

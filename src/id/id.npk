@@ -1,10 +1,11 @@
 // id.npk
 use "../vendor/io_utils.npk".*;
+use "../vendor/sys_constants.npk".*;
 
 
 func:print_str_safe = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys(WRITE, 1i64, s, len));
+    drop(sys!!(SYS_WRITE, 1i64, s, len));
     pass 0i32;
 };
 
@@ -14,7 +15,7 @@ func:failsafe = int32(tbb32:err) {
 };
 
 func:main = int32(int32:argc, wild int8->:argv) {
-    int64:uid = sys(GETUID) ? -1i64;
+    int64:uid = sys!!(SYS_GETUID) ? -1i64;
     int64:gid = sys(GETGID) ? -1i64;
     int64:euid = sys(GETEUID) ? -1i64;
     int64:egid = sys(GETEGID) ? -1i64;

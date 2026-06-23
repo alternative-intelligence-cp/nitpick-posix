@@ -21,7 +21,7 @@ extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys(WRITE, 2i64, s, len));
+    drop(sys!!(SYS_WRITE, 2i64, s, len));
     pass 0i32;
 };
 
@@ -41,8 +41,8 @@ func:main = int32(int32:argc, wild int8->:argv) {
         exit 1;
     }
     
-    int64:stat_buf = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
-    int64:zero_buf = sys(MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? -1i64; // anonymous mmap gives 0s
+    int64:stat_buf = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
+    int64:zero_buf = sys!!(SYS_MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? -1i64; // anonymous mmap gives 0s
     if (stat_buf < 0i64) { exit 1; }
     if (zero_buf < 0i64) { exit 1; }
     
@@ -59,7 +59,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
             ret = 1i32;
         } else {
             int64:size = npk_mem_read_int64(stat_buf, 48i64); // st_size is 48 offset
-            int64:fd = sys(OPEN, file, 2i64, 0i64) ? -1i64; // O_RDWR = 2
+            int64:fd = sys!!(SYS_OPEN, file, 2i64, 0i64) ? -1i64; // O_RDWR = 2
             if (fd < 0i64) {
                 drop(print_err("shred: cannot open '"));
                 drop(print_err(file));
@@ -75,7 +75,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
                         if (to_write > 65536i64) {
                             to_write = 65536i64;
                         }
-                        int64:w = sys(WRITE, fd, zero_buf, to_write) ? -1i64;
+                        int64:w = sys!!(SYS_WRITE, fd, zero_buf, to_write) ? -1i64;
                         if (w <= 0i64) {
                             // break
                             written = size;
@@ -86,13 +86,13 @@ func:main = int32(int32:argc, wild int8->:argv) {
                     pass_idx = pass_idx + 1i32;
                     drop(sys!!(74i64, fd)); // SYS_FSYNC
                 }
-                drop(sys(CLOSE, fd));
+                drop(sys!!(SYS_CLOSE, fd));
             }
         }
         i = i + 1i32;
     }
     
-    drop(sys(MUNMAP, stat_buf, 4096i64));
-    drop(sys(MUNMAP, zero_buf, 65536i64));
+    drop(sys!!(SYS_MUNMAP, stat_buf, 4096i64));
+    drop(sys!!(SYS_MUNMAP, zero_buf, 65536i64));
     exit ret;
 };

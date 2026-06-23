@@ -10,6 +10,7 @@ extern func:npk_mem_write_byte = int64(int64:ptr, int64:offset, int64:val);
 
 use "../vendor/nitpick_args.npk".*;
 use "../vendor/io_utils.npk".*;
+use "../vendor/sys_constants.npk".*;
 
 
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
@@ -19,39 +20,16 @@ func:print_err = int32(string:s) {
     int64:len = string_length(s);
     drop(s);
     drop(len);
-    pass @cast_unchecked<int32>(sys(WRITE, 2i64, s, len) ? -1i64);
+    pass @cast_unchecked<int32>(sys!!(SYS_WRITE, 2i64, s, len) ? -1i64);
 };
 
-func:parse_int = int64(string:s) {
-    int64:res = 0i64;
-    int64:len = string_length(s);
-    int64:i = 0i64;
-    while (i < len) {
-        string:ch = string_substring(s, i, i + 1i64);
-        int64:d = -1i64;
-        if (string_equals(ch, "0")) { d = 0i64; }
-        if (string_equals(ch, "1")) { d = 1i64; }
-        if (string_equals(ch, "2")) { d = 2i64; }
-        if (string_equals(ch, "3")) { d = 3i64; }
-        if (string_equals(ch, "4")) { d = 4i64; }
-        if (string_equals(ch, "5")) { d = 5i64; }
-        if (string_equals(ch, "6")) { d = 6i64; }
-        if (string_equals(ch, "7")) { d = 7i64; }
-        if (string_equals(ch, "8")) { d = 8i64; }
-        if (string_equals(ch, "9")) { d = 9i64; }
-        if (d >= 0i64) {
-            res = (res * 10i64) + d;
-        }
-        i = i + 1i64;
-    }
-    pass res;
-};
+
 
 func:print_str = int32(string:s) {
     int64:len = string_length(s);
     drop(s);
     drop(len);
-    pass @cast_unchecked<int32>(sys(WRITE, 1i64, s, len) ? -1i64);
+    pass @cast_unchecked<int32>(sys!!(SYS_WRITE, 1i64, s, len) ? -1i64);
 };
 
 func:failsafe = int32(tbb32:err) {
@@ -77,14 +55,14 @@ func:main = int32(int32:argc, wild int8->:argv) {
             if (string_equals(string_substring(arg, 0i64, 1i64), "-")) {
                 if (string_equals(arg, "-n")) {
                     if (i + 1i32 <= arg_count) {
-                        limit_n = raw parse_int(raw args_at(args, i + 1i32));
+                        limit_n = string_to_int(raw args_at(args, i + 1i32));
                         limit_c = -1i64;
                         i = i + 1i32;
                     }
                 } else {
                     if (string_equals(arg, "-c")) {
                         if (i + 1i32 <= arg_count) {
-                            limit_c = raw parse_int(raw args_at(args, i + 1i32));
+                            limit_c = string_to_int(raw args_at(args, i + 1i32));
                             limit_n = -1i64;
                             i = i + 1i32;
                         }
@@ -99,7 +77,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
         i = i + 1i32;
     }
 
-    int64:buf = sys(MMAP, 0i64, 8192i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    int64:buf = sys!!(SYS_MMAP, 0i64, 8192i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
     if (buf <= 0i64) { exit 1; }
     
     int32:exit_status = 0i32;
@@ -128,7 +106,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
         if (is_flag == 0i32) {
             int64:fd = 0i64;
             if (string_equals(filename, "-") == false) {
-                fd = sys(OPEN, filename, 0i64, 0i64) ? -1i64;
+                fd = sys!!(SYS_OPEN, filename, 0i64, 0i64) ? -1i64;
             }
 
             if (fd < 0i64) {
@@ -160,7 +138,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
                 if (limit_c == 0i64) { running = 0i32; }
                 
                 while (running == 1i32) {
-                    int64:bytes_read = sys(READ, fd, buf, 8192i64) ? -1i64;
+                    int64:bytes_read = sys!!(SYS_READ, fd, buf, 8192i64) ? -1i64;
                     if (bytes_read <= 0i64) {
                         running = 0i32;
                     } else {
@@ -169,7 +147,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
                             if (rem_c < to_write) {
                                 to_write = rem_c;
                             }
-                            drop(sys(WRITE, 1i64, buf, to_write));
+                            drop(sys!!(SYS_WRITE, 1i64, buf, to_write));
                             rem_c = rem_c - to_write;
                             if (rem_c <= 0i64) {
                                 running = 0i32;
@@ -193,17 +171,17 @@ func:main = int32(int32:argc, wild int8->:argv) {
                                         in_idx = in_idx + 1i64;
                                     }
                                 }
-                                drop(sys(WRITE, 1i64, buf, bytes_read));
+                                drop(sys!!(SYS_WRITE, 1i64, buf, bytes_read));
                             }
                         }
                     }
                 }
-                if (fd != 0i64) { drop(sys(CLOSE, fd)); }
+                if (fd != 0i64) { drop(sys!!(SYS_CLOSE, fd)); }
             }
         }
         i = i + 1i32;
     }
     
-    drop(sys(MUNMAP, buf, 8192i64));
+    drop(sys!!(SYS_MUNMAP, buf, 8192i64));
     exit exit_status;
 };

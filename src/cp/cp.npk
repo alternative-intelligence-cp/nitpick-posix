@@ -23,7 +23,7 @@ func:print_err = int32(string:s) {
     int64:len = string_length(s);
     drop(s);
     drop(len);
-    pass @cast_unchecked<int32>(sys(WRITE, 2i64, s, len) ? -1i64);
+    pass @cast_unchecked<int32>(sys!!(SYS_WRITE, 2i64, s, len) ? -1i64);
 };
 
 func:str_clone = int64(int64:s) {
@@ -58,7 +58,7 @@ func:failsafe = int32(tbb32:err) {
 };
 
 func:copy_file = int32(string:src_path, string:dst_path) {
-    int64:src_fd = sys(OPEN, src_path, 0i64, 0i64) ? -1i64;
+    int64:src_fd = sys!!(SYS_OPEN, src_path, 0i64, 0i64) ? -1i64;
     if (src_fd < 0i64) {
         drop(print_err("cp: cannot open '"));
         drop(print_err(src_path));
@@ -66,20 +66,20 @@ func:copy_file = int32(string:src_path, string:dst_path) {
         pass 1i32;
     }
 
-    int64:dst_fd = sys(OPEN, dst_path, 577i64, 438i64) ? -1i64;
+    int64:dst_fd = sys!!(SYS_OPEN, dst_path, 577i64, 438i64) ? -1i64;
     if (dst_fd < 0i64) {
         drop(print_err("cp: cannot create regular file '"));
         drop(print_err(dst_path));
         drop(print_err("'\n"));
-        drop(sys(CLOSE, src_fd));
+        drop(sys!!(SYS_CLOSE, src_fd));
         pass 1i32;
     }
 
-    int64:buf = sys(MMAP, 0i64, 8192i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    int64:buf = sys!!(SYS_MMAP, 0i64, 8192i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
     if (buf <= 0i64) { 
         drop(print_err("cp: memory allocation error\n"));
-        drop(sys(CLOSE, src_fd));
-        drop(sys(CLOSE, dst_fd));
+        drop(sys!!(SYS_CLOSE, src_fd));
+        drop(sys!!(SYS_CLOSE, dst_fd));
         pass 1i32; 
     }
     
@@ -87,7 +87,7 @@ func:copy_file = int32(string:src_path, string:dst_path) {
     int32:exit_status = 0i32;
 
     while (running == 1i32) {
-        int64:bytes_read = sys(READ, src_fd, buf, 8192i64) ? -1i64;
+        int64:bytes_read = sys!!(SYS_READ, src_fd, buf, 8192i64) ? -1i64;
         if (bytes_read <= 0i64) {
             running = 0i32;
             if (bytes_read < 0i64) {
@@ -95,7 +95,7 @@ func:copy_file = int32(string:src_path, string:dst_path) {
                 exit_status = 1i32;
             }
         } else {
-            int64:bytes_written = sys(WRITE, dst_fd, buf, bytes_read) ? -1i64;
+            int64:bytes_written = sys!!(SYS_WRITE, dst_fd, buf, bytes_read) ? -1i64;
             if (bytes_written != bytes_read) {
                 drop(print_err("cp: error writing to destination file\n"));
                 running = 0i32;
@@ -104,21 +104,21 @@ func:copy_file = int32(string:src_path, string:dst_path) {
         }
     }
     
-    drop(sys(CLOSE, src_fd));
-    drop(sys(CLOSE, dst_fd));
-    drop(sys(MUNMAP, buf, 8192i64));
+    drop(sys!!(SYS_CLOSE, src_fd));
+    drop(sys!!(SYS_CLOSE, dst_fd));
+    drop(sys!!(SYS_MUNMAP, buf, 8192i64));
     
     pass exit_status;
 };
 
 func:copy_recursive = int32(string:src, string:dst, int32:recursive) {
-    int64:statbuf = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    int64:statbuf = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
     int64:res = sys!!(SYS_STAT, src, statbuf) ? -1i64; // STAT
     if (res < 0i64) {
         drop(print_err("cp: cannot stat '"));
         drop(print_err(src));
         drop(print_err("': No such file or directory\n"));
-        drop(sys(MUNMAP, statbuf, 4096i64));
+        drop(sys!!(SYS_MUNMAP, statbuf, 4096i64));
         pass 1i32;
     }
     
@@ -128,7 +128,7 @@ func:copy_recursive = int32(string:src, string:dst, int32:recursive) {
     int64:b3 = npk_mem_read_byte(statbuf, 27i64);
     int64:mode = b0 | (b1 << 8i64) | (b2 << 16i64) | (b3 << 24i64);
     int64:is_dir = mode & 16384i64;
-    drop(sys(MUNMAP, statbuf, 4096i64));
+    drop(sys!!(SYS_MUNMAP, statbuf, 4096i64));
 
     if (is_dir != 0i64) {
         if (recursive == 0i32) {
@@ -141,7 +141,7 @@ func:copy_recursive = int32(string:src, string:dst, int32:recursive) {
         // Try to create directory
         drop(sys!!(SYS_MKDIR, dst, 493i64)); // MKDIR 0755
         
-        int64:fd = sys(OPEN, src, 65536i64, 0i64) ? -1i64;
+        int64:fd = sys!!(SYS_OPEN, src, 65536i64, 0i64) ? -1i64;
         if (fd < 0i64) {
             drop(print_err("cp: cannot open directory '"));
             drop(print_err(src));
@@ -149,9 +149,9 @@ func:copy_recursive = int32(string:src, string:dst, int32:recursive) {
             pass 1i32;
         }
 
-        int64:buf = sys(MMAP, 0i64, 32768i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
+        int64:buf = sys!!(SYS_MMAP, 0i64, 32768i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
         if (buf < 0i64) {
-            drop(sys(CLOSE, fd));
+            drop(sys!!(SYS_CLOSE, fd));
             pass 1i32;
         }
 
@@ -195,8 +195,8 @@ func:copy_recursive = int32(string:src, string:dst, int32:recursive) {
             }
         }
         
-        drop(sys(MUNMAP, buf, 32768i64));
-        drop(sys(CLOSE, fd));
+        drop(sys!!(SYS_MUNMAP, buf, 32768i64));
+        drop(sys!!(SYS_CLOSE, fd));
 
         while (raw SList.is_empty(sl) == 0i32) {
             int64:child_ptr = raw SList.pop_front(sl);

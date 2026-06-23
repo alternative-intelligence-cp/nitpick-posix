@@ -22,7 +22,7 @@ func:print_err = int32(string:s) {
     int64:len = string_length(s);
     drop(s);
     drop(len);
-    pass @cast_unchecked<int32>(sys(WRITE, 2i64, s, len) ? -1i64);
+    pass @cast_unchecked<int32>(sys!!(SYS_WRITE, 2i64, s, len) ? -1i64);
 };
 
 func:str_clone = int64(int64:s) {
@@ -57,7 +57,7 @@ func:failsafe = int32(tbb32:err) {
 };
 
 func:rm_recursive = int32(string:path, int32:recursive) {
-    int64:statbuf = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    int64:statbuf = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
     int64:res = sys!!(SYS_STAT, path, statbuf) ? -1i64; // STAT
     if (res < 0i64) {
         res = sys!!(6i64, path, statbuf) ? -1i64; // LSTAT fallback
@@ -65,7 +65,7 @@ func:rm_recursive = int32(string:path, int32:recursive) {
             drop(print_err("rm: cannot remove '"));
             drop(print_err(path));
             drop(print_err("': No such file or directory\n"));
-            drop(sys(MUNMAP, statbuf, 4096i64));
+            drop(sys!!(SYS_MUNMAP, statbuf, 4096i64));
             pass 1i32;
         }
     }
@@ -76,7 +76,7 @@ func:rm_recursive = int32(string:path, int32:recursive) {
     int64:b3 = npk_mem_read_byte(statbuf, 27i64);
     int64:mode = b0 | (b1 << 8i64) | (b2 << 16i64) | (b3 << 24i64);
     int64:is_dir = mode & 16384i64;
-    drop(sys(MUNMAP, statbuf, 4096i64));
+    drop(sys!!(SYS_MUNMAP, statbuf, 4096i64));
 
     if (is_dir != 0i64) {
         if (recursive == 0i32) {
@@ -86,7 +86,7 @@ func:rm_recursive = int32(string:path, int32:recursive) {
             pass 1i32;
         }
 
-        int64:fd = sys(OPEN, path, 65536i64, 0i64) ? -1i64;
+        int64:fd = sys!!(SYS_OPEN, path, 65536i64, 0i64) ? -1i64;
         if (fd < 0i64) {
             drop(print_err("rm: cannot open directory '"));
             drop(print_err(path));
@@ -94,9 +94,9 @@ func:rm_recursive = int32(string:path, int32:recursive) {
             pass 1i32;
         }
 
-        int64:buf = sys(MMAP, 0i64, 32768i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
+        int64:buf = sys!!(SYS_MMAP, 0i64, 32768i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
         if (buf < 0i64) {
-            drop(sys(CLOSE, fd));
+            drop(sys!!(SYS_CLOSE, fd));
             pass 1i32;
         }
 
@@ -140,8 +140,8 @@ func:rm_recursive = int32(string:path, int32:recursive) {
             }
         }
         
-        drop(sys(MUNMAP, buf, 32768i64));
-        drop(sys(CLOSE, fd));
+        drop(sys!!(SYS_MUNMAP, buf, 32768i64));
+        drop(sys!!(SYS_CLOSE, fd));
 
         while (raw SList.is_empty(sl) == 0i32) {
             int64:child_ptr = raw SList.pop_front(sl);

@@ -2,12 +2,12 @@
 
 use "../vendor/nitpick_args.npk".*;
 use "../vendor/io_utils.npk".*;
+use "../vendor/sys_constants.npk".*;
 
 
 extern "libc" {
-    func:fopen  = int64(string:path, string:mode);
-    func:fgetc  = int32(int64:fp);
-    func:fclose = int32(int64:fp);
+    func:malloc = int64(int64:bytes);
+    func:nitpick_libc_mem_free = int32(int64:ptr);
 }
 
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
@@ -15,7 +15,7 @@ extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys(WRITE, 2i64, s, len));
+    drop(sys!!(SYS_WRITE, 2i64, s, len));
     pass 0i32;
 };
 
@@ -45,55 +45,69 @@ func:main = int32(int32:argc, wild int8->:argv) {
     if (len1 == 0i64) { exit 0; }
     if (len2 == 0i64) { exit 0; }
     
+    int64:tr_map = sys!!(SYS_MMAP, 0i64, 256i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
+    int64:i_init = 0i64;
+    while (i_init < 256i64) {
+        npk_mem_write_byte(tr_map, i_init, i_init);
+        i_init = i_init + 1i64;
+    }
+    
+    // Now map set1 to set2
+    int64:i_set = 0i64;
+    while (i_set < len1) {
+        string:c1 = string_char_at(set1, i_set);
+        int64:idx2 = i_set;
+        if (idx2 >= len2) {
+            idx2 = len2 - 1i64;
+        }
+        string:c2 = string_char_at(set2, idx2);
+        
+        // Find their ASCII values. Since string_char_at is a string, we check equality 1 to 255.
+        // We do this ONCE during setup, so it's perfectly fine.
+        int64:v1 = 0i64;
+        int64:k1 = 1i64;
+        while (k1 < 256i64) {
+            if (string_equals(c1, string_from_char(@cast_unchecked<int8>(k1)))) { v1 = k1; k1 = 300i64; }
+            k1 = k1 + 1i64;
+        }
+        
+        int64:v2 = 0i64;
+        int64:k2 = 1i64;
+        while (k2 < 256i64) {
+            if (string_equals(c2, string_from_char(@cast_unchecked<int8>(k2)))) { v2 = k2; k2 = 300i64; }
+            k2 = k2 + 1i64;
+        }
+        
+        npk_mem_write_byte(tr_map, v1, v2);
+        i_set = i_set + 1i64;
+    }
+    
     int64:buf_size = 1048576i64; // 1MB buffer
-    int64:buf = sys(MMAP, 0i64, buf_size, 3i64, 34i64, -1i64, 0i64) ? -1i64;
+    int64:buf = sys!!(SYS_MMAP, 0i64, buf_size, 3i64, 34i64, -1i64, 0i64) ? -1i64;
     if (buf < 0i64) { exit 1; }
     
     int32:running = 1i32;
     int64:fd = 0i64; // stdin
     
     while (running == 1i32) {
-        int64:n = sys(READ, fd, buf, buf_size) ? -1i64;
+        int64:n = sys!!(SYS_READ, fd, buf, buf_size) ? -1i64;
         if (n <= 0i64) {
             running = 0i32;
         } else {
             int64:j = 0i64;
             while (j < n) {
                 int64:c = npk_mem_read_byte(buf, j);
-                int64:i = 0i64;
-                int32:matched = 0i32;
-                while (i < len1) {
-                    string:c1 = string_char_at(set1, i);
-                    // get ascii of c1
-                    // simple char comparison
-                    string:sc = string_from_char(@cast_unchecked<int8>(c));
-                    if (string_equals(c1, sc)) {
-                        // replace it
-                        int64:idx2 = i;
-                        if (idx2 >= len2) {
-                            idx2 = len2 - 1i64;
-                        }
-                        string:c2 = string_char_at(set2, idx2);
-                        // find its ascii
-                        int64:k = 1i64;
-                        while (k < 256i64) {
-                            if (string_equals(c2, string_from_char(@cast_unchecked<int8>(k)))) {
-                                drop(npk_mem_write_byte(buf, j, k));
-                                k = 300i64;
-                            }
-                            k = k + 1i64;
-                        }
-                        i = len1; // break
-                        matched = 1i32;
-                    }
-                    i = i + 1i64;
+                int64:mapped_c = npk_mem_read_byte(tr_map, c);
+                if (mapped_c != c) {
+                    drop(npk_mem_write_byte(buf, j, mapped_c));
                 }
                 j = j + 1i64;
             }
-            drop(sys(WRITE, 1i64, buf, n));
+            drop(sys!!(SYS_WRITE, 1i64, buf, n));
         }
     }
     
-    drop(sys(MUNMAP, buf, buf_size));
+    drop(sys!!(SYS_MUNMAP, tr_map, 256i64));
+    drop(sys!!(SYS_MUNMAP, buf, buf_size));
     exit 0;
 };

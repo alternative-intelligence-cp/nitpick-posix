@@ -13,6 +13,7 @@ extern func:npk_mem_write_byte = void(int64:ptr, int64:offset, int64:val);
 use "../vendor/nitpick_args.npk".*;
 use "../vendor/singly.npk".*;
 use "../vendor/io_utils.npk".*;
+use "../vendor/sys_constants.npk".*;
 
 
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
@@ -20,12 +21,12 @@ extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
-    pass @cast_unchecked<int32>(sys(WRITE, 2i64, s, len) ? -1i64);
+    pass @cast_unchecked<int32>(sys!!(SYS_WRITE, 2i64, s, len) ? -1i64);
 };
 
 func:print_out = int32(string:s) {
     int64:len = string_length(s);
-    pass @cast_unchecked<int32>(sys(WRITE, 1i64, s, len) ? -1i64);
+    pass @cast_unchecked<int32>(sys!!(SYS_WRITE, 1i64, s, len) ? -1i64);
 };
 
 func:ptr_to_string = string(int64:ptr) {
@@ -89,7 +90,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
             // we must create a copy in an int64 pointer to store in files
             string:arg_s = string_concat(arg, string_from_char(@cast_unchecked<int8>(0i32)));
             // Can't cast string to int64 directly, let's open the file!
-            int64:fd = sys(OPEN, arg, 0i64, 0i64) ? -1i64;
+            int64:fd = sys!!(SYS_OPEN, arg, 0i64, 0i64) ? -1i64;
             if (fd >= 0i64) {
                 drop(SList.push_back(files, fd));
             } else {
@@ -110,7 +111,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     while (raw SList.is_empty(files) == 0i32) {
         int64:fd = raw SList.pop_front(files);
         
-        int64:buf = sys(MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+        int64:buf = sys!!(SYS_MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
         if (buf <= 0i64) { exit 1; }
         
         int32:running = 1i32;
@@ -118,7 +119,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
         int64:line_len = 0i64;
 
         while (running == 1i32) {
-            int64:nread = sys(READ, fd, buf, 65536i64) ? -1i64;
+            int64:nread = sys!!(SYS_READ, fd, buf, 65536i64) ? -1i64;
             if (nread <= 0i64) {
                 running = 0i32;
             } else {
@@ -143,8 +144,8 @@ func:main = int32(int32:argc, wild int8->:argv) {
         }
 
         drop(nitpick_libc_mem_free(line_buf));
-        drop(sys(MUNMAP, buf, 65536i64));
-        if (fd > 0i64) { drop(sys(CLOSE, fd)); }
+        drop(sys!!(SYS_MUNMAP, buf, 65536i64));
+        if (fd > 0i64) { drop(sys!!(SYS_CLOSE, fd)); }
     }
     
     drop(SList.destroy(files));

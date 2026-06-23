@@ -1,13 +1,10 @@
 // cmp.npk
 
-extern "libc" {
-    func:fopen  = int64(string:path, string:mode);
-    func:fgetc  = int32(int64:fp);
-    func:fclose = int32(int64:fp);
-}
+
 
 use "../vendor/nitpick_args.npk".*;
 use "../vendor/io_utils.npk".*;
+use "../vendor/sys_constants.npk".*;
 
 
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
@@ -15,13 +12,13 @@ extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys(WRITE, 2i64, s, len));
+    drop(sys!!(SYS_WRITE, 2i64, s, len));
     pass 0i32;
 };
 
 func:print_str_safe = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys(WRITE, 1i64, s, len));
+    drop(sys!!(SYS_WRITE, 1i64, s, len));
     pass 0i32;
 };
 
@@ -42,29 +39,31 @@ func:main = int32(int32:argc, wild int8->:argv) {
     string:file1 = raw args_at(args, 1i32);
     string:file2 = raw args_at(args, 2i32);
     
-    int64:fp1 = fopen(file1, "r");
-    if (fp1 == 0i64) {
+    int64:fd1 = sys!!(SYS_OPEN, file1, 0i64, 0i64) ? -1i64;
+    if (fd1 < 0i64) {
         drop(print_err("cmp: cannot open '"));
         drop(print_err(file1));
         drop(print_err("'\n"));
         exit 2;
     }
+    int64:fp1 = raw io_buf_new(fd1);
     
-    int64:fp2 = fopen(file2, "r");
-    if (fp2 == 0i64) {
+    int64:fd2 = sys!!(SYS_OPEN, file2, 0i64, 0i64) ? -1i64;
+    if (fd2 < 0i64) {
         drop(print_err("cmp: cannot open '"));
         drop(print_err(file2));
         drop(print_err("'\n"));
         exit 2;
     }
+    int64:fp2 = raw io_buf_new(fd2);
     
     int32:running = 1i32;
     int64:byte_num = 1i64;
     int64:line_num = 1i64;
     
     while (running == 1i32) {
-        int32:c1 = fgetc(fp1);
-        int32:c2 = fgetc(fp2);
+        int32:c1 = raw io_buf_getc(fp1);
+        int32:c2 = raw io_buf_getc(fp2);
         
         if (c1 != c2) {
             if (c1 < 0i32) {
@@ -101,7 +100,11 @@ func:main = int32(int32:argc, wild int8->:argv) {
         }
     }
     
-    drop(fclose(fp1));
-    drop(fclose(fp2));
+    int64:fd_1 = (<- (@cast_unchecked<int64->>(fp1 + 0i64)));
+    int64:fd_2 = (<- (@cast_unchecked<int64->>(fp2 + 0i64)));
+    drop(sys!!(SYS_CLOSE, fd_1));
+    drop(sys!!(SYS_CLOSE, fd_2));
+    drop(raw io_buf_free(fp1));
+    drop(raw io_buf_free(fp2));
     exit 0;
 };

@@ -13,13 +13,13 @@ extern "libc" {
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
 pub func:args_load = string() {
-    int64:fd = sys(OPEN, "/proc/self/cmdline", 0i64, 0i64) ? -1i64;
+    int64:fd = sys!!(SYS_OPEN, "/proc/self/cmdline", 0i64, 0i64) ? -1i64;
     if (fd < 0i64) { pass("|"); }
     string:result  = "|";
     string:current = "";
-    int64:buf = sys(MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    int64:buf = sys!!(SYS_MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
     if (buf > 0i64) {
-        int64:nread = sys(READ, fd, buf, 65536i64) ? -1i64;
+        int64:nread = sys!!(SYS_READ, fd, buf, 65536i64) ? -1i64;
         if (nread > 0i64) {
             int64:i = 0i64;
             while (i < nread) {
@@ -35,9 +35,9 @@ pub func:args_load = string() {
                 i = i + 1i64;
             }
         }
-        drop(sys(MUNMAP, buf, 65536i64));
+        drop(sys!!(SYS_MUNMAP, buf, 65536i64));
     }
-    drop(sys(CLOSE, fd));
+    drop(sys!!(SYS_CLOSE, fd));
     if (string_length(current) > 0i64) {
         result = string_concat(result, string_concat(current, "|"));
     }

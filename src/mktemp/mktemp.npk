@@ -21,13 +21,13 @@ extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys(WRITE, 2i64, s, len));
+    drop(sys!!(SYS_WRITE, 2i64, s, len));
     pass 0i32;
 };
 
 func:print_str_safe = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys(WRITE, 1i64, s, len));
+    drop(sys!!(SYS_WRITE, 1i64, s, len));
     pass 0i32;
 };
 
@@ -51,7 +51,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
         template = raw args_at(args, 1i32);
     }
     
-    int64:urandom_fd = sys(OPEN, "/dev/urandom", 0i64, 0i64) ? -1i64;
+    int64:urandom_fd = sys!!(SYS_OPEN, "/dev/urandom", 0i64, 0i64) ? -1i64;
     if (urandom_fd < 0i64) {
         drop(print_err("mktemp: cannot open /dev/urandom\n"));
         exit 1;
@@ -101,7 +101,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     while (tries < 1000i32) {
         if (success == 0i64) {
             // Read more bytes than x_count to allow for rejection sampling
-            drop(sys(READ, urandom_fd, buf, x_count * 2i64));
+            drop(sys!!(SYS_READ, urandom_fd, buf, x_count * 2i64));
             string:rand_str = "";
             int64:j = 0i64;
             int64:k = 0i64;
@@ -109,7 +109,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
                 if (k >= x_count * 2i64) {
                     // if we run out, just use modulo bias, it's fine
                     k = 0i64; 
-                    drop(sys(READ, urandom_fd, buf, x_count * 2i64));
+                    drop(sys!!(SYS_READ, urandom_fd, buf, x_count * 2i64));
                 }
                 int64:c = npk_mem_read_byte(buf, k);
                 k = k + 1i64;
@@ -123,7 +123,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
             // O_CREAT | O_EXCL | O_RDWR = 64 + 128 + 2 = 194
             int64:res = sys!!(SYS_OPEN, final_path, 194i64, 384i64) ? -1i64; // OPEN is 2, 0600 is 384
             if (res >= 0i64) {
-                drop(sys(CLOSE, res));
+                drop(sys!!(SYS_CLOSE, res));
                 success = 1i64;
             }
         }
@@ -131,7 +131,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     }
     
     drop(nitpick_libc_mem_free(buf));
-    drop(sys(CLOSE, urandom_fd));
+    drop(sys!!(SYS_CLOSE, urandom_fd));
     
     if (success == 1i64) {
         drop(print_str_safe(final_path));

@@ -10,6 +10,7 @@ extern func:npk_mem_write_byte = int32(int64:ptr, int64:offset, int64:value);
 
 use "../vendor/nitpick_args.npk".*;
 use "../vendor/io_utils.npk".*;
+use "../vendor/sys_constants.npk".*;
 
 
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
@@ -19,7 +20,7 @@ func:print_err = int32(string:s) {
     int64:len = string_length(s);
     drop(s);
     drop(len);
-    pass @cast_unchecked<int32>(sys(WRITE, 2i64, s, len) ? -1i64);
+    pass @cast_unchecked<int32>(sys!!(SYS_WRITE, 2i64, s, len) ? -1i64);
 };
 
 func:failsafe = int32(tbb32:err) {
@@ -58,7 +59,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     }
     
     // allocate 16 bytes for struct timespec
-    int64:req = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
+    int64:req = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
     if (req < 0i64) {
         exit 1;
     }
@@ -68,7 +69,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     
     int64:res = sys(NANOSLEEP, req, 0i64) ? -1i64;
     
-    drop(sys(MUNMAP, req, 4096i64));
+    drop(sys!!(SYS_MUNMAP, req, 4096i64));
     
     if (res < 0i64) {
         exit 1;

@@ -1,18 +1,21 @@
 // whoami.npk
 
 extern "libc" {
-    func:fopen  = int64(string:path, string:mode);
-    func:fgetc  = int32(int64:fp);
-    func:fclose = int32(int64:fp);
+    func:malloc = int64(int64:bytes);
+    func:nitpick_libc_mem_free = int32(int64:ptr);
 }
 
 use "../vendor/nitpick_args.npk".*;
 use "../vendor/io_utils.npk".*;
+use "../vendor/sys_constants.npk".*;
+
+extern func:npk_mem_read_string = string(int64:ptr, int64:max_len);
+extern func:npk_mem_write_byte = void(int64:ptr, int64:offset, int64:val);
 
 
 func:print_str_safe = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys(WRITE, 1i64, s, len));
+    drop(sys!!(SYS_WRITE, 1i64, s, len));
     pass 0i32;
 };
 
@@ -22,10 +25,12 @@ func:failsafe = int32(tbb32:err) {
 };
 
 func:main = int32(int32:argc, wild int8->:argv) {
-    int64:uid = sys(GETUID) ? -1i64;
+    int64:uid = sys!!(SYS_GETUID) ? -1i64;
     string:uid_str = string_from_int(uid);
     
-    int64:fp = fopen("/etc/passwd", "r");
+    int64:fd_pw = sys!!(SYS_OPEN, "/etc/passwd", 0i64, 0i64) ? -1i64;
+    int64:fp = 0i64;
+    if (fd_pw >= 0i64) { fp = raw io_buf_new(fd_pw); }
     if (fp == 0i64) {
         // fallback to just printing uid
         drop(print_str_safe(uid_str));
@@ -34,41 +39,52 @@ func:main = int32(int32:argc, wild int8->:argv) {
     }
     
     string:username = "";
-    string:current_field = "";
+    int64:cf_buf = malloc(4096i64);
+    int64:cf_len = 0i64;
     int64:field_index = 0i64;
     
-    int32:c = fgetc(fp);
+    int32:c = raw io_buf_getc(fp);
     while (c >= 0i32) {
         if (c == 10i32) { // newline
             // reset
             username = "";
-            current_field = "";
+            cf_len = 0i64;
             field_index = 0i64;
         } else {
             if (c == 58i32) { // colon
                 if (field_index == 0i64) {
-                    username = current_field;
+                    username = npk_mem_read_string(cf_buf, cf_len);
                 } else {
                     if (field_index == 2i64) {
+                        string:current_field = npk_mem_read_string(cf_buf, cf_len);
                         if (string_equals(current_field, uid_str)) {
                             // Match!
                             drop(print_str_safe(username));
                             drop(print_str_safe("\n"));
-                            drop(fclose(fp));
+                            drop(nitpick_libc_mem_free(cf_buf));
+                            int64:fd = (<- (@cast_unchecked<int64->>(fp + 0i64)));
+                            drop(sys!!(SYS_CLOSE, fd));
+                            drop(raw io_buf_free(fp));
                             exit 0;
                         }
                     }
                 }
-                current_field = "";
+                cf_len = 0i64;
                 field_index = field_index + 1i64;
             } else {
-                current_field = string_concat(current_field, string_from_char(@cast_unchecked<int8>(c)));
+                if (cf_len < 4096i64) {
+                    npk_mem_write_byte(cf_buf, cf_len, @cast_unchecked<int64>(c));
+                    cf_len = cf_len + 1i64;
+                }
             }
         }
-        c = fgetc(fp);
+        c = raw io_buf_getc(fp);
     }
     
-    drop(fclose(fp));
+    drop(nitpick_libc_mem_free(cf_buf));
+    int64:fd_fp = (<- (@cast_unchecked<int64->>(fp + 0i64)));
+    drop(sys!!(SYS_CLOSE, fd_fp));
+    drop(raw io_buf_free(fp));
     
     // fallback if not found
     drop(print_str_safe(uid_str));

@@ -13,6 +13,7 @@ extern "libc" {
 
 use "../vendor/nitpick_args.npk".*;
 use "../vendor/io_utils.npk".*;
+use "../vendor/sys_constants.npk".*;
 
 
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
@@ -20,12 +21,12 @@ extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
-    pass @cast_unchecked<int32>(sys(WRITE, 2i64, s, len) ? -1i64);
+    pass @cast_unchecked<int32>(sys!!(SYS_WRITE, 2i64, s, len) ? -1i64);
 };
 
 func:print_out = int32(string:s) {
     int64:len = string_length(s);
-    pass @cast_unchecked<int32>(sys(WRITE, 1i64, s, len) ? -1i64);
+    pass @cast_unchecked<int32>(sys!!(SYS_WRITE, 1i64, s, len) ? -1i64);
 };
 
 func:print_page_header = int32(string:filename, int64:page) {
@@ -50,7 +51,7 @@ func:failsafe = int32(tbb32:err) {
 };
 
 func:pr_file = int32(string:filename) {
-    int64:fd = sys(OPEN, filename, 0i64, 0i64) ? -1i64;
+    int64:fd = sys!!(SYS_OPEN, filename, 0i64, 0i64) ? -1i64;
     if (fd < 0i64) {
         drop(print_err("pr: cannot open '"));
         drop(print_err(filename));
@@ -58,7 +59,7 @@ func:pr_file = int32(string:filename) {
         pass 1i32;
     }
 
-    int64:buf = sys(MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    int64:buf = sys!!(SYS_MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
     if (buf <= 0i64) { pass 1i32; }
     
     int32:running = 1i32;
@@ -71,7 +72,7 @@ func:pr_file = int32(string:filename) {
     int64:out_len = 0i64;
 
     while (running == 1i32) {
-        int64:nread = sys(READ, fd, buf, 65536i64) ? -1i64;
+        int64:nread = sys!!(SYS_READ, fd, buf, 65536i64) ? -1i64;
         if (nread <= 0i64) {
             running = 0i32;
         } else {
@@ -80,12 +81,12 @@ func:pr_file = int32(string:filename) {
                 int64:c = npk_mem_read_byte(buf, pos);
                 npk_mem_write_byte(out_buf, out_len, c);
                 out_len = out_len + 1i64;
-                if (out_len >= 65536i64) { drop(sys(WRITE, 1i64, out_buf, out_len)); out_len = 0i64; }
+                if (out_len >= 65536i64) { drop(sys!!(SYS_WRITE, 1i64, out_buf, out_len)); out_len = 0i64; }
                 
                 if (c == 10i64) { // '\n'
                     line_count = line_count + 1i64;
                     if (line_count >= 56i64) {
-                        if (out_len > 0i64) { drop(sys(WRITE, 1i64, out_buf, out_len)); out_len = 0i64; }
+                        if (out_len > 0i64) { drop(sys!!(SYS_WRITE, 1i64, out_buf, out_len)); out_len = 0i64; }
                         // Footer padding
                         drop(print_out("\n\n\n\n\n"));
                         page_count = page_count + 1i64;
@@ -102,15 +103,15 @@ func:pr_file = int32(string:filename) {
     while (line_count < 56i64) {
         npk_mem_write_byte(out_buf, out_len, 10i64);
         out_len = out_len + 1i64;
-        if (out_len >= 65536i64) { drop(sys(WRITE, 1i64, out_buf, out_len)); out_len = 0i64; }
+        if (out_len >= 65536i64) { drop(sys!!(SYS_WRITE, 1i64, out_buf, out_len)); out_len = 0i64; }
         line_count = line_count + 1i64;
     }
-    if (out_len > 0i64) { drop(sys(WRITE, 1i64, out_buf, out_len)); out_len = 0i64; }
+    if (out_len > 0i64) { drop(sys!!(SYS_WRITE, 1i64, out_buf, out_len)); out_len = 0i64; }
     drop(print_out("\n\n\n\n\n")); // footer
 
     drop(nitpick_libc_mem_free(out_buf));
-    drop(sys(MUNMAP, buf, 65536i64));
-    drop(sys(CLOSE, fd));
+    drop(sys!!(SYS_MUNMAP, buf, 65536i64));
+    drop(sys!!(SYS_CLOSE, fd));
     pass 0i32;
 };
 
