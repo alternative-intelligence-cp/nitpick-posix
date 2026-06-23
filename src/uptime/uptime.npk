@@ -1,4 +1,6 @@
 // uptime.npk
+use "../vendor/io_utils.npk".*;
+
 
 extern "libc" {
     func:fopen  = int64(string:path, string:mode);
@@ -19,7 +21,7 @@ func:print_str_safe = int32(string:s) {
 };
 
 func:failsafe = int32(tbb32:err) {
-    drop(err);
+    drop(standard_failsafe(err));
     exit 1;
 };
 
@@ -72,7 +74,7 @@ func:read_loadavg = string(string:path) {
     pass(res);
 };
 
-func:main = int32() {
+func:main = int32(int32:argc, wild int8->:argv) {
     string:uptime_str = raw read_first_word("/proc/uptime");
     // it's a float like 1234.56. we just truncate at the dot.
     int64:dot_pos = string_index_of(uptime_str, ".");

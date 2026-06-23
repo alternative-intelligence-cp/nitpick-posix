@@ -1,4 +1,6 @@
 // arch.npk
+use "../vendor/io_utils.npk".*;
+
 
 func:print_str_safe = int32(string:s) {
     int64:len = string_length(s);
@@ -29,11 +31,11 @@ func:read_string = string(int64:ptr, int64:offset, int64:max_len) {
 };
 
 func:failsafe = int32(tbb32:err) {
-    drop(err);
+    drop(standard_failsafe(err));
     exit 1;
 };
 
-func:main = int32() {
+func:main = int32(int32:argc, wild int8->:argv) {
     int64:buf = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
     if (buf < 0i64) { exit 1; }
     

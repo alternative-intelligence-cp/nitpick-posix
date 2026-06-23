@@ -1,4 +1,6 @@
 // who.npk
+use "../vendor/io_utils.npk".*;
+
 
 extern "libc" {
     func:getpwuid = int64(int64:uid);
@@ -18,11 +20,11 @@ func:print_str = int32(string:s) {
 };
 
 func:failsafe = int32(tbb32:err) {
-    drop(err);
+    drop(standard_failsafe(err));
     exit 1;
 };
 
-func:main = int32() {
+func:main = int32(int32:argc, wild int8->:argv) {
     int64:uid = sys!!(102i64) ? -1i64; // SYS_GETEUID
     int64:pwd = getpwuid(uid);
     string:user = "unknown";

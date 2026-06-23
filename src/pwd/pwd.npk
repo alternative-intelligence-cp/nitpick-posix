@@ -1,4 +1,6 @@
 // pwd.npk
+use "../vendor/io_utils.npk".*;
+
 
 extern func:npk_mem_read_string = string(int64:ptr, int64:max_len);
 
@@ -10,12 +12,11 @@ func:print_err = int32(string:s) {
 };
 
 func:failsafe = int32(tbb32:err) {
-    drop(err);
-    drop(print_err("pwd: error getting current working directory\n"));
+    drop(standard_failsafe(err));
     exit 1;
 };
 
-func:main = int32() {
+func:main = int32(int32:argc, wild int8->:argv) {
     any->:buf = @cast_unchecked<any->>(alloc(4096i64));
     defer { free(buf); }
     

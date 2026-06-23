@@ -1,4 +1,6 @@
 // nproc.npk
+use "../vendor/io_utils.npk".*;
+
 
 extern "libc" {
     func:fopen  = int64(string:path, string:mode);
@@ -13,11 +15,11 @@ func:print_str_safe = int32(string:s) {
 };
 
 func:failsafe = int32(tbb32:err) {
-    drop(err);
+    drop(standard_failsafe(err));
     exit 1;
 };
 
-func:main = int32() {
+func:main = int32(int32:argc, wild int8->:argv) {
     int64:fp = fopen("/proc/cpuinfo", "r");
     if (fp == 0i64) {
         drop(print_str_safe("1\n")); // default if missing

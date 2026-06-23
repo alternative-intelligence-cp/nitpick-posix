@@ -1,11 +1,13 @@
 // clear.npk
+use "../vendor/io_utils.npk".*;
+
 
 func:failsafe = int32(tbb32:err) {
-    drop(err);
+    drop(standard_failsafe(err));
     exit 1;
 };
 
-func:main = int32() {
+func:main = int32(int32:argc, wild int8->:argv) {
     // \x1b[H  : Move cursor to home position (0,0)
     // \x1b[2J : Clear entire screen
     // \x1b[3J : Clear scrollback buffer (like modern clear)

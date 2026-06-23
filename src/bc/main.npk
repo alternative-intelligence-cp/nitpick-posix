@@ -382,7 +382,7 @@ pub func:parse_expression = flt64() {
 
 
 
-pub func:main = int32() {
+pub func:main = int32(int32:argc, wild int8->:argv) {
     drop(parser_init());
     
     any->:buf = malloc(4096i64) => any->;

@@ -1,6 +1,8 @@
 // runcon.npk
 use "../vendor/nitpick_args.npk".*;
 use "../vendor/exec_helper.npk".*;
+use "../vendor/io_utils.npk".*;
+
 
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
@@ -9,12 +11,12 @@ func:print_err = int32(string:s) {
 };
 
 func:failsafe = int32(tbb32:err) {
-    drop(err);
+    drop(standard_failsafe(err));
     exit 1;
 };
 
-func:main = int32() {
-    string:args = raw args_load();
+func:main = int32(int32:argc, wild int8->:argv) {
+    string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     
     if (arg_count < 2i32) {
