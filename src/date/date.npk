@@ -1,6 +1,11 @@
 // date.npk
 
+extern "libc" {
+    func:ctime = int64(int64:timep);
+}
+
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
+extern func:npk_mem_write_int64 = void(int64:ptr, int64:offset, int64:val);
 
 func:print_str_safe = int32(string:s) {
     int64:len = string_length(s);
@@ -32,10 +37,37 @@ func:main = int32() {
     if (res < 0i64) { exit 1; }
     
     int64:sec = raw mem_read_64(ts, 0i64);
-    string:sec_str = string_from_int(sec);
     
-    drop(print_str_safe(sec_str));
+    // allocate an 8-byte buffer for time_t
+    int64:t_buf = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    npk_mem_write_int64(t_buf, 0i64, sec);
+    
+    int64:c_ptr = ctime(t_buf);
+    string:ctime_str = "";
+    if (c_ptr != 0i64) {
+        int64:j = 0i64;
+        int32:reading = 1i32;
+        while (reading == 1i32) {
+            int64:c = npk_mem_read_byte(c_ptr, j);
+            if (c == 0i64) {
+                reading = 0i32;
+            } else {
+                if (c == 10i64) {
+                    reading = 0i32;
+                } else {
+                    ctime_str = string_concat(ctime_str, string_from_char(@cast_unchecked<int8>(c)));
+                }
+            }
+            j = j + 1i64;
+        }
+    } else {
+        ctime_str = string_from_int(sec);
+    }
+    
+    drop(print_str_safe(ctime_str));
     drop(print_str_safe("\n"));
+    
+    drop(sys(MUNMAP, t_buf, 4096i64));
     
     drop(sys(MUNMAP, ts, 4096i64));
     exit 0;

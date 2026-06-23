@@ -4,32 +4,46 @@ extern "libc" {
     func:fopen  = int64(string:path, string:mode);
     func:fgetc  = int32(int64:fp);
     func:fclose = int32(int64:fp);
+    func:malloc = int64(int64:bytes);
+    func:nitpick_libc_mem_free = int32(int64:ptr);
 }
 
 use "../vendor/nitpick_args.npk".*;
 
+extern func:npk_mem_read_string = string(int64:ptr, int64:max_len);
+extern func:npk_mem_write_byte = void(int64:ptr, int64:offset, int64:val);
+
+extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
+
 func:args_load = string() {
-    int64:fp = fopen("/proc/self/cmdline", "r");
-    if (fp == 0i64) { pass("|"); }
+    int64:fd = sys(OPEN, "/proc/self/cmdline", 0i64, 0i64) ? -1i64;
+    if (fd < 0i64) { pass("|"); }
     string:result  = "|";
     string:current = "";
-    int32:c = fgetc(fp);
-    while (c >= 0i32) {
-        if (c == 0i32) {
-            if (string_length(current) > 0i64) {
-                result  = string_concat(result, string_concat(current, "|"));
-                current = "";
+    int64:buf = sys(MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    if (buf > 0i64) {
+        int64:nread = sys(READ, fd, buf, 65536i64) ? -1i64;
+        if (nread > 0i64) {
+            int64:i = 0i64;
+            while (i < nread) {
+                int64:c = npk_mem_read_byte(buf, i);
+                if (c == 0i64) {
+                    if (string_length(current) > 0i64) {
+                        result = string_concat(result, string_concat(current, "|"));
+                        current = "";
+                    }
+                } else {
+                    current = string_concat(current, string_from_char(@cast_unchecked<int8>(c)));
+                }
+                i = i + 1i64;
             }
         }
-        if (c > 0i32) {
-            current = string_concat(current, string_from_char(@cast_unchecked<int8>(c)));
-        }
-        c = fgetc(fp);
+        drop(sys(MUNMAP, buf, 65536i64));
     }
+    drop(sys(CLOSE, fd));
     if (string_length(current) > 0i64) {
         result = string_concat(result, string_concat(current, "|"));
     }
-    drop(fclose(fp));
     pass(result);
 };
 
@@ -44,8 +58,6 @@ func:print_str_safe = int32(string:s) {
     drop(sys(WRITE, 1i64, s, len));
     pass 0i32;
 };
-
-extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
 func:failsafe = int32(tbb32:err) {
     drop(err);
@@ -73,9 +85,6 @@ func:main = int32() {
         exit 1;
     }
     
-    int64:buf = sys(MMAP, 0i64, 16i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
-    if (buf < 0i64) { exit 1; }
-    
     int64:tpl_len = string_length(template);
     string:base = template;
     int64:suffix_len = 0i64;
@@ -99,8 +108,6 @@ func:main = int32() {
     }
     
     if (x_count < 3i64) {
-        // If not enough X's, POSIX says default to 6 X's appended or something.
-        // We will just append .XXXXXX if there are no X's, like GNU mktemp does.
         if (x_count == 0i64) {
             template = string_concat(template, ".XXXXXX");
             x_count = 6i64;
@@ -117,15 +124,27 @@ func:main = int32() {
     int64:success = 0i64;
     string:final_path = "";
     
-    while (tries < 10i32) {
+    int64:buf = malloc(x_count * 2i64 + 16i64);
+    
+    while (tries < 1000i32) {
         if (success == 0i64) {
-            drop(sys(READ, urandom_fd, buf, x_count));
+            // Read more bytes than x_count to allow for rejection sampling
+            drop(sys(READ, urandom_fd, buf, x_count * 2i64));
             string:rand_str = "";
             int64:j = 0i64;
+            int64:k = 0i64;
             while (j < x_count) {
-                int64:c = npk_mem_read_byte(buf, j);
-                rand_str = string_concat(rand_str, raw get_rand_char(c));
-                j = j + 1i64;
+                if (k >= x_count * 2i64) {
+                    // if we run out, just use modulo bias, it's fine
+                    k = 0i64; 
+                    drop(sys(READ, urandom_fd, buf, x_count * 2i64));
+                }
+                int64:c = npk_mem_read_byte(buf, k);
+                k = k + 1i64;
+                if (c < 248i64) {
+                    rand_str = string_concat(rand_str, raw get_rand_char(c));
+                    j = j + 1i64;
+                }
             }
             final_path = string_concat(base, rand_str);
             
@@ -139,8 +158,8 @@ func:main = int32() {
         tries = tries + 1i32;
     }
     
+    drop(nitpick_libc_mem_free(buf));
     drop(sys(CLOSE, urandom_fd));
-    drop(sys(MUNMAP, buf, 16i64));
     
     if (success == 1i64) {
         drop(print_str_safe(final_path));

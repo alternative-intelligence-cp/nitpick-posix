@@ -8,28 +8,37 @@ extern "libc" {
 
 use "../vendor/nitpick_args.npk".*;
 
+extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
+
 func:args_load = string() {
-    int64:fp = fopen("/proc/self/cmdline", "r");
-    if (fp == 0i64) { pass("|"); }
+    int64:fd = sys(OPEN, "/proc/self/cmdline", 0i64, 0i64) ? -1i64;
+    if (fd < 0i64) { pass("|"); }
     string:result  = "|";
     string:current = "";
-    int32:c = fgetc(fp);
-    while (c >= 0i32) {
-        if (c == 0i32) {
-            if (string_length(current) > 0i64) {
-                result  = string_concat(result, string_concat(current, "|"));
-                current = "";
+    int64:buf = sys(MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    if (buf > 0i64) {
+        int64:nread = sys(READ, fd, buf, 65536i64) ? -1i64;
+        if (nread > 0i64) {
+            int64:i = 0i64;
+            while (i < nread) {
+                int64:c = npk_mem_read_byte(buf, i);
+                if (c == 0i64) {
+                    if (string_length(current) > 0i64) {
+                        result = string_concat(result, string_concat(current, "|"));
+                        current = "";
+                    }
+                } else {
+                    current = string_concat(current, string_from_char(@cast_unchecked<int8>(c)));
+                }
+                i = i + 1i64;
             }
         }
-        if (c > 0i32) {
-            current = string_concat(current, string_from_char(@cast_unchecked<int8>(c)));
-        }
-        c = fgetc(fp);
+        drop(sys(MUNMAP, buf, 65536i64));
     }
+    drop(sys(CLOSE, fd));
     if (string_length(current) > 0i64) {
         result = string_concat(result, string_concat(current, "|"));
     }
-    drop(fclose(fp));
     pass(result);
 };
 
@@ -49,8 +58,6 @@ func:failsafe = int32(tbb32:err) {
     drop(err);
     exit 1;
 };
-
-extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
 func:main = int32() {
     string:args = raw args_load();

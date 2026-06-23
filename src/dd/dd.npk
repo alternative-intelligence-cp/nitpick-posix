@@ -8,33 +8,41 @@ extern "libc" {
     func:nitpick_libc_mem_free = int32(int64:ptr);
 }
 
-extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 extern func:npk_mem_write_byte = void(int64:ptr, int64:offset, int64:val);
 
 use "../vendor/nitpick_args.npk".*;
 
+extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
+
 func:args_load = string() {
-    int64:fp = fopen("/proc/self/cmdline", "r");
-    if (fp == 0i64) { pass("|"); }
+    int64:fd = sys(OPEN, "/proc/self/cmdline", 0i64, 0i64) ? -1i64;
+    if (fd < 0i64) { pass("|"); }
     string:result  = "|";
     string:current = "";
-    int32:c = fgetc(fp);
-    while (c >= 0i32) {
-        if (c == 0i32) {
-            if (string_length(current) > 0i64) {
-                result  = string_concat(result, string_concat(current, "|"));
-                current = "";
+    int64:buf = sys(MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    if (buf > 0i64) {
+        int64:nread = sys(READ, fd, buf, 65536i64) ? -1i64;
+        if (nread > 0i64) {
+            int64:i = 0i64;
+            while (i < nread) {
+                int64:c = npk_mem_read_byte(buf, i);
+                if (c == 0i64) {
+                    if (string_length(current) > 0i64) {
+                        result = string_concat(result, string_concat(current, "|"));
+                        current = "";
+                    }
+                } else {
+                    current = string_concat(current, string_from_char(@cast_unchecked<int8>(c)));
+                }
+                i = i + 1i64;
             }
         }
-        if (c > 0i32) {
-            current = string_concat(current, string_from_char(@cast_unchecked<int8>(c)));
-        }
-        c = fgetc(fp);
+        drop(sys(MUNMAP, buf, 65536i64));
     }
+    drop(sys(CLOSE, fd));
     if (string_length(current) > 0i64) {
         result = string_concat(result, string_concat(current, "|"));
     }
-    drop(fclose(fp));
     pass(result);
 };
 
@@ -49,24 +57,37 @@ func:failsafe = int32(tbb32:err) {
 };
 
 func:parse_int = int64(string:s) {
-    // We treat string as int64 pointer in memory
-    // Actually we can't easily cast string to int64. But we can just use npk_mem_read_byte.
-    // Wait, we CAN cast it if we use a helper or if we use our pointer knowledge. 
-    // Wait, how do we read from `s` without casting?
-    // We can't cast string to int64. Let's just create a file and read it? No!
-    // To parse an int from a string, we can use a clever trick: write it to a temp file, then read it as int64 pointer.
-    // Or we can just use `sys(WRITE)` to a pipe, then read it? No, too complex.
-    // Can we cast? NO.
-    // Is there a way? `string_length` gets the length. We don't have `string_at`.
-    // Let's look at `string_from_char`.
-    // Let's look at `vendor/nitpick_args.npk`. It has `string_starts_with`!
-    // We can just use `sys(OPEN)` and `sys(READ)` if it's a file.
-    // What if we don't have parse_int? Let's just default to bs=512, and NOT support count or bs from command line, just `if` and `of`.
-    // Actually, `dd` usually supports `if=...` and `of=...`. We can extract strings using `string_split`? No.
-    // Let's just do a basic `dd`: only `if=` and `of=`. We don't need to parse ints for `bs` and `count` for now, or just hardcode bs=512.
-    // Wait, let's just parse `if=` and `of=` by slicing.
-    // Since we don't have string slice, we can iterate through args.
-    pass 0i64;
+    int64:res = 0i64;
+    int64:len = string_length(s);
+    int64:i = 0i64;
+    int64:mult = 1i64;
+    while (i < len) {
+        string:ch = string_substring(s, i, i + 1i64);
+        int64:d = -1i64;
+        if (string_equals(ch, "0")) { d = 0i64; }
+        if (string_equals(ch, "1")) { d = 1i64; }
+        if (string_equals(ch, "2")) { d = 2i64; }
+        if (string_equals(ch, "3")) { d = 3i64; }
+        if (string_equals(ch, "4")) { d = 4i64; }
+        if (string_equals(ch, "5")) { d = 5i64; }
+        if (string_equals(ch, "6")) { d = 6i64; }
+        if (string_equals(ch, "7")) { d = 7i64; }
+        if (string_equals(ch, "8")) { d = 8i64; }
+        if (string_equals(ch, "9")) { d = 9i64; }
+        if (d >= 0i64) {
+            res = (res * 10i64) + d;
+        } else {
+            if (string_equals(ch, "K")) { mult = 1024i64; }
+            if (string_equals(ch, "k")) { mult = 1024i64; }
+            if (string_equals(ch, "M")) { mult = 1048576i64; }
+            if (string_equals(ch, "m")) { mult = 1048576i64; }
+            if (string_equals(ch, "G")) { mult = 1073741824i64; }
+            if (string_equals(ch, "g")) { mult = 1073741824i64; }
+            i = len; // break loop
+        }
+        i = i + 1i64;
+    }
+    pass res * mult;
 };
 
 // we can write an argument parser that just compares strings
@@ -86,60 +107,20 @@ func:main = int32() {
     int32:i = 1i32;
     while (i <= arg_count) {
         string:arg = raw args_at(args, i);
+        int64:arg_len = string_length(arg);
         
-        // We don't have `string_starts_with`? Oh wait, we do.
         if (string_starts_with(arg, "if=")) {
-            // Need a way to extract the rest.
-            // Since we can't slice, we can just use the fact that `if=` is 3 bytes.
-            // But we don't have `string_slice`.
-            // Instead of slicing, let's just accept positional args for simplicity?
-            // "if=" is POSIX standard.
-            // Without `string_slice`, we can just write the arg to a scratch file, read it back with an offset of 3!
-            int64:tmp_fd = sys(OPEN, "/tmp/dd_if.txt", 577i64, 438i64) ? -1i64;
-            if (tmp_fd >= 0i64) {
-                drop(sys(WRITE, tmp_fd, arg, string_length(arg)));
-                drop(sys(CLOSE, tmp_fd));
-                
-                int64:tmp_fd2 = sys(OPEN, "/tmp/dd_if.txt", 0i64, 0i64) ? -1i64;
-                int64:tbuf = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
-                int64:nread = sys(READ, tmp_fd2, tbuf, 4096i64) ? -1i64;
-                if (nread > 3i64) {
-                    npk_mem_write_byte(tbuf, nread, 0i64); // null terminate
-                    ifile = string_concat("", ""); // clear
-                    int64:j = 3i64;
-                    while (j < nread) {
-                        int64:c = npk_mem_read_byte(tbuf, j);
-                        ifile = string_concat(ifile, string_from_char(@cast_unchecked<int8>(c)));
-                        j = j + 1i64;
-                    }
-                }
-                drop(sys(MUNMAP, tbuf, 4096i64));
-                drop(sys(CLOSE, tmp_fd2));
-                drop(sys(UNLINK, "/tmp/dd_if.txt"));
-            }
+            ifile = string_substring(arg, 3i64, arg_len);
         } else {
             if (string_starts_with(arg, "of=")) {
-                int64:tmp_fd = sys(OPEN, "/tmp/dd_of.txt", 577i64, 438i64) ? -1i64;
-                if (tmp_fd >= 0i64) {
-                    drop(sys(WRITE, tmp_fd, arg, string_length(arg)));
-                    drop(sys(CLOSE, tmp_fd));
-                    
-                    int64:tmp_fd2 = sys(OPEN, "/tmp/dd_of.txt", 0i64, 0i64) ? -1i64;
-                    int64:tbuf = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
-                    int64:nread = sys(READ, tmp_fd2, tbuf, 4096i64) ? -1i64;
-                    if (nread > 3i64) {
-                        npk_mem_write_byte(tbuf, nread, 0i64); // null terminate
-                        ofile = string_concat("", ""); // clear
-                        int64:j = 3i64;
-                        while (j < nread) {
-                            int64:c = npk_mem_read_byte(tbuf, j);
-                            ofile = string_concat(ofile, string_from_char(@cast_unchecked<int8>(c)));
-                            j = j + 1i64;
-                        }
+                ofile = string_substring(arg, 3i64, arg_len);
+            } else {
+                if (string_starts_with(arg, "bs=")) {
+                    bs = raw parse_int(string_substring(arg, 3i64, arg_len));
+                } else {
+                    if (string_starts_with(arg, "count=")) {
+                        count = raw parse_int(string_substring(arg, 6i64, arg_len));
                     }
-                    drop(sys(MUNMAP, tbuf, 4096i64));
-                    drop(sys(CLOSE, tmp_fd2));
-                    drop(sys(UNLINK, "/tmp/dd_of.txt"));
                 }
             }
         }

@@ -1,5 +1,7 @@
 // pwd.npk
 
+extern func:npk_mem_read_string = string(int64:ptr, int64:max_len);
+
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
     drop(s);
@@ -14,8 +16,32 @@ func:failsafe = int32(tbb32:err) {
 };
 
 func:main = int32() {
-    string:cwd = raw sys(GETCWD);
-    int64:len = string_length(cwd);
+    any->:buf = @cast_unchecked<any->>(alloc(4096i64));
+    defer { free(buf); }
+    
+    int64:res = sys!!(79i64, @cast_unchecked<int64>(buf), 4096i64) ? -1i64;
+    if (res < 0i64) {
+        drop(print_err("pwd: error getting current working directory\n"));
+        exit 1;
+    }
+    
+    // find length
+    int64:len = 0i64;
+    int32:running = 1i32;
+    while (running == 1i32) {
+        if (len >= 4096i64) {
+            running = 0i32;
+        } else {
+            int64:c = (<- (@cast_unchecked<uint8->>(@cast_unchecked<int64>(buf) + len))) => int64;
+            if (c == 0i64) {
+                running = 0i32;
+            } else {
+                len = len + 1i64;
+            }
+        }
+    }
+    
+    string:cwd = npk_mem_read_string(@cast_unchecked<int64>(buf), len);
     drop(sys(WRITE, 1i64, cwd, len));
     drop(sys(WRITE, 1i64, "\n", 1i64));
     exit 0;

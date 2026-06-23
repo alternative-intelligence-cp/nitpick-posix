@@ -7,29 +7,45 @@ extern "libc" {
 }
 
 use "../vendor/nitpick_args.npk".*;
+use "../../../nitpick-packages/packages/nitpick-crypto/src/nitpick_crypto.npk".*;
+extern func:npk_mem_read_string = string(int64:ptr, int64:max_len);
+extern func:npk_mem_write_byte = void(int64:ptr, int64:offset, int64:val);
+extern "libc" {
+    func:malloc = int64(int64:bytes);
+    func:nitpick_libc_mem_free = int32(int64:ptr);
+}
+
+extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
 func:args_load = string() {
-    int64:fp = fopen("/proc/self/cmdline", "r");
-    if (fp == 0i64) { pass("|"); }
+    int64:fd = sys(OPEN, "/proc/self/cmdline", 0i64, 0i64) ? -1i64;
+    if (fd < 0i64) { pass("|"); }
     string:result  = "|";
     string:current = "";
-    int32:c = fgetc(fp);
-    while (c >= 0i32) {
-        if (c == 0i32) {
-            if (string_length(current) > 0i64) {
-                result  = string_concat(result, string_concat(current, "|"));
-                current = "";
+    int64:buf = sys(MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    if (buf > 0i64) {
+        int64:nread = sys(READ, fd, buf, 65536i64) ? -1i64;
+        if (nread > 0i64) {
+            int64:i = 0i64;
+            while (i < nread) {
+                int64:c = npk_mem_read_byte(buf, i);
+                if (c == 0i64) {
+                    if (string_length(current) > 0i64) {
+                        result = string_concat(result, string_concat(current, "|"));
+                        current = "";
+                    }
+                } else {
+                    current = string_concat(current, string_from_char(@cast_unchecked<int8>(c)));
+                }
+                i = i + 1i64;
             }
         }
-        if (c > 0i32) {
-            current = string_concat(current, string_from_char(@cast_unchecked<int8>(c)));
-        }
-        c = fgetc(fp);
+        drop(sys(MUNMAP, buf, 65536i64));
     }
+    drop(sys(CLOSE, fd));
     if (string_length(current) > 0i64) {
         result = string_concat(result, string_concat(current, "|"));
     }
-    drop(fclose(fp));
     pass(result);
 };
 
@@ -68,11 +84,13 @@ func:main = int32() {
             drop(print_err(path));
             drop(print_err(": No such file or directory\n"));
         } else {
+            int64:crc = 0i64;
             int64:total_bytes = 0i64;
             int64:buf = sys(MMAP, 0i64, 8192i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
             if (buf > 0i64) {
                 int64:bytes = sys(READ, fd, buf, 8192i64) ? -1i64;
                 while (bytes > 0i64) {
+                    crc = raw Crypto.cksum_update(crc, buf, bytes);
                     total_bytes = total_bytes + bytes;
                     bytes = sys(READ, fd, buf, 8192i64) ? -1i64;
                 }
@@ -80,11 +98,13 @@ func:main = int32() {
             }
             drop(sys(CLOSE, fd));
             
-            // Output: <crc> <byte_count> <filename>
-            drop(print_str_safe("0000000000 ")); // Stubbed CRC
+            crc = raw Crypto.cksum_finalize(crc, total_bytes);
             
-            // Hardcoded "byte count" for simplicity
-            drop(print_str_safe("4096 "));
+            drop(print_str_safe(string_from_int(crc)));
+            drop(print_str_safe(" "));
+            
+            drop(print_str_safe(string_from_int(total_bytes)));
+            drop(print_str_safe(" "));
             
             drop(print_str_safe(path));
             drop(print_str_safe("\n"));

@@ -1,37 +1,49 @@
 // pr.npk
 
+extern func:npk_mem_read_string = string(int64:ptr, int64:max_len);
+extern func:npk_mem_write_byte = void(int64:ptr, int64:offset, int64:val);
+
 extern "libc" {
     func:fopen  = int64(string:path, string:mode);
     func:fgetc  = int32(int64:fp);
     func:fclose = int32(int64:fp);
+    func:malloc = int64(int64:bytes);
+    func:nitpick_libc_mem_free = int32(int64:ptr);
 }
-
-extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
 use "../vendor/nitpick_args.npk".*;
 
+extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
+
 func:args_load = string() {
-    int64:fp = fopen("/proc/self/cmdline", "r");
-    if (fp == 0i64) { pass("|"); }
+    int64:fd = sys(OPEN, "/proc/self/cmdline", 0i64, 0i64) ? -1i64;
+    if (fd < 0i64) { pass("|"); }
     string:result  = "|";
     string:current = "";
-    int32:c = fgetc(fp);
-    while (c >= 0i32) {
-        if (c == 0i32) {
-            if (string_length(current) > 0i64) {
-                result  = string_concat(result, string_concat(current, "|"));
-                current = "";
+    int64:buf = sys(MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    if (buf > 0i64) {
+        int64:nread = sys(READ, fd, buf, 65536i64) ? -1i64;
+        if (nread > 0i64) {
+            int64:i = 0i64;
+            while (i < nread) {
+                int64:c = npk_mem_read_byte(buf, i);
+                if (c == 0i64) {
+                    if (string_length(current) > 0i64) {
+                        result = string_concat(result, string_concat(current, "|"));
+                        current = "";
+                    }
+                } else {
+                    current = string_concat(current, string_from_char(@cast_unchecked<int8>(c)));
+                }
+                i = i + 1i64;
             }
         }
-        if (c > 0i32) {
-            current = string_concat(current, string_from_char(@cast_unchecked<int8>(c)));
-        }
-        c = fgetc(fp);
+        drop(sys(MUNMAP, buf, 65536i64));
     }
+    drop(sys(CLOSE, fd));
     if (string_length(current) > 0i64) {
         result = string_concat(result, string_concat(current, "|"));
     }
-    drop(fclose(fp));
     pass(result);
 };
 
@@ -84,6 +96,9 @@ func:pr_file = int32(string:filename) {
 
     drop(print_page_header(filename, page_count));
 
+    int64:out_buf = malloc(65536i64);
+    int64:out_len = 0i64;
+
     while (running == 1i32) {
         int64:nread = sys(READ, fd, buf, 65536i64) ? -1i64;
         if (nread <= 0i64) {
@@ -92,11 +107,14 @@ func:pr_file = int32(string:filename) {
             int64:pos = 0i64;
             while (pos < nread) {
                 int64:c = npk_mem_read_byte(buf, pos);
-                drop(sys(WRITE, 1i64, buf + pos, 1i64));
+                npk_mem_write_byte(out_buf, out_len, c);
+                out_len = out_len + 1i64;
+                if (out_len >= 65536i64) { drop(sys(WRITE, 1i64, out_buf, out_len)); out_len = 0i64; }
                 
                 if (c == 10i64) { // '\n'
                     line_count = line_count + 1i64;
                     if (line_count >= 56i64) {
+                        if (out_len > 0i64) { drop(sys(WRITE, 1i64, out_buf, out_len)); out_len = 0i64; }
                         // Footer padding
                         drop(print_out("\n\n\n\n\n"));
                         page_count = page_count + 1i64;
@@ -111,11 +129,15 @@ func:pr_file = int32(string:filename) {
     
     // padding for last page
     while (line_count < 56i64) {
-        drop(print_out("\n"));
+        npk_mem_write_byte(out_buf, out_len, 10i64);
+        out_len = out_len + 1i64;
+        if (out_len >= 65536i64) { drop(sys(WRITE, 1i64, out_buf, out_len)); out_len = 0i64; }
         line_count = line_count + 1i64;
     }
+    if (out_len > 0i64) { drop(sys(WRITE, 1i64, out_buf, out_len)); out_len = 0i64; }
     drop(print_out("\n\n\n\n\n")); // footer
 
+    drop(nitpick_libc_mem_free(out_buf));
     drop(sys(MUNMAP, buf, 65536i64));
     drop(sys(CLOSE, fd));
     pass 0i32;
