@@ -7,7 +7,7 @@ use "../vendor/utmp_utils.npk".*;
 
 func:print_str = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys(SYS_WRITE, 1i64, s, len));
+    drop(sys(WRITE, 1i64, s, len));
     pass 0i32;
 };
 
@@ -15,17 +15,17 @@ pub func:failsafe = int32(tbb32:err) { drop(standard_failsafe(err)); exit 1; };
 
 pub func:main = int32(int32:argc, wild int8->:argv) {
     int64:lst = raw utmp_read_users();
-    int64:count = raw alsize(lst);
+    int64:count = alsize(lst);
     int64:idx = 0i64;
     while (idx < count) {
-        int64:u_ptr = raw alget(lst, idx);
-        int64:l_ptr = raw alget(lst, idx + 1i64);
-        string:user = raw ptr_to_string(u_ptr);
+        int64:u_ptr = alget(lst, idx);
+        int64:l_ptr = alget(lst, idx + 1i64);
+        string:user = raw ptr_to_string(ok(u_ptr));
         drop(print_str(user));
         if (idx + 2i64 < count) { drop(print_str(" ")); }
         
-        drop(nitpick_libc_mem_free(u_ptr));
-        drop(nitpick_libc_mem_free(l_ptr));
+        drop(nitpick_libc_mem_free(ok(u_ptr)));
+        drop(nitpick_libc_mem_free(ok(l_ptr)));
         idx = idx + 2i64;
     }
     drop(print_str("\n"));

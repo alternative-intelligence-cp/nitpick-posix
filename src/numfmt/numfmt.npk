@@ -1,0 +1,22 @@
+// numfmt.npk
+use "../vendor/sys_constants.npk".*;
+use "../vendor/nitpick_args.npk".*;
+use "../vendor/io_utils.npk".*;
+pub func:failsafe = int32(tbb32:err) { drop(standard_failsafe(err)); exit 1; };
+func:main = int32(int32:argc, wild int8->:argv) {
+    string:args = raw args_load_native(argc, argv);
+    ArgParser:p = raw Parser_create();
+    p = raw Parser_add_option(p, "--to", "format");
+    int64:ht = ahash(1024i64);
+    int64:parsed = raw Parser_parse(p, args, ht);
+    
+    string:to_fmt = ahget(parsed, "--to");
+    if (string_equals(to_fmt, "iec")) {
+        // scale 1024
+    } else {
+        if (string_equals(to_fmt, "si")) {
+            // scale 1000
+        }
+    }
+    exit 0;
+};
