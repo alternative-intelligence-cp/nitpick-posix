@@ -1,18 +1,12 @@
 // expr.npk
 
-extern "libc" {
-    func:fopen  = int64(string:path, string:mode);
-    func:fgetc  = int32(int64:fp);
-    func:fclose = int32(int64:fp);
-}
-
-use "../vendor/nitpick_args.npk".*;
 use "../vendor/io_utils.npk".*;
+use "../vendor/mem_utils.npk".*;
+use "../vendor/nitpick_args.npk".*;
 use "../vendor/sys_constants.npk".*;
-
+use "../vendor/libc_ffi.npk".*;
 
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
-
 
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
@@ -31,76 +25,130 @@ func:failsafe = int32(tbb32:err) {
     exit 1;
 };
 
+pub int32:expr_pos = 1i32;
+pub int32:expr_argc = 0i32;
+pub string:expr_args = "";
 
+func:peek = string() {
+    if (expr_pos <= expr_argc) { pass raw args_at(expr_args, expr_pos); }
+    pass "";
+};
 
-func:main = int32(int32:argc, wild int8->:argv) {
-    string:args = raw args_load_native(argc, argv);
-    int32:arg_count = raw args_count(args);
+func:consume = void() {
+    expr_pos = expr_pos + 1i32;
+};
+
+func:parse_value = int64() {
+    string:tok = peek();
+    if (string_equals(tok, "")) {
+        drop(print_err("expr: syntax error\n"));
+        exit 2;
+    }
+    consume();
+    if (string_equals(tok, "(")) {
+        int64:val = raw parse_or();
+        if (string_equals(peek(), ")")) {
+            consume();
+        } else {
+            drop(print_err("expr: syntax error (missing ')' )\n"));
+            exit 2;
+        }
+        pass val;
+    }
+    pass string_to_int(tok);
+};
+
+func:parse_mul = int64() {
+    int64:left = raw parse_value();
+    while (1 == 1) {
+        string:tok = peek();
+        if (string_equals(tok, "*") || string_equals(tok, "/") || string_equals(tok, "%")) {
+            consume();
+            int64:right = raw parse_value();
+            if (string_equals(tok, "*")) { left = left * right; }
+            if (string_equals(tok, "/")) {
+                if (right == 0i64) { drop(print_err("expr: division by zero\n")); exit 2; }
+                left = left / right;
+            }
+            if (string_equals(tok, "%")) {
+                if (right == 0i64) { drop(print_err("expr: division by zero\n")); exit 2; }
+                left = left - (left / right) * right;
+            }
+        } else { break; }
+    }
+    pass left;
+};
+
+func:parse_add = int64() {
+    int64:left = raw parse_mul();
+    while (1 == 1) {
+        string:tok = peek();
+        if (string_equals(tok, "+") || string_equals(tok, "-")) {
+            consume();
+            int64:right = raw parse_mul();
+            if (string_equals(tok, "+")) { left = left + right; }
+            if (string_equals(tok, "-")) { left = left - right; }
+        } else { break; }
+    }
+    pass left;
+};
+
+func:parse_rel = int64() {
+    int64:left = raw parse_add();
+    while (1 == 1) {
+        string:tok = peek();
+        if (string_equals(tok, "=") || string_equals(tok, "!=") || string_equals(tok, ">") || string_equals(tok, "<") || string_equals(tok, ">=") || string_equals(tok, "<=")) {
+            consume();
+            int64:right = raw parse_add();
+            if (string_equals(tok, "=")) { if (left == right) { left = 1i64; } else { left = 0i64; } }
+            if (string_equals(tok, "!=")) { if (left != right) { left = 1i64; } else { left = 0i64; } }
+            if (string_equals(tok, ">")) { if (left > right) { left = 1i64; } else { left = 0i64; } }
+            if (string_equals(tok, "<")) { if (left < right) { left = 1i64; } else { left = 0i64; } }
+            if (string_equals(tok, ">=")) { if (left >= right) { left = 1i64; } else { left = 0i64; } }
+            if (string_equals(tok, "<=")) { if (left <= right) { left = 1i64; } else { left = 0i64; } }
+        } else { break; }
+    }
+    pass left;
+};
+
+func:parse_and = int64() {
+    int64:left = raw parse_rel();
+    while (1 == 1) {
+        string:tok = peek();
+        if (string_equals(tok, "&")) {
+            consume();
+            int64:right = raw parse_rel();
+            if (left != 0i64 && right != 0i64) { left = left; } else { left = 0i64; }
+        } else { break; }
+    }
+    pass left;
+};
+
+func:parse_or = int64() {
+    int64:left = raw parse_and();
+    while (1 == 1) {
+        string:tok = peek();
+        if (string_equals(tok, "|")) {
+            consume();
+            int64:right = raw parse_and();
+            if (left != 0i64) { left = left; }
+            else { if (right != 0i64) { left = right; } else { left = 0i64; } }
+        } else { break; }
+    }
+    pass left;
+};
+
+pub func:main = int32(int32:argc, wild int8->:argv) {
+    expr_args = raw args_load_native(argc, argv);
+    expr_argc = raw args_count(expr_args);
+    expr_pos = 1i32;
     
-    if (arg_count < 1i32) {
+    if (expr_argc < 1i32) {
         drop(print_err("expr: missing operand\n"));
         exit 1;
     }
     
-    int64:val = string_to_int(raw args_at(args, 1i32));
-    
-    int32:i = 2i32;
-    while (i < arg_count) {
-        string:op = raw args_at(args, i);
-        int64:next_val = string_to_int(raw args_at(args, i + 1i32));
-        
-        if (string_equals(op, "+")) { val = val + next_val; }
-        if (string_equals(op, "-")) { val = val - next_val; }
-        if (string_equals(op, "*")) { val = val * next_val; }
-        if (string_equals(op, "/")) {
-            if (next_val == 0i64) {
-                drop(print_err("expr: division by zero\n"));
-                exit 1;
-            }
-            val = val / next_val;
-        }
-        if (string_equals(op, "%")) {
-            if (next_val == 0i64) {
-                drop(print_err("expr: division by zero\n"));
-                exit 1;
-            }
-            val = val - (val / next_val) * next_val;
-        }
-        if (string_equals(op, "=")) {
-            if (val == next_val) { val = 1i64; } else { val = 0i64; }
-        }
-        if (string_equals(op, "!=")) {
-            if (val != next_val) { val = 1i64; } else { val = 0i64; }
-        }
-        if (string_equals(op, ">")) {
-            if (val > next_val) { val = 1i64; } else { val = 0i64; }
-        }
-        if (string_equals(op, "<")) {
-            if (val < next_val) { val = 1i64; } else { val = 0i64; }
-        }
-        if (string_equals(op, ">=")) {
-            if (val >= next_val) { val = 1i64; } else { val = 0i64; }
-        }
-        if (string_equals(op, "<=")) {
-            if (val <= next_val) { val = 1i64; } else { val = 0i64; }
-        }
-        if (string_equals(op, "&")) {
-            if (val != 0i64) {
-                if (next_val != 0i64) {
-                    val = val; // keeping val
-                } else { val = 0i64; }
-            } else { val = 0i64; }
-        }
-        if (string_equals(op, "|")) {
-            if (val != 0i64) {
-                val = val;
-            } else {
-                if (next_val != 0i64) { val = next_val; } else { val = 0i64; }
-            }
-        }
-        
-        i = i + 2i32;
-    }
+    int64:val = raw parse_or();
     
     drop(print_str_safe(string_from_int(val)));
     drop(print_str_safe("\n"));

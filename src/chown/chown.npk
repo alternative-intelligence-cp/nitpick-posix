@@ -1,7 +1,8 @@
 // chown.npk
 
-use "../vendor/nitpick_args.npk".*;
 use "../vendor/io_utils.npk".*;
+use "../vendor/mem_utils.npk".*;
+use "../vendor/nitpick_args.npk".*;
 use "../vendor/sys_constants.npk".*;
 use "../vendor/pwd_utils.npk".*;
 

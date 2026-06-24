@@ -1,16 +1,14 @@
 // wc.npk
 
-extern "libc" {
-    func:fopen  = int64(string:path, string:mode);
-    func:fgetc  = int32(int64:fp);
-    func:fclose = int32(int64:fp);
-}
 
+
+use "../vendor/io_utils.npk".*;
+use "../vendor/mem_utils.npk".*;
 extern func:npk_mem_write_byte = int64(int64:ptr, int64:offset, int64:val);
 
 use "../vendor/nitpick_args.npk".*;
-use "../vendor/io_utils.npk".*;
 use "../vendor/sys_constants.npk".*;
+use "../vendor/libc_ffi.npk".*;
 
 
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
@@ -32,27 +30,36 @@ func:print_str = int32(string:s) {
 
 func:write_num = int64(int64:out_buf, int64:out_idx, int64:num) {
     int64:idx = out_idx;
-    int64:d1 = num % 10i64;
-    int64:n = num / 10i64;
-    int64:d2 = n % 10i64; n = n / 10i64;
-    int64:d3 = n % 10i64; n = n / 10i64;
-    int64:d4 = n % 10i64; n = n / 10i64;
-    int64:d5 = n % 10i64; n = n / 10i64;
-    int64:d6 = n % 10i64; n = n / 10i64;
-    int64:d7 = n % 10i64; 
+    int64:n = num;
     
-    if (num >= 1000000i64) { drop(npk_mem_write_byte(out_buf, idx, 48i64 + d7)); } else { drop(npk_mem_write_byte(out_buf, idx, 32i64)); } idx = idx + 1i64;
-    if (num >= 100000i64) { drop(npk_mem_write_byte(out_buf, idx, 48i64 + d6)); } else { drop(npk_mem_write_byte(out_buf, idx, 32i64)); } idx = idx + 1i64;
-    if (num >= 10000i64) { drop(npk_mem_write_byte(out_buf, idx, 48i64 + d5)); } else { drop(npk_mem_write_byte(out_buf, idx, 32i64)); } idx = idx + 1i64;
-    if (num >= 1000i64) { drop(npk_mem_write_byte(out_buf, idx, 48i64 + d4)); } else { drop(npk_mem_write_byte(out_buf, idx, 32i64)); } idx = idx + 1i64;
-    if (num >= 100i64) { drop(npk_mem_write_byte(out_buf, idx, 48i64 + d3)); } else { drop(npk_mem_write_byte(out_buf, idx, 32i64)); } idx = idx + 1i64;
-    if (num >= 10i64) { drop(npk_mem_write_byte(out_buf, idx, 48i64 + d2)); } else { drop(npk_mem_write_byte(out_buf, idx, 32i64)); } idx = idx + 1i64;
-    drop(npk_mem_write_byte(out_buf, idx, 48i64 + d1)); idx = idx + 1i64;
-    
-    drop(npk_mem_write_byte(out_buf, idx, 32i64)); idx = idx + 1i64;
+    // special case 0
+    if (n == 0i64) {
+        drop(npk_mem_write_byte(out_buf, idx, 48i64));
+        idx = idx + 1i64;
+    } else {
+        int64:digits = 0i64;
+        int64:temp = n;
+        while (temp > 0i64) {
+            digits = digits + 1i64;
+            temp = temp / 10i64;
+        }
+        
+        int64:i = digits - 1i64;
+        temp = n;
+        while (i >= 0i64) {
+            int64:d = temp % 10i64;
+            drop(npk_mem_write_byte(out_buf, idx + i, 48i64 + d));
+            temp = temp / 10i64;
+            i = i - 1i64;
+        }
+        idx = idx + digits;
+    }
+    drop(npk_mem_write_byte(out_buf, idx, 32i64)); // space
+    idx = idx + 1i64;
 
     pass idx;
 };
+
 
 func:failsafe = int32(tbb32:err) {
     drop(standard_failsafe(err));
@@ -139,6 +146,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
             int64:fd = 0i64;
             if (string_equals(filename, "-") == false) {
                 fd = sys!!(SYS_OPEN, filename, 0i64, 0i64) ? -1i64;
+                defer { if (fd >= 0i64) { drop(sys(SYS_CLOSE, fd)); } }
             }
 
             if (fd < 0i64) {
@@ -155,6 +163,43 @@ func:main = int32(int32:argc, wild int8->:argv) {
                 int32:in_word = 0i32;
                 
                 int32:running = 1i32;
+                int64:file_size = sys!!(SYS_LSEEK, fd, 0i64, 2i64) ? -1i64; // SEEK_END
+                
+                int64:mmap_ptr = -1i64;
+                if (file_size > 0i64) {
+                    mmap_ptr = sys!!(SYS_MMAP, 0i64, file_size, 1i64, 2i64, fd, 0i64) ? -1i64; // PROT_READ, MAP_PRIVATE
+                    if (mmap_ptr > 0i64) {
+                        file_bytes = file_size;
+                        int64:in_idx = 0i64;
+                        while (in_idx < file_size) {
+                            int64:c = npk_mem_read_byte(mmap_ptr, in_idx);
+                            if (c == 10i64) { file_lines = file_lines + 1i64; }
+                            
+                            int32:is_space = 0i32;
+                            if (c == 32i64) { is_space = 1i32; }
+                            if (c == 10i64) { is_space = 1i32; }
+                            if (c == 9i64)  { is_space = 1i32; }
+                            if (c == 13i64) { is_space = 1i32; }
+                            if (c == 11i64) { is_space = 1i32; }
+                            if (c == 12i64) { is_space = 1i32; }
+                            
+                            if (is_space == 1i32) {
+                                in_word = 0i32;
+                            } else {
+                                if (in_word == 0i32) {
+                                    in_word = 1i32;
+                                    file_words = file_words + 1i64;
+                                }
+                            }
+                            in_idx = in_idx + 1i64;
+                        }
+                        drop(sys!!(SYS_MUNMAP, mmap_ptr, file_size));
+                        running = 0i32;
+                    } else {
+                        drop(sys!!(SYS_LSEEK, fd, 0i64, 0i64)); // Rewind to start
+                    }
+                }
+                
                 while (running == 1i32) {
                     int64:bytes_read = sys!!(SYS_READ, fd, buf, 8192i64) ? -1i64;
                     if (bytes_read <= 0i64) {
@@ -188,7 +233,6 @@ func:main = int32(int32:argc, wild int8->:argv) {
                     }
                 }
                 
-                if (fd != 0i64) { drop(sys!!(SYS_CLOSE, fd)); }
                 
                 tot_lines = tot_lines + file_lines;
                 tot_words = tot_words + file_words;

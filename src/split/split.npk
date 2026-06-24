@@ -1,10 +1,10 @@
 // split.npk
 
 
-use "../vendor/nitpick_args.npk".*;
 use "../vendor/io_utils.npk".*;
-use "../vendor/sys_constants.npk".*;
 use "../vendor/mem_utils.npk".*;
+use "../vendor/nitpick_args.npk".*;
+use "../vendor/sys_constants.npk".*;
 
 
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
@@ -68,18 +68,20 @@ func:main = int32(int32:argc, wild int8->:argv) {
                 drop(print_err("'\n"));
                 exit 1;
             }
+            defer { if (fd_in >= 0i64) { drop(sys(SYS_CLOSE, fd_in)); } }
         }
     }
     
     int64:buf_size = 65536i64; // 1MB buffer
-    int64:buf = @cast_unchecked<int64>(alloc(buf_size));
+    wild int8->:buf = alloc(buf_size);
     if (buf < 0i64) { exit 1; }
     
     int64:lines_in_current = 0i64;
     int64:fd_out = -1i64;
     
-    int32:idx1 = 97i32; // a
-    int32:idx2 = 97i32; // a
+    
+    int64:suffix_len = 2i64;
+    int64:file_idx = 0i64;
     
     int32:running = 1i32;
     while (running == 1i32) {
@@ -92,14 +94,34 @@ func:main = int32(int32:argc, wild int8->:argv) {
             
             while (j < n) {
                 if (fd_out == -1i64) {
-                    string:fname = string_concat(prefix, string_concat(string_from_char(@cast_unchecked<int8>(idx1)), string_from_char(@cast_unchecked<int8>(idx2))));
-                    // O_CREAT | O_WRONLY | O_TRUNC = 64 | 1 | 512 = 577
-                    fd_out = sys!!(SYS_OPEN, fname, 577i64, 420i64) ? -1i64; // 420 is 0644 octal
-                    idx2 = idx2 + 1i32;
-                    if (idx2 > 122i32) {
-                        idx2 = 97i32;
-                        idx1 = idx1 + 1i32;
+                    string:fname = prefix;
+                    
+                    int64:num = file_idx;
+                    int64:t = 0i64;
+                    // Determine suffix length dynamically
+                    int64:max_files = 1i64;
+                    int64:k = 0i64;
+                    while (k < suffix_len) { max_files = max_files * 26i64; k = k + 1i64; }
+                    
+                    if (num >= max_files) {
+                        suffix_len = suffix_len + 1i64;
+                        num = file_idx;
                     }
+                    
+                    string:suf = "";
+                    k = 0i64;
+                    int64:tmp = num;
+                    while (k < suffix_len) {
+                        int64:rem = tmp % 26i64;
+                        tmp = tmp / 26i64;
+                        suf = string_concat(string_from_char(@cast_unchecked<int8>(97i64 + rem)), suf);
+                        k = k + 1i64;
+                    }
+                    fname = string_concat(fname, suf);
+                    
+                    fd_out = sys!!(SYS_OPEN, fname, 577i64, 420i64) ? -1i64; // 420 is 0644 octal
+                    defer { if (fd_out >= 0i64) { drop(sys(SYS_CLOSE, fd_out)); } }
+                    file_idx = file_idx + 1i64;
                 }
                 
                 int64:c = npk_mem_read_byte(buf, j);
@@ -107,7 +129,6 @@ func:main = int32(int32:argc, wild int8->:argv) {
                     lines_in_current = lines_in_current + 1i64;
                     if (lines_in_current == lines_per_file) {
                         drop(sys!!(SYS_WRITE, fd_out, buf + start, j - start + 1i64));
-                        drop(sys!!(SYS_CLOSE, fd_out));
                         fd_out = -1i64;
                         lines_in_current = 0i64;
                         start = j + 1i64;
@@ -122,11 +143,16 @@ func:main = int32(int32:argc, wild int8->:argv) {
             }
         }
     }
+if (fd_out != -1i64) {
+                if (j > start) {
+                    drop(sys!!(SYS_WRITE, fd_out, buf + start, j - start));
+                }
+            }
+        }
+    }
     
     if (fd_out != -1i64) {
-        drop(sys!!(SYS_CLOSE, fd_out));
     }
-    drop(sys!!(SYS_CLOSE, fd_in));
     free(@cast_unchecked<any->>(buf));
     
     exit 0;

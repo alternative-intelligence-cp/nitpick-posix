@@ -1,13 +1,12 @@
 // whoami.npk
 
-extern "libc" {
-    func:malloc = int64(int64:bytes);
-    func:nitpick_libc_mem_free = int32(int64:ptr);
-}
 
-use "../vendor/nitpick_args.npk".*;
+
 use "../vendor/io_utils.npk".*;
+use "../vendor/mem_utils.npk".*;
+use "../vendor/nitpick_args.npk".*;
 use "../vendor/sys_constants.npk".*;
+use "../vendor/libc_ffi.npk".*;
 
 extern func:npk_mem_read_string = string(int64:ptr, int64:max_len);
 extern func:npk_mem_write_byte = void(int64:ptr, int64:offset, int64:val);
@@ -29,6 +28,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     string:uid_str = string_from_int(uid);
     
     int64:fd_pw = sys!!(SYS_OPEN, "/etc/passwd", 0i64, 0i64) ? -1i64;
+    defer { if (fd_pw >= 0i64) { drop(sys(SYS_CLOSE, fd_pw)); } }
     int64:fp = 0i64;
     if (fd_pw >= 0i64) { fp = raw io_buf_new(fd_pw); }
     if (fp == 0i64) {
@@ -63,7 +63,6 @@ func:main = int32(int32:argc, wild int8->:argv) {
                             drop(print_str_safe("\n"));
                             drop(nitpick_libc_mem_free(cf_buf));
                             int64:fd = (<- (@cast_unchecked<int64->>(fp + 0i64)));
-                            drop(sys!!(SYS_CLOSE, fd));
                             drop(raw io_buf_free(fp));
                             exit 0;
                         }
@@ -83,7 +82,6 @@ func:main = int32(int32:argc, wild int8->:argv) {
     
     drop(nitpick_libc_mem_free(cf_buf));
     int64:fd_fp = (<- (@cast_unchecked<int64->>(fp + 0i64)));
-    drop(sys!!(SYS_CLOSE, fd_fp));
     drop(raw io_buf_free(fp));
     
     // fallback if not found

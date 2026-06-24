@@ -1,22 +1,17 @@
 // cksum.npk
 
-extern "libc" {
-    func:fopen  = int64(string:path, string:mode);
-    func:fgetc  = int32(int64:fp);
-    func:fclose = int32(int64:fp);
-}
 
+
+use "../vendor/io_utils.npk".*;
+use "../vendor/mem_utils.npk".*;
 use "../vendor/nitpick_args.npk".*;
 use "../../../nitpick-packages/packages/nitpick-crypto/src/nitpick_crypto.npk".*;
-use "../vendor/io_utils.npk".*;
 use "../vendor/sys_constants.npk".*;
+use "../vendor/libc_ffi.npk".*;
 
 extern func:npk_mem_read_string = string(int64:ptr, int64:max_len);
 extern func:npk_mem_write_byte = void(int64:ptr, int64:offset, int64:val);
-extern "libc" {
-    func:malloc = int64(int64:bytes);
-    func:nitpick_libc_mem_free = int32(int64:ptr);
-}
+
 
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
@@ -68,7 +63,6 @@ func:main = int32(int32:argc, wild int8->:argv) {
                 }
                 drop(sys!!(SYS_MUNMAP, buf, 8192i64));
             }
-            drop(sys!!(SYS_CLOSE, fd));
             
             crc = raw Crypto.cksum_finalize(crc, total_bytes);
             
@@ -81,6 +75,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
             drop(print_str_safe(path));
             drop(print_str_safe("\n"));
         }
+        defer { if (fd >= 0i64) { drop(sys(SYS_CLOSE, fd)); } }
         i = i + 1i32;
     }
     exit 0;

@@ -1,21 +1,23 @@
 // sort.npk
 
-extern "libc" {
-    func:fopen  = int64(string:path, string:mode);
-    func:fgetc  = int32(int64:fp);
-    func:fclose = int32(int64:fp);
-    func:malloc = int64(int64:bytes);
-    func:nitpick_libc_mem_free = int32(int64:ptr);
-}
 
+
+use "../vendor/io_utils.npk".*;
+use "../vendor/mem_utils.npk".*;
 extern func:npk_mem_write_byte = void(int64:ptr, int64:offset, int64:val);
 
 use "../vendor/nitpick_args.npk".*;
-use "../vendor/singly.npk".*;
-use "../vendor/io_utils.npk".*;
 use "../vendor/sys_constants.npk".*;
+use "../vendor/libc_ffi.npk".*;
 
 
+
+pub func:alist_pop_front = int64(int64:lst) {
+    if (alsize(lst) == 0i64) { pass -1i64; }
+    int64:v = alget(lst, 0i64);
+    drop(alremove(lst, 0i64));
+    pass ok(v);
+};
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
 
@@ -79,10 +81,10 @@ func:main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     
-    int64:sl = raw SList.create();
+    int64:sl = alist(1024i64);
 
     // Collect files
-    int64:files = raw SList.create();
+    int64:files = alist(1024i64);
     int32:i = 1i32;
     while (i <= arg_count) {
         string:arg = raw args_at(args, i);
@@ -92,71 +94,52 @@ func:main = int32(int32:argc, wild int8->:argv) {
             // Can't cast string to int64 directly, let's open the file!
             int64:fd = sys!!(SYS_OPEN, arg, 0i64, 0i64) ? -1i64;
             if (fd >= 0i64) {
-                drop(SList.push_back(files, fd));
+                drop(alpush(files, fd));
             } else {
                 drop(print_err("sort: cannot open '"));
                 drop(print_err(arg));
                 drop(print_err("'\n"));
                 exit 1;
             }
+            defer { if (fd >= 0i64) { drop(sys(SYS_CLOSE, fd)); } }
         }
         i = i + 1i32;
     }
 
-    if (raw SList.is_empty(files) == 1i32) {
-        drop(SList.push_back(files, 0i64)); // stdin
+    if (alsize(files) == 0i64) {
+        drop(alpush(files, 0i64)); // stdin
     }
 
     // Read all lines
-    while (raw SList.is_empty(files) == 0i32) {
-        int64:fd = raw SList.pop_front(files);
+    while (alsize(files) > 0i64) {
+        int64:fd = raw alist_pop_front(files);
         
-        int64:buf = sys!!(SYS_MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
-        if (buf <= 0i64) { exit 1; }
-        
+        int64:state = raw io_buf_new(fd);
+        int64:line_buf = malloc(65536i64);
         int32:running = 1i32;
-        int64:line_buf = malloc(65536i64); // max line length 64k
-        int64:line_len = 0i64;
-
+        
         while (running == 1i32) {
-            int64:nread = sys!!(SYS_READ, fd, buf, 65536i64) ? -1i64;
-            if (nread <= 0i64) {
+            int64:len = raw io_buf_readline(state, line_buf);
+            if (len == 0i64) {
                 running = 0i32;
             } else {
-                int64:pos = 0i64;
-                while (pos < nread) {
-                    int64:c = npk_mem_read_byte(buf, pos);
-                    npk_mem_write_byte(line_buf, line_len, c);
-                    line_len = line_len + 1i64;
-                    if (c == 10i64) { // '\n'
-                        npk_mem_write_byte(line_buf, line_len, 0i64);
-                        drop(SList.push_back(sl, raw str_clone(line_buf)));
-                        line_len = 0i64;
-                    }
-                    pos = pos + 1i64;
-                }
+                drop(alpush(sl, raw str_clone(line_buf)));
             }
         }
-
-        if (line_len > 0i64) {
-            npk_mem_write_byte(line_buf, line_len, 0i64);
-            drop(SList.push_back(sl, raw str_clone(line_buf)));
-        }
-
+        
         drop(nitpick_libc_mem_free(line_buf));
-        drop(sys!!(SYS_MUNMAP, buf, 65536i64));
-        if (fd > 0i64) { drop(sys!!(SYS_CLOSE, fd)); }
+        drop(io_buf_free(state));
     }
     
-    drop(SList.destroy(files));
+    /* alist files auto-destroyed */
 
     // Sort the list
-    int64:size = raw SList.len(sl);
+    int64:size = alsize(sl);
     if (size > 1i64) {
         int64:arr = malloc(size * 8i64);
         int64:idx = 0i64;
-        while (raw SList.is_empty(sl) == 0i32) {
-            int64:ptr = raw SList.pop_front(sl);
+        while (alsize(sl) > 0i64) {
+            int64:ptr = raw alist_pop_front(sl);
             nitpick_libc_mem_write_i64(arr, idx * 8i64, ptr);
             idx = idx + 1i64;
         }
@@ -213,7 +196,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
         // Add back to list
         int64:k = 0i64;
         while (k < size) {
-            drop(SList.push_back(sl, nitpick_libc_mem_read_i64(arr, k * 8i64)));
+            drop(alpush(sl, nitpick_libc_mem_read_i64(arr, k * 8i64)));
             k = k + 1i64;
         }
         drop(nitpick_libc_mem_free(stack));
@@ -221,14 +204,14 @@ func:main = int32(int32:argc, wild int8->:argv) {
     }
 
     // Print sorted
-    while (raw SList.is_empty(sl) == 0i32) {
-        int64:ptr = raw SList.pop_front(sl);
+    while (alsize(sl) > 0i64) {
+        int64:ptr = raw alist_pop_front(sl);
         string:s = raw ptr_to_string(ptr);
         drop(print_out(s));
         drop(nitpick_libc_mem_free(ptr));
     }
 
-    drop(SList.destroy(sl));
+    /* alist sl auto-destroyed */
     
     exit 0;
 };

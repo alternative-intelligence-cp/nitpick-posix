@@ -1,14 +1,12 @@
 // touch.npk
 
-extern "libc" {
-    func:fopen  = int64(string:path, string:mode);
-    func:fgetc  = int32(int64:fp);
-    func:fclose = int32(int64:fp);
-}
 
-use "../vendor/nitpick_args.npk".*;
+
 use "../vendor/io_utils.npk".*;
+use "../vendor/mem_utils.npk".*;
+use "../vendor/nitpick_args.npk".*;
 use "../vendor/sys_constants.npk".*;
+use "../vendor/libc_ffi.npk".*;
 
 
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
@@ -43,8 +41,8 @@ func:main = int32(int32:argc, wild int8->:argv) {
         // OPEN with O_CREAT (64) | O_WRONLY (1) = 65. Mode 0666 = 438
         int64:fd = sys!!(SYS_OPEN, file, 65i64, 438i64) ? -1i64;
         if (fd >= 0i64) {
-            drop(sys!!(SYS_CLOSE, fd));
         }
+        defer { if (fd >= 0i64) { drop(sys(SYS_CLOSE, fd)); } }
         
         // UTIMENSAT with AT_FDCWD (-100), path, NULL (0), flags (0)
         int64:res = sys(UTIMENSAT, -100i64, file, 0i64, 0i64) ? -1i64;

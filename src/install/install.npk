@@ -1,14 +1,12 @@
 // install.npk
 
-extern "libc" {
-    func:fopen  = int64(string:path, string:mode);
-    func:fgetc  = int32(int64:fp);
-    func:fclose = int32(int64:fp);
-}
 
+
+use "../vendor/io_utils.npk".*;
+use "../vendor/mem_utils.npk".*;
 use "../vendor/sys_constants.npk".*;
 use "../vendor/nitpick_args.npk".*;
-use "../vendor/io_utils.npk".*;
+use "../vendor/libc_ffi.npk".*;
 
 
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
@@ -46,6 +44,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
         drop(print_err("': No such file or directory\n"));
         exit 1;
     }
+    defer { if (src_fd >= 0i64) { drop(sys(SYS_CLOSE, src_fd)); } }
 
     // O_WRONLY = 1, O_CREAT = 64, O_TRUNC = 512 => 1 + 64 + 512 = 577
     // Mode = 0666 (octal) = 438 (decimal)
@@ -54,9 +53,9 @@ func:main = int32(int32:argc, wild int8->:argv) {
         drop(print_err("install: cannot create regular file '"));
         drop(print_err(dst_path));
         drop(print_err("': Permission denied or invalid path\n"));
-        drop(sys!!(SYS_CLOSE, src_fd));
         exit 1;
     }
+    defer { if (dst_fd >= 0i64) { drop(sys(SYS_CLOSE, dst_fd)); } }
 
     int64:buf = sys!!(SYS_MMAP, 0i64, 8192i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
     if (buf <= 0i64) {
@@ -85,8 +84,6 @@ func:main = int32(int32:argc, wild int8->:argv) {
         }
     }
 
-    drop(sys!!(SYS_CLOSE, src_fd));
-    drop(sys!!(SYS_CLOSE, dst_fd));
     drop(sys!!(SYS_MUNMAP, buf, 8192i64));
     
     if (exit_status == 0i32) {

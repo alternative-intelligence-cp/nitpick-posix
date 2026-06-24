@@ -1,18 +1,14 @@
 // dd.npk
 
-extern "libc" {
-    func:fopen  = int64(string:path, string:mode);
-    func:fgetc  = int32(int64:fp);
-    func:fclose = int32(int64:fp);
-    func:malloc = int64(int64:bytes);
-    func:nitpick_libc_mem_free = int32(int64:ptr);
-}
 
+
+use "../vendor/io_utils.npk".*;
+use "../vendor/mem_utils.npk".*;
 extern func:npk_mem_write_byte = void(int64:ptr, int64:offset, int64:val);
 
 use "../vendor/nitpick_args.npk".*;
-use "../vendor/io_utils.npk".*;
 use "../vendor/sys_constants.npk".*;
+use "../vendor/libc_ffi.npk".*;
 
 
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
@@ -89,6 +85,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
             drop(print_err("dd: failed to open input file\n"));
             exit 1;
         }
+        defer { if (fd_in >= 0i64) { drop(sys(SYS_CLOSE, fd_in)); } }
     }
     
     if (string_length(ofile) > 0i64) {
@@ -97,6 +94,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
             drop(print_err("dd: failed to open output file\n"));
             exit 1;
         }
+        defer { if (fd_out >= 0i64) { drop(sys(SYS_CLOSE, fd_out)); } }
     }
     
     int64:buf = sys!!(SYS_MMAP, 0i64, bs, 3i64, 34i64, -1i64, 0i64) ? 0i64;
@@ -130,8 +128,6 @@ func:main = int32(int32:argc, wild int8->:argv) {
     }
     
     drop(sys!!(SYS_MUNMAP, buf, bs));
-    if (fd_in != 0i64) { drop(sys!!(SYS_CLOSE, fd_in)); }
-    if (fd_out != 1i64) { drop(sys!!(SYS_CLOSE, fd_out)); }
     
     exit 0;
 };

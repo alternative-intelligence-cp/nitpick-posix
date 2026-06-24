@@ -1,17 +1,15 @@
 // uniq.npk
 
+use "../vendor/io_utils.npk".*;
+use "../vendor/mem_utils.npk".*;
 extern func:npk_mem_read_string = string(int64:ptr, int64:max_len);
 extern func:npk_mem_write_byte = void(int64:ptr, int64:offset, int64:val);
 
-extern "libc" {
 
-    func:malloc = int64(int64:bytes);
-    func:nitpick_libc_mem_free = int32(int64:ptr);
-}
 
 use "../vendor/nitpick_args.npk".*;
-use "../vendor/io_utils.npk".*;
 use "../vendor/sys_constants.npk".*;
+use "../vendor/libc_ffi.npk".*;
 
 
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
@@ -60,6 +58,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
                 drop(print_err("'\n"));
                 exit 1;
             }
+            defer { if (fd >= 0i64) { drop(sys(SYS_CLOSE, fd)); } }
         }
     }
     fp = raw io_buf_new(fd);
@@ -106,7 +105,6 @@ func:main = int32(int32:argc, wild int8->:argv) {
         drop(nitpick_libc_mem_free(buf));
     }
     
-    if (fd != 0i64) { drop(sys!!(SYS_CLOSE, fd)); }
     drop(raw io_buf_free(fp));
     exit 0;
 };

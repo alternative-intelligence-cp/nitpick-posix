@@ -1,13 +1,11 @@
 // sync.npk
 
-extern "libc" {
-    func:fopen  = int64(string:path, string:mode);
-    func:fgetc  = int32(int64:fp);
-    func:fclose = int32(int64:fp);
-}
 
-use "../vendor/nitpick_args.npk".*;
+
 use "../vendor/io_utils.npk".*;
+use "../vendor/mem_utils.npk".*;
+use "../vendor/nitpick_args.npk".*;
+use "../vendor/libc_ffi.npk".*;
 
 
 func:failsafe = int32(tbb32:err) {

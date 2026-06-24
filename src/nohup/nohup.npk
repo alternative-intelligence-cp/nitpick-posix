@@ -1,16 +1,12 @@
 // nohup.npk
-extern "libc" {
-    func:signal = int64(int32:signum, int64:handler);
-    func:isatty = int32(int32:fd);
-    func:open = int32(string:pathname, int32:flags, int32:mode);
-    func:dup2 = int32(int32:oldfd, int32:newfd);
-    func:close = int32(int32:fd);
-}
 
+
+use "../vendor/io_utils.npk".*;
+use "../vendor/mem_utils.npk".*;
 use "../vendor/sys_constants.npk".*;
 use "../vendor/nitpick_args.npk".*;
 use "../vendor/exec_helper.npk".*;
-use "../vendor/io_utils.npk".*;
+use "../vendor/libc_ffi.npk".*;
 
 
 func:print_str = int32(string:s) {

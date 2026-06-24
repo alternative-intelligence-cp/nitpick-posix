@@ -1,6 +1,7 @@
 // pwd.npk
-use "../vendor/sys_constants.npk".*;
 use "../vendor/io_utils.npk".*;
+use "../vendor/mem_utils.npk".*;
+use "../vendor/sys_constants.npk".*;
 
 
 extern func:npk_mem_read_string = string(int64:ptr, int64:max_len);

@@ -1,17 +1,16 @@
 // exec_stub.npk - Generic exec modifier stub
 
-extern "libc" {
-    func:fopen  = int64(string:path, string:mode);
-    func:fgetc  = int32(int64:fp);
-    func:fclose = int32(int64:fp);
-}
 
+
+use "../vendor/io_utils.npk".*;
+use "../vendor/mem_utils.npk".*;
 use "../vendor/sys_constants.npk".*;
 use "../vendor/nitpick_args.npk".*;
-use "../vendor/io_utils.npk".*;
+use "../vendor/libc_ffi.npk".*;
 
 
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
+extern func:npk_mem_write_int64 = int64(int64:ptr, int64:offset, int64:val); = int64(int64:ptr, int64:offset);
 
 
 func:print_err = int32(string:s) {
@@ -48,7 +47,10 @@ func:main = int32(int32:argc, wild int8->:argv) {
     }
     
     if (found == 1i32) {
-        int64:exec_res = sys!!(SYS_EXECVE, cmd, 0i64, 0i64) ? -1i64; // SYS_EXECVE
+        int64:argv_arr = sys!!(SYS_MMAP, 0i64, 16i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    drop(npk_mem_write_int64(argv_arr, 0i64, cmd));
+    drop(npk_mem_write_int64(argv_arr, 8i64, 0i64));
+    int64:exec_res = sys!!(SYS_EXECVE, cmd, argv_arr, 0i64) ? -1i64; // SYS_EXECVE
         if (exec_res < 0i64) {
             drop(print_err("failed to run command '"));
             drop(print_err(cmd));

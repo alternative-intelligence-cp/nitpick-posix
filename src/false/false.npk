@@ -1,6 +1,7 @@
 // false.npk
-use "../vendor/io_utils.npk".*;
 
+use "../vendor/io_utils.npk".*;
+use "../vendor/mem_utils.npk".*;
 func:failsafe = int32(tbb32:err) {
     drop(standard_failsafe(err));
     exit 1;

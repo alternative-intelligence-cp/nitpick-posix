@@ -1,10 +1,10 @@
 // sum.npk
 
 
-use "../vendor/nitpick_args.npk".*;
 use "../vendor/io_utils.npk".*;
-use "../vendor/sys_constants.npk".*;
 use "../vendor/mem_utils.npk".*;
+use "../vendor/nitpick_args.npk".*;
+use "../vendor/sys_constants.npk".*;
 
 
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
@@ -41,7 +41,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     }
     
     int64:buf_size = 65536i64; // 64KB buffer
-    int64:buf = @cast_unchecked<int64>(alloc(buf_size));
+    wild int8->:buf = alloc(buf_size);
     if (buf < 0i64) { exit 1; }
     
     while (i <= arg_count) {
@@ -51,6 +51,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
             fd = 0i64;
         } else {
             fd = sys!!(SYS_OPEN, file, 0i64, 0i64) ? -1i64;
+            defer { if (fd >= 0i64) { drop(sys(SYS_CLOSE, fd)); } }
         }
         if (fd < 0i64) {
             drop(print_err("sum: cannot open '"));
@@ -80,7 +81,6 @@ func:main = int32(int32:argc, wild int8->:argv) {
                 }
             }
             
-            drop(sys!!(SYS_CLOSE, fd));
             
             int64:blocks = (bytes + 1023i64) / 1024i64;
             

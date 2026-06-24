@@ -1,18 +1,9 @@
 // pinky.npk
-use "../vendor/sys_constants.npk".*;
 use "../vendor/io_utils.npk".*;
-
-
-extern "libc" {
-    func:getpwuid = int64(int64:uid);
-    func:ttyname = int64(int32:fd);
-    func:time = int64(int64:tloc);
-    func:ctime = int64(int64:timep);
-}
-
-extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
-extern func:npk_mem_read_int64 = int64(int64:ptr, int64:offset);
-extern func:npk_mem_write_int64 = int64(int64:ptr, int64:offset, int64:val);
+use "../vendor/mem_utils.npk".*;
+use "../vendor/sys_constants.npk".*;
+use "../vendor/libc_ffi.npk".*;
+use "../vendor/utmp_utils.npk".*;
 
 func:print_str = int32(string:s) {
     int64:len = string_length(s);
@@ -30,110 +21,33 @@ func:pad_right = string(string:s, int64:width) {
     pass res;
 };
 
-func:failsafe = int32(tbb32:err) {
-    drop(standard_failsafe(err));
-    exit 1;
-};
+pub func:failsafe = int32(tbb32:err) { drop(standard_failsafe(err)); exit 1; };
 
-func:main = int32(int32:argc, wild int8->:argv) {
-    int64:uid = sys!!(102i64) ? -1i64; // SYS_GETEUID
-    int64:pwd = getpwuid(uid);
-    string:user = "unknown";
-    string:full_name = "unknown";
-    if (pwd != 0i64) {
-        int64:pw_name_ptr = npk_mem_read_int64(pwd, 0i64);
-        user = "";
-        int64:i = 0i64;
-        int32:running = 1i32;
-        while (running == 1i32) {
-            int64:c = npk_mem_read_byte(pw_name_ptr, i);
-            if (c == 0i64) {
-                running = 0i32;
-            } else {
-                user = string_concat(user, string_from_char(@cast_unchecked<int8>(c)));
-                i = i + 1i64;
-            }
-        }
-        
-        int64:pw_gecos_ptr = npk_mem_read_int64(pwd, 32i64); // pw_gecos is at offset 32 on 64-bit linux
-        if (pw_gecos_ptr != 0i64) {
-            full_name = "";
-            i = 0i64;
-            running = 1i32;
-            while (running == 1i32) {
-                int64:c = npk_mem_read_byte(pw_gecos_ptr, i);
-                if (c == 0i64) {
-                    running = 0i32;
-                } else {
-                    if (c == 44i64) { // ',' separates gecos fields
-                        running = 0i32;
-                    } else {
-                        full_name = string_concat(full_name, string_from_char(@cast_unchecked<int8>(c)));
-                        i = i + 1i64;
-                    }
-                }
-            }
-            if (string_length(full_name) == 0i64) { full_name = user; }
-        } else {
-            full_name = user;
-        }
-    }
-
-    int64:tty_ptr = ttyname(0i32);
-    string:tty = "tty";
-    if (tty_ptr != 0i64) {
-        tty = "";
-        int64:i = 0i64;
-        int32:running = 1i32;
-        while (running == 1i32) {
-            int64:c = npk_mem_read_byte(tty_ptr, i);
-            if (c == 0i64) {
-                running = 0i32;
-            } else {
-                tty = string_concat(tty, string_from_char(@cast_unchecked<int8>(c)));
-                i = i + 1i64;
-            }
-        }
-        if (string_length(tty) >= 5i64) {
-            if (string_equals(string_substring(tty, 0i64, 5i64), "/dev/")) {
-                tty = string_substring(tty, 5i64, string_length(tty));
-            }
-        }
-    }
-
+pub func:main = int32(int32:argc, wild int8->:argv) {
     int64:t = time(0i64);
-    int64:t_buf = sys!!(SYS_MMAP, 0i64, 8i64, 3i64, 34i64, -1i64, 0i64) ? 0i64; // MMAP
+    int64:t_buf = sys!!(SYS_MMAP, 0i64, 8i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
     drop(npk_mem_write_int64(t_buf, 0i64, t));
     
     int64:c_ptr = ctime(t_buf);
     string:ctime_str = "";
     if (c_ptr != 0i64) {
         int64:i = 0i64;
-        int32:running = 1i32;
-        while (running == 1i32) {
+        while (1 == 1) {
             int64:c = npk_mem_read_byte(c_ptr, i);
-            if (c == 0i64) {
-                running = 0i32;
-            } else {
-                if (c != 10i64) { 
-                    ctime_str = string_concat(ctime_str, string_from_char(@cast_unchecked<int8>(c)));
-                }
-                i = i + 1i64;
-            }
+            if (c == 0i64) { break; }
+            if (c != 10i64) { ctime_str = string_concat(ctime_str, string_from_char(@cast_unchecked<int8>(c))); }
+            i = i + 1i64;
         }
     }
-    drop(sys!!(SYS_MUNMAP, t_buf, 8i64)); // MUNMAP
+    drop(sys!!(SYS_MUNMAP, t_buf, 8i64));
 
     string:fmt_date = ctime_str;
     if (string_length(ctime_str) >= 24i64) {
         string:month = string_substring(ctime_str, 4i64, 7i64);
         string:day = string_substring(ctime_str, 8i64, 10i64);
-        if (string_equals(string_substring(day, 0i64, 1i64), " ")) {
-            day = string_concat("0", string_substring(day, 1i64, 2i64));
-        }
+        if (string_equals(string_substring(day, 0i64, 1i64), " ")) { day = string_concat("0", string_substring(day, 1i64, 2i64)); }
         string:time_s = string_substring(ctime_str, 11i64, 16i64);
         string:year = string_substring(ctime_str, 20i64, 24i64);
-        
         string:m = "01";
         if (string_equals(month, "Feb")) { m = "02"; }
         if (string_equals(month, "Mar")) { m = "03"; }
@@ -146,7 +60,6 @@ func:main = int32(int32:argc, wild int8->:argv) {
         if (string_equals(month, "Oct")) { m = "10"; }
         if (string_equals(month, "Nov")) { m = "11"; }
         if (string_equals(month, "Dec")) { m = "12"; }
-        
         fmt_date = string_concat(year, "-");
         fmt_date = string_concat(fmt_date, m);
         fmt_date = string_concat(fmt_date, "-");
@@ -156,12 +69,33 @@ func:main = int32(int32:argc, wild int8->:argv) {
     }
 
     drop(print_str("Login    Name                 TTY      Idle   When             Where\n"));
-    drop(print_str(raw pad_right(user, 9i64)));
-    drop(print_str(raw pad_right(full_name, 21i64)));
-    drop(print_str(raw pad_right(tty, 9i64)));
-    drop(print_str("       ")); // Idle empty
-    drop(print_str(fmt_date));
-    drop(print_str("\n"));
+    
+    int64:lst = raw utmp_read_users();
+    int64:count = raw alsize(lst);
+    int64:idx = 0i64;
+    while (idx < count) {
+        int64:u_ptr = raw alget(lst, idx);
+        int64:l_ptr = raw alget(lst, idx + 1i64);
+        string:user = raw ptr_to_string(u_ptr);
+        string:tty = raw ptr_to_string(l_ptr);
+        
+        if (string_length(tty) >= 5i64) {
+            if (string_equals(string_substring(tty, 0i64, 5i64), "/dev/")) {
+                tty = string_substring(tty, 5i64, string_length(tty));
+            }
+        }
+        
+        drop(print_str(raw pad_right(user, 9i64)));
+        drop(print_str(raw pad_right(user, 21i64))); // name fallback
+        drop(print_str(raw pad_right(tty, 9i64)));
+        drop(print_str("       ")); // Idle empty
+        drop(print_str(fmt_date));
+        drop(print_str("\n"));
+        
+        drop(nitpick_libc_mem_free(u_ptr));
+        drop(nitpick_libc_mem_free(l_ptr));
+        idx = idx + 2i64;
+    }
     
     exit 0;
 };

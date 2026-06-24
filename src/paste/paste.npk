@@ -1,10 +1,11 @@
 // paste.npk
 
+use "../vendor/io_utils.npk".*;
+use "../vendor/mem_utils.npk".*;
 extern func:npk_mem_read_string = string(int64:ptr, int64:max_len);
 extern func:npk_mem_write_byte = void(int64:ptr, int64:offset, int64:val);
 
 use "../vendor/nitpick_args.npk".*;
-use "../vendor/io_utils.npk".*;
 use "../vendor/sys_constants.npk".*;
 
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
@@ -51,6 +52,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
             drop(print_err("'\n"));
             exit 1;
         }
+        defer { if (fd >= 0i64) { drop(sys(SYS_CLOSE, fd)); } }
         int64:fp = raw io_buf_new(fd);
         drop(npk_mem_write_int64(fp_array, n_files * 8i64, fp));
         n_files = n_files + 1i64;
@@ -67,14 +69,13 @@ func:main = int32(int32:argc, wild int8->:argv) {
             int64:fp = npk_mem_read_int64(fp_array, j * 8i64);
             if (fp != 0i64) {
                 // read a line
-                int64:buf = @cast_unchecked<int64>(alloc(65536i64));
+                wild int8->:buf = alloc(65536i64);
                 int64:len = 0i64;
                 int32:c = raw io_buf_getc(fp);
                 if (c < 0i32) {
                     // EOF
                     drop(npk_mem_write_int64(fp_array, j * 8i64, 0i64));
                     int64:fd_c = (<- (@cast_unchecked<int64->>(fp + 0i64)));
-                    drop(sys!!(SYS_CLOSE, fd_c));
                     drop(raw io_buf_free(fp));
                 } else {
                     any_data = 1i32;

@@ -1,8 +1,9 @@
 // chgrp.npk
 
+use "../vendor/io_utils.npk".*;
+use "../vendor/mem_utils.npk".*;
 use "../vendor/sys_constants.npk".*;
 use "../vendor/nitpick_args.npk".*;
-use "../vendor/io_utils.npk".*;
 use "../vendor/pwd_utils.npk".*;
 
 func:print_err = int32(string:s) {

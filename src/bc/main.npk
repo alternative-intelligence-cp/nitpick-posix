@@ -8,45 +8,68 @@ use "stdlib/string.npk".*;
 use "lexer.npk".*;
 use "parser.npk".*;
 
+use "../vendor/nitpick_args.npk".*;
+
 pub func:main = int32(int32:argc, wild int8->:argv) {
     drop(parser_init());
     
-    any->:buf = @cast_unchecked<any->>(alloc(4096i64));
+    string:args = raw args_load_native(argc, argv);
+    int32:arg_count = raw args_count(args);
     
-    while (1 == 1) {
-        drop(print_out("> "));
-        
-        int64:bytes_read = sys!!(SYS_READ, 0i64, buf, 4095i64) ? -1i64;
-        if (bytes_read <= 0i64) {
-            break;
+    int64:line_buf = malloc(65536i64);
+    
+    if (arg_count == 0i32) {
+        int64:state = raw io_buf_new(0i64);
+        while (1 == 1) {
+            drop(print_out("> "));
+            int64:len = raw io_buf_readline(state, line_buf);
+            if (len == 0i64) { break; }
+            
+            string:input = npk_mem_read_string(line_buf, len);
+            if (string_equals(input, "quit\n")) { break; }
+            if (string_equals(input, "exit\n")) { break; }
+            
+            drop(lexer_init(input));
+            while (lexer_curr_token != TOKEN_EOF) {
+                if (lexer_curr_token == TOKEN_SEMI) { drop(lexer_next()); continue; }
+                if (lexer_curr_token == TOKEN_ERROR) { drop(print_err("Parse error\n")); break; }
+                fix256:res = raw(parse_expression());
+                drop(print_out(fix256_toString(res, 6i32)));
+                drop(print_out("\n"));
+            }
         }
-        
-        <- (@cast_unchecked<uint8->>((@cast_unchecked<int64>(buf)) + bytes_read)) = (@cast_unchecked<uint8>(0i64));
-        string:input = npk_mem_read_string(buf, bytes_read);
-        
-        if (string_equals(input, "quit\n")) { break; }
-        if (string_equals(input, "exit\n")) { break; }
-        
-        drop(lexer_init(input));
-        
-        while (lexer_curr_token != TOKEN_EOF) {
-            if (lexer_curr_token == TOKEN_SEMI) {
-                drop(lexer_next());
-                continue;
+        drop(io_buf_free(state));
+    } else {
+        int32:i = 1i32;
+        while (i <= arg_count) {
+            string:filename = raw args_at(args, i);
+            int64:fd = sys!!(SYS_OPEN, filename, 0i64, 0i64) ? -1i64;
+            if (fd >= 0i64) {
+                int64:state = raw io_buf_new(fd);
+                while (1 == 1) {
+                    int64:len = raw io_buf_readline(state, line_buf);
+                    if (len == 0i64) { break; }
+                    string:input = npk_mem_read_string(line_buf, len);
+                    drop(lexer_init(input));
+                    while (lexer_curr_token != TOKEN_EOF) {
+                        if (lexer_curr_token == TOKEN_SEMI) { drop(lexer_next()); continue; }
+                        if (lexer_curr_token == TOKEN_ERROR) { drop(print_err("Parse error\n")); break; }
+                        fix256:res = raw(parse_expression());
+                        drop(print_out(fix256_toString(res, 6i32)));
+                        drop(print_out("\n"));
+                    }
+                }
+                drop(io_buf_free(state));
+            } else {
+                drop(print_err("bc: cannot open '"));
+                drop(print_err(filename));
+                drop(print_err("'\n"));
             }
-            if (lexer_curr_token == TOKEN_ERROR) {
-                drop(print_err("Parse error\n"));
-                break;
-            }
-            
-            fix256:res = raw(parse_expression());
-            
-            string:out_str = fix256_toString(res, 6i32);
-            drop(print_out(out_str));
-            drop(print_out("\n"));
+            defer { if (fd >= 0i64) { drop(sys(SYS_CLOSE, fd)); } }
+            i = i + 1i32;
         }
     }
     
-    free(buf);
+    drop(nitpick_libc_mem_free(line_buf));
     exit 0i32;
 };

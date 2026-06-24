@@ -2,8 +2,9 @@
 
 
 
-use "../vendor/nitpick_args.npk".*;
 use "../vendor/io_utils.npk".*;
+use "../vendor/mem_utils.npk".*;
+use "../vendor/nitpick_args.npk".*;
 use "../vendor/sys_constants.npk".*;
 
 
@@ -54,6 +55,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
                 drop(print_err("'\n"));
                 exit 1;
             }
+            defer { if (fd >= 0i64) { drop(sys(SYS_CLOSE, fd)); } }
         }
     }
     fp = raw io_buf_new(fd);
@@ -105,7 +107,6 @@ func:main = int32(int32:argc, wild int8->:argv) {
         drop(print_str_safe("\n"));
     }
     
-    if (fd != 0i64) { drop(sys!!(SYS_CLOSE, fd)); }
     drop(raw io_buf_free(fp));
     exit 0;
 };

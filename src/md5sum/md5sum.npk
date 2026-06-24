@@ -1,16 +1,14 @@
 // md5sum.npk
 
+use "../vendor/io_utils.npk".*;
+use "../vendor/mem_utils.npk".*;
 use "../vendor/nitpick_args.npk".*;
 use "../../../nitpick-packages/packages/nitpick-crypto/src/nitpick_crypto.npk".*;
-use "../vendor/io_utils.npk".*;
 use "../vendor/sys_constants.npk".*;
+use "../vendor/libc_ffi.npk".*;
 
 
-extern "libc" {
-    func:fopen  = int64(string:path, string:mode);
-    func:fgetc  = int32(int64:fp);
-    func:fclose = int32(int64:fp);
-}
+
 
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
@@ -38,34 +36,47 @@ func:hash_file = int32(string:filename) {
         drop(print_err("'\n"));
         pass 1i32;
     }
+    defer { if (fd >= 0i64) { drop(sys(SYS_CLOSE, fd)); } }
 
     int64:ctx = raw Crypto.md5_init();
     if (ctx == 0i64) {
-        drop(sys!!(SYS_CLOSE, fd));
         pass 1i32;
     }
 
     int64:buf = sys!!(SYS_MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
     if (buf <= 0i64) {
         drop(Crypto.md5_free(ctx));
-        drop(sys!!(SYS_CLOSE, fd));
         pass 1i32;
     }
 
-    int32:running = 1i32;
-    while (running == 1i32) {
-        int64:nread = sys!!(SYS_READ, fd, buf, 65536i64) ? -1i64;
-        if (nread <= 0i64) {
-            running = 0i32;
+    int64:file_size = sys!!(SYS_LSEEK, fd, 0i64, 2i64) ? -1i64; // SEEK_END
+    int64:mmap_ptr = -1i64;
+    
+    if (file_size > 0i64) {
+        mmap_ptr = sys!!(SYS_MMAP, 0i64, file_size, 1i64, 2i64, fd, 0i64) ? -1i64;
+        if (mmap_ptr > 0i64) {
+            drop(Crypto.md5_update(ctx, mmap_ptr, file_size));
+            drop(sys!!(SYS_MUNMAP, mmap_ptr, file_size));
         } else {
-            drop(Crypto.md5_update(ctx, buf, nread));
+            drop(sys!!(SYS_LSEEK, fd, 0i64, 0i64)); // Rewind
+        }
+    }
+    
+    if (mmap_ptr <= 0i64) {
+        int32:running = 1i32;
+        while (running == 1i32) {
+            int64:nread = sys!!(SYS_READ, fd, buf, 65536i64) ? -1i64;
+            if (nread <= 0i64) {
+                running = 0i32;
+            } else {
+                drop(Crypto.md5_update(ctx, buf, nread));
+            }
         }
     }
 
     string:digest = raw Crypto.md5_finalize(ctx);
     drop(Crypto.md5_free(ctx));
     drop(sys!!(SYS_MUNMAP, buf, 65536i64));
-    drop(sys!!(SYS_CLOSE, fd));
 
     drop(print_out(digest));
     drop(print_out("  "));

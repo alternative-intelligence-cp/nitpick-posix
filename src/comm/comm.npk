@@ -1,21 +1,23 @@
 // comm.npk
 
-extern "libc" {
-    func:fopen  = int64(string:path, string:mode);
-    func:fgetc  = int32(int64:fp);
-    func:fclose = int32(int64:fp);
-    func:malloc = int64(int64:bytes);
-    func:nitpick_libc_mem_free = int32(int64:ptr);
-}
 
+
+use "../vendor/io_utils.npk".*;
+use "../vendor/mem_utils.npk".*;
 extern func:npk_mem_write_byte = void(int64:ptr, int64:offset, int64:val);
 
 use "../vendor/nitpick_args.npk".*;
-use "../vendor/singly.npk".*;
-use "../vendor/io_utils.npk".*;
 use "../vendor/sys_constants.npk".*;
+use "../vendor/libc_ffi.npk".*;
 
 
+
+pub func:alist_pop_front = int64(int64:lst) {
+    if (alsize(lst) == 0i64) { pass -1i64; }
+    int64:v = alget(lst, 0i64);
+    drop(alremove(lst, 0i64));
+    pass ok(v);
+};
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
 
@@ -76,7 +78,7 @@ func:failsafe = int32(tbb32:err) {
 };
 
 func:read_lines = int64(string:filename) {
-    int64:sl = raw SList.create();
+    int64:sl = alist(1024i64);
     int64:fd = sys!!(SYS_OPEN, filename, 0i64, 0i64) ? -1i64;
     if (fd < 0i64) {
         drop(print_err("comm: cannot open '"));
@@ -84,6 +86,7 @@ func:read_lines = int64(string:filename) {
         drop(print_err("'\n"));
         pass 0i64;
     }
+    defer { if (fd >= 0i64) { drop(sys(SYS_CLOSE, fd)); } }
 
     int64:buf = sys!!(SYS_MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
     if (buf <= 0i64) { pass 0i64; }
@@ -104,7 +107,7 @@ func:read_lines = int64(string:filename) {
                 line_len = line_len + 1i64;
                 if (c == 10i64) { // '\n'
                     npk_mem_write_byte(line_buf, line_len, 0i64);
-                    drop(SList.push_back(sl, raw str_clone(line_buf)));
+                    drop(alpush(sl, raw str_clone(line_buf)));
                     line_len = 0i64;
                 }
                 pos = pos + 1i64;
@@ -114,12 +117,11 @@ func:read_lines = int64(string:filename) {
 
     if (line_len > 0i64) {
         npk_mem_write_byte(line_buf, line_len, 0i64);
-        drop(SList.push_back(sl, raw str_clone(line_buf)));
+        drop(alpush(sl, raw str_clone(line_buf)));
     }
 
     drop(nitpick_libc_mem_free(line_buf));
     drop(sys!!(SYS_MUNMAP, buf, 65536i64));
-    drop(sys!!(SYS_CLOSE, fd));
     pass sl;
 };
 
@@ -147,65 +149,69 @@ func:main = int32(int32:argc, wild int8->:argv) {
         exit 1;
     }
 
-    int64:sl1 = raw read_lines(f1);
-    int64:sl2 = raw read_lines(f2);
+    int64:fd1 = sys!!(SYS_OPEN, f1, 0i64, 0i64) ? -1i64;
+    defer { if (fd1 >= 0i64) { drop(sys(SYS_CLOSE, fd1)); } }
+    int64:fd2 = sys!!(SYS_OPEN, f2, 0i64, 0i64) ? -1i64;
+    defer { if (fd2 >= 0i64) { drop(sys(SYS_CLOSE, fd2)); } }
     
-    if (sl1 == 0i64) { exit 1; }
-    if (sl2 == 0i64) { exit 1; }
+    if (fd1 < 0i64) { drop(print_err("comm: cannot open ")); drop(print_err(f1)); drop(print_err("\n")); exit 1; }
+    if (fd2 < 0i64) { drop(print_err("comm: cannot open ")); drop(print_err(f2)); drop(print_err("\n")); exit 1; }
     
-    int64:p1 = raw SList.pop_front(sl1);
-    int64:p2 = raw SList.pop_front(sl2);
+    int64:state1 = raw io_buf_new(fd1);
+    int64:state2 = raw io_buf_new(fd2);
+    
+    int64:p1 = malloc(65536i64);
+    int64:p2 = malloc(65536i64);
+    
+    int64:len1 = raw io_buf_readline(state1, p1);
+    int64:len2 = raw io_buf_readline(state2, p2);
 
     while (1i32 == 1i32) {
-        if (p1 == -1i64) {
-            if (p2 == -1i64) {
+        if (len1 == 0i64) {
+            if (len2 == 0i64) {
                 // both empty
                 exit 0;
             }
         }
         
-        if (p1 == -1i64) {
+        if (len1 == 0i64) {
             // print col 2
             drop(print_out("\t"));
             drop(print_out(raw ptr_to_string(p2)));
-            drop(nitpick_libc_mem_free(p2));
-            p2 = raw SList.pop_front(sl2);
+            len2 = raw io_buf_readline(state2, p2);
         } else {
-            if (p2 == -1i64) {
+            if (len2 == 0i64) {
                 // print col 1
                 drop(print_out(raw ptr_to_string(p1)));
-                drop(nitpick_libc_mem_free(p1));
-                p1 = raw SList.pop_front(sl1);
+                len1 = raw io_buf_readline(state1, p1);
             } else {
                 int32:cmp = raw strcmp(p1, p2);
                 if (cmp == 0i32) {
                     // print col 3
                     drop(print_out("\t\t"));
                     drop(print_out(raw ptr_to_string(p1)));
-                    drop(nitpick_libc_mem_free(p1));
-                    drop(nitpick_libc_mem_free(p2));
-                    p1 = raw SList.pop_front(sl1);
-                    p2 = raw SList.pop_front(sl2);
+                    len1 = raw io_buf_readline(state1, p1);
+                    len2 = raw io_buf_readline(state2, p2);
                 } else {
                     if (cmp < 0i32) {
                         // print col 1
                         drop(print_out(raw ptr_to_string(p1)));
-                        drop(nitpick_libc_mem_free(p1));
-                        p1 = raw SList.pop_front(sl1);
+                        len1 = raw io_buf_readline(state1, p1);
                     } else {
                         // print col 2
                         drop(print_out("\t"));
                         drop(print_out(raw ptr_to_string(p2)));
-                        drop(nitpick_libc_mem_free(p2));
-                        p2 = raw SList.pop_front(sl2);
+                        len2 = raw io_buf_readline(state2, p2);
                     }
                 }
             }
         }
     }
-
-    drop(SList.destroy(sl1));
-    drop(SList.destroy(sl2));
+    
+    drop(io_buf_free(state1));
+    drop(io_buf_free(state2));
+    drop(nitpick_libc_mem_free(p1));
+    drop(nitpick_libc_mem_free(p2));
     
     exit 0;
 };

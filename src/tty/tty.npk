@@ -1,5 +1,6 @@
 // tty.npk
 use "../vendor/io_utils.npk".*;
+use "../vendor/mem_utils.npk".*;
 use "../vendor/sys_constants.npk".*;
 
 

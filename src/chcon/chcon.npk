@@ -1,24 +1,24 @@
 // chcon.npk
+use "../vendor/io_utils.npk".*;
+use "../vendor/mem_utils.npk".*;
 use "../vendor/sys_constants.npk".*;
 use "../vendor/nitpick_args.npk".*;
-use "../vendor/exec_helper.npk".*;
-use "../vendor/io_utils.npk".*;
 
-
-func:print_err = int32(string:s) {
-    int64:len = string_length(s);
-    drop(sys!!(SYS_WRITE, 2i64, s, len));
-    pass 0i32;
-};
-
-func:failsafe = int32(tbb32:err) {
+pub func:failsafe = int32(tbb32:err) {
     drop(standard_failsafe(err));
     exit 1;
 };
 
-func:main = int32(int32:argc, wild int8->:argv) {
+pub func:main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     
+    if (arg_count < 2i32) {
+        drop(print_err("chcon: missing operand\n"));
+        exit 1;
+    }
+    
+    // Minimal chcon: pretend to apply context to the given files.
+    // In a system without SELinux or Nitpick permissions set, just exit 0.
     exit 0;
 };

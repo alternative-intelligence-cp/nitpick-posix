@@ -1,6 +1,7 @@
+use "libc_ffi.npk".*;
 // nitpick-args v0.2.0 — CLI argument parsing for Nitpick
 
-extern "libc" { func:string_length = int64(string:s); }
+
 
 extern func:npk_mem_read_string = string(int64:ptr, int64:len);
 
@@ -158,3 +159,87 @@ pub func:args_make3 = string(string:a0, string:a1, string:a2) { string:b = raw a
 pub func:args_make4 = string(string:a0, string:a1, string:a2, string:a3) { string:b = raw args_make3(a0, a1, a2); pass(string_concat(b, string_concat(a3, "|"))); };
 pub func:args_make5 = string(string:a0, string:a1, string:a2, string:a3, string:a4) { string:b = raw args_make4(a0, a1, a2, a3); pass(string_concat(b, string_concat(a4, "|"))); };
 pub func:args_make6 = string(string:a0, string:a1, string:a2, string:a3, string:a4, string:a5) { string:b = raw args_make5(a0, a1, a2, a3, a4); pass(string_concat(b, string_concat(a5, "|"))); };
+
+func:_parser_get_type = string(ArgParser:p, string:key) {
+    string:needle = string_concat("|", string_concat(key, "|"));
+    int64:idx = string_index_of(p.keys, needle);
+    if (idx < 0i64) { pass(""); }
+    
+    int64:pipes = 0i64;
+    int64:i = 0i64;
+    string:ch = "";
+    while (i <= idx) {
+        ch = string_substring(p.keys, i, i + 1i64);
+        if (string_equals(ch, "|")) {
+            pipes = pipes + 1i64;
+        }
+        i = i + 1i64;
+    }
+    pass(raw _args_token(p.types, @cast_unchecked<int32>(pipes - 1i64)));
+};
+
+pub func:Parser_parse = int64(ArgParser:p, string:args) {
+    int64:ht = ahash(4096i64);
+    int32:count = args_count(args);
+    int32:i = 1i32;
+    int64:pos_idx = 0i64;
+    string:tok = "";
+    int64:len = 0i64;
+
+    while (i <= count) {
+        tok = raw _args_token(args, i);
+        len = string_length(tok);
+
+        if (len > 0i64) {
+            if (string_starts_with(tok, "--")) {
+                string:key = tok;
+                string:type = raw _parser_get_type(p, key);
+                
+                if (string_equals(type, "opt")) {
+                    if (i < count) {
+                        i = i + 1i32;
+                        ahset(ht, key, raw _args_token(args, i));
+                    } else {
+                        ahset(ht, key, "");
+                    }
+                } else {
+                    ahset(ht, key, "1");
+                }
+            } else {
+                if (string_starts_with(tok, "-") && len > 1i64) {
+                    int64:j = 1i64;
+                    while (j < len) {
+                        string:flag_char = string_substring(tok, j, j + 1i64);
+                        string:key = string_concat("-", flag_char);
+                        string:type = raw _parser_get_type(p, key);
+                        
+                        if (string_equals(type, "opt")) {
+                            if (j + 1i64 < len) {
+                                ahset(ht, key, string_substring(tok, j + 1i64, len));
+                                j = len;
+                            } else {
+                                if (i < count) {
+                                    i = i + 1i32;
+                                    ahset(ht, key, raw _args_token(args, i));
+                                } else {
+                                    ahset(ht, key, "");
+                                }
+                            }
+                        } else {
+                            ahset(ht, key, "1");
+                        }
+                        j = j + 1i64;
+                    }
+                } else {
+                    string:pos_key = `pos&{pos_idx}`;
+                    ahset(ht, pos_key, tok);
+                    pos_idx = pos_idx + 1i64;
+                }
+            }
+        }
+        i = i + 1i32;
+    }
+    
+    ahset(ht, "pos_count", string_from_int(pos_idx));
+    pass ht;
+};

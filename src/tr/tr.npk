@@ -1,15 +1,13 @@
 // tr.npk
 
-use "../vendor/nitpick_args.npk".*;
 use "../vendor/io_utils.npk".*;
-use "../vendor/sys_constants.npk".*;
 use "../vendor/mem_utils.npk".*;
+use "../vendor/nitpick_args.npk".*;
+use "../vendor/sys_constants.npk".*;
+use "../vendor/libc_ffi.npk".*;
 
 
-extern "libc" {
-    func:malloc = int64(int64:bytes);
-    func:nitpick_libc_mem_free = int32(int64:ptr);
-}
+
 
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
@@ -84,7 +82,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     }
     
     int64:buf_size = 65536i64; // 1MB buffer
-    int64:buf = @cast_unchecked<int64>(alloc(buf_size));
+    wild int8->:buf = alloc(buf_size);
     if (buf < 0i64) { exit 1; }
     
     int32:running = 1i32;

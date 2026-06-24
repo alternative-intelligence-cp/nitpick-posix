@@ -2,8 +2,9 @@
 
 
 
-use "../vendor/nitpick_args.npk".*;
 use "../vendor/io_utils.npk".*;
+use "../vendor/mem_utils.npk".*;
+use "../vendor/nitpick_args.npk".*;
 use "../vendor/sys_constants.npk".*;
 
 
@@ -76,6 +77,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
         target_user = raw args_at(args, 1i32);
         // We'd have to find their primary GID from /etc/passwd
         int64:fd_pw = sys!!(SYS_OPEN, "/etc/passwd", 0i64, 0i64) ? -1i64;
+        defer { if (fd_pw >= 0i64) { drop(sys(SYS_CLOSE, fd_pw)); } }
         int64:fp_pw = 0i64;
         if (fd_pw >= 0i64) { fp_pw = raw io_buf_new(fd_pw); }
         if (fp_pw != 0i64) {
@@ -116,7 +118,6 @@ func:main = int32(int32:argc, wild int8->:argv) {
                 }
             }
             int64:fd = (<- (@cast_unchecked<int64->>(fp_pw + 0i64)));
-            drop(sys!!(SYS_CLOSE, fd));
             drop(raw io_buf_free(fp_pw));
         }
     } else {
@@ -124,6 +125,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
         string:uid_str = string_from_int(uid);
         
         int64:fd_pw = sys!!(SYS_OPEN, "/etc/passwd", 0i64, 0i64) ? -1i64;
+        defer { if (fd_pw >= 0i64) { drop(sys(SYS_CLOSE, fd_pw)); } }
         int64:fp_pw = 0i64;
         if (fd_pw >= 0i64) { fp_pw = raw io_buf_new(fd_pw); }
         if (fp_pw != 0i64) {
@@ -166,7 +168,6 @@ func:main = int32(int32:argc, wild int8->:argv) {
                 }
             }
             int64:fd = (<- (@cast_unchecked<int64->>(fp_pw + 0i64)));
-            drop(sys!!(SYS_CLOSE, fd));
             drop(raw io_buf_free(fp_pw));
         }
     }
@@ -184,6 +185,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
         drop(print_err("groups: cannot open /etc/group\n"));
         exit 1;
     }
+    defer { if (fd_g >= 0i64) { drop(sys(SYS_CLOSE, fd_g)); } }
     int64:fp = raw io_buf_new(fd_g);
     
     int32:running2 = 1i32;
@@ -237,7 +239,6 @@ func:main = int32(int32:argc, wild int8->:argv) {
     
     drop(print_str_safe("\n"));
     int64:fd_fp = (<- (@cast_unchecked<int64->>(fp + 0i64)));
-    drop(sys!!(SYS_CLOSE, fd_fp));
     drop(raw io_buf_free(fp));
     exit 0;
 };

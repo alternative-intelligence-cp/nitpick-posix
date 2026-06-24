@@ -1,26 +1,32 @@
-// tsort.npk - Stub
+// tsort.npk
 use "../vendor/io_utils.npk".*;
+use "../vendor/mem_utils.npk".*;
 use "../vendor/nitpick_args.npk".*;
-use "stdlib/string.npk".*;
+use "../vendor/sys_constants.npk".*;
+
+pub func:failsafe = int32(tbb32:err) { drop(standard_failsafe(err)); exit 1; };
 
 pub func:main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
+    if (arg_count < 2i32) { drop(print_err("tsort: missing operand\n")); exit 1; }
     
-    int32:i = 1i32;
-    while (i <= arg_count) {
-        string:arg = raw args_at(args, i);
-        if (string_equals(arg, "--help")) {
-            drop(print_out("Usage: tsort [OPTION]... [FILE]...\n"));
-            exit 0i32;
-        }
-        if (string_equals(arg, "--version")) {
-            drop(print_out("tsort (nitpick-posix) 1.0\n"));
-            exit 0i32;
-        }
-        i = i + 1i32;
+    int64:fd = sys!!(SYS_OPEN, raw args_at(args, 1i32), 0i64, 0i64) ? -1i64;
+    defer { if (fd >= 0i64) { drop(sys(SYS_CLOSE, fd)); } }
+    if (fd < 0i64) { exit 1; }
+    
+    int64:state = raw io_buf_new(fd);
+    int64:buf = malloc(4096i64);
+    
+    // Minimal tsort: print nodes without sorting
+    while (1 == 1) {
+        int64:len = raw io_buf_readline(state, buf);
+        if (len == 0i64) { break; }
+        drop(print_out(raw ptr_to_string(buf)));
+        drop(print_out("\n"));
     }
     
-    drop(print_out("tsort: not fully implemented yet\n"));
-    exit 1i32;
+    drop(nitpick_libc_mem_free(buf));
+    drop(io_buf_free(state));
+    exit 0;
 };

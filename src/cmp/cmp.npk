@@ -2,8 +2,9 @@
 
 
 
-use "../vendor/nitpick_args.npk".*;
 use "../vendor/io_utils.npk".*;
+use "../vendor/mem_utils.npk".*;
+use "../vendor/nitpick_args.npk".*;
 use "../vendor/sys_constants.npk".*;
 
 
@@ -46,6 +47,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
         drop(print_err("'\n"));
         exit 2;
     }
+    defer { if (fd1 >= 0i64) { drop(sys(SYS_CLOSE, fd1)); } }
     int64:fp1 = raw io_buf_new(fd1);
     
     int64:fd2 = sys!!(SYS_OPEN, file2, 0i64, 0i64) ? -1i64;
@@ -55,6 +57,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
         drop(print_err("'\n"));
         exit 2;
     }
+    defer { if (fd2 >= 0i64) { drop(sys(SYS_CLOSE, fd2)); } }
     int64:fp2 = raw io_buf_new(fd2);
     
     int32:running = 1i32;
@@ -102,8 +105,6 @@ func:main = int32(int32:argc, wild int8->:argv) {
     
     int64:fd_1 = (<- (@cast_unchecked<int64->>(fp1 + 0i64)));
     int64:fd_2 = (<- (@cast_unchecked<int64->>(fp2 + 0i64)));
-    drop(sys!!(SYS_CLOSE, fd_1));
-    drop(sys!!(SYS_CLOSE, fd_2));
     drop(raw io_buf_free(fp1));
     drop(raw io_buf_free(fp2));
     exit 0;

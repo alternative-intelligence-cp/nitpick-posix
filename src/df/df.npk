@@ -1,14 +1,12 @@
 // df.npk
 
-extern "libc" {
-    func:fopen  = int64(string:path, string:mode);
-    func:fgetc  = int32(int64:fp);
-    func:fclose = int32(int64:fp);
-}
 
+
+use "../vendor/io_utils.npk".*;
+use "../vendor/mem_utils.npk".*;
 use "../vendor/sys_constants.npk".*;
 use "../vendor/nitpick_args.npk".*;
-use "../vendor/io_utils.npk".*;
+use "../vendor/libc_ffi.npk".*;
 
 
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
@@ -92,10 +90,10 @@ func:main = int32(int32:argc, wild int8->:argv) {
             string:kb = raw pad_left(string_from_int(kblocks), 10i64);
             string:us = raw pad_left(string_from_int(kused), 10i64);
             string:av = raw pad_left(string_from_int(kavail), 10i64);
-            string:pc = raw pad_left(string_concat(string_from_int(use_pct), "%"), 5i64);
+            string:pc = raw pad_left(`&{string_from_int(use_pct)}%`, 5i64);
             string:mo = " /";
             
-            drop(print_str_safe(string_concat(fs, string_concat(" ", string_concat(kb, string_concat(" ", string_concat(us, string_concat(" ", string_concat(av, string_concat(" ", string_concat(pc, mo)))))))))));
+            drop(print_str_safe(`&{fs} &{kb} &{us} &{av} &{pc}&{mo}`));
             drop(print_str_safe("\n"));
         }
     } else {
@@ -121,10 +119,10 @@ func:main = int32(int32:argc, wild int8->:argv) {
                 string:kb = raw pad_left(string_from_int(kblocks), 10i64);
                 string:us = raw pad_left(string_from_int(kused), 10i64);
                 string:av = raw pad_left(string_from_int(kavail), 10i64);
-                string:pc = raw pad_left(string_concat(string_from_int(use_pct), "%"), 5i64);
-                string:mo = string_concat(" ", path);
+                string:pc = raw pad_left(`&{string_from_int(use_pct)}%`, 5i64);
+                string:mo = ` &{path}`;
                 
-                drop(print_str_safe(string_concat(fs, string_concat(" ", string_concat(kb, string_concat(" ", string_concat(us, string_concat(" ", string_concat(av, string_concat(" ", string_concat(pc, mo)))))))))));
+                drop(print_str_safe(`&{fs} &{kb} &{us} &{av} &{pc}&{mo}`));
                 drop(print_str_safe("\n"));
             } else {
                 drop(print_err("df: '"));

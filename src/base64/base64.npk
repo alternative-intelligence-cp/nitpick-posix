@@ -2,10 +2,10 @@
 
 
 
-use "../vendor/nitpick_args.npk".*;
 use "../vendor/io_utils.npk".*;
-use "../vendor/sys_constants.npk".*;
 use "../vendor/mem_utils.npk".*;
+use "../vendor/nitpick_args.npk".*;
+use "../vendor/sys_constants.npk".*;
 
 
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
@@ -51,11 +51,12 @@ func:main = int32(int32:argc, wild int8->:argv) {
                 drop(print_err("'\n"));
                 exit 1;
             }
+            defer { if (fd >= 0i64) { drop(sys(SYS_CLOSE, fd)); } }
         }
     }
     
     int64:buf_size = 65536i64; // 1MB buffer
-    int64:buf = @cast_unchecked<int64>(alloc(buf_size));
+    wild int8->:buf = alloc(buf_size);
     if (buf < 0i64) { exit 1; }
     
     int32:running = 1i32;
@@ -140,7 +141,6 @@ func:main = int32(int32:argc, wild int8->:argv) {
     }
     
     if (fd != 0i64) {
-        drop(sys!!(SYS_CLOSE, fd));
     }
     free(@cast_unchecked<any->>(buf));
     exit 0;

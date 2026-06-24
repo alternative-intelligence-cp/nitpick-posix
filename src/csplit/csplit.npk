@@ -1,26 +1,58 @@
-// csplit.npk - Stub
+// csplit.npk
 use "../vendor/io_utils.npk".*;
+use "../vendor/mem_utils.npk".*;
 use "../vendor/nitpick_args.npk".*;
-use "stdlib/string.npk".*;
+use "../vendor/sys_constants.npk".*;
+use "../vendor/libc_ffi.npk".*;
+
+pub func:failsafe = int32(tbb32:err) { drop(standard_failsafe(err)); exit 1; };
 
 pub func:main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
+    if (arg_count < 3i32) { drop(print_err("csplit: missing operand\n")); exit 1; }
     
-    int32:i = 1i32;
-    while (i <= arg_count) {
-        string:arg = raw args_at(args, i);
-        if (string_equals(arg, "--help")) {
-            drop(print_out("Usage: csplit [OPTION]... [FILE]...\n"));
-            exit 0i32;
+    int64:fd = sys!!(SYS_OPEN, raw args_at(args, 1i32), 0i64, 0i64) ? -1i64;
+    defer { if (fd >= 0i64) { drop(sys(SYS_CLOSE, fd)); } }
+    if (fd < 0i64) { drop(print_err("csplit: cannot open file\n")); exit 1; }
+    
+    // Parse the split line number
+    string:split_str = raw args_at(args, 2i32);
+    int64:split_line = 0i64;
+    int64:i = 0i64;
+    while (i < string_length(split_str)) {
+        int64:c = @cast_unchecked<int64>(string_char_at(split_str, i));
+        if (c >= 48i64) {
+            if (c <= 57i64) {
+                split_line = (split_line * 10i64) + (c - 48i64);
+            }
         }
-        if (string_equals(arg, "--version")) {
-            drop(print_out("csplit (nitpick-posix) 1.0\n"));
-            exit 0i32;
-        }
-        i = i + 1i32;
+        i = i + 1i64;
     }
     
-    drop(print_out("csplit: not fully implemented yet\n"));
-    exit 1i32;
+    int64:out_fd = sys!!(SYS_OPEN, "xx00", 577i64, 438i64) ? -1i64; // O_WRONLY | O_CREAT | O_TRUNC
+    if (out_fd < 0i64) { drop(print_err("csplit: cannot create output\n")); exit 1; }
+    
+    int64:state = raw io_buf_new(fd);
+    int64:buf = malloc(65536i64);
+    
+    int64:current_line = 1i64;
+    
+    while (1 == 1) {
+        if (current_line == split_line) {
+            drop(sys!!(SYS_CLOSE, out_fd));
+            out_fd = sys!!(SYS_OPEN, "xx01", 577i64, 438i64) ? -1i64;
+        }
+        
+        int64:len = raw io_buf_readline(state, buf);
+        if (len == 0i64) { break; }
+        
+        drop(sys!!(SYS_WRITE, out_fd, buf, len));
+        current_line = current_line + 1i64;
+    }
+    
+    drop(sys(SYS_CLOSE, out_fd));
+    drop(nitpick_libc_mem_free(buf));
+    drop(io_buf_free(state));
+    exit 0;
 };

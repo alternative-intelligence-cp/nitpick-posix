@@ -1,21 +1,23 @@
 // cp.npk
 
-extern "libc" {
-    func:fopen  = int64(string:path, string:mode);
-    func:fgetc  = int32(int64:fp);
-    func:fclose = int32(int64:fp);
-    func:malloc = int64(int64:bytes);
-    func:free   = int32(int64:ptr);
-}
 
+
+use "../vendor/io_utils.npk".*;
+use "../vendor/mem_utils.npk".*;
 extern func:npk_mem_write_byte = void(int64:ptr, int64:offset, int64:val);
 
 use "../vendor/sys_constants.npk".*;
 use "../vendor/nitpick_args.npk".*;
-use "../vendor/singly.npk".*;
-use "../vendor/io_utils.npk".*;
+use "../vendor/libc_ffi.npk".*;
 
 
+
+pub func:alist_pop_front = int64(int64:lst) {
+    if (alsize(lst) == 0i64) { pass -1i64; }
+    int64:v = alget(lst, 0i64);
+    drop(alremove(lst, 0i64));
+    pass ok(v);
+};
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
 
@@ -65,21 +67,20 @@ func:copy_file = int32(string:src_path, string:dst_path) {
         drop(print_err("' for reading\n"));
         pass 1i32;
     }
+    defer { if (src_fd >= 0i64) { drop(sys(SYS_CLOSE, src_fd)); } }
 
     int64:dst_fd = sys!!(SYS_OPEN, dst_path, 577i64, 438i64) ? -1i64;
     if (dst_fd < 0i64) {
         drop(print_err("cp: cannot create regular file '"));
         drop(print_err(dst_path));
         drop(print_err("'\n"));
-        drop(sys!!(SYS_CLOSE, src_fd));
         pass 1i32;
     }
+    defer { if (dst_fd >= 0i64) { drop(sys(SYS_CLOSE, dst_fd)); } }
 
     int64:buf = sys!!(SYS_MMAP, 0i64, 8192i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
     if (buf <= 0i64) { 
         drop(print_err("cp: memory allocation error\n"));
-        drop(sys!!(SYS_CLOSE, src_fd));
-        drop(sys!!(SYS_CLOSE, dst_fd));
         pass 1i32; 
     }
     
@@ -104,8 +105,6 @@ func:copy_file = int32(string:src_path, string:dst_path) {
         }
     }
     
-    drop(sys!!(SYS_CLOSE, src_fd));
-    drop(sys!!(SYS_CLOSE, dst_fd));
     drop(sys!!(SYS_MUNMAP, buf, 8192i64));
     
     pass exit_status;
@@ -148,14 +147,14 @@ func:copy_recursive = int32(string:src, string:dst, int32:recursive) {
             drop(print_err("'\n"));
             pass 1i32;
         }
+        defer { if (fd >= 0i64) { drop(sys(SYS_CLOSE, fd)); } }
 
         int64:buf = sys!!(SYS_MMAP, 0i64, 32768i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
         if (buf < 0i64) {
-            drop(sys!!(SYS_CLOSE, fd));
             pass 1i32;
         }
 
-        int64:sl = raw SList.create();
+        int64:sl = alist(1024i64);
         int32:running = 1i32;
         int32:exit_status = 0i32;
 
@@ -188,7 +187,7 @@ func:copy_recursive = int32(string:src, string:dst, int32:recursive) {
                     
                     if (skip == 0i32) {
                         int64:name_copy = raw str_clone(name_ptr);
-                        drop(SList.push_back(sl, name_copy));
+                        drop(alpush(sl, name_copy));
                     }
                     bpos = bpos + reclen;
                 }
@@ -196,10 +195,9 @@ func:copy_recursive = int32(string:src, string:dst, int32:recursive) {
         }
         
         drop(sys!!(SYS_MUNMAP, buf, 32768i64));
-        drop(sys!!(SYS_CLOSE, fd));
 
-        while (raw SList.is_empty(sl) == 0i32) {
-            int64:child_ptr = raw SList.pop_front(sl);
+        while (alsize(sl) > 0i64) {
+            int64:child_ptr = raw alist_pop_front(sl);
             string:child_name = raw ptr_to_string(child_ptr);
             
             string:child_src = string_concat(src, string_concat("/", child_name));
@@ -211,7 +209,7 @@ func:copy_recursive = int32(string:src, string:dst, int32:recursive) {
             drop(nitpick_libc_mem_free(child_ptr));
         }
         
-        drop(SList.destroy(sl));
+        /* alist sl auto-destroyed */
         pass exit_status;
     } else {
         pass raw copy_file(src, dst);

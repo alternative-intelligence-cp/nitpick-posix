@@ -1,14 +1,12 @@
 // kill.npk
 
-extern "libc" {
-    func:fopen  = int64(string:path, string:mode);
-    func:fgetc  = int32(int64:fp);
-    func:fclose = int32(int64:fp);
-}
 
+
+use "../vendor/io_utils.npk".*;
+use "../vendor/mem_utils.npk".*;
 use "../vendor/sys_constants.npk".*;
 use "../vendor/nitpick_args.npk".*;
-use "../vendor/io_utils.npk".*;
+use "../vendor/libc_ffi.npk".*;
 
 
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
@@ -60,8 +58,8 @@ func:parse_int = int64(string:s) {
         if (digit >= 0i64) {
             val = val * 10i64 + digit;
         } else {
-            // Error! Just return what we have
-            i = len;
+            drop(print_err("kill: arguments must be process or job IDs\n"));
+            exit 1;
         }
         i = i + 1i64;
     }
