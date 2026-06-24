@@ -12,7 +12,7 @@ pub func:main = int32(int32:argc, wild int8->:argv) {
     int32:arg_count = raw args_count(args);
     if (arg_count < 3i32) { drop(print_err("csplit: missing operand\n")); exit 1; }
     
-    int64:fd = sys!!(SYS_OPEN, raw args_at(args, 1i32), 0i64, 0i64) ? -1i64;
+    int64:fd = sys(SYS_OPEN, raw args_at(args, 1i32), 0i64, 0i64) ? -1i64;
     defer { if (fd >= 0i64) { drop(sys(SYS_CLOSE, fd)); } }
     if (fd < 0i64) { drop(print_err("csplit: cannot open file\n")); exit 1; }
     
@@ -30,7 +30,7 @@ pub func:main = int32(int32:argc, wild int8->:argv) {
         i = i + 1i64;
     }
     
-    int64:out_fd = sys!!(SYS_OPEN, "xx00", 577i64, 438i64) ? -1i64; // O_WRONLY | O_CREAT | O_TRUNC
+    int64:out_fd = sys(SYS_OPEN, "xx00", 577i64, 438i64) ? -1i64; // O_WRONLY | O_CREAT | O_TRUNC
     if (out_fd < 0i64) { drop(print_err("csplit: cannot create output\n")); exit 1; }
     
     int64:state = raw io_buf_new(fd);
@@ -41,13 +41,13 @@ pub func:main = int32(int32:argc, wild int8->:argv) {
     while (1 == 1) {
         if (current_line == split_line) {
             drop(sys!!(SYS_CLOSE, out_fd));
-            out_fd = sys!!(SYS_OPEN, "xx01", 577i64, 438i64) ? -1i64;
+            out_fd = sys(SYS_OPEN, "xx01", 577i64, 438i64) ? -1i64;
         }
         
         int64:len = raw io_buf_readline(state, buf);
         if (len == 0i64) { break; }
         
-        drop(sys!!(SYS_WRITE, out_fd, buf, len));
+        drop(sys(SYS_WRITE, out_fd, buf, len));
         current_line = current_line + 1i64;
     }
     

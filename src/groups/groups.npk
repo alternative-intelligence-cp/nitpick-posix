@@ -13,13 +13,13 @@ extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys!!(SYS_WRITE, 2i64, s, len));
+    drop(sys(SYS_WRITE, 2i64, s, len));
     pass 0i32;
 };
 
 func:print_str_safe = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys!!(SYS_WRITE, 1i64, s, len));
+    drop(sys(SYS_WRITE, 1i64, s, len));
     pass 0i32;
 };
 
@@ -76,7 +76,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     if (arg_count >= 1i32) {
         target_user = raw args_at(args, 1i32);
         // We'd have to find their primary GID from /etc/passwd
-        int64:fd_pw = sys!!(SYS_OPEN, "/etc/passwd", 0i64, 0i64) ? -1i64;
+        int64:fd_pw = sys(SYS_OPEN, "/etc/passwd", 0i64, 0i64) ? -1i64;
         defer { if (fd_pw >= 0i64) { drop(sys(SYS_CLOSE, fd_pw)); } }
         int64:fp_pw = 0i64;
         if (fd_pw >= 0i64) { fp_pw = raw io_buf_new(fd_pw); }
@@ -124,7 +124,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
         int64:uid = sys!!(SYS_GETUID) ? -1i64;
         string:uid_str = string_from_int(uid);
         
-        int64:fd_pw = sys!!(SYS_OPEN, "/etc/passwd", 0i64, 0i64) ? -1i64;
+        int64:fd_pw = sys(SYS_OPEN, "/etc/passwd", 0i64, 0i64) ? -1i64;
         defer { if (fd_pw >= 0i64) { drop(sys(SYS_CLOSE, fd_pw)); } }
         int64:fp_pw = 0i64;
         if (fd_pw >= 0i64) { fp_pw = raw io_buf_new(fd_pw); }
@@ -180,7 +180,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     drop(print_str_safe(target_user));
     drop(print_str_safe(" : "));
     
-    int64:fd_g = sys!!(SYS_OPEN, "/etc/group", 0i64, 0i64) ? -1i64;
+    int64:fd_g = sys(SYS_OPEN, "/etc/group", 0i64, 0i64) ? -1i64;
     if (fd_g < 0i64) {
         drop(print_err("groups: cannot open /etc/group\n"));
         exit 1;

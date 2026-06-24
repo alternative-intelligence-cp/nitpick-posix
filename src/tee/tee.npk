@@ -14,7 +14,7 @@ extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys!!(SYS_WRITE, 2i64, s, len));
+    drop(sys(SYS_WRITE, 2i64, s, len));
     pass 0i32;
 };
 
@@ -74,7 +74,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     
     while (i <= arg_count) {
         string:file = raw args_at(args, i);
-        int64:fd = sys!!(SYS_OPEN, file, 65i64, 438i64) ? -1i64; // O_WRONLY | O_CREAT
+        int64:fd = sys(SYS_OPEN, file, 65i64, 438i64) ? -1i64; // O_WRONLY | O_CREAT
         if (fd < 0i64) {
             drop(print_err("tee: failed to open '"));
             drop(print_err(file));
@@ -83,7 +83,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
         } else {
             // truncate? actually tee normally truncates. O_TRUNC = 512
             // wait, let's just close and reopen with O_TRUNC to be safe
-            fd = sys!!(SYS_OPEN, file, 577i64, 438i64) ? -1i64; // O_WRONLY | O_CREAT | O_TRUNC
+            fd = sys(SYS_OPEN, file, 577i64, 438i64) ? -1i64; // O_WRONLY | O_CREAT | O_TRUNC
             
             // allocate new node
             int64:new_node = mem + alloc_offset;
@@ -102,15 +102,15 @@ func:main = int32(int32:argc, wild int8->:argv) {
     int64:buf = sys!!(SYS_MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
     if (buf < 0i64) { exit 1; }
     
-    int64:nread = sys!!(SYS_READ, 0i64, buf, 65536i64) ? -1i64;
+    int64:nread = sys(SYS_READ, 0i64, buf, 65536i64) ? -1i64;
     while (nread > 0i64) {
         int64:node = head;
         while (node != 0i64) {
             int64:fd = raw mem_read_64(node, 0i64);
-            drop(sys!!(SYS_WRITE, fd, buf, nread));
+            drop(sys(SYS_WRITE, fd, buf, nread));
             node = raw mem_read_64(node, 8i64);
         }
-        nread = sys!!(SYS_READ, 0i64, buf, 65536i64) ? -1i64;
+        nread = sys(SYS_READ, 0i64, buf, 65536i64) ? -1i64;
     }
     
     // close fds

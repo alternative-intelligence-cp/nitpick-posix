@@ -12,7 +12,7 @@ extern func:npk_mem_read_int64 = int64(int64:ptr, int64:offset);
 
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys!!(SYS_WRITE, 2i64, s, len));
+    drop(sys(SYS_WRITE, 2i64, s, len));
     pass 0i32;
 };
 
@@ -29,7 +29,7 @@ pub func:main = int32(int32:argc, wild int8->:argv) {
     if (stat_buf < 0i64) { exit 1; }
     if (rand_buf < 0i64) { exit 1; }
     
-    int64:urandom_fd = sys!!(SYS_OPEN, "/dev/urandom", 0i64, 0i64) ? -1i64;
+    int64:urandom_fd = sys(SYS_OPEN, "/dev/urandom", 0i64, 0i64) ? -1i64;
     if (urandom_fd < 0i64) {
         drop(print_err("shred: cannot open /dev/urandom\n"));
         exit 1;
@@ -41,7 +41,7 @@ pub func:main = int32(int32:argc, wild int8->:argv) {
     
     while (i <= arg_count) {
         string:file = raw args_at(args, i);
-        int64:res = sys!!(SYS_STAT, file, stat_buf) ? -1i64;
+        int64:res = sys(SYS_STAT, file, stat_buf) ? -1i64;
         if (res < 0i64) {
             drop(print_err("shred: cannot stat '"));
             drop(print_err(file));
@@ -49,7 +49,7 @@ pub func:main = int32(int32:argc, wild int8->:argv) {
             ret = 0i32;
         } else {
             int64:size = npk_mem_read_int64(stat_buf, 48i64); // st_size
-            int64:fd = sys!!(SYS_OPEN, file, 2i64, 0i64) ? -1i64; // O_RDWR = 2
+            int64:fd = sys(SYS_OPEN, file, 2i64, 0i64) ? -1i64; // O_RDWR = 2
             if (fd < 0i64) {
                 drop(print_err("shred: cannot open '"));
                 drop(print_err(file));
@@ -65,11 +65,11 @@ pub func:main = int32(int32:argc, wild int8->:argv) {
                         if (to_write > 65536i64) { to_write = 65536i64; }
                         
                         // Fill rand_buf with random data
-                        int64:rn = sys!!(SYS_READ, urandom_fd, rand_buf, to_write) ? -1i64;
+                        int64:rn = sys(SYS_READ, urandom_fd, rand_buf, to_write) ? -1i64;
                         if (rn <= 0i64) {
                             written = size; // exit loop
                         } else {
-                            int64:w = sys!!(SYS_WRITE, fd, rand_buf, rn) ? -1i64;
+                            int64:w = sys(SYS_WRITE, fd, rand_buf, rn) ? -1i64;
                             if (w <= 0i64) {
                                 written = size; // exit loop
                             } else {

@@ -178,8 +178,7 @@ func:_parser_get_type = string(ArgParser:p, string:key) {
     pass(raw _args_token(p.types, @cast_unchecked<int32>(pipes - 1i64)));
 };
 
-pub func:Parser_parse = int64(ArgParser:p, string:args) {
-    int64:ht = ahash(4096i64);
+pub func:Parser_parse = int64(ArgParser:p, string:args, int64:ht) {
     int32:count = args_count(args);
     int32:i = 1i32;
     int64:pos_idx = 0i64;

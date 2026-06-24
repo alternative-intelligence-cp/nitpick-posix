@@ -16,7 +16,7 @@ func:print_str = int32(string:s) {
     int64:len = string_length(s);
     drop(s);
     drop(len);
-    pass @cast_unchecked<int32>(sys!!(SYS_WRITE, 1i64, s, len) ? -1i64);
+    pass @cast_unchecked<int32>(sys(SYS_WRITE, 1i64, s, len) ? -1i64);
 };
 
 func:failsafe = int32(tbb32:err) {

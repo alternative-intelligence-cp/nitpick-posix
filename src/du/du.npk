@@ -7,13 +7,13 @@ use "../vendor/libc_ffi.npk".*;
 
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys!!(SYS_WRITE, 2i64, s, len));
+    drop(sys(SYS_WRITE, 2i64, s, len));
     pass 0i32;
 };
 
 func:print_str_safe = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys!!(SYS_WRITE, 1i64, s, len));
+    drop(sys(SYS_WRITE, 1i64, s, len));
     pass 0i32;
 };
 
@@ -63,7 +63,7 @@ func:str_clone_str = int64(string:s) {
 func:du_walk = int64(string:path, int64:statbuf) {
     int64:total_size = 0i64;
     
-    int64:res = sys!!(SYS_NEWFSTATAT, -100i64, path, statbuf, 256i64) ? -1i64;
+    int64:res = sys(SYS_NEWFSTATAT, -100i64, path, statbuf, 256i64) ? -1i64;
     if (res < 0i64) { pass 0i64; }
     
     int64:st_blocks = npk_mem_read_int64(statbuf, 64i64);
@@ -78,7 +78,7 @@ func:du_walk = int64(string:path, int64:statbuf) {
     }
     
     if ((mode & 61440i64) == 16384i64) { // Directory
-        int64:fd = sys!!(SYS_OPEN, path, 65536i64, 0i64) ? -1i64; // O_DIRECTORY
+        int64:fd = sys(SYS_OPEN, path, 65536i64, 0i64) ? -1i64; // O_DIRECTORY
         if (fd >= 0i64) {
             wild int8->:buf_alloc_alloc_ptr = alloc(32768i64);
             int64:buf_alloc = @cast_unchecked<int64>(buf_alloc_alloc_ptr);
@@ -89,7 +89,7 @@ func:du_walk = int64(string:path, int64:statbuf) {
                 int64:dirs_sl = alist();
                 int32:running = 1i32;
                 while (running == 1i32) {
-                    int64:nread = sys!!(SYS_GETDENTS64, fd, buf, 32768i64) ? -1i64;
+                    int64:nread = sys(SYS_GETDENTS64, fd, buf, 32768i64) ? -1i64;
                     if (nread <= 0i64) {
                         running = 0i32;
                     } else {

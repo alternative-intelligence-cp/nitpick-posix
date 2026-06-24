@@ -12,13 +12,13 @@ extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys!!(SYS_WRITE, 2i64, s, len));
+    drop(sys(SYS_WRITE, 2i64, s, len));
     pass 0i32;
 };
 
 func:print_str_safe = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys!!(SYS_WRITE, 1i64, s, len));
+    drop(sys(SYS_WRITE, 1i64, s, len));
     pass 0i32;
 };
 
@@ -61,15 +61,15 @@ func:main = int32(int32:argc, wild int8->:argv) {
         if (string_equals(in_file, "-")) {
             fd_in = 0i64;
         } else {
-            fd_in = sys!!(SYS_OPEN, in_file, 0i64, 0i64) ? -1i64;
+            fd_in = sys(SYS_OPEN, in_file, 0i64, 0i64) ? -1i64;
             if (fd_in < 0i64) {
                 drop(print_err("split: cannot open '"));
                 drop(print_err(in_file));
                 drop(print_err("'\n"));
                 exit 1;
             }
-            defer { if (fd_in >= 0i64) { drop(sys(SYS_CLOSE, fd_in)); } }
-        }
+            }
+    defer { if (fd_in >= 0i64) { drop(sys(SYS_CLOSE, fd_in)); } }
     }
     
     int64:buf_size = 65536i64; // 1MB buffer
@@ -85,7 +85,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     
     int32:running = 1i32;
     while (running == 1i32) {
-        int64:n = sys!!(SYS_READ, fd_in, buf, buf_size) ? -1i64;
+        int64:n = sys(SYS_READ, fd_in, buf, buf_size) ? -1i64;
         if (n <= 0i64) {
             running = 0i32;
         } else {
@@ -119,7 +119,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
                     }
                     fname = string_concat(fname, suf);
                     
-                    fd_out = sys!!(SYS_OPEN, fname, 577i64, 420i64) ? -1i64; // 420 is 0644 octal
+                    fd_out = sys(SYS_OPEN, fname, 577i64, 420i64) ? -1i64; // 420 is 0644 octal
                     defer { if (fd_out >= 0i64) { drop(sys(SYS_CLOSE, fd_out)); } }
                     file_idx = file_idx + 1i64;
                 }
@@ -128,7 +128,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
                 if (c == 10i64) {
                     lines_in_current = lines_in_current + 1i64;
                     if (lines_in_current == lines_per_file) {
-                        drop(sys!!(SYS_WRITE, fd_out, buf + start, j - start + 1i64));
+                        drop(sys(SYS_WRITE, fd_out, buf + start, j - start + 1i64));
                         fd_out = -1i64;
                         lines_in_current = 0i64;
                         start = j + 1i64;
@@ -138,19 +138,12 @@ func:main = int32(int32:argc, wild int8->:argv) {
             }
             if (fd_out != -1i64) {
                 if (j > start) {
-                    drop(sys!!(SYS_WRITE, fd_out, buf + start, j - start));
+                    drop(sys(SYS_WRITE, fd_out, buf + start, j - start));
                 }
             }
         }
     }
-if (fd_out != -1i64) {
-                if (j > start) {
-                    drop(sys!!(SYS_WRITE, fd_out, buf + start, j - start));
-                }
-            }
-        }
-    }
-    
+
     if (fd_out != -1i64) {
     }
     free(@cast_unchecked<any->>(buf));

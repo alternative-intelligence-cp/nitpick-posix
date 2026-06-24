@@ -12,13 +12,13 @@ extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys!!(SYS_WRITE, 2i64, s, len));
+    drop(sys(SYS_WRITE, 2i64, s, len));
     pass 0i32;
 };
 
 func:print_str_safe = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys!!(SYS_WRITE, 1i64, s, len));
+    drop(sys(SYS_WRITE, 1i64, s, len));
     pass 0i32;
 };
 
@@ -37,15 +37,15 @@ func:main = int32(int32:argc, wild int8->:argv) {
         if (string_equals(file, "-")) {
             fd = 0i64;
         } else {
-            fd = sys!!(SYS_OPEN, file, 0i64, 0i64) ? -1i64;
+            fd = sys(SYS_OPEN, file, 0i64, 0i64) ? -1i64;
             if (fd < 0i64) {
                 drop(print_err("nl: cannot open '"));
                 drop(print_err(file));
                 drop(print_err("'\n"));
                 exit 1;
             }
-            defer { if (fd >= 0i64) { drop(sys(SYS_CLOSE, fd)); } }
-        }
+            }
+    defer { if (fd >= 0i64) { drop(sys(SYS_CLOSE, fd)); } }
     }
     int64:fp = raw io_buf_new(fd);
     

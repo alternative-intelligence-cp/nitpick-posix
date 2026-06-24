@@ -18,14 +18,14 @@ func:print_err = int32(string:s) {
     int64:len = string_length(s);
     drop(s);
     drop(len);
-    pass @cast_unchecked<int32>(sys!!(SYS_WRITE, 2i64, s, len) ? -1i64);
+    pass @cast_unchecked<int32>(sys(SYS_WRITE, 2i64, s, len) ? -1i64);
 };
 
 func:print_str = int32(string:s) {
     int64:len = string_length(s);
     drop(s);
     drop(len);
-    pass @cast_unchecked<int32>(sys!!(SYS_WRITE, 1i64, s, len) ? -1i64);
+    pass @cast_unchecked<int32>(sys(SYS_WRITE, 1i64, s, len) ? -1i64);
 };
 
 func:write_num = int64(int64:out_buf, int64:out_idx, int64:num) {
@@ -145,9 +145,9 @@ func:main = int32(int32:argc, wild int8->:argv) {
         if (is_flag == 0i32) {
             int64:fd = 0i64;
             if (string_equals(filename, "-") == false) {
-                fd = sys!!(SYS_OPEN, filename, 0i64, 0i64) ? -1i64;
-                defer { if (fd >= 0i64) { drop(sys(SYS_CLOSE, fd)); } }
-            }
+                fd = sys(SYS_OPEN, filename, 0i64, 0i64) ? -1i64;
+                }
+    defer { if (fd >= 0i64) { drop(sys(SYS_CLOSE, fd)); } }
 
             if (fd < 0i64) {
                 drop(print_err("wc: "));
@@ -201,7 +201,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
                 }
                 
                 while (running == 1i32) {
-                    int64:bytes_read = sys!!(SYS_READ, fd, buf, 8192i64) ? -1i64;
+                    int64:bytes_read = sys(SYS_READ, fd, buf, 8192i64) ? -1i64;
                     if (bytes_read <= 0i64) {
                         running = 0i32;
                     } else {
@@ -243,7 +243,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
                 if (flag_w == 1i32) { out_idx = raw write_num(out_buf, out_idx, file_words); }
                 if (flag_c == 1i32) { out_idx = raw write_num(out_buf, out_idx, file_bytes); }
                 
-                drop(sys!!(SYS_WRITE, 1i64, out_buf, out_idx));
+                drop(sys(SYS_WRITE, 1i64, out_buf, out_idx));
                 if (string_equals(filename, "-") == false) {
                     drop(print_str(filename));
                 }
@@ -259,7 +259,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
         if (flag_w == 1i32) { out_idx = raw write_num(out_buf, out_idx, tot_words); }
         if (flag_c == 1i32) { out_idx = raw write_num(out_buf, out_idx, tot_bytes); }
         
-        drop(sys!!(SYS_WRITE, 1i64, out_buf, out_idx));
+        drop(sys(SYS_WRITE, 1i64, out_buf, out_idx));
         drop(print_str("total\n"));
     }
 

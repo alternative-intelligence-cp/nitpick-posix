@@ -18,7 +18,7 @@ func:print_err = int32(string:s) {
     int64:len = string_length(s);
     drop(s);
     drop(len);
-    pass @cast_unchecked<int32>(sys!!(SYS_WRITE, 2i64, s, len) ? -1i64);
+    pass @cast_unchecked<int32>(sys(SYS_WRITE, 2i64, s, len) ? -1i64);
 };
 
 func:failsafe = int32(tbb32:err) {
@@ -126,9 +126,9 @@ func:main = int32(int32:argc, wild int8->:argv) {
             files_processed = files_processed + 1i32;
             int64:fd = 0i64; // default to stdin
             if (string_equals(filename, "-") == false) {
-                fd = sys!!(SYS_OPEN, filename, 0i64, 0i64) ? -1i64;
-                defer { if (fd >= 0i64) { drop(sys(SYS_CLOSE, fd)); } }
-            }
+                fd = sys(SYS_OPEN, filename, 0i64, 0i64) ? -1i64;
+                }
+    defer { if (fd >= 0i64) { drop(sys(SYS_CLOSE, fd)); } }
 
             if (fd < 0i64) {
                 drop(print_err("cat: "));
@@ -140,14 +140,14 @@ func:main = int32(int32:argc, wild int8->:argv) {
                 int64:out_idx = 0i64;
 
                 while (running == 1i32) {
-                    int64:bytes_read = sys!!(SYS_READ, fd, buf, 8192i64) ? -1i64;
+                    int64:bytes_read = sys(SYS_READ, fd, buf, 8192i64) ? -1i64;
 
                     if (bytes_read <= 0i64) {
                         running = 0i32;
                     } else {
                         if (fmt_enabled == 0i32) {
                             // FAST PATH
-                            int64:bytes_written = sys!!(SYS_WRITE, 1i64, buf, bytes_read) ? -1i64;
+                            int64:bytes_written = sys(SYS_WRITE, 1i64, buf, bytes_read) ? -1i64;
                             if (bytes_written < 0i64) { running = 0i32; }
                         } else {
                             // FORMATTING PATH
@@ -218,12 +218,12 @@ func:main = int32(int32:argc, wild int8->:argv) {
                                 in_idx = in_idx + 1i64;
 
                                 if (out_idx > 32000i64) {
-                                    drop(sys!!(SYS_WRITE, 1i64, out_buf, out_idx));
+                                    drop(sys(SYS_WRITE, 1i64, out_buf, out_idx));
                                     out_idx = 0i64;
                                 }
                                 if (flag_u == 1i32) {
                                     if (out_idx > 0i64) {
-                                        drop(sys!!(SYS_WRITE, 1i64, out_buf, out_idx));
+                                        drop(sys(SYS_WRITE, 1i64, out_buf, out_idx));
                                         out_idx = 0i64;
                                     }
                                 }
@@ -234,7 +234,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
 
                 if (fmt_enabled == 1i32) {
                     if (out_idx > 0i64) {
-                        drop(sys!!(SYS_WRITE, 1i64, out_buf, out_idx));
+                        drop(sys(SYS_WRITE, 1i64, out_buf, out_idx));
                     }
                 }
 

@@ -23,12 +23,12 @@ extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
-    pass @cast_unchecked<int32>(sys!!(SYS_WRITE, 2i64, s, len) ? -1i64);
+    pass @cast_unchecked<int32>(sys(SYS_WRITE, 2i64, s, len) ? -1i64);
 };
 
 func:print_out = int32(string:s) {
     int64:len = string_length(s);
-    pass @cast_unchecked<int32>(sys!!(SYS_WRITE, 1i64, s, len) ? -1i64);
+    pass @cast_unchecked<int32>(sys(SYS_WRITE, 1i64, s, len) ? -1i64);
 };
 
 func:ptr_to_string = string(int64:ptr) {
@@ -77,9 +77,8 @@ func:failsafe = int32(tbb32:err) {
     exit 1;
 };
 
-func:read_lines = int64(string:filename) {
-    int64:sl = alist(1024i64);
-    int64:fd = sys!!(SYS_OPEN, filename, 0i64, 0i64) ? -1i64;
+func:read_lines = int64(string:filename, int64:sl) {
+    int64:fd = sys(SYS_OPEN, filename, 0i64, 0i64) ? -1i64;
     if (fd < 0i64) {
         drop(print_err("comm: cannot open '"));
         drop(print_err(filename));
@@ -96,7 +95,7 @@ func:read_lines = int64(string:filename) {
     int64:line_len = 0i64;
 
     while (running == 1i32) {
-        int64:nread = sys!!(SYS_READ, fd, buf, 65536i64) ? -1i64;
+        int64:nread = sys(SYS_READ, fd, buf, 65536i64) ? -1i64;
         if (nread <= 0i64) {
             running = 0i32;
         } else {
@@ -149,9 +148,9 @@ func:main = int32(int32:argc, wild int8->:argv) {
         exit 1;
     }
 
-    int64:fd1 = sys!!(SYS_OPEN, f1, 0i64, 0i64) ? -1i64;
+    int64:fd1 = sys(SYS_OPEN, f1, 0i64, 0i64) ? -1i64;
     defer { if (fd1 >= 0i64) { drop(sys(SYS_CLOSE, fd1)); } }
-    int64:fd2 = sys!!(SYS_OPEN, f2, 0i64, 0i64) ? -1i64;
+    int64:fd2 = sys(SYS_OPEN, f2, 0i64, 0i64) ? -1i64;
     defer { if (fd2 >= 0i64) { drop(sys(SYS_CLOSE, fd2)); } }
     
     if (fd1 < 0i64) { drop(print_err("comm: cannot open ")); drop(print_err(f1)); drop(print_err("\n")); exit 1; }

@@ -18,13 +18,13 @@ extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys!!(SYS_WRITE, 2i64, s, len));
+    drop(sys(SYS_WRITE, 2i64, s, len));
     pass 0i32;
 };
 
 func:print_str_safe = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys!!(SYS_WRITE, 1i64, s, len));
+    drop(sys(SYS_WRITE, 1i64, s, len));
     pass 0i32;
 };
 
@@ -48,7 +48,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     int32:i = 1i32;
     while (i <= arg_count) {
         string:path = raw args_at(args, i);
-        int64:fd = sys!!(SYS_OPEN, path, 0i64, 0i64) ? -1i64;
+        int64:fd = sys(SYS_OPEN, path, 0i64, 0i64) ? -1i64;
         if (fd < 0i64) {
             drop(print_err("b2sum: "));
             drop(print_err(path));
@@ -62,11 +62,11 @@ func:main = int32(int32:argc, wild int8->:argv) {
             int64:total_bytes = 0i64;
             int64:buf = sys!!(SYS_MMAP, 0i64, 8192i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
             if (buf > 0i64) {
-                int64:bytes = sys!!(SYS_READ, fd, buf, 8192i64) ? -1i64;
+                int64:bytes = sys(SYS_READ, fd, buf, 8192i64) ? -1i64;
                 while (bytes > 0i64) {
                     total_bytes = total_bytes + bytes;
                     drop(Crypto.blake2b_update(ctx, buf, bytes));
-                    bytes = sys!!(SYS_READ, fd, buf, 8192i64) ? -1i64;
+                    bytes = sys(SYS_READ, fd, buf, 8192i64) ? -1i64;
                 }
                 drop(sys!!(SYS_MUNMAP, buf, 8192i64));
             }

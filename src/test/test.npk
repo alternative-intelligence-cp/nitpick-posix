@@ -59,14 +59,14 @@ func:main = int32(int32:argc, wild int8->:argv) {
         
         if (string_equals(op, "-e")) {
             int64:buf = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
-            int64:res = sys!!(SYS_STAT, s, buf) ? -1i64; // SYS_STAT
+            int64:res = sys(SYS_STAT, s, buf) ? -1i64; // SYS_STAT
             drop(sys!!(SYS_MUNMAP, buf, 4096i64));
             if (res >= 0i64) { exit 0; } else { exit 1; }
         }
         
         if (string_equals(op, "-d")) {
             int64:buf = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
-            int64:res = sys!!(SYS_STAT, s, buf) ? -1i64; // SYS_STAT
+            int64:res = sys(SYS_STAT, s, buf) ? -1i64; // SYS_STAT
             if (res >= 0i64) {
                 int32:mode = npk_mem_read_int32(buf, 24i64); // st_mode is at offset 24
                 drop(sys!!(SYS_MUNMAP, buf, 4096i64));
@@ -86,7 +86,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
         
         if (string_equals(op, "-f")) {
             int64:buf = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
-            int64:res = sys!!(SYS_STAT, s, buf) ? -1i64; // SYS_STAT
+            int64:res = sys(SYS_STAT, s, buf) ? -1i64; // SYS_STAT
             if (res >= 0i64) {
                 int32:mode = npk_mem_read_int32(buf, 24i64); // st_mode is at offset 24
                 drop(sys!!(SYS_MUNMAP, buf, 4096i64));

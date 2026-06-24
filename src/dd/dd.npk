@@ -16,7 +16,7 @@ extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
-    pass @cast_unchecked<int32>(sys!!(SYS_WRITE, 2i64, s, len) ? -1i64);
+    pass @cast_unchecked<int32>(sys(SYS_WRITE, 2i64, s, len) ? -1i64);
 };
 
 func:failsafe = int32(tbb32:err) {
@@ -80,22 +80,22 @@ func:main = int32(int32:argc, wild int8->:argv) {
     }
     
     if (string_length(ifile) > 0i64) {
-        fd_in = sys!!(SYS_OPEN, ifile, 0i64, 0i64) ? -1i64;
+        fd_in = sys(SYS_OPEN, ifile, 0i64, 0i64) ? -1i64;
         if (fd_in < 0i64) {
             drop(print_err("dd: failed to open input file\n"));
             exit 1;
         }
-        defer { if (fd_in >= 0i64) { drop(sys(SYS_CLOSE, fd_in)); } }
-    }
+        }
+    defer { if (fd_in >= 0i64) { drop(sys(SYS_CLOSE, fd_in)); } }
     
     if (string_length(ofile) > 0i64) {
-        fd_out = sys!!(SYS_OPEN, ofile, 577i64, 438i64) ? -1i64;
+        fd_out = sys(SYS_OPEN, ofile, 577i64, 438i64) ? -1i64;
         if (fd_out < 0i64) {
             drop(print_err("dd: failed to open output file\n"));
             exit 1;
         }
-        defer { if (fd_out >= 0i64) { drop(sys(SYS_CLOSE, fd_out)); } }
-    }
+        }
+    defer { if (fd_out >= 0i64) { drop(sys(SYS_CLOSE, fd_out)); } }
     
     int64:buf = sys!!(SYS_MMAP, 0i64, bs, 3i64, 34i64, -1i64, 0i64) ? 0i64;
     if (buf <= 0i64) {
@@ -114,12 +114,12 @@ func:main = int32(int32:argc, wild int8->:argv) {
             }
         }
         if (running == 1i32) {
-            int64:nread = sys!!(SYS_READ, fd_in, buf, bs) ? -1i64;
+            int64:nread = sys(SYS_READ, fd_in, buf, bs) ? -1i64;
             if (nread <= 0i64) {
                 running = 0i32;
             } else {
                 blocks_in = blocks_in + 1i64;
-                int64:nwritten = sys!!(SYS_WRITE, fd_out, buf, nread) ? -1i64;
+                int64:nwritten = sys(SYS_WRITE, fd_out, buf, nread) ? -1i64;
                 if (nwritten == nread) {
                     blocks_out = blocks_out + 1i64;
                 }

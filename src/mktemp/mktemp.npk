@@ -11,13 +11,13 @@ extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys!!(SYS_WRITE, 2i64, s, len));
+    drop(sys(SYS_WRITE, 2i64, s, len));
     pass 0i32;
 };
 
 func:print_str_safe = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys!!(SYS_WRITE, 1i64, s, len));
+    drop(sys(SYS_WRITE, 1i64, s, len));
     pass 0i32;
 };
 
@@ -41,7 +41,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
         template = raw args_at(args, 1i32);
     }
     
-    int64:urandom_fd = sys!!(SYS_OPEN, "/dev/urandom", 0i64, 0i64) ? -1i64;
+    int64:urandom_fd = sys(SYS_OPEN, "/dev/urandom", 0i64, 0i64) ? -1i64;
     if (urandom_fd < 0i64) {
         drop(print_err("mktemp: cannot open /dev/urandom\n"));
         exit 1;
@@ -90,7 +90,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     
     while (tries < 1000i32) {
         if (success == 0i64) {
-            int64:nread = sys!!(SYS_READ, urandom_fd, buf, x_count * 2i64) ? -1i64;
+            int64:nread = sys(SYS_READ, urandom_fd, buf, x_count * 2i64) ? -1i64;
             if (nread <= 0i64) {
                 drop(print_err("mktemp: error reading from /dev/urandom\n"));
                 free(buf);
@@ -103,7 +103,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
             while (j < x_count) {
                 if (k >= nread) {
                     k = 0i64;
-                    nread = sys!!(SYS_READ, urandom_fd, buf, x_count * 2i64) ? -1i64;
+                    nread = sys(SYS_READ, urandom_fd, buf, x_count * 2i64) ? -1i64;
                     if (nread <= 0i64) {
                         drop(print_err("mktemp: error reading from /dev/urandom\n"));
                         free(buf);
@@ -120,7 +120,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
             final_path = string_concat(base, rand_str);
             
             // O_CREAT | O_EXCL | O_RDWR = 64 + 128 + 2 = 194
-            int64:res = sys!!(SYS_OPEN, final_path, 194i64, 384i64) ? -1i64;
+            int64:res = sys(SYS_OPEN, final_path, 194i64, 384i64) ? -1i64;
             if (res >= 0i64) {
                 success = 1i64;
             }
