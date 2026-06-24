@@ -4,6 +4,7 @@ use "../vendor/io_utils.npk".*;
 use "../vendor/mem_utils.npk".*;
 use "../vendor/sys_constants.npk".*;
 use "../vendor/nitpick_args.npk".*;
+use "../vendor/libc_ffi.npk".*;
 
 extern func:npk_mem_read_string = string(int64:ptr, int64:max_len);
 extern func:npk_mem_write_byte = void(int64:ptr, int64:offset, int64:val);
@@ -11,13 +12,13 @@ extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys(SYS_WRITE, 2i64, s, len));
+    drop(sys(WRITE, 2i64, s, len));
     pass 0i32;
 };
 
 func:print_str_safe = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys(SYS_WRITE, 1i64, s, len));
+    drop(sys(WRITE, 1i64, s, len));
     pass 0i32;
 };
 
@@ -41,12 +42,12 @@ func:main = int32(int32:argc, wild int8->:argv) {
         template = raw args_at(args, 1i32);
     }
     
-    int64:urandom_fd = sys(SYS_OPEN, "/dev/urandom", 0i64, 0i64) ? -1i64;
+    int64:urandom_fd = sys(OPEN, "/dev/urandom", 0i64, 0i64) ? -1i64;
     if (urandom_fd < 0i64) {
         drop(print_err("mktemp: cannot open /dev/urandom\n"));
         exit 1;
     }
-    defer { if (urandom_fd >= 0i64) { drop(sys(SYS_CLOSE, urandom_fd)); } }
+    defer { if (urandom_fd >= 0i64) { drop(sys(CLOSE, urandom_fd)); } }
     
     int64:tpl_len = string_length(template);
     string:base = template;
@@ -86,14 +87,14 @@ func:main = int32(int32:argc, wild int8->:argv) {
     int64:success = 0i64;
     string:final_path = "";
     
-    any->:buf = @cast_unchecked<any->>(alloc(x_count * 2i64 + 16i64));
+    int64:buf = malloc(x_count * 2i64 + 16i64);
     
     while (tries < 1000i32) {
         if (success == 0i64) {
-            int64:nread = sys(SYS_READ, urandom_fd, buf, x_count * 2i64) ? -1i64;
+            int64:nread = sys(READ, urandom_fd, buf, x_count * 2i64) ? -1i64;
             if (nread <= 0i64) {
                 drop(print_err("mktemp: error reading from /dev/urandom\n"));
-                free(buf);
+                drop(nitpick_libc_mem_free(buf));
                 exit 1;
             }
             
@@ -103,14 +104,14 @@ func:main = int32(int32:argc, wild int8->:argv) {
             while (j < x_count) {
                 if (k >= nread) {
                     k = 0i64;
-                    nread = sys(SYS_READ, urandom_fd, buf, x_count * 2i64) ? -1i64;
+                    nread = sys(READ, urandom_fd, buf, x_count * 2i64) ? -1i64;
                     if (nread <= 0i64) {
                         drop(print_err("mktemp: error reading from /dev/urandom\n"));
-                        free(buf);
+                        drop(nitpick_libc_mem_free(buf));
                         exit 1;
                     }
                 }
-                int64:c = @cast_unchecked<int64>(<- (@cast_unchecked<uint8->>((buf => int64) + k)));
+                int64:c = cast_unchecked<int64>(<- (cast_unchecked<uint8->>(buf + k)));
                 k = k + 1i64;
                 if (c < 248i64) {
                     rand_str = string_concat(rand_str, raw get_rand_char(c));
@@ -120,16 +121,16 @@ func:main = int32(int32:argc, wild int8->:argv) {
             final_path = string_concat(base, rand_str);
             
             // O_CREAT | O_EXCL | O_RDWR = 64 + 128 + 2 = 194
-            int64:res = sys(SYS_OPEN, final_path, 194i64, 384i64) ? -1i64;
+            int64:res = sys(OPEN, final_path, 194i64, 384i64) ? -1i64;
             if (res >= 0i64) {
                 success = 1i64;
             }
-            defer { if (res >= 0i64) { drop(sys(SYS_CLOSE, res)); } }
+            defer { if (res >= 0i64) { drop(sys(CLOSE, res)); } }
         }
         tries = tries + 1i32;
     }
     
-    free(buf);
+    drop(nitpick_libc_mem_free(buf));
     
     if (success == 1i64) {
         drop(print_str_safe(final_path));

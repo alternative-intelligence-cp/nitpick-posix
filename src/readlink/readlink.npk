@@ -14,13 +14,13 @@ extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys(SYS_WRITE, 2i64, s, len));
+    drop(sys(WRITE, 2i64, s, len));
     pass 0i32;
 };
 
 func:print_str_safe = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys(SYS_WRITE, 1i64, s, len));
+    drop(sys(WRITE, 1i64, s, len));
     pass 0i32;
 };
 
@@ -40,25 +40,13 @@ func:main = int32(int32:argc, wild int8->:argv) {
     
     string:path = raw args_at(args, 1i32);
     
-    int64:buf = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
-    if (buf < 0i64) { exit 1; }
+    string:target = sys(READLINK, path) ? "";
     
-    int64:res = sys(SYS_READLINK, path, buf, 4096i64) ? -1i64; // SYS_READLINK
-    
-    if (res > 0i64) {
-        string:target = "";
-        int64:i = 0i64;
-        while (i < res) {
-            int64:b = npk_mem_read_byte(buf, i);
-            target = string_concat(target, string_from_char(@cast_unchecked<int8>(b)));
-            i = i + 1i64;
-        }
+    if (string_length(target) > 0i64) {
         drop(print_str_safe(target));
         drop(print_str_safe("\n"));
-        drop(sys!!(SYS_MUNMAP, buf, 4096i64));
         exit 0;
     } else {
-        drop(sys!!(SYS_MUNMAP, buf, 4096i64));
         exit 1;
     }
 };

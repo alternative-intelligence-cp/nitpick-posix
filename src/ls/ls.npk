@@ -8,33 +8,28 @@ use "../vendor/nitpick_args.npk".*;
 use "../vendor/sys_constants.npk".*;
 use "../vendor/libc_ffi.npk".*;
 
-pub func:alist_pop_front = int64(int64:lst) {
-    if (alsize(lst) == 0i64) { pass -1i64; }
-    int64:v = alget(lst, 0i64);
-    drop(alremove(lst, 0i64));
-    pass ok(v);
-};
+
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
-extern func:npk_mem_read_int64 = int64(int64:ptr, int64:offset);
 extern func:npk_mem_read_int32 = int32(int64:ptr, int64:offset);
+extern func:npk_string_byte_at = int64(string:s, int64:offset);
 
 func:print_str = int32(int64:s) {
     int64:len = 0i64;
     while (npk_mem_read_byte(s, len) != 0i64) {
         len = len + 1i64;
     }
-    pass @cast_unchecked<int32>(sys(SYS_WRITE, 1i64, s, len) ? -1i64);
+    pass cast_unchecked<int32>(sys(WRITE, 1i64, s, len) ? -1i64);
 };
 
 func:print_str_safe = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys(SYS_WRITE, 1i64, s, len));
+    drop(sys(WRITE, 1i64, s, len));
     pass 0i32;
 };
 
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys(SYS_WRITE, 2i64, s, len));
+    drop(sys(WRITE, 2i64, s, len));
     pass 0i32;
 };
 
@@ -58,7 +53,7 @@ func:ptr_to_string = string(int64:ptr) {
     int64:i = 0i64;
     while (npk_mem_read_byte(ptr, i) != 0i64) {
         int64:c = npk_mem_read_byte(ptr, i);
-        s = string_concat(s, string_from_char(@cast_unchecked<int8>(c)));
+        s = string_concat(s, string_from_char(cast_unchecked<int8>(c)));
         i = i + 1i64;
     }
     pass s;
@@ -69,10 +64,10 @@ func:failsafe = int32(tbb32:err) {
     exit 1;
 };
 
-func:print_num = void(int64:n) {
+func:print_num = int32(int64:n) {
     if (n == 0i64) {
         drop(print_str_safe("0"));
-        pass;
+        pass 0i32;
     }
     int64:digits = 0i64;
     int64:temp = n;
@@ -93,9 +88,10 @@ func:print_num = void(int64:n) {
     npk_mem_write_byte(buf, digits, 0i64);
     drop(print_str(buf));
     drop(sys!!(SYS_MUNMAP, buf, 32i64));
+    pass 0i32;
 };
 
-func:print_human_num = void(int64:n) {
+func:print_human_num = int32(int64:n) {
     if (n < 1024i64) {
         drop(print_num(n));
         drop(print_str_safe("B"));
@@ -113,10 +109,11 @@ func:print_human_num = void(int64:n) {
             }
         }
     }
+    pass 0i32;
 };
 
-func:print_perms = void(int32:mode) {
-    int64:m = @cast_unchecked<int64>(mode);
+func:print_perms = int32(int32:mode) {
+    int64:m = cast_unchecked<int64>(mode);
     if ((m & 16384i64) != 0i64) { drop(print_str_safe("d")); } else { drop(print_str_safe("-")); }
     if ((m & 256i64) != 0i64) { drop(print_str_safe("r")); } else { drop(print_str_safe("-")); }
     if ((m & 128i64) != 0i64) { drop(print_str_safe("w")); } else { drop(print_str_safe("-")); }
@@ -127,6 +124,7 @@ func:print_perms = void(int32:mode) {
     if ((m & 4i64) != 0i64) { drop(print_str_safe("r")); } else { drop(print_str_safe("-")); }
     if ((m & 2i64) != 0i64) { drop(print_str_safe("w")); } else { drop(print_str_safe("-")); }
     if ((m & 1i64) != 0i64) { drop(print_str_safe("x")); } else { drop(print_str_safe("-")); }
+    pass 0i32;
 };
 
 func:list_dir = int32(string:dir, int32:print_header, int32:recursive, int32:show_hidden, int32:long_fmt, int32:human_fmt, int32:is_first) {
@@ -136,19 +134,20 @@ func:list_dir = int32(string:dir, int32:print_header, int32:recursive, int32:sho
         drop(print_str_safe(":\n"));
     }
 
-    int64:fd = sys(SYS_OPEN, dir, 65536i64, 0i64) ? -1i64;
+    int64:fd = sys(OPEN, dir, 65536i64, 0i64) ? -1i64;
     if (fd < 0i64) {
         drop(print_err("ls: cannot access '"));
         drop(print_err(dir));
         drop(print_err("'\n"));
         pass 1i32;
     }
-    defer { if (fd >= 0i64) { drop(sys(SYS_CLOSE, fd)); } }
+    defer { if (fd >= 0i64) { drop(sys(CLOSE, fd)); } }
 
     int64:buf = sys!!(SYS_MMAP, 0i64, 32768i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
     if (buf < 0i64) { pass 1i32; }
 
-    int64:sl = alist(1024i64);
+    int64:sl = ahash(1024i64);
+    int64:sl_size = 0i64;
     int32:running = 1i32;
     int32:has_printed = 0i32;
 
@@ -206,18 +205,18 @@ func:list_dir = int32(string:dir, int32:print_header, int32:recursive, int32:sho
                         }
                         npk_mem_write_byte(pathbuf, idx + k, 0i64);
                         
-                        int64:res_stat = sys(SYS_LSTAT, pathbuf, statbuf) ? -1i64;
+                        int64:res_stat = sys!!(SYS_LSTAT, pathbuf, statbuf) ? -1i64;
                         if (res_stat >= 0i64) {
                             int32:st_mode = npk_mem_read_int32(statbuf, 24i64);
-                            int64:st_nlink = npk_mem_read_int64(statbuf, 16i64);
+                            int64:st_nlink = (<- (cast_unchecked<int64->>(statbuf + 16i64)));
                             int32:st_uid = npk_mem_read_int32(statbuf, 28i64);
                             int32:st_gid = npk_mem_read_int32(statbuf, 32i64);
-                            int64:st_size = npk_mem_read_int64(statbuf, 48i64);
+                            int64:st_size = (<- (cast_unchecked<int64->>(statbuf + 48i64)));
                             
                             drop(print_perms(st_mode)); drop(print_str_safe(" "));
                             drop(print_num(st_nlink)); drop(print_str_safe(" "));
-                            drop(print_num(@cast_unchecked<int64>(st_uid))); drop(print_str_safe(" "));
-                            drop(print_num(@cast_unchecked<int64>(st_gid))); drop(print_str_safe(" "));
+                            drop(print_num(cast_unchecked<int64>(st_uid))); drop(print_str_safe(" "));
+                            drop(print_num(cast_unchecked<int64>(st_gid))); drop(print_str_safe(" "));
                             
                             if (human_fmt == 1i32) {
                                 drop(print_human_num(st_size)); drop(print_str_safe(" "));
@@ -237,7 +236,8 @@ func:list_dir = int32(string:dir, int32:print_header, int32:recursive, int32:sho
                     if (recursive == 1i32) {
                         if (dtype == 4i64) {
                             int64:name_copy = raw str_clone(name_ptr);
-                            drop(alpush(sl, name_copy));
+                            ahset(sl, string_from_int(sl_size), name_copy);
+                            sl_size = sl_size + 1i64;
                         }
                     }
                 }
@@ -256,8 +256,9 @@ func:list_dir = int32(string:dir, int32:print_header, int32:recursive, int32:sho
     drop(sys!!(SYS_MUNMAP, statbuf, 144i64));
 
     if (recursive == 1i32) {
-        while (alsize(sl) > 0i64) {
-            int64:child_ptr = raw alist_pop_front(sl);
+        while (sl_size > 0i64) {
+            sl_size = sl_size - 1i64;
+            int64:child_ptr = ahget(sl, string_from_int(sl_size));
             string:child_name = raw ptr_to_string(child_ptr);
             string:child_path = "";
             if (string_equals(dir, "/")) {
@@ -275,33 +276,28 @@ func:list_dir = int32(string:dir, int32:print_header, int32:recursive, int32:sho
 
 pub func:main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
-    int32:arg_count = raw args_count(args);
+    ArgParser:p = raw Parser_create();
+    p = raw Parser_add_flag(p, "-R", "recursive");
+    p = raw Parser_add_flag(p, "-a", "all");
+    p = raw Parser_add_flag(p, "-l", "long format");
+    p = raw Parser_add_flag(p, "-h", "human readable");
+    int64:ht = ahash(1024i64);
+    int64:parsed = raw Parser_parse(p, args, ht);
     
     int32:recursive = 0i32;
+    if (string_equals(raw ahget_str(parsed, "-R"), "1")) { recursive = 1i32; }
     int32:show_hidden = 0i32;
+    if (string_equals(raw ahget_str(parsed, "-a"), "1")) { show_hidden = 1i32; }
     int32:long_fmt = 0i32;
+    if (string_equals(raw ahget_str(parsed, "-l"), "1")) { long_fmt = 1i32; }
     int32:human_fmt = 0i32;
+    if (string_equals(raw ahget_str(parsed, "-h"), "1")) { human_fmt = 1i32; }
     
     int32:dir_count = 0i32;
-    
-    int32:j = 1i32;
-    while (j <= arg_count) {
-        string:a = raw args_at(args, j);
-        if (string_starts_with(a, "-")) {
-            int64:l = string_length(a);
-            int64:k = 1i64;
-            while (k < l) {
-                string:ch = string_substring(a, k, k + 1i64);
-                if (string_equals(ch, "R")) { recursive = 1i32; }
-                if (string_equals(ch, "a")) { show_hidden = 1i32; }
-                if (string_equals(ch, "l")) { long_fmt = 1i32; }
-                if (string_equals(ch, "h")) { human_fmt = 1i32; }
-                k = k + 1i64;
-            }
-        } else {
-            dir_count = dir_count + 1i32;
-        }
-        j = j + 1i32;
+    while (1i32 == 1i32) {
+        string:pos_key = string_concat("pos&", string_from_int(cast_unchecked<int64>(dir_count)));
+        if (string_length(raw ahget_str(parsed, pos_key)) == 0i64) { break; }
+        dir_count = dir_count + 1i32;
     }
     
     int32:exit_status = 0i32;
@@ -309,21 +305,20 @@ pub func:main = int32(int32:argc, wild int8->:argv) {
     if (dir_count == 0i32) {
         exit_status = raw list_dir(".", 0i32, recursive, show_hidden, long_fmt, human_fmt, 1i32);
     } else {
-        int32:i = 1i32;
+        int32:i = 0i32;
         int32:print_header = 0i32;
         if (dir_count > 1i32 || recursive == 1i32) {
             print_header = 1i32;
         }
         
         int32:is_first = 1i32;
-        while (i <= arg_count) {
-            string:dir = raw args_at(args, i);
-            if (string_starts_with(dir, "-") == false) {
-                int32:res = raw list_dir(dir, print_header, recursive, show_hidden, long_fmt, human_fmt, is_first);
-                is_first = 0i32;
-                if (res != 0i32) {
-                    exit_status = 1i32;
-                }
+        while (i < dir_count) {
+            string:pos_key = string_concat("pos&", string_from_int(cast_unchecked<int64>(i)));
+            string:dir = raw ahget_str(parsed, pos_key);
+            int32:res = raw list_dir(dir, print_header, recursive, show_hidden, long_fmt, human_fmt, is_first);
+            is_first = 0i32;
+            if (res != 0i32) {
+                exit_status = 1i32;
             }
             i = i + 1i32;
         }

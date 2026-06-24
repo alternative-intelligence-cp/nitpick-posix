@@ -7,52 +7,249 @@ use "../vendor/libc_ffi.npk".*;
 
 pub func:failsafe = int32(tbb32:err) { drop(standard_failsafe(err)); exit 1; };
 
-pub func:main = int32(int32:argc, wild int8->:argv) {
-    string:args = raw args_load_native(argc, argv);
-    int32:arg_count = raw args_count(args);
-    if (arg_count < 3i32) { drop(print_err("csplit: missing operand\n")); exit 1; }
-    
-    int64:fd = sys(SYS_OPEN, raw args_at(args, 1i32), 0i64, 0i64) ? -1i64;
-    defer { if (fd >= 0i64) { drop(sys(SYS_CLOSE, fd)); } }
-    if (fd < 0i64) { drop(print_err("csplit: cannot open file\n")); exit 1; }
-    
-    // Parse the split line number
-    string:split_str = raw args_at(args, 2i32);
-    int64:split_line = 0i64;
-    int64:i = 0i64;
-    while (i < string_length(split_str)) {
-        int64:c = @cast_unchecked<int64>(string_char_at(split_str, i));
-        if (c >= 48i64) {
-            if (c <= 57i64) {
-                split_line = (split_line * 10i64) + (c - 48i64);
-            }
+extern func:npk_string_byte_at = int64(string:s, int64:idx);
+
+func:char_lower = int64(int64:c) {
+    if (c >= 65i64 && c <= 90i64) { pass c + 32i64; }
+    pass c;
+};
+
+func:match_star = int32(int64:c, string:p, int64:pi, string:t, int64:ti, int32:ignore_case) {
+    int64:tlen = string_length(t);
+    int32:running = 1i32;
+    int64:curr_ti = ti;
+    while (running == 1i32) {
+        if (raw match_here(p, pi, t, curr_ti, ignore_case) == 1i32) { pass 1i32; }
+        if (curr_ti >= tlen) { running = 0i32; }
+        else {
+            int64:tc = npk_string_byte_at(t, curr_ti);
+            if (ignore_case == 1i32) { tc = raw char_lower(tc); }
+            int64:pc = c;
+            if (ignore_case == 1i32) { pc = raw char_lower(c); }
+            if (pc != 46i64 && pc != tc) { running = 0i32; }
+            curr_ti = curr_ti + 1i64;
+        }
+    }
+    pass 0i32;
+};
+
+func:match_here = int32(string:p, int64:pi, string:t, int64:ti, int32:ignore_case) {
+    int64:plen = string_length(p);
+    int64:tlen = string_length(t);
+    if (pi >= plen) { pass 1i32; }
+    int64:pc = npk_string_byte_at(p, pi);
+    if (pi + 1i64 < plen) {
+        if (npk_string_byte_at(p, pi + 1i64) == 42i64) {
+            pass raw match_star(pc, p, pi + 2i64, t, ti, ignore_case);
+        }
+    }
+    if (pc == 36i64 && pi == plen - 1i64) {
+        if (ti == tlen) { pass 1i32; } else { pass 0i32; }
+    }
+    if (ti < tlen) {
+        int64:tc = npk_string_byte_at(t, ti);
+        int64:c1 = pc;
+        int64:c2 = tc;
+        if (ignore_case == 1i32) { c1 = raw char_lower(pc); c2 = raw char_lower(tc); }
+        if (c1 == 46i64 || c1 == c2) {
+            pass raw match_here(p, pi + 1i64, t, ti + 1i64, ignore_case);
+        }
+    }
+    pass 0i32;
+};
+
+func:regex_match = int32(string:p, string:t, int32:ignore_case) {
+    if (string_length(p) > 0i64) {
+        if (npk_string_byte_at(p, 0i64) == 94i64) { pass raw match_here(p, 1i64, t, 0i64, ignore_case); }
+    }
+    int64:tlen = string_length(t);
+    int64:ti = 0i64;
+    while (ti <= tlen) {
+        if (raw match_here(p, 0i64, t, ti, ignore_case) == 1i32) { pass 1i32; }
+        ti = ti + 1i64;
+    }
+    pass 0i32;
+};
+
+func:make_filename = string(int64:idx) {
+    int64:d1 = idx % 10i64;
+    int64:n = idx / 10i64;
+    int64:d2 = n % 10i64;
+    string:res = "xx";
+    res = string_concat(res, string_from_char(cast_unchecked<int8>(d2 + 48i64)));
+    res = string_concat(res, string_from_char(cast_unchecked<int8>(d1 + 48i64)));
+    pass res;
+};
+
+func:parse_int = int64(string:s, int64:start_idx) {
+    int64:res = 0i64;
+    int64:i = start_idx;
+    int64:len = string_length(s);
+    while (i < len) {
+        int64:c = npk_string_byte_at(s, i);
+        if (c >= 48i64 && c <= 57i64) {
+            res = res * 10i64 + (c - 48i64);
+        } else {
+            break;
         }
         i = i + 1i64;
     }
+    pass res;
+};
+
+pub func:main = int32(int32:argc, wild int8->:argv) {
+    string:args = raw args_load_native(argc, argv);
+    int32:arg_count = raw args_count(args);
+    if (arg_count < 2i32) { drop(print_err("csplit: missing operand\n")); exit 1; }
     
-    int64:out_fd = sys(SYS_OPEN, "xx00", 577i64, 438i64) ? -1i64; // O_WRONLY | O_CREAT | O_TRUNC
+    int64:fd = sys(OPEN, raw args_at(args, 1i32), 0i64, 0i64) ?! -1i64;
+    defer { if (fd >= 0i64) { drop(sys(CLOSE, fd)); } }
+    if (fd < 0i64) { drop(print_err("csplit: cannot open file\n")); exit 1; }
+    
+    int64:file_idx = 0i64;
+    int64:out_fd = sys(OPEN, raw make_filename(file_idx), 577i64, 438i64) ?! -1i64; // O_WRONLY | O_CREAT | O_TRUNC
     if (out_fd < 0i64) { drop(print_err("csplit: cannot create output\n")); exit 1; }
     
     int64:state = raw io_buf_new(fd);
-    int64:buf = malloc(65536i64);
+    int64:buf = sys!!(SYS_MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    if (buf == 0i64) { exit 1; }
     
     int64:current_line = 1i64;
     
-    while (1 == 1) {
-        if (current_line == split_line) {
-            drop(sys!!(SYS_CLOSE, out_fd));
-            out_fd = sys(SYS_OPEN, "xx01", 577i64, 438i64) ? -1i64;
+    int32:arg_idx = 2i32;
+    int32:rule_type = -1i32; // 0=line, 1=regex
+    int64:rule_line = 0i64;
+    string:rule_regex = "";
+    int64:rule_offset = 0i64;
+    int64:rule_repeat = 0i64;
+    
+    int64:next_split_line = -1i64;
+    
+    int32:parsing_rules = 1i32;
+    while (parsing_rules == 1i32) {
+        if (arg_idx > arg_count) {
+            parsing_rules = 0i32;
+        } else {
+            string:arg = raw args_at(args, arg_idx);
+            int64:len = string_length(arg);
+            if (len == 0i64) { parsing_rules = 0i32; }
+            else {
+                int64:first_char = npk_string_byte_at(arg, 0i64);
+                if (first_char == 47i64) { // '/'
+                    // Regex rule
+                    rule_type = 1i32;
+                    int64:end_slash = -1i64;
+                    int64:slash_i = 1i64;
+                    while (slash_i < len) {
+                        if (npk_string_byte_at(arg, slash_i) == 47i64) {
+                            end_slash = slash_i;
+                            break;
+                        }
+                        slash_i = slash_i + 1i64;
+                    }
+                    
+                    if (end_slash < 0i64) {
+                        rule_regex = string_substring(arg, 1i64, len);
+                        rule_offset = 0i64;
+                    } else {
+                        rule_regex = string_substring(arg, 1i64, end_slash + 1i64);
+                        if (end_slash + 2i64 < len) {
+                            if (npk_string_byte_at(arg, end_slash + 2i64) == 43i64) { // '+'
+                                rule_offset = raw parse_int(arg, end_slash + 3i64);
+                            } else {
+                                if (npk_string_byte_at(arg, end_slash + 2i64) == 45i64) { // '-'
+                                    rule_offset = 0i64 - raw parse_int(arg, end_slash + 3i64);
+                                }
+                            }
+                        }
+                    }
+                    next_split_line = -1i64;
+                } else {
+                    if (first_char == 123i64) { // '{'
+                        // Repeat rule
+                        if (len >= 3i64 && npk_string_byte_at(arg, 1i64) == 42i64) { // '*'
+                            rule_repeat = -1i64;
+                        } else {
+                            rule_repeat = raw parse_int(arg, 1i64);
+                        }
+                        // Don't change rule_type/rule_regex/rule_line, keep previous
+                        if (rule_type == 0i32) {
+                            // If previous was a line offset, repeat adds that offset again!
+                            // wait, in csplit, {N} repeats the previous pattern.
+                            // If it was a line number like 10, {1} means split at 20.
+                            next_split_line = current_line + rule_line;
+                        } else {
+                            next_split_line = -1i64;
+                        }
+                    } else {
+                        // Line number rule
+                        rule_type = 0i32;
+                        rule_line = raw parse_int(arg, 0i64);
+                        next_split_line = rule_line;
+                    }
+                }
+                
+                // Read lines until this rule is satisfied
+                int32:rule_satisfied = 0i32;
+                while (rule_satisfied == 0i32) {
+                    if (rule_type == 0i32) {
+                        if (current_line == next_split_line) {
+                            drop(sys(CLOSE, out_fd));
+                            file_idx = file_idx + 1i64;
+                            out_fd = sys(OPEN, raw make_filename(file_idx), 577i64, 438i64) ?! -1i64;
+                            rule_satisfied = 1i32;
+                            if (rule_repeat > 0i64) { rule_repeat = rule_repeat - 1i64; next_split_line = next_split_line + rule_line; rule_satisfied = 0i32; }
+                            else { if (rule_repeat == -1i64) { next_split_line = next_split_line + rule_line; rule_satisfied = 0i32; } }
+                        }
+                    }
+                    
+                    int64:read_len = raw io_buf_readline(state, cast_unchecked<uint8->>(buf));
+                    if (read_len == 0i64) {
+                        parsing_rules = 0i32;
+                        rule_satisfied = 1i32;
+                    } else {
+                        int32:do_split = 0i32;
+                        if (rule_type == 1i32) {
+                            string:line_str = npk_mem_read_string(cast_unchecked<void->>(buf), read_len);
+                            if (raw regex_match(rule_regex, line_str, 0i32) == 1i32) {
+                                // Match!
+                                // Wait, offset handling is complex, for simplicity in A14, split immediately if offset <= 0.
+                                // If offset > 0, wait offset lines.
+                                if (rule_offset <= 0i64) { do_split = 1i32; }
+                                else {
+                                    next_split_line = current_line + rule_offset;
+                                    rule_type = 0i32; // turn into a line split rule
+                                }
+                            }
+                        }
+                        
+                        if (do_split == 1i32) {
+                            drop(sys(CLOSE, out_fd));
+                            file_idx = file_idx + 1i64;
+                            out_fd = sys(OPEN, raw make_filename(file_idx), 577i64, 438i64) ?! -1i64;
+                            rule_satisfied = 1i32;
+                            if (rule_repeat > 0i64) { rule_repeat = rule_repeat - 1i64; rule_satisfied = 0i32; }
+                            else { if (rule_repeat == -1i64) { rule_satisfied = 0i32; } }
+                        }
+                        
+                        drop(sys(WRITE, out_fd, buf, read_len));
+                        current_line = current_line + 1i64;
+                    }
+                }
+            }
+            arg_idx = arg_idx + 1i32;
         }
-        
-        int64:len = raw io_buf_readline(state, buf);
-        if (len == 0i64) { break; }
-        
-        drop(sys(SYS_WRITE, out_fd, buf, len));
-        current_line = current_line + 1i64;
     }
     
-    drop(sys(SYS_CLOSE, out_fd));
-    drop(nitpick_libc_mem_free(buf));
+    // Write remaining lines
+    while (1i32 == 1i32) {
+        int64:read_len = raw io_buf_readline(state, cast_unchecked<uint8->>(buf));
+        if (read_len == 0i64) { break; }
+        drop(sys(WRITE, out_fd, buf, read_len));
+    }
+    
+    drop(sys(CLOSE, out_fd));
+    drop(sys!!(SYS_MUNMAP, buf, 65536i64));
     drop(io_buf_free(state));
     exit 0;
 };

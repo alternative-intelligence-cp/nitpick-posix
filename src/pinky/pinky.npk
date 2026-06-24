@@ -33,9 +33,9 @@ pub func:main = int32(int32:argc, wild int8->:argv) {
     if (c_ptr != 0i64) {
         int64:i = 0i64;
         while (1 == 1) {
-            int64:c = npk_mem_read_byte(c_ptr, i);
+            int64:c = raw safe_mem_read_byte(cast_unchecked<uint8->>(c_ptr), i);
             if (c == 0i64) { break; }
-            if (c != 10i64) { ctime_str = string_concat(ctime_str, string_from_char(@cast_unchecked<int8>(c))); }
+            if (c != 10i64) { ctime_str = string_concat(ctime_str, string_from_char(cast_unchecked<int8>(c))); }
             i = i + 1i64;
         }
     }
@@ -71,11 +71,11 @@ pub func:main = int32(int32:argc, wild int8->:argv) {
     drop(print_str("Login    Name                 TTY      Idle   When             Where\n"));
     
     int64:lst = raw utmp_read_users();
-    int64:count = alsize(lst);
+    int64:count = raw alsize(lst);
     int64:idx = 0i64;
     while (idx < count) {
-        int64:u_ptr = alget(lst, idx);
-        int64:l_ptr = alget(lst, idx + 1i64);
+        int64:u_ptr = raw alget(lst, idx);
+        int64:l_ptr = raw alget(lst, idx + 1i64);
         string:user = raw ptr_to_string(ok(u_ptr));
         string:tty = raw ptr_to_string(ok(l_ptr));
         

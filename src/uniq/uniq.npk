@@ -2,7 +2,7 @@
 
 use "../vendor/io_utils.npk".*;
 use "../vendor/mem_utils.npk".*;
-extern func:npk_mem_read_string = string(int64:ptr, int64:max_len);
+extern func:npk_mem_read_string = string(void*:ptr, int64:max_len);
 extern func:npk_mem_write_byte = void(int64:ptr, int64:offset, int64:val);
 
 
@@ -17,13 +17,13 @@ extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys(SYS_WRITE, 2i64, s, len));
+    drop(sys(WRITE, 2i64, s, len));
     pass 0i32;
 };
 
 func:print_str_safe = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys(SYS_WRITE, 1i64, s, len));
+    drop(sys(WRITE, 1i64, s, len));
     pass 0i32;
 };
 
@@ -51,7 +51,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
         if (string_equals(file, "-")) {
             fd = 0i64;
         } else {
-            fd = sys(SYS_OPEN, file, 0i64, 0i64) ? -1i64;
+            fd = sys(OPEN, file, 0i64, 0i64) ? -1i64;
             if (fd < 0i64) {
                 drop(print_err("uniq: cannot open '"));
                 drop(print_err(file));
@@ -59,7 +59,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
                 exit 1;
             }
             }
-    defer { if (fd >= 0i64) { drop(sys(SYS_CLOSE, fd)); } }
+    defer { if (fd >= 0i64) { drop(sys(CLOSE, fd)); } }
     }
     fp = raw io_buf_new(fd);
     
@@ -79,14 +79,14 @@ func:main = int32(int32:argc, wild int8->:argv) {
                     c = -1i32; // break
                 } else {
                     if (len < 65536i64) {
-                        npk_mem_write_byte(buf, len, @cast_unchecked<int64>(c));
+                        npk_mem_write_byte(buf, len, cast_unchecked<int64>(c));
                         len = len + 1i64;
                     }
                     c = raw io_buf_getc(fp);
                 }
             }
             
-            string:line = npk_mem_read_string(buf, len);
+            string:line = npk_mem_read_string(cast_unchecked<void->>(buf), len);
             if (first == 1i32) {
                 drop(print_str_safe(line));
                 drop(print_str_safe("\n"));

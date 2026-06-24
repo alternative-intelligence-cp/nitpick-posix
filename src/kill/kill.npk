@@ -14,13 +14,13 @@ extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys(SYS_WRITE, 2i64, s, len));
+    drop(sys(WRITE, 2i64, s, len));
     pass 0i32;
 };
 
 func:print_str_safe = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys(SYS_WRITE, 1i64, s, len));
+    drop(sys(WRITE, 1i64, s, len));
     pass 0i32;
 };
 
@@ -58,8 +58,7 @@ func:parse_int = int64(string:s) {
         if (digit >= 0i64) {
             val = val * 10i64 + digit;
         } else {
-            drop(print_err("kill: arguments must be process or job IDs\n"));
-            exit 1;
+            pass -1i64;
         }
         i = i + 1i64;
     }
@@ -69,7 +68,7 @@ func:parse_int = int64(string:s) {
     pass val;
 };
 
-func:main = int32(int32:argc, wild int8->:argv) {
+pub func:main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     
@@ -87,20 +86,36 @@ func:main = int32(int32:argc, wild int8->:argv) {
         if (string_equals(c, "-")) {
             string:nsig = string_substring(arg1, 1i64, string_length(arg1));
             int64:parsed_sig = raw parse_int(nsig);
+            if (parsed_sig < 0i64) {
+                drop(print_err("kill: arguments must be process or job IDs\n"));
+                exit 1;
+            }
             if (parsed_sig > 0i64) {
                 sig = parsed_sig;
             }
             if (arg_count >= 2i32) {
                 pid = raw parse_int(raw args_at(args, 2i32));
+                if (pid < 0i64) {
+                    drop(print_err("kill: arguments must be process or job IDs\n"));
+                    exit 1;
+                }
             } else {
                 drop(print_err("kill: missing pid\n"));
                 exit 1;
             }
         } else {
             pid = raw parse_int(arg1);
+            if (pid < 0i64) {
+                drop(print_err("kill: arguments must be process or job IDs\n"));
+                exit 1;
+            }
         }
     } else {
         pid = raw parse_int(arg1);
+        if (pid < 0i64) {
+            drop(print_err("kill: arguments must be process or job IDs\n"));
+            exit 1;
+        }
     }
     
     int64:res = sys!!(SYS_KILL, pid, sig) ? -1i64; // SYS_KILL

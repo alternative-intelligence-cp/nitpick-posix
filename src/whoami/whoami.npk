@@ -8,13 +8,13 @@ use "../vendor/nitpick_args.npk".*;
 use "../vendor/sys_constants.npk".*;
 use "../vendor/libc_ffi.npk".*;
 
-extern func:npk_mem_read_string = string(int64:ptr, int64:max_len);
+extern func:npk_mem_read_string = string(void*:ptr, int64:max_len);
 extern func:npk_mem_write_byte = void(int64:ptr, int64:offset, int64:val);
 
 
 func:print_str_safe = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys(SYS_WRITE, 1i64, s, len));
+    drop(sys(WRITE, 1i64, s, len));
     pass 0i32;
 };
 
@@ -27,8 +27,8 @@ func:main = int32(int32:argc, wild int8->:argv) {
     int64:uid = sys!!(SYS_GETUID) ? -1i64;
     string:uid_str = string_from_int(uid);
     
-    int64:fd_pw = sys(SYS_OPEN, "/etc/passwd", 0i64, 0i64) ? -1i64;
-    defer { if (fd_pw >= 0i64) { drop(sys(SYS_CLOSE, fd_pw)); } }
+    int64:fd_pw = sys(OPEN, "/etc/passwd", 0i64, 0i64) ? -1i64;
+    defer { if (fd_pw >= 0i64) { drop(sys(CLOSE, fd_pw)); } }
     int64:fp = 0i64;
     if (fd_pw >= 0i64) { fp = raw io_buf_new(fd_pw); }
     if (fp == 0i64) {
@@ -53,16 +53,16 @@ func:main = int32(int32:argc, wild int8->:argv) {
         } else {
             if (c == 58i32) { // colon
                 if (field_index == 0i64) {
-                    username = npk_mem_read_string(cf_buf, cf_len);
+                    username = npk_mem_read_string(cast_unchecked<void->>(cf_buf), cf_len);
                 } else {
                     if (field_index == 2i64) {
-                        string:current_field = npk_mem_read_string(cf_buf, cf_len);
+                        string:current_field = npk_mem_read_string(cast_unchecked<void->>(cf_buf), cf_len);
                         if (string_equals(current_field, uid_str)) {
                             // Match!
                             drop(print_str_safe(username));
                             drop(print_str_safe("\n"));
                             drop(nitpick_libc_mem_free(cf_buf));
-                            int64:fd = (<- (@cast_unchecked<int64->>(fp + 0i64)));
+                            int64:fd = (<- (cast_unchecked<int64->>(fp + 0i64)));
                             drop(raw io_buf_free(fp));
                             exit 0;
                         }
@@ -72,7 +72,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
                 field_index = field_index + 1i64;
             } else {
                 if (cf_len < 4096i64) {
-                    npk_mem_write_byte(cf_buf, cf_len, @cast_unchecked<int64>(c));
+                    npk_mem_write_byte(cf_buf, cf_len, cast_unchecked<int64>(c));
                     cf_len = cf_len + 1i64;
                 }
             }
@@ -81,7 +81,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     }
     
     drop(nitpick_libc_mem_free(cf_buf));
-    int64:fd_fp = (<- (@cast_unchecked<int64->>(fp + 0i64)));
+    int64:fd_fp = (<- (cast_unchecked<int64->>(fp + 0i64)));
     drop(raw io_buf_free(fp));
     
     // fallback if not found

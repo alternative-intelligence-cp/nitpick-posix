@@ -10,7 +10,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     int64:ht = ahash(1024i64);
     int64:parsed = raw Parser_parse(p, args, ht);
     
-    string:to_fmt = ahget(parsed, "--to");
+    string:to_fmt = raw ahget_str(parsed, "--to");
     if (string_equals(to_fmt, "iec")) {
         // scale 1024
     } else {

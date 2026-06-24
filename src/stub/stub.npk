@@ -14,7 +14,7 @@ extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys(SYS_WRITE, 2i64, s, len));
+    drop(sys(WRITE, 2i64, s, len));
     pass 0i32;
 };
 
@@ -37,24 +37,24 @@ func:main = int32(int32:argc, wild int8->:argv) {
         string:arg = raw args_at(args, i);
         if (string_equals(string_substring(arg, 0i64, 1i64), "-") == false) {
             processed = processed + 1i32;
-            int64:fd = sys(SYS_OPEN, arg, 0i64, 0i64) ? -1i64;
+            int64:fd = sys(OPEN, arg, 0i64, 0i64) ? -1i64;
             if (fd >= 0i64) {
-                int64:bytes = sys(SYS_READ, fd, buf, 8192i64) ? -1i64;
+                int64:bytes = sys(READ, fd, buf, 8192i64) ? -1i64;
                 while (bytes > 0i64) {
-                    drop(sys(SYS_WRITE, 1i64, buf, bytes));
-                    bytes = sys(SYS_READ, fd, buf, 8192i64) ? -1i64;
+                    drop(sys(WRITE, 1i64, buf, bytes));
+                    bytes = sys(READ, fd, buf, 8192i64) ? -1i64;
                 }
             }
-            defer { if (fd >= 0i64) { drop(sys(SYS_CLOSE, fd)); } }
+            defer { if (fd >= 0i64) { drop(sys(CLOSE, fd)); } }
         }
         i = i + 1i32;
     }
 
     if (processed == 0i32) {
-        int64:bytes = sys(SYS_READ, 0i64, buf, 8192i64) ? -1i64;
+        int64:bytes = sys(READ, 0i64, buf, 8192i64) ? -1i64;
         while (bytes > 0i64) {
-            drop(sys(SYS_WRITE, 1i64, buf, bytes));
-            bytes = sys(SYS_READ, 0i64, buf, 8192i64) ? -1i64;
+            drop(sys(WRITE, 1i64, buf, bytes));
+            bytes = sys(READ, 0i64, buf, 8192i64) ? -1i64;
         }
     }
 

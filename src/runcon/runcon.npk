@@ -21,7 +21,7 @@ pub func:main = int32(int32:argc, wild int8->:argv) {
     
     // Attempting to set SELinux context usually fails if it's disabled.
     // In our minimal POSIX environment, we ignore the context and run the command.
-    drop(sys_execvp_from(args, 2i32));
+    drop(sys_execvp_from(2i64));
     
     drop(print_err("runcon: failed to execute command\n"));
     exit 1;

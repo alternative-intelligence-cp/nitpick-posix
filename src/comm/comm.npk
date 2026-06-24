@@ -13,9 +13,9 @@ use "../vendor/libc_ffi.npk".*;
 
 
 pub func:alist_pop_front = int64(int64:lst) {
-    if (alsize(lst) == 0i64) { pass -1i64; }
-    int64:v = alget(lst, 0i64);
-    drop(alremove(lst, 0i64));
+    if (raw alsize(lst) == 0i64) { pass -1i64; }
+    int64:v = raw alget(lst, 0i64);
+    drop(raw alremove(lst, 0i64));
     pass ok(v);
 };
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
@@ -23,12 +23,12 @@ extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
-    pass @cast_unchecked<int32>(sys(SYS_WRITE, 2i64, s, len) ? -1i64);
+    pass cast_unchecked<int32>(sys(WRITE, 2i64, s, len) ? -1i64);
 };
 
 func:print_out = int32(string:s) {
     int64:len = string_length(s);
-    pass @cast_unchecked<int32>(sys(SYS_WRITE, 1i64, s, len) ? -1i64);
+    pass cast_unchecked<int32>(sys(WRITE, 1i64, s, len) ? -1i64);
 };
 
 func:ptr_to_string = string(int64:ptr) {
@@ -36,7 +36,7 @@ func:ptr_to_string = string(int64:ptr) {
     int64:i = 0i64;
     while (npk_mem_read_byte(ptr, i) != 0i64) {
         int64:c = npk_mem_read_byte(ptr, i);
-        s = string_concat(s, string_from_char(@cast_unchecked<int8>(c)));
+        s = string_concat(s, string_from_char(cast_unchecked<int8>(c)));
         i = i + 1i64;
     }
     pass s;
@@ -78,14 +78,14 @@ func:failsafe = int32(tbb32:err) {
 };
 
 func:read_lines = int64(string:filename, int64:sl) {
-    int64:fd = sys(SYS_OPEN, filename, 0i64, 0i64) ? -1i64;
+    int64:fd = sys(OPEN, filename, 0i64, 0i64) ? -1i64;
     if (fd < 0i64) {
         drop(print_err("comm: cannot open '"));
         drop(print_err(filename));
         drop(print_err("'\n"));
         pass 0i64;
     }
-    defer { if (fd >= 0i64) { drop(sys(SYS_CLOSE, fd)); } }
+    defer { if (fd >= 0i64) { drop(sys(CLOSE, fd)); } }
 
     int64:buf = sys!!(SYS_MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
     if (buf <= 0i64) { pass 0i64; }
@@ -95,7 +95,7 @@ func:read_lines = int64(string:filename, int64:sl) {
     int64:line_len = 0i64;
 
     while (running == 1i32) {
-        int64:nread = sys(SYS_READ, fd, buf, 65536i64) ? -1i64;
+        int64:nread = sys(READ, fd, buf, 65536i64) ? -1i64;
         if (nread <= 0i64) {
             running = 0i32;
         } else {
@@ -106,7 +106,7 @@ func:read_lines = int64(string:filename, int64:sl) {
                 line_len = line_len + 1i64;
                 if (c == 10i64) { // '\n'
                     npk_mem_write_byte(line_buf, line_len, 0i64);
-                    drop(alpush(sl, raw str_clone(line_buf)));
+                    drop(raw alpush(sl, raw str_clone(line_buf)));
                     line_len = 0i64;
                 }
                 pos = pos + 1i64;
@@ -116,7 +116,7 @@ func:read_lines = int64(string:filename, int64:sl) {
 
     if (line_len > 0i64) {
         npk_mem_write_byte(line_buf, line_len, 0i64);
-        drop(alpush(sl, raw str_clone(line_buf)));
+        drop(raw alpush(sl, raw str_clone(line_buf)));
     }
 
     drop(nitpick_libc_mem_free(line_buf));
@@ -148,10 +148,10 @@ func:main = int32(int32:argc, wild int8->:argv) {
         exit 1;
     }
 
-    int64:fd1 = sys(SYS_OPEN, f1, 0i64, 0i64) ? -1i64;
-    defer { if (fd1 >= 0i64) { drop(sys(SYS_CLOSE, fd1)); } }
-    int64:fd2 = sys(SYS_OPEN, f2, 0i64, 0i64) ? -1i64;
-    defer { if (fd2 >= 0i64) { drop(sys(SYS_CLOSE, fd2)); } }
+    int64:fd1 = sys(OPEN, f1, 0i64, 0i64) ? -1i64;
+    defer { if (fd1 >= 0i64) { drop(sys(CLOSE, fd1)); } }
+    int64:fd2 = sys(OPEN, f2, 0i64, 0i64) ? -1i64;
+    defer { if (fd2 >= 0i64) { drop(sys(CLOSE, fd2)); } }
     
     if (fd1 < 0i64) { drop(print_err("comm: cannot open ")); drop(print_err(f1)); drop(print_err("\n")); exit 1; }
     if (fd2 < 0i64) { drop(print_err("comm: cannot open ")); drop(print_err(f2)); drop(print_err("\n")); exit 1; }
@@ -162,8 +162,8 @@ func:main = int32(int32:argc, wild int8->:argv) {
     int64:p1 = malloc(65536i64);
     int64:p2 = malloc(65536i64);
     
-    int64:len1 = raw io_buf_readline(state1, p1);
-    int64:len2 = raw io_buf_readline(state2, p2);
+    int64:len1 = raw io_buf_readline(state1, cast_unchecked<uint8->>(p1));
+    int64:len2 = raw io_buf_readline(state2, cast_unchecked<uint8->>(p2));
 
     while (1i32 == 1i32) {
         if (len1 == 0i64) {
@@ -177,30 +177,30 @@ func:main = int32(int32:argc, wild int8->:argv) {
             // print col 2
             drop(print_out("\t"));
             drop(print_out(raw ptr_to_string(p2)));
-            len2 = raw io_buf_readline(state2, p2);
+            len2 = raw io_buf_readline(state2, cast_unchecked<uint8->>(p2));
         } else {
             if (len2 == 0i64) {
                 // print col 1
                 drop(print_out(raw ptr_to_string(p1)));
-                len1 = raw io_buf_readline(state1, p1);
+                len1 = raw io_buf_readline(state1, cast_unchecked<uint8->>(p1));
             } else {
                 int32:cmp = raw strcmp(p1, p2);
                 if (cmp == 0i32) {
                     // print col 3
                     drop(print_out("\t\t"));
                     drop(print_out(raw ptr_to_string(p1)));
-                    len1 = raw io_buf_readline(state1, p1);
-                    len2 = raw io_buf_readline(state2, p2);
+                    len1 = raw io_buf_readline(state1, cast_unchecked<uint8->>(p1));
+                    len2 = raw io_buf_readline(state2, cast_unchecked<uint8->>(p2));
                 } else {
                     if (cmp < 0i32) {
                         // print col 1
                         drop(print_out(raw ptr_to_string(p1)));
-                        len1 = raw io_buf_readline(state1, p1);
+                        len1 = raw io_buf_readline(state1, cast_unchecked<uint8->>(p1));
                     } else {
                         // print col 2
                         drop(print_out("\t"));
                         drop(print_out(raw ptr_to_string(p2)));
-                        len2 = raw io_buf_readline(state2, p2);
+                        len2 = raw io_buf_readline(state2, cast_unchecked<uint8->>(p2));
                     }
                 }
             }

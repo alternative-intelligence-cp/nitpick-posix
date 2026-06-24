@@ -13,6 +13,6 @@ func:main = int32(int32:argc, wild int8->:argv) {
     // \x1b[H  : Move cursor to home position (0,0)
     // \x1b[2J : Clear entire screen
     // \x1b[3J : Clear scrollback buffer (like modern clear)
-    drop(sys(SYS_WRITE, 1i64, "\x1b[H\x1b[2J\x1b[3J", 11i64));
+    drop(sys(WRITE, 1i64, "\x1b[H\x1b[2J\x1b[3J", 11i64));
     exit 0;
 };

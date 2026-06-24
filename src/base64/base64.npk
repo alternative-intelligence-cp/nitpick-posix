@@ -6,6 +6,7 @@ use "../vendor/io_utils.npk".*;
 use "../vendor/mem_utils.npk".*;
 use "../vendor/nitpick_args.npk".*;
 use "../vendor/sys_constants.npk".*;
+use "../vendor/libc_ffi.npk".*;
 
 
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
@@ -13,13 +14,13 @@ extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys(SYS_WRITE, 2i64, s, len));
+    drop(sys(WRITE, 2i64, s, len));
     pass 0i32;
 };
 
 func:print_str_safe = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys(SYS_WRITE, 1i64, s, len));
+    drop(sys(WRITE, 1i64, s, len));
     pass 0i32;
 };
 
@@ -28,9 +29,9 @@ func:failsafe = int32(tbb32:err) {
     exit 1;
 };
 
-func:b64_char = string(int64:idx) {
+func:b64_char = int32(int64:idx) {
     string:alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-    pass string_substring(alphabet, idx, idx + 1i64);
+    pass cast_unchecked<int32>(npk_string_byte_at(alphabet, idx));
 };
 
 func:main = int32(int32:argc, wild int8->:argv) {
@@ -44,7 +45,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
         if (string_equals(file, "-")) {
             fd = 0i64;
         } else {
-            fd = sys(SYS_OPEN, file, 0i64, 0i64) ? -1i64;
+            fd = sys(OPEN, file, 0i64, 0i64) ? -1i64;
             if (fd < 0i64) {
                 drop(print_err("base64: cannot open '"));
                 drop(print_err(file));
@@ -52,12 +53,14 @@ func:main = int32(int32:argc, wild int8->:argv) {
                 exit 1;
             }
             }
-    defer { if (fd >= 0i64) { drop(sys(SYS_CLOSE, fd)); } }
+    defer { if (fd >= 0i64) { drop(sys(CLOSE, fd)); } }
     }
     
     int64:buf_size = 65536i64; // 1MB buffer
-    wild int8->:buf = alloc(buf_size);
+    int64:buf = malloc(buf_size);
     if (buf < 0i64) { exit 1; }
+    
+    int64:out_state = raw io_buf_new(1i64);
     
     int32:running = 1i32;
     int64:b0 = -1i64;
@@ -67,7 +70,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     int64:cols = 0i64;
     
     while (running == 1i32) {
-        int64:n = sys(SYS_READ, fd, buf, buf_size) ? -1i64;
+        int64:n = sys(READ, fd, buf, buf_size) ? -1i64;
         if (n <= 0i64) {
             running = 0i32;
         } else {
@@ -95,14 +98,14 @@ func:main = int32(int32:argc, wild int8->:argv) {
                             int64:c2 = (b1_and_15 * 4i64) + (b2 / 64i64);
                             int64:c3 = b2_and_63;
                             
-                            drop(print_str_safe(raw b64_char(c0)));
-                            drop(print_str_safe(raw b64_char(c1)));
-                            drop(print_str_safe(raw b64_char(c2)));
-                            drop(print_str_safe(raw b64_char(c3)));
+                            drop(io_buf_putc(out_state, raw b64_char(c0)));
+                            drop(io_buf_putc(out_state, raw b64_char(c1)));
+                            drop(io_buf_putc(out_state, raw b64_char(c2)));
+                            drop(io_buf_putc(out_state, raw b64_char(c3)));
                             
                             cols = cols + 4i64;
                             if (cols == 76i64) {
-                                drop(print_str_safe("\n"));
+                                drop(io_buf_puts(out_state, "\n"));
                                 cols = 0i64;
                             }
                         }
@@ -117,9 +120,9 @@ func:main = int32(int32:argc, wild int8->:argv) {
         int64:b0_and_3 = b0 - (b0 / 4i64) * 4i64;
         int64:c0 = b0 / 4i64;
         int64:c1 = (b0_and_3 * 16i64);
-        drop(print_str_safe(raw b64_char(c0)));
-        drop(print_str_safe(raw b64_char(c1)));
-        drop(print_str_safe("=="));
+        drop(io_buf_putc(out_state, raw b64_char(c0)));
+        drop(io_buf_putc(out_state, raw b64_char(c1)));
+        drop(io_buf_puts(out_state, "=="));
         cols = cols + 4i64;
     } else {
         if (state == 2i64) {
@@ -128,20 +131,23 @@ func:main = int32(int32:argc, wild int8->:argv) {
             int64:c0 = b0 / 4i64;
             int64:c1 = (b0_and_3 * 16i64) + (b1 / 16i64);
             int64:c2 = (b1_and_15 * 4i64);
-            drop(print_str_safe(raw b64_char(c0)));
-            drop(print_str_safe(raw b64_char(c1)));
-            drop(print_str_safe(raw b64_char(c2)));
-            drop(print_str_safe("="));
+            drop(io_buf_putc(out_state, raw b64_char(c0)));
+            drop(io_buf_putc(out_state, raw b64_char(c1)));
+            drop(io_buf_putc(out_state, raw b64_char(c2)));
+            drop(io_buf_puts(out_state, "="));
             cols = cols + 4i64;
         }
     }
     
     if (cols > 0i64) {
-        drop(print_str_safe("\n"));
+        drop(io_buf_puts(out_state, "\n"));
     }
+    
+    drop(io_buf_flush(out_state));
+    drop(io_buf_free(out_state));
     
     if (fd != 0i64) {
     }
-    free(@cast_unchecked<any->>(buf));
+    drop(nitpick_libc_mem_free(buf));
     exit 0;
 };

@@ -3,27 +3,16 @@
 use "../vendor/io_utils.npk".*;
 use "../vendor/mem_utils.npk".*;
 extern func:npk_mem_read_string = string(int64:ptr, int64:max_len);
-extern func:npk_mem_write_byte = void(int64:ptr, int64:offset, int64:val);
+extern func:npk_mem_write_byte = int32(int64:ptr, int64:offset, int64:val);
+extern func:string_from_cstr = string(int64:ptr);
 
 use "../vendor/nitpick_args.npk".*;
 use "../vendor/sys_constants.npk".*;
+use "../vendor/libc_ffi.npk".*;
 
-extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
-func:print_err = int32(string:s) {
-    int64:len = string_length(s);
-    drop(sys(SYS_WRITE, 2i64, s, len));
-    pass 0i32;
-};
+// using io_utils functions
 
-func:print_str_safe = int32(string:s) {
-    int64:len = string_length(s);
-    drop(sys(SYS_WRITE, 1i64, s, len));
-    pass 0i32;
-};
-
-extern func:npk_mem_write_int64 = int32(int64:ptr, int64:offset, int64:val);
-extern func:npk_mem_read_int64  = int64(int64:ptr, int64:offset);
 
 func:failsafe = int32(tbb32:err) {
     drop(standard_failsafe(err));
@@ -39,43 +28,45 @@ func:main = int32(int32:argc, wild int8->:argv) {
         exit 0;
     }
     
-    int64:fp_array = @cast_unchecked<int64>(alloc(@cast_unchecked<int64>(arg_count) * 8i64));
+    int64:fp_array = malloc(cast_unchecked<int64>(arg_count) * 8i64);
     
     int64:n_files = 0i64;
     int32:i = 1i32;
     while (i <= arg_count) {
         string:file = raw args_at(args, i);
-        int64:fd = sys(SYS_OPEN, file, 0i64, 0i64) ? -1i64;
+        int64:fd = sys(OPEN, file, 0i64, 0i64) ? -1i64;
+        
         if (fd < 0i64) {
-            drop(print_err("paste: cannot open '"));
+            drop(print_err("paste: "));
             drop(print_err(file));
-            drop(print_err("'\n"));
-            exit 1;
+            drop(print_err(": No such file or directory\n"));
+            drop(proc_exit(1i32));
         }
-        defer { if (fd >= 0i64) { drop(sys(SYS_CLOSE, fd)); } }
+
         int64:fp = raw io_buf_new(fd);
-        drop(npk_mem_write_int64(fp_array, n_files * 8i64, fp));
+        drop(<- (cast_unchecked<int64->>(fp_array + n_files * 8i64)) = fp);
         n_files = n_files + 1i64;
         i = i + 1i32;
     }
     
     int32:running = 1i32;
-    
     while (running == 1i32) {
         int64:j = 0i64;
         int32:any_data = 0i32;
         
         while (j < n_files) {
-            int64:fp = npk_mem_read_int64(fp_array, j * 8i64);
+            int64:fp = (<- (cast_unchecked<int64->>(fp_array + j * 8i64)));
             if (fp != 0i64) {
                 // read a line
-                wild int8->:buf = alloc(65536i64);
+                int64:buf = malloc(65536i64);
                 int64:len = 0i64;
                 int32:c = raw io_buf_getc(fp);
                 if (c < 0i32) {
                     // EOF
-                    drop(npk_mem_write_int64(fp_array, j * 8i64, 0i64));
-                    int64:fd_c = (<- (@cast_unchecked<int64->>(fp + 0i64)));
+
+                    drop(<- (cast_unchecked<int64->>(fp_array + j * 8i64)) = 0i64);
+                    int64:fd_c = (<- (cast_unchecked<int64->>(fp + 0i64)));
+                    if (fd_c >= 0i64) { drop(sys(CLOSE, fd_c)); }
                     drop(raw io_buf_free(fp));
                 } else {
                     any_data = 1i32;
@@ -84,30 +75,31 @@ func:main = int32(int32:argc, wild int8->:argv) {
                             c = -1i32; // break
                         } else {
                             if (len < 65536i64) {
-                                npk_mem_write_byte(buf, len, @cast_unchecked<int64>(c));
+                                drop(<- (cast_unchecked<uint8->>(buf + len)) = cast_unchecked<uint8>(c));
                                 len = len + 1i64;
                             }
                             c = raw io_buf_getc(fp);
                         }
                     }
-                    string:line = npk_mem_read_string(buf, len);
-                    drop(print_str_safe(line));
+                    if (len > 0i64) {
+                        drop(sys(WRITE, 1i64, buf, len) ? -1i64);
+                    }
                 }
-                free(@cast_unchecked<any->>(buf));
+                drop(free(cast_unchecked<void->>(buf)));
             }
             if (j < n_files - 1i64) {
-                drop(print_str_safe("\t"));
+                drop(print_out("\t"));
             }
             j = j + 1i64;
         }
         
         if (any_data == 1i32) {
-            drop(print_str_safe("\n"));
+            drop(print_out("\n"));
         } else {
             running = 0i32;
         }
     }
     
-    free(@cast_unchecked<any->>(fp_array));
+    drop(free(cast_unchecked<void->>(fp_array)));
     exit 0;
 };

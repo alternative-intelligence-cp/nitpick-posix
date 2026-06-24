@@ -3,30 +3,67 @@ use "../vendor/io_utils.npk".*;
 use "../vendor/mem_utils.npk".*;
 use "../vendor/nitpick_args.npk".*;
 use "../vendor/sys_constants.npk".*;
+use "../vendor/libc_ffi.npk".*;
 
 pub func:failsafe = int32(tbb32:err) { drop(standard_failsafe(err)); exit 1; };
+
+extern func:npk_string_byte_at = int64(string:s, int64:idx);
+
+func:print_permutation = int32(string:line) {
+    int64:len = string_length(line);
+    if (len > 0i64 && npk_string_byte_at(line, len - 1i64) == 10i64) { len = len - 1i64; }
+    
+    int64:i = 0i64;
+    while (i < len) {
+        while (i < len) {
+            int64:c = npk_string_byte_at(line, i);
+            if (c != 32i64 && c != 9i64) { break; }
+            i = i + 1i64;
+        }
+        if (i >= len) { break; }
+        
+        int64:word_start = i;
+        while (i < len) {
+            int64:c = npk_string_byte_at(line, i);
+            if (c == 32i64 || c == 9i64) { break; }
+            i = i + 1i64;
+        }
+        
+        string:part1 = string_substring(line, word_start, len);
+        string:part2 = "";
+        if (word_start > 0i64) { part2 = string_substring(line, 0i64, word_start - 1i64); }
+        
+        drop(print_str_safe(part1));
+        if (string_length(part2) > 0i64) {
+            drop(print_str_safe(" "));
+            drop(print_str_safe(part2));
+        }
+        drop(print_str_safe("\n"));
+    }
+    pass 0i32;
+};
 
 pub func:main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     if (arg_count < 2i32) { drop(print_err("ptx: missing operand\n")); exit 1; }
     
-    int64:fd = sys(SYS_OPEN, raw args_at(args, 1i32), 0i64, 0i64) ? -1i64;
-    defer { if (fd >= 0i64) { drop(sys(SYS_CLOSE, fd)); } }
+    int64:fd = sys(OPEN, raw args_at(args, 1i32), 0i64, 0i64) ?! -1i64;
+    defer { if (fd >= 0i64) { drop(sys(CLOSE, fd)); } }
     if (fd < 0i64) { exit 1; }
     
     int64:state = raw io_buf_new(fd);
-    int64:buf = malloc(4096i64);
+    int64:buf = sys!!(SYS_MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    if (buf <= 0i64) { exit 1; }
     
-    // Minimal ptx: output lines without permutation to save complexity
     while (1 == 1) {
-        int64:len = raw io_buf_readline(state, buf);
+        int64:len = raw io_buf_readline(state, cast_unchecked<uint8->>(buf));
         if (len == 0i64) { break; }
-        drop(print_out(raw ptr_to_string(buf)));
-        drop(print_out("\n"));
+        string:line = npk_mem_read_string(cast_unchecked<void->>(buf), len);
+        drop(print_permutation(line));
     }
     
-    drop(nitpick_libc_mem_free(buf));
+    drop(sys!!(SYS_MUNMAP, buf, 65536i64));
     drop(io_buf_free(state));
     exit 0;
 };

@@ -18,7 +18,7 @@ func:print_err = int32(string:s) {
     int64:len = string_length(s);
     drop(s);
     drop(len);
-    pass @cast_unchecked<int32>(sys(SYS_WRITE, 2i64, s, len) ? -1i64);
+    pass cast_unchecked<int32>(sys(WRITE, 2i64, s, len) ? -1i64);
 };
 
 func:failsafe = int32(tbb32:err) {
@@ -49,7 +49,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     
     string:arg = raw args_at(args, 1i32);
     int32:sec_int = raw args_get_int(raw args_make2("sleep", arg), "sleep", 0i32);
-    int64:seconds = @cast_unchecked<int64>(sec_int);
+    int64:seconds = cast_unchecked<int64>(sec_int);
     
     if (seconds < 0i64) {
         drop(print_err("sleep: invalid time interval\n"));

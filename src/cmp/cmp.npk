@@ -13,13 +13,13 @@ extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys(SYS_WRITE, 2i64, s, len));
+    drop(sys(WRITE, 2i64, s, len));
     pass 0i32;
 };
 
 func:print_str_safe = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys(SYS_WRITE, 1i64, s, len));
+    drop(sys(WRITE, 1i64, s, len));
     pass 0i32;
 };
 
@@ -40,24 +40,24 @@ func:main = int32(int32:argc, wild int8->:argv) {
     string:file1 = raw args_at(args, 1i32);
     string:file2 = raw args_at(args, 2i32);
     
-    int64:fd1 = sys(SYS_OPEN, file1, 0i64, 0i64) ? -1i64;
+    int64:fd1 = sys(OPEN, file1, 0i64, 0i64) ? -1i64;
     if (fd1 < 0i64) {
         drop(print_err("cmp: cannot open '"));
         drop(print_err(file1));
         drop(print_err("'\n"));
         exit 2;
     }
-    defer { if (fd1 >= 0i64) { drop(sys(SYS_CLOSE, fd1)); } }
+    defer { if (fd1 >= 0i64) { drop(sys(CLOSE, fd1)); } }
     int64:fp1 = raw io_buf_new(fd1);
     
-    int64:fd2 = sys(SYS_OPEN, file2, 0i64, 0i64) ? -1i64;
+    int64:fd2 = sys(OPEN, file2, 0i64, 0i64) ? -1i64;
     if (fd2 < 0i64) {
         drop(print_err("cmp: cannot open '"));
         drop(print_err(file2));
         drop(print_err("'\n"));
         exit 2;
     }
-    defer { if (fd2 >= 0i64) { drop(sys(SYS_CLOSE, fd2)); } }
+    defer { if (fd2 >= 0i64) { drop(sys(CLOSE, fd2)); } }
     int64:fp2 = raw io_buf_new(fd2);
     
     int32:running = 1i32;
@@ -103,8 +103,8 @@ func:main = int32(int32:argc, wild int8->:argv) {
         }
     }
     
-    int64:fd_1 = (<- (@cast_unchecked<int64->>(fp1 + 0i64)));
-    int64:fd_2 = (<- (@cast_unchecked<int64->>(fp2 + 0i64)));
+    int64:fd_1 = (<- (cast_unchecked<int64->>(fp1 + 0i64)));
+    int64:fd_2 = (<- (cast_unchecked<int64->>(fp2 + 0i64)));
     drop(raw io_buf_free(fp1));
     drop(raw io_buf_free(fp2));
     exit 0;

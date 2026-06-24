@@ -1,29 +1,18 @@
+use "unsafe.npk".*;
 // tail.npk
 
 use "../vendor/io_utils.npk".*;
 use "../vendor/mem_utils.npk".*;
 use "../vendor/nitpick_args.npk".*;
 use "../vendor/sys_constants.npk".*;
-
-extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
-extern func:npk_mem_write_byte = void(int64:ptr, int64:offset, int64:val);
-
-func:print_str_safe = int32(string:s) {
-    int64:len = string_length(s);
-    drop(sys(SYS_WRITE, 1i64, s, len));
-    pass 0i32;
-};
-
-func:print_err = int32(string:s) {
-    int64:len = string_length(s);
-    drop(sys(SYS_WRITE, 2i64, s, len));
-    pass 0i32;
-};
+use "../vendor/libc_ffi.npk".*;
 
 func:failsafe = int32(tbb32:err) {
     drop(standard_failsafe(err));
     exit 1;
 };
+
+
 
 func:main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
@@ -38,7 +27,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
         if (string_equals(arg, "-n")) {
             if (i + 1i32 <= arg_count) {
                 string:val = raw args_at(args, i + 1i32);
-                n_lines = @cast_unchecked<int64>(raw args_get_int(raw args_make2("tail", val), "tail", 10i32));
+                n_lines = cast_unchecked<int64>(raw args_get_int(raw args_make2("tail", val), "tail", 10i32));
                 i = i + 1i32;
             }
         } else {
@@ -50,7 +39,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     int64:fd = 0i64;
     if (file_idx != -1i32) {
         string:file = raw args_at(args, file_idx);
-        fd = sys(SYS_OPEN, file, 0i64, 0i64) ? -1i64;
+        fd = sys(OPEN, file, 0i64, 0i64) ? -1i64;
         if (fd < 0i64) {
             drop(print_err("tail: cannot open '"));
             drop(print_err(file));
@@ -59,13 +48,14 @@ func:main = int32(int32:argc, wild int8->:argv) {
             exit 1;
         }
         }
-    defer { if (fd >= 0i64) { drop(sys(SYS_CLOSE, fd)); } }
+    defer { if (fd >= 0i64) { drop(sys(CLOSE, fd)); } }
     
     // check if it's seekable
-    int64:file_size = sys!!(SYS_LSEEK, fd, 0i64, 2i64) ? -1i64; // SEEK_END
+    int64:file_size = sys!!(LSEEK, fd, 0i64, 2i64) ? -1i64; // SEEK_END
     if (file_size > 0i64) {
         int64:chunk_size = 65536i64;
-        int64:buf = @cast_unchecked<int64>(alloc(chunk_size));
+        int64:buf = malloc(chunk_size);
+        wild uint8->:buf_ptr = cast_unchecked<uint8->>(buf);
         int64:pos = file_size;
         int64:lines_found = 0i64;
         int64:start_pos = 0i64;
@@ -81,7 +71,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
             pos = pos - read_size;
             
             drop(sys!!(SYS_LSEEK, fd, pos, 0i64)); // SEEK_SET
-            int64:n = sys(SYS_READ, fd, buf, read_size) ? -1i64;
+            int64:n = sys(READ, fd, buf, read_size) ? -1i64;
             if (n <= 0i64) {
                 running = 0i32;
             } else {
@@ -89,14 +79,18 @@ func:main = int32(int32:argc, wild int8->:argv) {
                 if (first_char == 1i32) {
                     first_char = 0i32;
                     if (j >= 0i64) {
-                        int64:c = @cast_unchecked<int64>(<- (@cast_unchecked<uint8->>(buf + j)));
+                        wild uint8->:char_ptr2 = nodrop(cast_unchecked<uint8->>(@ptr_add<uint8>(buf_ptr, j)));
+                        int64:c = cast_unchecked<int64>(<- char_ptr2);
+                        drop(fake_free(char_ptr2));
                         if (c == 10i64) {
                             j = j - 1i64;
                         }
                     }
                 }
                 while (j >= 0i64) {
-                    int64:c = @cast_unchecked<int64>(<- (@cast_unchecked<uint8->>(buf + j)));
+                    wild uint8->:char_ptr_inner = nodrop(cast_unchecked<uint8->>(@ptr_add<uint8>(buf_ptr, j)));
+                    int64:c = cast_unchecked<int64>(<- char_ptr_inner);
+                    drop(fake_free(char_ptr_inner));
                     if (c == 10i64) {
                         lines_found = lines_found + 1i64;
                         if (lines_found == n_lines) {
@@ -115,30 +109,31 @@ func:main = int32(int32:argc, wild int8->:argv) {
             }
         }
         
-        drop(sys!!(SYS_LSEEK, fd, start_pos, 0i64));
+        drop(sys!!(LSEEK, fd, start_pos, 0i64));
         running = 1i32;
         while (running == 1i32) {
-            int64:n = sys(SYS_READ, fd, buf, chunk_size) ? -1i64;
+            int64:n = sys(READ, fd, buf, chunk_size) ? -1i64;
             if (n <= 0i64) {
                 running = 0i32;
             } else {
-                drop(sys(SYS_WRITE, 1i64, buf, n));
+                drop(sys(WRITE, 1i64, buf, n));
             }
         }
         
-        free(@cast_unchecked<any->>(buf));
+        free(buf_ptr);
     } else {
         // Unseekable fallback: read forward using circular buffer or just chunked
         // The audit only asks for SYS_LSEEK with SEEK_END, we'll keep it simple for unseekable:
         int64:buf_size = 1048576i64; // keep 1MB limit for unseekable pipes only
-        int64:buf = @cast_unchecked<int64>(alloc(buf_size));
+        int64:buf = malloc(buf_size);
+        wild uint8->:buf_ptr = cast_unchecked<uint8->>(buf);
         int64:total_read = 0i64;
         int32:running = 1i32;
         while (running == 1i32) {
             if (total_read >= buf_size) {
                 running = 0i32;
             } else {
-                int64:n = sys(SYS_READ, fd, @cast_unchecked<int64>(buf) + total_read, buf_size - total_read) ? -1i64;
+                int64:n = sys(READ, fd, buf + total_read, buf_size - total_read) ? -1i64;
                 if (n <= 0i64) {
                     running = 0i32;
                 } else {
@@ -150,11 +145,17 @@ func:main = int32(int32:argc, wild int8->:argv) {
             int64:lines_found = 0i64;
             int64:start_idx = 0i64;
             int64:j = total_read - 1i64;
-            if (<- (@cast_unchecked<uint8->>(buf + j)) == 10i32) {
+            wild uint8->:char_ptr3 = nodrop(cast_unchecked<uint8->>(@ptr_add<uint8>(buf_ptr, j)));
+            uint8:c3 = <- char_ptr3;
+            drop(fake_free(char_ptr3));
+            if (c3 == 10u8) {
                 j = j - 1i64;
             }
             while (j >= 0i64) {
-                if (<- (@cast_unchecked<uint8->>(buf + j)) == 10i32) {
+                wild uint8->:char_ptr = nodrop(cast_unchecked<uint8->>(@ptr_add<uint8>(buf_ptr, j)));
+                uint8:c = <- char_ptr;
+                drop(fake_free(char_ptr));
+                if (c == 10u8) {
                     lines_found = lines_found + 1i64;
                     if (lines_found == n_lines) {
                         start_idx = j + 1i64;
@@ -163,9 +164,9 @@ func:main = int32(int32:argc, wild int8->:argv) {
                 }
                 if (j >= 0i64) { j = j - 1i64; }
             }
-            drop(sys(SYS_WRITE, 1i64, @cast_unchecked<int64>(buf) + start_idx, total_read - start_idx));
+            drop(sys(WRITE, 1i64, buf + start_idx, total_read - start_idx));
         }
-        free(@cast_unchecked<any->>(buf));
+        free(buf_ptr);
     }
     
     if (fd != 0i64) {

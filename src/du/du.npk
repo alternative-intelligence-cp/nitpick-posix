@@ -7,20 +7,23 @@ use "../vendor/libc_ffi.npk".*;
 
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys(SYS_WRITE, 2i64, s, len));
+    drop(sys(WRITE, 2i64, s, len));
     pass 0i32;
 };
 
 func:print_str_safe = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys(SYS_WRITE, 1i64, s, len));
+    drop(sys(WRITE, 1i64, s, len));
     pass 0i32;
 };
 
 pub func:failsafe = int32(tbb32:err) { drop(standard_failsafe(err)); exit 1; };
 
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
-extern func:npk_mem_read_int64 = int64(int64:ptr, int64:offset);
+
+extern "libc" {
+    func:strdup = int64(string:s);
+}
 
 func:int_to_str = string(int64:val) {
     if (val == 0i64) { pass "0"; }
@@ -47,82 +50,72 @@ func:int_to_str = string(int64:val) {
     pass res;
 };
 
-func:str_clone_str = int64(string:s) {
-    int64:len = string_length(s);
-    wild int8->:copy_alloc_ptr = alloc(len + 1i64);
-    int64:copy = @cast_unchecked<int64>(copy_alloc_ptr);
-    int64:i = 0i64;
-    while (i < len) {
-        <- (@cast_unchecked<uint8->>(((@cast_unchecked<int64>(copy)) + i))) = @cast_unchecked<uint8>(raw str_byte_at(s, i));
-        i = i + 1i64;
-    }
-    <- (@cast_unchecked<uint8->>(((@cast_unchecked<int64>(copy)) + len))) = @cast_unchecked<uint8>((0i64));
-    pass (@cast_unchecked<int64>(copy));
-};
+
 
 func:du_walk = int64(string:path, int64:statbuf) {
     int64:total_size = 0i64;
     
-    int64:res = sys(SYS_NEWFSTATAT, -100i64, path, statbuf, 256i64) ? -1i64;
+    int64:res = sys(NEWFSTATAT, -100i64, path, statbuf, 256i64) ?! -1i64;
     if (res < 0i64) { pass 0i64; }
     
-    int64:st_blocks = npk_mem_read_int64(statbuf, 64i64);
+    int64:st_blocks = (<- (cast_unchecked<int64->>(statbuf + 64i64)));
     total_size = st_blocks / 2i64;
     
     int64:mode = 0i64;
     int64:i = 0i64;
     while (i < 4i64) {
-        int64:b = @cast_unchecked<int64>((<- (@cast_unchecked<uint8->>(statbuf + 24i64 + i))));
+        int64:b = cast_unchecked<int64>((<- (cast_unchecked<uint8->>(statbuf + 24i64 + i))));
         mode = mode | (b << (i * 8i64));
         i = i + 1i64;
     }
     
     if ((mode & 61440i64) == 16384i64) { // Directory
-        int64:fd = sys(SYS_OPEN, path, 65536i64, 0i64) ? -1i64; // O_DIRECTORY
+        int64:fd = sys(OPEN, path, 65536i64, 0i64) ?! -1i64; // O_DIRECTORY
         if (fd >= 0i64) {
             wild int8->:buf_alloc_alloc_ptr = alloc(32768i64);
-            int64:buf_alloc = @cast_unchecked<int64>(buf_alloc_alloc_ptr);
+            int64:buf_alloc = cast_unchecked<int64>(buf_alloc_alloc_ptr);
             defer { dalloc(buf_alloc_alloc_ptr); }
-            int64:buf = @cast_unchecked<int64>(buf_alloc);
+            int64:buf = cast_unchecked<int64>(buf_alloc);
             
             if (buf >= 0i64) {
-                int64:dirs_sl = alist();
+                int64:dirs_sl = raw alist(1024i64);
                 int32:running = 1i32;
                 while (running == 1i32) {
-                    int64:nread = sys(SYS_GETDENTS64, fd, buf, 32768i64) ? -1i64;
+                    int64:nread = sys(GETDENTS64, fd, buf, 32768i64) ?! -1i64;
                     if (nread <= 0i64) {
                         running = 0i32;
                     } else {
                         int64:bpos = 0i64;
                         while (bpos < nread) {
-                            int64:ent_ptr = @cast_unchecked<int64>(buf) + bpos;
-                            int64:reclen = @cast_unchecked<int64>((<- (@cast_unchecked<uint8->>(ent_ptr + 16i64)))) | (<- @cast_unchecked<int64>((@cast_unchecked<uint8->>((ent_ptr + 17i64)))) << 8i64);
+                            int64:ent_ptr = cast_unchecked<int64>(buf) + bpos;
+                            int64:reclen = cast_unchecked<int64>((<- (cast_unchecked<uint8->>(ent_ptr + 16i64)))) | (cast_unchecked<int64>((<- (cast_unchecked<uint8->>(ent_ptr + 17i64)))) << 8i64);
                             int64:name_ptr = ent_ptr + 19i64;
                             
-                            string:cname = ptr_to_string(name_ptr);
+                            string:cname = raw ptr_to_string(name_ptr);
                             if (string_equals(cname, ".") == false && string_equals(cname, "..") == false) {
                                 string:child_path = `&{path}/`;
                                 if (string_equals(path, "/")) { child_path = "/"; }
                                 child_path = `&{child_path}&{cname}`;
-                                drop(alpush(dirs_sl, raw str_clone_str(child_path)));
+                                drop(raw alpush(dirs_sl, strdup(child_path)));
                             }
                             bpos = bpos + reclen;
                         }
                     }
                 }
                 
-                int64:slen = alsize(dirs_sl);
+                int64:slen = raw alsize(dirs_sl);
                 int64:s_idx = 0i64;
                 while (s_idx < slen) {
-                    int64:n_ptr = ok(alget(dirs_sl, s_idx));
-                    string:child_path = ptr_to_string(n_ptr) ? "";
-                    total_size = total_size + du_walk(child_path, statbuf);
-                    free(@cast_unchecked<int8->>(n_ptr));
+                    int64:n_ptr = ok(raw alget(dirs_sl, s_idx));
+                    string:child_path = raw ptr_to_string(n_ptr);
+                    int64:w_sz = raw du_walk(child_path, statbuf);
+                    total_size = total_size + w_sz;
+                    free(cast_unchecked<int8->>(n_ptr));
                     s_idx = s_idx + 1i64;
                 }
                 drop(0i32);
             }
-            drop(sys(SYS_CLOSE, fd));
+            drop(sys(CLOSE, fd));
         }
     }
     
@@ -138,7 +131,7 @@ pub func:main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     
-    int64:statbuf = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
+    int64:statbuf = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ?! -1i64;
     if (statbuf < 0i64) { exit 1; }
     
     int32:i = 1i32;

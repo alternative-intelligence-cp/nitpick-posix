@@ -11,13 +11,13 @@ use "../vendor/libc_ffi.npk".*;
 
 func:print_str = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys(SYS_WRITE, 1i64, s, len));
+    drop(sys(WRITE, 1i64, s, len));
     pass 0i32;
 };
 
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys(SYS_WRITE, 2i64, s, len));
+    drop(sys(WRITE, 2i64, s, len));
     pass 0i32;
 };
 
@@ -33,7 +33,7 @@ func:print_int = int32(int64:val) {
     string:res = "";
     while (val > 0i64) {
         int64:d = val % 10i64;
-        res = string_concat(string_from_char(@cast_unchecked<int8>(48i64 + d)), res);
+        res = string_concat(string_from_char(cast_unchecked<int8>(48i64 + d)), res);
         val = val / 10i64;
     }
     drop(print_str(res));
@@ -52,7 +52,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     
     if (arg_count == 0i32) {
         int32:prio = getpriority(0i32, 0i32);
-        drop(print_int(@cast_unchecked<int64>(prio)));
+        drop(print_int(cast_unchecked<int64>(prio)));
         exit 0;
     }
     
@@ -128,7 +128,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
         }
     }
     
-    if (cmd_idx > @cast_unchecked<int64>(arg_count)) {
+    if (cmd_idx > cast_unchecked<int64>(arg_count)) {
         drop(print_err("nice: a command must be given with an adjustment\n"));
         exit 125;
     }

@@ -3,30 +3,238 @@ use "../vendor/io_utils.npk".*;
 use "../vendor/mem_utils.npk".*;
 use "../vendor/nitpick_args.npk".*;
 use "../vendor/sys_constants.npk".*;
+use "../vendor/libc_ffi.npk".*;
 
 pub func:failsafe = int32(tbb32:err) { drop(standard_failsafe(err)); exit 1; };
+
+extern func:npk_string_byte_at = int64(string:s, int64:idx);
+
+func:read_i64_local = int64(int64:ptr, int64:offset) {
+    int64:p = ptr + (offset * 8i64);
+    int64:v0 = raw safe_mem_read_byte(cast_unchecked<uint8->>(p), 0i64);
+    int64:v1 = raw safe_mem_read_byte(cast_unchecked<uint8->>(p), 1i64);
+    int64:v2 = raw safe_mem_read_byte(cast_unchecked<uint8->>(p), 2i64);
+    int64:v3 = raw safe_mem_read_byte(cast_unchecked<uint8->>(p), 3i64);
+    int64:v4 = raw safe_mem_read_byte(cast_unchecked<uint8->>(p), 4i64);
+    int64:v5 = raw safe_mem_read_byte(cast_unchecked<uint8->>(p), 5i64);
+    int64:v6 = raw safe_mem_read_byte(cast_unchecked<uint8->>(p), 6i64);
+    int64:v7 = raw safe_mem_read_byte(cast_unchecked<uint8->>(p), 7i64);
+    pass v0 + (v1 * 256i64) + (v2 * 65536i64) + (v3 * 16777216i64) + (v4 * 4294967296i64) + (v5 * 1099511627776i64) + (v6 * 281474976710656i64) + (v7 * 72057594037927936i64);
+};
+
+func:write_i64_local = int32(int64:ptr, int64:offset, int64:val) {
+    int64:p = ptr + (offset * 8i64);
+    int64:v = val;
+    drop(safe_mem_write_byte(cast_unchecked<uint8->>(p), 0i64, v - ((v / 256i64) * 256i64))); v = v / 256i64;
+    drop(safe_mem_write_byte(cast_unchecked<uint8->>(p), 1i64, v - ((v / 256i64) * 256i64))); v = v / 256i64;
+    drop(safe_mem_write_byte(cast_unchecked<uint8->>(p), 2i64, v - ((v / 256i64) * 256i64))); v = v / 256i64;
+    drop(safe_mem_write_byte(cast_unchecked<uint8->>(p), 3i64, v - ((v / 256i64) * 256i64))); v = v / 256i64;
+    drop(safe_mem_write_byte(cast_unchecked<uint8->>(p), 4i64, v - ((v / 256i64) * 256i64))); v = v / 256i64;
+    drop(safe_mem_write_byte(cast_unchecked<uint8->>(p), 5i64, v - ((v / 256i64) * 256i64))); v = v / 256i64;
+    drop(safe_mem_write_byte(cast_unchecked<uint8->>(p), 6i64, v - ((v / 256i64) * 256i64))); v = v / 256i64;
+    drop(safe_mem_write_byte(cast_unchecked<uint8->>(p), 7i64, v - ((v / 256i64) * 256i64)));
+    pass 0i32;
+};
+
+func:get_node_id_local = int64(
+    int64:buf,
+    int64:word_start,
+    int64:wlen,
+    int64:text_pool,
+    int64:state_arr,
+    int64:node_starts,
+    int64:node_lens
+) {
+    int64:nodes_count = 0i64;
+    nodes_count = raw read_i64_local(state_arr, 0i64);
+    int64:text_len = 0i64;
+    text_len = raw read_i64_local(state_arr, 1i64);
+    int64:i = 0i64;
+    while (i < nodes_count) {
+        if (raw read_i64_local(node_lens, i) == wlen) {
+            int64:st = 0i64;
+            st = raw read_i64_local(node_starts, i);
+            int32:match = 1i32;
+            int64:j = 0i64;
+            while (j < wlen) {
+                int64:c1 = raw safe_mem_read_byte(cast_unchecked<uint8->>(text_pool), st + j);
+                int64:c2 = raw safe_mem_read_byte(cast_unchecked<uint8->>(buf), word_start + j);
+                if (c1 != c2) {
+                    match = 0i32;
+                    break;
+                }
+                j = j + 1i64;
+            }
+            if (match == 1i32) { pass i; }
+        }
+        i = i + 1i64;
+    }
+    
+    int64:new_id = nodes_count;
+    drop(write_i64_local(node_starts, new_id, text_len));
+    drop(write_i64_local(node_lens, new_id, wlen));
+    int64:j = 0i64;
+    while (j < wlen) {
+        drop(safe_mem_write_byte(cast_unchecked<uint8->>(text_pool), text_len, raw safe_mem_read_byte(cast_unchecked<uint8->>(buf), word_start + j)));
+        text_len = text_len + 1i64;
+        j = j + 1i64;
+    }
+    drop(write_i64_local(state_arr, 0i64, nodes_count + 1i64));
+    drop(write_i64_local(state_arr, 1i64, text_len));
+    pass new_id;
+};
 
 pub func:main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
-    if (arg_count < 2i32) { drop(print_err("tsort: missing operand\n")); exit 1; }
+    if (arg_count > 2i32) { drop(print_err("tsort: extra operand\n")); exit 1; }
     
-    int64:fd = sys(SYS_OPEN, raw args_at(args, 1i32), 0i64, 0i64) ? -1i64;
-    defer { if (fd >= 0i64) { drop(sys(SYS_CLOSE, fd)); } }
-    if (fd < 0i64) { exit 1; }
+    int64:fd = 0i64;
+    if (arg_count == 2i32) {
+        string:fname = raw args_at(args, 1i32);
+        if (string_equals(fname, "-")) {
+            // keep fd = 0
+        } else {
+            fd = sys(OPEN, fname, 0i64, 0i64) ?! -1i64;
+        }
+    }
+    defer { if (fd > 0i64) { drop(sys(CLOSE, fd)); } }
+    if (fd < 0i64) { drop(print_err("tsort: open failed\n")); exit 1; }
     
-    int64:state = raw io_buf_new(fd);
-    int64:buf = malloc(4096i64);
+    int64:buf = sys!!(SYS_MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    if (buf <= 0i64) { exit 1; }
     
-    // Minimal tsort: print nodes without sorting
+    int64:text_pool = sys!!(SYS_MMAP, 0i64, 1048576i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    int64:node_starts = sys!!(SYS_MMAP, 0i64, 8000i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    int64:node_lens = sys!!(SYS_MMAP, 0i64, 8000i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    int64:in_degree = sys!!(SYS_MMAP, 0i64, 8000i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    int64:visited = sys!!(SYS_MMAP, 0i64, 8000i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    int64:adj = sys!!(SYS_MMAP, 0i64, 1000000i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    int64:state_arr = sys!!(SYS_MMAP, 0i64, 16i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    int64:word_buf = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    
+    drop(write_i64_local(state_arr, 0i64, 0i64));
+    drop(write_i64_local(state_arr, 1i64, 0i64));
+    
+    int64:in_pos = 0i64;
+    int64:in_len = 0i64;
+    int64:prev_node = -1i64;
+    int64:word_len = 0i64;
+    
     while (1 == 1) {
-        int64:len = raw io_buf_readline(state, buf);
-        if (len == 0i64) { break; }
-        drop(print_out(raw ptr_to_string(buf)));
-        drop(print_out("\n"));
+        if (in_pos >= in_len) {
+            in_len = sys(READ, fd, buf, 65536i64) ?! -1i64;
+            if (in_len <= 0i64) { break; }
+            in_pos = 0i64;
+        }
+        
+        int64:c = raw safe_mem_read_byte(cast_unchecked<uint8->>(buf), in_pos);
+        in_pos = in_pos + 1i64;
+        
+        if (c == 32i64 || c == 9i64 || c == 10i64) {
+            if (word_len > 0i64) {
+                int64:node_id = raw get_node_id_local(word_buf, 0i64, word_len, text_pool, state_arr, node_starts, node_lens);
+                if (prev_node == -1i64) {
+                    prev_node = node_id;
+                } else {
+                    if (prev_node != node_id) {
+                        int64:adj_idx = prev_node * 1000i64 + node_id;
+                        if (raw safe_mem_read_byte(cast_unchecked<uint8->>(adj), adj_idx) == 0i64) {
+                            drop(safe_mem_write_byte(cast_unchecked<uint8->>(adj), adj_idx, 1i64));
+                            int64:old_deg = raw read_i64_local(in_degree, node_id);
+                            drop(write_i64_local(in_degree, node_id, old_deg + 1i64));
+                        }
+                    }
+                    prev_node = -1i64;
+                }
+                word_len = 0i64;
+            }
+        } else {
+            if (word_len < 4096i64) {
+                drop(safe_mem_write_byte(cast_unchecked<uint8->>(word_buf), word_len, c));
+                word_len = word_len + 1i64;
+            }
+        }
     }
     
-    drop(nitpick_libc_mem_free(buf));
-    drop(io_buf_free(state));
+    if (word_len > 0i64) {
+        int64:node_id = raw get_node_id_local(word_buf, 0i64, word_len, text_pool, state_arr, node_starts, node_lens);
+        if (prev_node == -1i64) {
+            drop(print_err("tsort: odd input of tokens\n"));
+            exit 1;
+        } else {
+            if (prev_node != node_id) {
+                int64:adj_idx = prev_node * 1000i64 + node_id;
+                if (raw safe_mem_read_byte(cast_unchecked<uint8->>(adj), adj_idx) == 0i64) {
+                    drop(safe_mem_write_byte(cast_unchecked<uint8->>(adj), adj_idx, 1i64));
+                    int64:old_deg = raw read_i64_local(in_degree, node_id);
+                    drop(write_i64_local(in_degree, node_id, old_deg + 1i64));
+                }
+            }
+            prev_node = -1i64;
+        }
+    }
+    
+    if (prev_node != -1i64) {
+        drop(print_err("tsort: odd input of tokens\n"));
+        exit 1;
+    }
+    
+    // Kahn's algorithm
+    int64:nodes_count = 0i64;
+    nodes_count = raw read_i64_local(state_arr, 0i64);
+    int64:output_count = 0i64;
+    
+    while (output_count < nodes_count) {
+        int64:found = -1i64;
+        int64:i = 0i64;
+        while (i < nodes_count) {
+            if (raw read_i64_local(visited, i) == 0i64 && raw read_i64_local(in_degree, i) == 0i64) {
+                found = i;
+                break;
+            }
+            i = i + 1i64;
+        }
+        
+        if (found == -1i64) {
+            drop(print_err("tsort: input contains a loop\n"));
+            exit 1;
+        }
+        
+        drop(write_i64_local(visited, found, 1i64));
+        output_count = output_count + 1i64;
+        
+        // Print node
+        int64:st = 0i64;
+        st = raw read_i64_local(node_starts, found);
+        int64:ln = 0i64;
+        ln = raw read_i64_local(node_lens, found);
+        int64:j = 0i64;
+        while (j < ln) {
+            drop(sys(WRITE, 1i64, text_pool + st + j, 1i64));
+            j = j + 1i64;
+        }
+        drop(print_str_safe("\n"));
+        
+        // Remove edges
+        int64:k = 0i64;
+        while (k < nodes_count) {
+            int64:adj_idx = found * 1000i64 + k;
+            if (raw safe_mem_read_byte(cast_unchecked<uint8->>(adj), adj_idx) == 1i64) {
+                int64:old_deg = 0i64;
+                old_deg = raw read_i64_local(in_degree, k);
+                drop(write_i64_local(in_degree, k, old_deg - 1i64));
+            }
+            k = k + 1i64;
+        }
+    }
+    
+    drop(sys!!(SYS_MUNMAP, state_arr, 16i64));
+    drop(sys!!(SYS_MUNMAP, adj, 1000000i64));
+    drop(sys!!(SYS_MUNMAP, visited, 8000i64));
+    drop(sys!!(SYS_MUNMAP, in_degree, 8000i64));
+    drop(sys!!(SYS_MUNMAP, node_lens, 8000i64));
+    drop(sys!!(SYS_MUNMAP, node_starts, 8000i64));
+    drop(sys!!(SYS_MUNMAP, buf, 65536i64));
     exit 0;
 };

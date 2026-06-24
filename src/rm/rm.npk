@@ -13,10 +13,10 @@ use "../vendor/libc_ffi.npk".*;
 
 
 pub func:alist_pop_front = int64(int64:lst) {
-    if (alsize(lst) == 0i64) { pass -1i64; }
-    int64:v = alget(lst, 0i64);
-    drop(alremove(lst, 0i64));
-    pass ok(v);
+    if (raw alsize(lst) == 0i64) { pass -1i64; }
+    int64:v = raw alget(lst, 0i64);
+    drop(raw alremove(lst, 0i64));
+    pass v;
 };
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
@@ -25,7 +25,7 @@ func:print_err = int32(string:s) {
     int64:len = string_length(s);
     drop(s);
     drop(len);
-    pass @cast_unchecked<int32>(sys(SYS_WRITE, 2i64, s, len) ? -1i64);
+    pass cast_unchecked<int32>(sys(WRITE, 2i64, s, len) ? -1i64);
 };
 
 func:str_clone = int64(int64:s) {
@@ -48,7 +48,7 @@ func:ptr_to_string = string(int64:ptr) {
     int64:i = 0i64;
     while (npk_mem_read_byte(ptr, i) != 0i64) {
         int64:c = npk_mem_read_byte(ptr, i);
-        s = string_concat(s, string_from_char(@cast_unchecked<int8>(c)));
+        s = string_concat(s, string_from_char(cast_unchecked<int8>(c)));
         i = i + 1i64;
     }
     pass s;
@@ -86,21 +86,21 @@ func:rm_recursive = int32(string:path, int32:recursive) {
             pass 1i32;
         }
 
-        int64:fd = sys(SYS_OPEN, path, 65536i64, 0i64) ? -1i64;
+        int64:fd = sys(OPEN, path, 65536i64, 0i64) ? -1i64;
         if (fd < 0i64) {
             drop(print_err("rm: cannot open directory '"));
             drop(print_err(path));
             drop(print_err("'\n"));
             pass 1i32;
         }
-        defer { if (fd >= 0i64) { drop(sys(SYS_CLOSE, fd)); } }
+        defer { if (fd >= 0i64) { drop(sys(CLOSE, fd)); } }
 
         int64:buf = sys!!(SYS_MMAP, 0i64, 32768i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
         if (buf < 0i64) {
             pass 1i32;
         }
 
-        int64:sl = alist(1024i64);
+        int64:sl = raw alist(1024i64);
         int32:running = 1i32;
         int32:exit_status = 0i32;
 
@@ -133,7 +133,7 @@ func:rm_recursive = int32(string:path, int32:recursive) {
                     
                     if (skip == 0i32) {
                         int64:name_copy = raw str_clone(name_ptr);
-                        drop(alpush(sl, name_copy));
+                        drop(raw alpush(sl, name_copy));
                     }
                     bpos = bpos + reclen;
                 }
@@ -142,7 +142,7 @@ func:rm_recursive = int32(string:path, int32:recursive) {
         
         drop(sys!!(SYS_MUNMAP, buf, 32768i64));
 
-        while (alsize(sl) > 0i64) {
+        while (raw alsize(sl) > 0i64) {
             int64:child_ptr = raw alist_pop_front(sl);
             string:child_name = raw ptr_to_string(child_ptr);
             string:child_path = string_concat(path, string_concat("/", child_name));

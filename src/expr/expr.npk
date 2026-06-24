@@ -10,17 +10,21 @@ extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys(SYS_WRITE, 2i64, s, len));
+    drop(sys(WRITE, 2i64, s, len));
     pass 0i32;
 };
 
 func:print_str_safe = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys(SYS_WRITE, 1i64, s, len));
+    drop(sys(WRITE, 1i64, s, len));
     pass 0i32;
 };
 
 func:failsafe = int32(tbb32:err) {
+    int64:e = cast_unchecked<int64>(err);
+    if (e == 2i64) {
+        exit 2;
+    }
     drop(standard_failsafe(err));
     exit 1;
 };
@@ -34,24 +38,27 @@ func:peek = string() {
     pass "";
 };
 
-func:consume = void() {
+func:consume = int32() {
     expr_pos = expr_pos + 1i32;
+    pass 0i32;
 };
 
 func:parse_value = int64() {
-    string:tok = peek();
+    string:tok = raw peek();
     if (string_equals(tok, "")) {
         drop(print_err("expr: syntax error\n"));
-        exit 2;
+        drop(failsafe(cast_unchecked<tbb32>(2i64)));
+        pass 0i64;
     }
-    consume();
+    drop(consume());
     if (string_equals(tok, "(")) {
         int64:val = raw parse_or();
-        if (string_equals(peek(), ")")) {
-            consume();
+        if (string_equals(raw peek(), ")")) {
+            drop(consume());
         } else {
             drop(print_err("expr: syntax error (missing ')' )\n"));
-            exit 2;
+            drop(failsafe(cast_unchecked<tbb32>(2i64)));
+            pass 0i64;
         }
         pass val;
     }
@@ -61,17 +68,17 @@ func:parse_value = int64() {
 func:parse_mul = int64() {
     int64:left = raw parse_value();
     while (1 == 1) {
-        string:tok = peek();
+        string:tok = raw peek();
         if (string_equals(tok, "*") || string_equals(tok, "/") || string_equals(tok, "%")) {
-            consume();
+            drop(consume());
             int64:right = raw parse_value();
             if (string_equals(tok, "*")) { left = left * right; }
             if (string_equals(tok, "/")) {
-                if (right == 0i64) { drop(print_err("expr: division by zero\n")); exit 2; }
+                if (right == 0i64) { drop(print_err("expr: division by zero\n")); drop(failsafe(cast_unchecked<tbb32>(2i64))); pass 0i64; }
                 left = left / right;
             }
             if (string_equals(tok, "%")) {
-                if (right == 0i64) { drop(print_err("expr: division by zero\n")); exit 2; }
+                if (right == 0i64) { drop(print_err("expr: division by zero\n")); drop(failsafe(cast_unchecked<tbb32>(2i64))); pass 0i64; }
                 left = left - (left / right) * right;
             }
         } else { break; }
@@ -82,9 +89,9 @@ func:parse_mul = int64() {
 func:parse_add = int64() {
     int64:left = raw parse_mul();
     while (1 == 1) {
-        string:tok = peek();
+        string:tok = raw peek();
         if (string_equals(tok, "+") || string_equals(tok, "-")) {
-            consume();
+            drop(consume());
             int64:right = raw parse_mul();
             if (string_equals(tok, "+")) { left = left + right; }
             if (string_equals(tok, "-")) { left = left - right; }
@@ -96,9 +103,9 @@ func:parse_add = int64() {
 func:parse_rel = int64() {
     int64:left = raw parse_add();
     while (1 == 1) {
-        string:tok = peek();
+        string:tok = raw peek();
         if (string_equals(tok, "=") || string_equals(tok, "!=") || string_equals(tok, ">") || string_equals(tok, "<") || string_equals(tok, ">=") || string_equals(tok, "<=")) {
-            consume();
+            drop(consume());
             int64:right = raw parse_add();
             if (string_equals(tok, "=")) { if (left == right) { left = 1i64; } else { left = 0i64; } }
             if (string_equals(tok, "!=")) { if (left != right) { left = 1i64; } else { left = 0i64; } }
@@ -114,9 +121,9 @@ func:parse_rel = int64() {
 func:parse_and = int64() {
     int64:left = raw parse_rel();
     while (1 == 1) {
-        string:tok = peek();
+        string:tok = raw peek();
         if (string_equals(tok, "&")) {
-            consume();
+            drop(consume());
             int64:right = raw parse_rel();
             if (left != 0i64 && right != 0i64) { left = left; } else { left = 0i64; }
         } else { break; }
@@ -127,9 +134,9 @@ func:parse_and = int64() {
 func:parse_or = int64() {
     int64:left = raw parse_and();
     while (1 == 1) {
-        string:tok = peek();
+        string:tok = raw peek();
         if (string_equals(tok, "|")) {
-            consume();
+            drop(consume());
             int64:right = raw parse_and();
             if (left != 0i64) { left = left; }
             else { if (right != 0i64) { left = right; } else { left = 0i64; } }

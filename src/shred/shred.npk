@@ -8,11 +8,10 @@ use "../vendor/nitpick_args.npk".*;
 extern func:npk_mem_read_string = string(int64:ptr, int64:max_len);
 extern func:npk_mem_write_byte = void(int64:ptr, int64:offset, int64:val);
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
-extern func:npk_mem_read_int64 = int64(int64:ptr, int64:offset);
 
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys(SYS_WRITE, 2i64, s, len));
+    drop(sys(WRITE, 2i64, s, len));
     pass 0i32;
 };
 
@@ -29,27 +28,27 @@ pub func:main = int32(int32:argc, wild int8->:argv) {
     if (stat_buf < 0i64) { exit 1; }
     if (rand_buf < 0i64) { exit 1; }
     
-    int64:urandom_fd = sys(SYS_OPEN, "/dev/urandom", 0i64, 0i64) ? -1i64;
+    int64:urandom_fd = sys(OPEN, "/dev/urandom", 0i64, 0i64) ? -1i64;
     if (urandom_fd < 0i64) {
         drop(print_err("shred: cannot open /dev/urandom\n"));
         exit 1;
     }
-    defer { if (urandom_fd >= 0i64) { drop(sys(SYS_CLOSE, urandom_fd)); } }
+    defer { if (urandom_fd >= 0i64) { drop(sys(CLOSE, urandom_fd)); } }
     
     int32:i = 1i32;
     int32:ret = 0i32;
     
     while (i <= arg_count) {
         string:file = raw args_at(args, i);
-        int64:res = sys(SYS_STAT, file, stat_buf) ? -1i64;
+        int64:res = sys!!(SYS_STAT, file, stat_buf) ? -1i64;
         if (res < 0i64) {
             drop(print_err("shred: cannot stat '"));
             drop(print_err(file));
             drop(print_err("'\n"));
             ret = 0i32;
         } else {
-            int64:size = npk_mem_read_int64(stat_buf, 48i64); // st_size
-            int64:fd = sys(SYS_OPEN, file, 2i64, 0i64) ? -1i64; // O_RDWR = 2
+            int64:size = (<- (cast_unchecked<int64->>(stat_buf + 48i64))); // st_size
+            int64:fd = sys(OPEN, file, 2i64, 0i64) ? -1i64; // O_RDWR = 2
             if (fd < 0i64) {
                 drop(print_err("shred: cannot open '"));
                 drop(print_err(file));
@@ -65,11 +64,11 @@ pub func:main = int32(int32:argc, wild int8->:argv) {
                         if (to_write > 65536i64) { to_write = 65536i64; }
                         
                         // Fill rand_buf with random data
-                        int64:rn = sys(SYS_READ, urandom_fd, rand_buf, to_write) ? -1i64;
+                        int64:rn = sys(READ, urandom_fd, rand_buf, to_write) ? -1i64;
                         if (rn <= 0i64) {
                             written = size; // exit loop
                         } else {
-                            int64:w = sys(SYS_WRITE, fd, rand_buf, rn) ? -1i64;
+                            int64:w = sys(WRITE, fd, rand_buf, rn) ? -1i64;
                             if (w <= 0i64) {
                                 written = size; // exit loop
                             } else {
@@ -81,7 +80,7 @@ pub func:main = int32(int32:argc, wild int8->:argv) {
                     drop(sys!!(75i64, fd)); // SYS_FDATASYNC (75) instead of SYS_FSYNC (74)
                 }
             }
-            defer { if (fd >= 0i64) { drop(sys(SYS_CLOSE, fd)); } }
+            defer { if (fd >= 0i64) { drop(sys(CLOSE, fd)); } }
         }
         i = i + 1i32;
     }

@@ -13,13 +13,13 @@ extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys(SYS_WRITE, 2i64, s, len));
+    drop(sys(WRITE, 2i64, s, len));
     pass 0i32;
 };
 
 func:print_str_safe = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys(SYS_WRITE, 1i64, s, len));
+    drop(sys(WRITE, 1i64, s, len));
     pass 0i32;
 };
 
@@ -28,9 +28,9 @@ func:failsafe = int32(tbb32:err) {
     exit 1;
 };
 
-func:b32_char = string(int64:idx) {
+func:b32_char = int32(int64:idx) {
     string:alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
-    pass string_substring(alphabet, idx, idx + 1i64);
+    pass cast_unchecked<int32>(npk_string_byte_at(alphabet, idx));
 };
 
 func:main = int32(int32:argc, wild int8->:argv) {
@@ -45,7 +45,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
         if (string_equals(file, "-")) {
             fd = 0i64;
         } else {
-            fd = sys(SYS_OPEN, file, 0i64, 0i64) ? -1i64;
+            fd = sys(OPEN, file, 0i64, 0i64) ? -1i64;
             if (fd < 0i64) {
                 drop(print_err("base32: cannot open '"));
                 drop(print_err(file));
@@ -53,7 +53,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
                 exit 1;
             }
             }
-    defer { if (fd >= 0i64) { drop(sys(SYS_CLOSE, fd)); } }
+    defer { if (fd >= 0i64) { drop(sys(CLOSE, fd)); } }
         fp = raw io_buf_new(fd);
     } else {
         fp = raw io_buf_new(0i64);
@@ -62,20 +62,22 @@ func:main = int32(int32:argc, wild int8->:argv) {
     int32:running = 1i32;
     int32:c = raw io_buf_getc(fp);
     
+    int64:out_state = raw io_buf_new(1i64);
+    
     while (running == 1i32) {
         if (c < 0i32) {
             running = 0i32;
         } else {
-            int64:b1 = @cast_unchecked<int64>(c);
+            int64:b1 = cast_unchecked<int64>(c);
             c = raw io_buf_getc(fp);
             int64:b2 = 0i64;
-            if (c >= 0i32) { b2 = @cast_unchecked<int64>(c); c = raw io_buf_getc(fp); } else { b2 = -1i64; }
+            if (c >= 0i32) { b2 = cast_unchecked<int64>(c); c = raw io_buf_getc(fp); } else { b2 = -1i64; }
             int64:b3 = 0i64;
-            if (c >= 0i32) { b3 = @cast_unchecked<int64>(c); c = raw io_buf_getc(fp); } else { b3 = -1i64; }
+            if (c >= 0i32) { b3 = cast_unchecked<int64>(c); c = raw io_buf_getc(fp); } else { b3 = -1i64; }
             int64:b4 = 0i64;
-            if (c >= 0i32) { b4 = @cast_unchecked<int64>(c); c = raw io_buf_getc(fp); } else { b4 = -1i64; }
+            if (c >= 0i32) { b4 = cast_unchecked<int64>(c); c = raw io_buf_getc(fp); } else { b4 = -1i64; }
             int64:b5 = 0i64;
-            if (c >= 0i32) { b5 = @cast_unchecked<int64>(c); c = raw io_buf_getc(fp); } else { b5 = -1i64; }
+            if (c >= 0i32) { b5 = cast_unchecked<int64>(c); c = raw io_buf_getc(fp); } else { b5 = -1i64; }
             
             int64:c1 = b1 / 8i64;
             int64:c2 = ((b1 - (b1 / 8i64) * 8i64) * 4i64);
@@ -105,30 +107,32 @@ func:main = int32(int32:argc, wild int8->:argv) {
                 }
             }
             
-            string:out = raw b32_char(c1);
-            out = string_concat(out, raw b32_char(c2));
+            drop(io_buf_putc(out_state, raw b32_char(c1)));
+            drop(io_buf_putc(out_state, raw b32_char(c2)));
             if (b2 >= 0i64) {
-                out = string_concat(out, raw b32_char(c3));
-                out = string_concat(out, raw b32_char(c4));
-            } else { out = string_concat(out, "======"); }
+                drop(io_buf_putc(out_state, raw b32_char(c3)));
+                drop(io_buf_putc(out_state, raw b32_char(c4)));
+            } else { drop(io_buf_puts(out_state, "======")); }
             if (b3 >= 0i64) {
-                out = string_concat(out, raw b32_char(c5));
-            } else { if (b2 >= 0i64) { out = string_concat(out, "===="); } }
+                drop(io_buf_putc(out_state, raw b32_char(c5)));
+            } else { if (b2 >= 0i64) { drop(io_buf_puts(out_state, "====")); } }
             if (b4 >= 0i64) {
-                out = string_concat(out, raw b32_char(c6));
-                out = string_concat(out, raw b32_char(c7));
-            } else { if (b3 >= 0i64) { out = string_concat(out, "==="); } }
+                drop(io_buf_putc(out_state, raw b32_char(c6)));
+                drop(io_buf_putc(out_state, raw b32_char(c7)));
+            } else { if (b3 >= 0i64) { drop(io_buf_puts(out_state, "===")); } }
             if (b5 >= 0i64) {
-                out = string_concat(out, raw b32_char(c8));
-            } else { if (b4 >= 0i64) { out = string_concat(out, "="); } }
-            
-            drop(print_str_safe(out));
+                drop(io_buf_putc(out_state, raw b32_char(c8)));
+            } else { if (b4 >= 0i64) { drop(io_buf_puts(out_state, "=")); } }
         }
     }
     
-    drop(print_str_safe("\n"));
-    int64:fd = (<- (@cast_unchecked<int64->>(fp + 0i64)));
+    drop(io_buf_puts(out_state, "\n"));
+    drop(io_buf_flush(out_state));
+    drop(io_buf_free(out_state));
+    
+    int64:fd = (<- (cast_unchecked<int64->>(fp + 0i64)));
     drop(raw io_buf_free(fp));
+
     
     exit 0;
 };

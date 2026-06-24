@@ -15,11 +15,11 @@ pub func:failsafe = int32(tbb32:err) { drop(standard_failsafe(err)); exit 1; };
 
 pub func:main = int32(int32:argc, wild int8->:argv) {
     int64:lst = raw utmp_read_users();
-    int64:count = alsize(lst);
+    int64:count = raw alsize(lst);
     int64:idx = 0i64;
     while (idx < count) {
-        int64:u_ptr = alget(lst, idx);
-        int64:l_ptr = alget(lst, idx + 1i64);
+        int64:u_ptr = raw alget(lst, idx);
+        int64:l_ptr = raw alget(lst, idx + 1i64);
         string:user = raw ptr_to_string(ok(u_ptr));
         drop(print_str(user));
         if (idx + 2i64 < count) { drop(print_str(" ")); }

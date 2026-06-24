@@ -14,8 +14,8 @@ extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
 func:print_str_safe = int32(string:s) {
     int64:len = string_length(s);
-    int64:res = sys(SYS_WRITE, 1i64, s, len) ? -1i64;
-    if (res < 0i64) { exit 0; }
+    int64:res = sys(WRITE, 1i64, s, len) ? -1i64;
+    if (res < 0i64) { pass -1i32; }
     pass 0i32;
 };
 
@@ -46,7 +46,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     output = string_concat(output, "\n");
     
     while (1i32 == 1i32) {
-        drop(print_str_safe(output));
+        if (raw print_str_safe(output) < 0i32) { break; }
     }
     
     exit 0;

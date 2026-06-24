@@ -3,43 +3,108 @@ use "../vendor/io_utils.npk".*;
 use "../vendor/mem_utils.npk".*;
 use "../vendor/nitpick_args.npk".*;
 use "../vendor/sys_constants.npk".*;
+use "../vendor/libc_ffi.npk".*;
 
 pub func:failsafe = int32(tbb32:err) { drop(standard_failsafe(err)); exit 1; };
+
+extern func:npk_string_byte_at = int64(string:s, int64:idx);
+
+func:string_compare = int32(string:a, string:b) {
+    int64:la = string_length(a);
+    int64:lb = string_length(b);
+    int64:min_len = la;
+    if (lb < la) { min_len = lb; }
+    int64:i = 0i64;
+    while (i < min_len) {
+        int64:ca = npk_string_byte_at(a, i);
+        int64:cb = npk_string_byte_at(b, i);
+        if (ca < cb) { pass -1i32; }
+        if (ca > cb) { pass 1i32; }
+        i = i + 1i64;
+    }
+    if (la < lb) { pass -1i32; }
+    if (la > lb) { pass 1i32; }
+    pass 0i32;
+};
+
+func:split_field = string(string:s, int32:get_key) {
+    int64:len = string_length(s);
+    int64:i = 0i64;
+    while (i < len) {
+        int64:c = npk_string_byte_at(s, i);
+        if (c == 32i64 || c == 9i64 || c == 10i64) {
+            break;
+        }
+        i = i + 1i64;
+    }
+    if (get_key == 1i32) {
+        pass string_substring(s, 0i64, i);
+    } else {
+        while (i < len) {
+            int64:c = npk_string_byte_at(s, i);
+            if (c != 32i64 && c != 9i64) { break; }
+            i = i + 1i64;
+        }
+        if (i < len) {
+            int64:end_idx = len;
+            if (npk_string_byte_at(s, len - 1i64) == 10i64) { end_idx = len - 1i64; }
+            pass string_substring(s, i, end_idx);
+        }
+        pass "";
+    }
+};
 
 pub func:main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     if (arg_count < 3i32) { drop(print_err("join: missing operand\n")); exit 1; }
     
-    int64:fd1 = sys(SYS_OPEN, raw args_at(args, 1i32), 0i64, 0i64) ? -1i64;
-    defer { if (fd1 >= 0i64) { drop(sys(SYS_CLOSE, fd1)); } }
-    int64:fd2 = sys(SYS_OPEN, raw args_at(args, 2i32), 0i64, 0i64) ? -1i64;
-    defer { if (fd2 >= 0i64) { drop(sys(SYS_CLOSE, fd2)); } }
+    int64:fd1 = sys(OPEN, raw args_at(args, 1i32), 0i64, 0i64) ?! -1i64;
+    defer { if (fd1 >= 0i64) { drop(sys(CLOSE, fd1)); } }
+    int64:fd2 = sys(OPEN, raw args_at(args, 2i32), 0i64, 0i64) ?! -1i64;
+    defer { if (fd2 >= 0i64) { drop(sys(CLOSE, fd2)); } }
     
-    if (fd1 < 0i64) { exit 1; }
-    if (fd2 < 0i64) { exit 1; }
-    
-    // Simplification: We'll just read through the files for now to avoid hanging
     int64:state1 = raw io_buf_new(fd1);
     int64:state2 = raw io_buf_new(fd2);
-    int64:buf1 = malloc(4096i64);
-    int64:buf2 = malloc(4096i64);
+    int64:buf1 = sys!!(SYS_MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    if (buf1 <= 0i64) { exit 1; }
+    int64:buf2 = sys!!(SYS_MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    if (buf2 <= 0i64) { exit 1; }
     
-    // To do a real join requires complex string splitting and comparisons.
-    // For this minimal viable stub, we'll just read both line by line and print them together.
-    while (1 == 1) {
-        int64:len1 = raw io_buf_readline(state1, buf1);
-        int64:len2 = raw io_buf_readline(state2, buf2);
-        if (len1 == 0i64) { break; }
-        if (len2 == 0i64) { break; }
-        drop(print_out(raw ptr_to_string(buf1)));
-        drop(print_out(" "));
-        drop(print_out(raw ptr_to_string(buf2)));
-        drop(print_out("\n"));
+    int64:len1 = raw io_buf_readline(state1, cast_unchecked<uint8->>(buf1));
+    int64:len2 = raw io_buf_readline(state2, cast_unchecked<uint8->>(buf2));
+    
+    while (len1 > 0i64 && len2 > 0i64) {
+        string:line1 = npk_mem_read_string(cast_unchecked<void->>(buf1), len1);
+        string:line2 = npk_mem_read_string(cast_unchecked<void->>(buf2), len2);
+        
+        string:key1 = raw split_field(line1, 1i32);
+        string:key2 = raw split_field(line2, 1i32);
+        
+        int32:cmp = raw string_compare(key1, key2);
+        
+        if (cmp < 0i32) {
+            len1 = raw io_buf_readline(state1, cast_unchecked<uint8->>(buf1));
+        } else {
+            if (cmp > 0i32) {
+                len2 = raw io_buf_readline(state2, cast_unchecked<uint8->>(buf2));
+            } else {
+                string:rest1 = raw split_field(line1, 0i32);
+                string:rest2 = raw split_field(line2, 0i32);
+                
+                drop(print_str_safe(key1));
+                if (string_length(rest1) > 0i64) { drop(print_str_safe(" ")); drop(print_str_safe(rest1)); }
+                if (string_length(rest2) > 0i64) { drop(print_str_safe(" ")); drop(print_str_safe(rest2)); }
+                drop(print_str_safe("\n"));
+                
+                len1 = raw io_buf_readline(state1, cast_unchecked<uint8->>(buf1));
+                len2 = raw io_buf_readline(state2, cast_unchecked<uint8->>(buf2));
+            }
+        }
     }
     
-    drop(nitpick_libc_mem_free(buf1));
-    drop(nitpick_libc_mem_free(buf2));
+    drop(sys!!(SYS_MUNMAP, buf1, 65536i64));
+    drop(sys!!(SYS_MUNMAP, buf2, 65536i64));
     drop(io_buf_free(state1));
     drop(io_buf_free(state2));
     exit 0;

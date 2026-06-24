@@ -10,7 +10,7 @@ func:print_err = int32(string:s) {
     int64:len = string_length(s);
     drop(s);
     drop(len);
-    pass @cast_unchecked<int32>(sys(SYS_WRITE, 2i64, s, len) ? -1i64);
+    pass cast_unchecked<int32>(sys(WRITE, 2i64, s, len) ? -1i64);
 };
 
 func:failsafe = int32(tbb32:err) {
@@ -19,10 +19,10 @@ func:failsafe = int32(tbb32:err) {
 };
 
 func:main = int32(int32:argc, wild int8->:argv) {
-    any->:buf = @cast_unchecked<any->>(alloc(4096i64));
+    any->:buf = cast_unchecked<any->>(alloc(4096i64));
     defer { free(buf); }
     
-    int64:res = sys!!(SYS_GETCWD, @cast_unchecked<int64>(buf), 4096i64) ? -1i64;
+    int64:res = sys!!(SYS_GETCWD, cast_unchecked<int64>(buf), 4096i64) ? -1i64;
     if (res < 0i64) {
         drop(print_err("pwd: error getting current working directory\n"));
         exit 1;
@@ -35,7 +35,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
         if (len >= 4096i64) {
             running = 0i32;
         } else {
-            int64:c = @cast_unchecked<int64>((<- (@cast_unchecked<uint8->>(@cast_unchecked<int64>(buf) + len))));
+            int64:c = cast_unchecked<int64>((<- (cast_unchecked<uint8->>(cast_unchecked<int64>(buf) + len))));
             if (c == 0i64) {
                 running = 0i32;
             } else {
@@ -44,8 +44,8 @@ func:main = int32(int32:argc, wild int8->:argv) {
         }
     }
     
-    string:cwd = npk_mem_read_string(@cast_unchecked<int64>(buf), len);
-    drop(sys(SYS_WRITE, 1i64, cwd, len));
-    drop(sys(SYS_WRITE, 1i64, "\n", 1i64));
+    string:cwd = npk_mem_read_string(cast_unchecked<int64>(buf), len);
+    drop(sys(WRITE, 1i64, cwd, len));
+    drop(sys(WRITE, 1i64, "\n", 1i64));
     exit 0;
 };

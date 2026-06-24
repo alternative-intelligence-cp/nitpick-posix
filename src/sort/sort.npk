@@ -13,9 +13,9 @@ use "../vendor/libc_ffi.npk".*;
 
 
 pub func:alist_pop_front = int64(int64:lst) {
-    if (alsize(lst) == 0i64) { pass -1i64; }
-    int64:v = alget(lst, 0i64);
-    drop(alremove(lst, 0i64));
+    if (raw alsize(lst) == 0i64) { pass -1i64; }
+    int64:v = raw alget(lst, 0i64);
+    drop(raw alremove(lst, 0i64));
     pass ok(v);
 };
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
@@ -23,12 +23,12 @@ extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
-    pass @cast_unchecked<int32>(sys(SYS_WRITE, 2i64, s, len) ? -1i64);
+    pass cast_unchecked<int32>(sys(WRITE, 2i64, s, len) ? -1i64);
 };
 
 func:print_out = int32(string:s) {
     int64:len = string_length(s);
-    pass @cast_unchecked<int32>(sys(SYS_WRITE, 1i64, s, len) ? -1i64);
+    pass cast_unchecked<int32>(sys(WRITE, 1i64, s, len) ? -1i64);
 };
 
 func:ptr_to_string = string(int64:ptr) {
@@ -36,7 +36,7 @@ func:ptr_to_string = string(int64:ptr) {
     int64:i = 0i64;
     while (npk_mem_read_byte(ptr, i) != 0i64) {
         int64:c = npk_mem_read_byte(ptr, i);
-        s = string_concat(s, string_from_char(@cast_unchecked<int8>(c)));
+        s = string_concat(s, string_from_char(cast_unchecked<int8>(c)));
         i = i + 1i64;
     }
     pass s;
@@ -81,37 +81,37 @@ func:main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     
-    int64:sl = alist(1024i64);
+    int64:sl = raw alist(1024i64);
 
     // Collect files
-    int64:files = alist(1024i64);
+    int64:files = raw alist(1024i64);
     int32:i = 1i32;
     while (i <= arg_count) {
         string:arg = raw args_at(args, i);
         if (string_starts_with(arg, "-") == false) {
             // we must create a copy in an int64 pointer to store in files
-            string:arg_s = string_concat(arg, string_from_char(@cast_unchecked<int8>(0i32)));
+            string:arg_s = string_concat(arg, string_from_char(cast_unchecked<int8>(0i32)));
             // Can't cast string to int64 directly, let's open the file!
-            int64:fd = sys(SYS_OPEN, arg, 0i64, 0i64) ? -1i64;
+            int64:fd = sys(OPEN, arg, 0i64, 0i64) ? -1i64;
             if (fd >= 0i64) {
-                drop(alpush(files, fd));
+                drop(raw alpush(files, fd));
             } else {
                 drop(print_err("sort: cannot open '"));
                 drop(print_err(arg));
                 drop(print_err("'\n"));
                 exit 1;
             }
-            defer { if (fd >= 0i64) { drop(sys(SYS_CLOSE, fd)); } }
+            defer { if (fd >= 0i64) { drop(sys(CLOSE, fd)); } }
         }
         i = i + 1i32;
     }
 
-    if (alsize(files) == 0i64) {
-        drop(alpush(files, 0i64)); // stdin
+    if (raw alsize(files) == 0i64) {
+        drop(raw alpush(files, 0i64)); // stdin
     }
 
     // Read all lines
-    while (alsize(files) > 0i64) {
+    while (raw alsize(files) > 0i64) {
         int64:fd = raw alist_pop_front(files);
         
         int64:state = raw io_buf_new(fd);
@@ -119,11 +119,11 @@ func:main = int32(int32:argc, wild int8->:argv) {
         int32:running = 1i32;
         
         while (running == 1i32) {
-            int64:len = raw io_buf_readline(state, line_buf);
+            int64:len = raw io_buf_readline(state, cast_unchecked<uint8->>(line_buf));
             if (len == 0i64) {
                 running = 0i32;
             } else {
-                drop(alpush(sl, raw str_clone(line_buf)));
+                drop(raw alpush(sl, raw str_clone(line_buf)));
             }
         }
         
@@ -134,11 +134,11 @@ func:main = int32(int32:argc, wild int8->:argv) {
     /* alist files auto-destroyed */
 
     // Sort the list
-    int64:size = alsize(sl);
+    int64:size = raw alsize(sl);
     if (size > 1i64) {
         int64:arr = malloc(size * 8i64);
         int64:idx = 0i64;
-        while (alsize(sl) > 0i64) {
+        while (raw alsize(sl) > 0i64) {
             int64:ptr = raw alist_pop_front(sl);
             nitpick_libc_mem_write_i64(arr, idx * 8i64, ptr);
             idx = idx + 1i64;
@@ -196,7 +196,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
         // Add back to list
         int64:k = 0i64;
         while (k < size) {
-            drop(alpush(sl, nitpick_libc_mem_read_i64(arr, k * 8i64)));
+            drop(raw alpush(sl, nitpick_libc_mem_read_i64(arr, k * 8i64)));
             k = k + 1i64;
         }
         drop(nitpick_libc_mem_free(stack));
@@ -204,7 +204,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     }
 
     // Print sorted
-    while (alsize(sl) > 0i64) {
+    while (raw alsize(sl) > 0i64) {
         int64:ptr = raw alist_pop_front(sl);
         string:s = raw ptr_to_string(ptr);
         drop(print_out(s));

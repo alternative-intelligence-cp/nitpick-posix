@@ -12,13 +12,13 @@ extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys(SYS_WRITE, 2i64, s, len));
+    drop(sys(WRITE, 2i64, s, len));
     pass 0i32;
 };
 
 func:print_str_safe = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys(SYS_WRITE, 1i64, s, len));
+    drop(sys(WRITE, 1i64, s, len));
     pass 0i32;
 };
 
@@ -27,42 +27,47 @@ func:failsafe = int32(tbb32:err) {
     exit 1;
 };
 
-func:hex_char = string(int32:nibble) {
-    if (nibble == 0i32) { pass "0"; }
-    if (nibble == 1i32) { pass "1"; }
-    if (nibble == 2i32) { pass "2"; }
-    if (nibble == 3i32) { pass "3"; }
-    if (nibble == 4i32) { pass "4"; }
-    if (nibble == 5i32) { pass "5"; }
-    if (nibble == 6i32) { pass "6"; }
-    if (nibble == 7i32) { pass "7"; }
-    if (nibble == 8i32) { pass "8"; }
-    if (nibble == 9i32) { pass "9"; }
-    if (nibble == 10i32) { pass "a"; }
-    if (nibble == 11i32) { pass "b"; }
-    if (nibble == 12i32) { pass "c"; }
-    if (nibble == 13i32) { pass "d"; }
-    if (nibble == 14i32) { pass "e"; }
-    if (nibble == 15i32) { pass "f"; }
-    pass "0";
+func:hex_char = int32(int32:nibble) {
+    if (nibble == 0i32) { pass 48i32; }
+    if (nibble == 1i32) { pass 49i32; }
+    if (nibble == 2i32) { pass 50i32; }
+    if (nibble == 3i32) { pass 51i32; }
+    if (nibble == 4i32) { pass 52i32; }
+    if (nibble == 5i32) { pass 53i32; }
+    if (nibble == 6i32) { pass 54i32; }
+    if (nibble == 7i32) { pass 55i32; }
+    if (nibble == 8i32) { pass 56i32; }
+    if (nibble == 9i32) { pass 57i32; }
+    if (nibble == 10i32) { pass 97i32; }
+    if (nibble == 11i32) { pass 98i32; }
+    if (nibble == 12i32) { pass 99i32; }
+    if (nibble == 13i32) { pass 100i32; }
+    if (nibble == 14i32) { pass 101i32; }
+    if (nibble == 15i32) { pass 102i32; }
+    pass 48i32;
 };
 
-func:hex_byte = string(int32:byte) {
-    int32:hi = byte / 16i32;
-    int32:lo = byte - hi * 16i32;
-    pass string_concat(raw hex_char(hi), raw hex_char(lo));
-};
+// removed hex_byte function
 
-func:hex_addr = string(int64:addr) {
-    string:res = "";
-    int32:i = 0i32;
-    while (i < 8i32) {
-        int64:nib = addr - (addr / 16i64) * 16i64;
-        res = string_concat(raw hex_char(@cast_unchecked<int32>(nib)), res);
-        addr = addr / 16i64;
-        i = i + 1i32;
-    }
-    pass res;
+func:hex_addr = int32(int64:out_state, int64:addr) {
+    int64:n7 = addr - (addr / 16i64) * 16i64; addr = addr / 16i64;
+    int64:n6 = addr - (addr / 16i64) * 16i64; addr = addr / 16i64;
+    int64:n5 = addr - (addr / 16i64) * 16i64; addr = addr / 16i64;
+    int64:n4 = addr - (addr / 16i64) * 16i64; addr = addr / 16i64;
+    int64:n3 = addr - (addr / 16i64) * 16i64; addr = addr / 16i64;
+    int64:n2 = addr - (addr / 16i64) * 16i64; addr = addr / 16i64;
+    int64:n1 = addr - (addr / 16i64) * 16i64; addr = addr / 16i64;
+    int64:n0 = addr - (addr / 16i64) * 16i64;
+    
+    drop(io_buf_putc(out_state, raw hex_char(cast_unchecked<int32>(n0))));
+    drop(io_buf_putc(out_state, raw hex_char(cast_unchecked<int32>(n1))));
+    drop(io_buf_putc(out_state, raw hex_char(cast_unchecked<int32>(n2))));
+    drop(io_buf_putc(out_state, raw hex_char(cast_unchecked<int32>(n3))));
+    drop(io_buf_putc(out_state, raw hex_char(cast_unchecked<int32>(n4))));
+    drop(io_buf_putc(out_state, raw hex_char(cast_unchecked<int32>(n5))));
+    drop(io_buf_putc(out_state, raw hex_char(cast_unchecked<int32>(n6))));
+    drop(io_buf_putc(out_state, raw hex_char(cast_unchecked<int32>(n7))));
+    pass 0i32;
 };
 
 extern func:npk_mem_write_byte = int64(int64:ptr, int64:offset, int64:val);
@@ -77,14 +82,14 @@ func:main = int32(int32:argc, wild int8->:argv) {
         if (string_equals(file, "-")) {
             fp = raw io_buf_new(0i64);
         } else {
-            int64:fd = sys(SYS_OPEN, file, 0i64, 0i64) ? -1i64;
+            int64:fd = sys(OPEN, file, 0i64, 0i64) ? -1i64;
             if (fd < 0i64) {
                 drop(print_err("od: cannot open '"));
                 drop(print_err(file));
                 drop(print_err("'\n"));
                 exit 1;
             }
-            defer { if (fd >= 0i64) { drop(sys(SYS_CLOSE, fd)); } }
+            defer { if (fd >= 0i64) { drop(sys(CLOSE, fd)); } }
             fp = raw io_buf_new(fd);
         }
     } else {
@@ -96,6 +101,8 @@ func:main = int32(int32:argc, wild int8->:argv) {
     
     int64:buf = sys!!(SYS_MMAP, 0i64, 16i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
     if (buf < 0i64) { exit 1; }
+    
+    int64:out_state = raw io_buf_new(1i64);
     
     while (running == 1i32) {
         int32:read_count = 0i32;
@@ -109,51 +116,57 @@ func:main = int32(int32:argc, wild int8->:argv) {
                     running = 0i32;
                     inner_run = 0i32;
                 } else {
-                    drop(npk_mem_write_byte(buf, @cast_unchecked<int64>(read_count), @cast_unchecked<int64>(c)));
+                    drop(npk_mem_write_byte(buf, cast_unchecked<int64>(read_count), cast_unchecked<int64>(c)));
                     read_count = read_count + 1i32;
                 }
             }
         }
         
         if (read_count > 0i32) {
-            string:line = raw hex_addr(addr);
-            line = string_concat(line, "  ");
-            
-            string:ascii = "";
+            drop(raw hex_addr(out_state, addr));
+            drop(io_buf_puts(out_state, "  "));
             
             int32:i = 0i32;
             while (i < 16i32) {
                 if (i < read_count) {
-                    int32:b = @cast_unchecked<int32>(npk_mem_read_byte(buf, @cast_unchecked<int64>(i)));
-                    line = string_concat(line, raw hex_byte(b));
-                    line = string_concat(line, " ");
-                    
-                    if (b >= 32i32) {
-                        if (b <= 126i32) {
-                            ascii = string_concat(ascii, string_from_char(@cast_unchecked<int8>(b)));
-                        } else { ascii = string_concat(ascii, "."); }
-                    } else { ascii = string_concat(ascii, "."); }
+                    int32:b = cast_unchecked<int32>(npk_mem_read_byte(buf, cast_unchecked<int64>(i)));
+                    int32:hi = b / 16i32;
+                    int32:lo = b - hi * 16i32;
+                    drop(io_buf_putc(out_state, raw hex_char(hi)));
+                    drop(io_buf_putc(out_state, raw hex_char(lo)));
+                    drop(io_buf_puts(out_state, " "));
                 } else {
-                    line = string_concat(line, "   ");
+                    drop(io_buf_puts(out_state, "   "));
                 }
                 
-                if (i == 7i32) { line = string_concat(line, " "); }
+                if (i == 7i32) { drop(io_buf_puts(out_state, " ")); }
                 i = i + 1i32;
             }
             
-            line = string_concat(line, " |");
-            line = string_concat(line, ascii);
-            line = string_concat(line, "|\n");
+            drop(io_buf_puts(out_state, " |"));
             
-            drop(print_str_safe(line));
-            addr = addr + @cast_unchecked<int64>(read_count);
+            i = 0i32;
+            while (i < read_count) {
+                int32:b = cast_unchecked<int32>(npk_mem_read_byte(buf, cast_unchecked<int64>(i)));
+                if (b >= 32i32) {
+                    if (b <= 126i32) {
+                        drop(io_buf_putc(out_state, b));
+                    } else { drop(io_buf_puts(out_state, ".")); }
+                } else { drop(io_buf_puts(out_state, ".")); }
+                i = i + 1i32;
+            }
+            
+            drop(io_buf_puts(out_state, "|\n"));
+            addr = addr + cast_unchecked<int64>(read_count);
         }
     }
     
-    drop(print_str_safe(raw hex_addr(addr)));
-    drop(print_str_safe("\n"));
+    drop(raw hex_addr(out_state, addr));
+    drop(io_buf_puts(out_state, "\n"));
+    drop(io_buf_flush(out_state));
+    drop(io_buf_free(out_state));
     
-    int64:fd_fp = (<- (@cast_unchecked<int64->>(fp + 0i64)));
+    int64:fd_fp = (<- (cast_unchecked<int64->>(fp + 0i64)));
     drop(raw io_buf_free(fp));
     drop(sys!!(SYS_MUNMAP, buf, 16i64));
     exit 0;

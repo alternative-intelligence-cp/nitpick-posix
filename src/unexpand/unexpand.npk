@@ -17,13 +17,13 @@ extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys(SYS_WRITE, 2i64, s, len));
+    drop(sys(WRITE, 2i64, s, len));
     pass 0i32;
 };
 
 func:print_str_safe = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys(SYS_WRITE, 1i64, s, len));
+    drop(sys(WRITE, 1i64, s, len));
     pass 0i32;
 };
 
@@ -46,7 +46,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     int64:fd = 0i64;
     if (file_idx != -1i32) {
         string:file = raw args_at(args, file_idx);
-        fd = sys(SYS_OPEN, file, 0i64, 0i64) ? -1i64;
+        fd = sys(OPEN, file, 0i64, 0i64) ? -1i64;
         if (fd < 0i64) {
             drop(print_err("unexpand: cannot open '"));
             drop(print_err(file));
@@ -54,10 +54,10 @@ func:main = int32(int32:argc, wild int8->:argv) {
             exit 1;
         }
         }
-    defer { if (fd >= 0i64) { drop(sys(SYS_CLOSE, fd)); } }
+    defer { if (fd >= 0i64) { drop(sys(CLOSE, fd)); } }
     
     int64:buf_size = 65536i64; // 1MB buffer
-    wild int8->:buf = alloc(buf_size);
+    int64:buf = malloc(buf_size);
     if (buf < 0i64) { exit 1; }
     
     int64:col = 0i64;
@@ -68,7 +68,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     int64:out_len = 0i64;
 
     while (running == 1i32) {
-        int64:n = sys(SYS_READ, fd, buf, buf_size) ? -1i64;
+        int64:n = sys(READ, fd, buf, buf_size) ? -1i64;
         if (n <= 0i64) {
             running = 0i32;
         } else {
@@ -82,7 +82,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
                         if (pending_spaces > 0i64) {
                             npk_mem_write_byte(out_buf, out_len, 9i64);
                             out_len = out_len + 1i64;
-                            if (out_len >= 65536i64) { drop(sys(SYS_WRITE, 1i64, out_buf, out_len)); out_len = 0i64; }
+                            if (out_len >= 65536i64) { drop(sys(WRITE, 1i64, out_buf, out_len)); out_len = 0i64; }
                             pending_spaces = 0i64;
                         }
                     }
@@ -90,7 +90,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
                     if (c == 9i64) { // tab
                         npk_mem_write_byte(out_buf, out_len, 9i64);
                         out_len = out_len + 1i64;
-                        if (out_len >= 65536i64) { drop(sys(SYS_WRITE, 1i64, out_buf, out_len)); out_len = 0i64; }
+                        if (out_len >= 65536i64) { drop(sys(WRITE, 1i64, out_buf, out_len)); out_len = 0i64; }
                         int64:add_to_col = 8i64 - (col - (col / 8i64) * 8i64);
                         col = col + add_to_col;
                         pending_spaces = 0i64;
@@ -100,13 +100,13 @@ func:main = int32(int32:argc, wild int8->:argv) {
                         while (k < pending_spaces) {
                             npk_mem_write_byte(out_buf, out_len, 32i64);
                             out_len = out_len + 1i64;
-                            if (out_len >= 65536i64) { drop(sys(SYS_WRITE, 1i64, out_buf, out_len)); out_len = 0i64; }
+                            if (out_len >= 65536i64) { drop(sys(WRITE, 1i64, out_buf, out_len)); out_len = 0i64; }
                             k = k + 1i64;
                         }
                         pending_spaces = 0i64;
                         npk_mem_write_byte(out_buf, out_len, c);
                         out_len = out_len + 1i64;
-                        if (out_len >= 65536i64) { drop(sys(SYS_WRITE, 1i64, out_buf, out_len)); out_len = 0i64; }
+                        if (out_len >= 65536i64) { drop(sys(WRITE, 1i64, out_buf, out_len)); out_len = 0i64; }
                         if (c == 10i64) {
                             col = 0i64;
                         } else {
@@ -124,18 +124,18 @@ func:main = int32(int32:argc, wild int8->:argv) {
         while (k < pending_spaces) {
             npk_mem_write_byte(out_buf, out_len, 32i64);
             out_len = out_len + 1i64;
-            if (out_len >= 65536i64) { drop(sys(SYS_WRITE, 1i64, out_buf, out_len)); out_len = 0i64; }
+            if (out_len >= 65536i64) { drop(sys(WRITE, 1i64, out_buf, out_len)); out_len = 0i64; }
             k = k + 1i64;
         }
     }
     
     if (out_len > 0i64) {
-        drop(sys(SYS_WRITE, 1i64, out_buf, out_len));
+        drop(sys(WRITE, 1i64, out_buf, out_len));
     }
     drop(nitpick_libc_mem_free(out_buf));
     
     if (fd != 0i64) {
     }
-    free(@cast_unchecked<any->>(buf));
+    drop(nitpick_libc_mem_free(buf));
     exit 0;
 };
