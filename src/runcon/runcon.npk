@@ -5,18 +5,15 @@ use "../vendor/sys_constants.npk".*;
 use "../vendor/nitpick_args.npk".*;
 use "../vendor/exec_helper.npk".*;
 
-pub func:failsafe = int32(tbb32:err) {
-    drop(standard_failsafe(err));
-    exit 1;
-};
 
-pub func:main = int32(int32:argc, wild int8->:argv) {
+
+pub func:runcon_main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     
     if (arg_count < 3i32) {
         drop(print_err("runcon: missing operand\n"));
-        exit 125;
+        pass 125;
     }
     
     // Attempting to set SELinux context usually fails if it's disabled.
@@ -24,5 +21,5 @@ pub func:main = int32(int32:argc, wild int8->:argv) {
     drop(sys_execvp_from(2i64));
     
     drop(print_err("runcon: failed to execute command\n"));
-    exit 1;
+    pass 1;
 };

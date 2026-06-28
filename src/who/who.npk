@@ -3,6 +3,7 @@ use "../vendor/io_utils.npk".*;
 use "../vendor/mem_utils.npk".*;
 use "../vendor/sys_constants.npk".*;
 use "../vendor/libc_ffi.npk".*;
+use "alist.npk".*;
 use "../vendor/utmp_utils.npk".*;
 
 func:print_str = int32(string:s) {
@@ -11,19 +12,26 @@ func:print_str = int32(string:s) {
     pass 0i32;
 };
 
-pub func:failsafe = int32(tbb32:err) { drop(standard_failsafe(err)); exit 1; };
 
-pub func:main = int32(int32:argc, wild int8->:argv) {
+
+pub func:who_main = int32(int32:argc, wild int8->:argv) {
     int64:t = time(0i64);
     int64:t_buf = sys!!(SYS_MMAP, 0i64, 8i64, 3i64, 34i64, -1i64, 0i64) ?! 0i64;
-    nitpick_libc_mem_write_i64(t_buf, 0i64, t);
+    npk_mem_write_byte(t_buf, 0i64, t & 255i64);
+    npk_mem_write_byte(t_buf, 1i64, (t / 256i64) & 255i64);
+    npk_mem_write_byte(t_buf, 2i64, (t / 65536i64) & 255i64);
+    npk_mem_write_byte(t_buf, 3i64, (t / 16777216i64) & 255i64);
+    npk_mem_write_byte(t_buf, 4i64, (t / 4294967296i64) & 255i64);
+    npk_mem_write_byte(t_buf, 5i64, (t / 1099511627776i64) & 255i64);
+    npk_mem_write_byte(t_buf, 6i64, (t / 281474976710656i64) & 255i64);
+    npk_mem_write_byte(t_buf, 7i64, (t / 72057594037927936i64) & 255i64);
     
     int64:c_ptr = ctime(t_buf);
     string:ctime_str = "";
     if (c_ptr != 0i64) {
         int64:i = 0i64;
         while (1 == 1) {
-            int64:c = raw safe_mem_read_byte(cast_unchecked<uint8->>(c_ptr), i);
+            int64:c = npk_mem_read_byte(c_ptr, i);
             if (c == 0i64) { break; }
             if (c != 10i64) { ctime_str = string_concat(ctime_str, string_from_char(cast_unchecked<int8>(c))); }
             i = i + 1i64;
@@ -59,11 +67,11 @@ pub func:main = int32(int32:argc, wild int8->:argv) {
     }
 
     int64:lst = raw utmp_read_users();
-    int64:count = raw alsize(lst);
+    int64:count = raw alist_size(lst);
     int64:idx = 0i64;
     while (idx < count) {
-        int64:u_ptr = raw alget(lst, idx);
-        int64:l_ptr = raw alget(lst, idx + 1i64);
+        int64:u_ptr = raw alist_get(lst, idx);
+        int64:l_ptr = raw alist_get(lst, idx + 1i64);
         string:user = raw ptr_to_string(ok(u_ptr));
         string:tty = raw ptr_to_string(ok(l_ptr));
         
@@ -85,5 +93,5 @@ pub func:main = int32(int32:argc, wild int8->:argv) {
         idx = idx + 2i64;
     }
     
-    exit 0;
+    pass 0;
 };

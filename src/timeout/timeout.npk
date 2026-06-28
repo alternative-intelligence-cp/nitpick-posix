@@ -59,18 +59,15 @@ func:parse_duration = int64(string:s) {
     pass val * multiplier;
 };
 
-func:failsafe = int32(tbb32:err) {
-    drop(standard_failsafe(err));
-    exit 1;
-};
 
-func:main = int32(int32:argc, wild int8->:argv) {
+
+pub func:timeout_main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     
     if (arg_count < 2i32) {
         drop(print_err("usage: timeout DURATION COMMAND [ARG]...\n"));
-        exit 1;
+        pass 1;
     }
     
     string:dur_str = raw args_at(args, 1i32);
@@ -80,7 +77,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
         drop(print_err("timeout: invalid time interval '"));
         drop(print_err(dur_str));
         drop(print_err("'\n"));
-        exit 125;
+        pass 125;
     }
     
     string:cmd = raw args_at(args, 2i32);
@@ -94,7 +91,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
             drop(print_err("timeout: failed to run command '"));
             drop(print_err(cmd));
             drop(print_err("'\n"));
-            exit 127;
+            pass 127;
         }
     } else {
         if (pid > 0i64) {
@@ -137,7 +134,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
                             running = 0i32;
                             drop(sys!!(SYS_MUNMAP, ts_buf, 16i64));
                             drop(sys!!(SYS_MUNMAP, status_buf, 8i64));
-                            exit 124; // standard timeout exit code
+                            pass 124; // standard timeout pass code
                         } else {
                             drop(sys!!(35i64, ts_buf, 0i64)); // nanosleep
                         }
@@ -148,13 +145,13 @@ func:main = int32(int32:argc, wild int8->:argv) {
             drop(sys!!(SYS_MUNMAP, status_buf, 8i64));
             
             if (child_exited == 1i32) {
-                exit exit_status;
+                pass exit_status;
             }
         } else {
             drop(print_err("timeout: fork failed\n"));
-            exit 125;
+            pass 125;
         }
     }
     
-    exit 0;
+    pass 0;
 };

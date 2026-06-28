@@ -19,12 +19,9 @@ func:print_str_safe = int32(string:s) {
     pass 0i32;
 };
 
-func:failsafe = int32(tbb32:err) {
-    drop(standard_failsafe(err));
-    exit 1;
-};
 
-func:main = int32(int32:argc, wild int8->:argv) {
+
+pub func:yes_main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     
@@ -49,5 +46,5 @@ func:main = int32(int32:argc, wild int8->:argv) {
         if (raw print_str_safe(output) < 0i32) { break; }
     }
     
-    exit 0;
+    pass 0;
 };

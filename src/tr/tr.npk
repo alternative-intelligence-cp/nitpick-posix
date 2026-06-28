@@ -21,18 +21,15 @@ func:print_err = int32(string:s) {
 extern func:npk_mem_read_byte  = int64(int64:ptr, int64:offset);
 extern func:npk_mem_write_byte = int32(int64:ptr, int64:offset, int64:val);
 
-func:failsafe = int32(tbb32:err) {
-    drop(standard_failsafe(err));
-    exit 1;
-};
 
-func:main = int32(int32:argc, wild int8->:argv) {
+
+pub func:tr_main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     
     if (arg_count < 2i32) {
         drop(print_err("tr: missing operand\n"));
-        exit 1;
+        pass 1;
     }
     
     string:set1 = raw args_at(args, 1i32);
@@ -41,8 +38,8 @@ func:main = int32(int32:argc, wild int8->:argv) {
     int64:len1 = string_length(set1);
     int64:len2 = string_length(set2);
     
-    if (len1 == 0i64) { exit 0; }
-    if (len2 == 0i64) { exit 0; }
+    if (len1 == 0i64) { pass 0; }
+    if (len2 == 0i64) { pass 0; }
     
     int64:tr_map = sys!!(SYS_MMAP, 0i64, 256i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
     int64:i_init = 0i64;
@@ -83,7 +80,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     
     int64:buf_size = 65536i64; // 1MB buffer
     int64:buf = malloc(buf_size);
-    if (buf < 0i64) { exit 1; }
+    if (buf < 0i64) { pass 1; }
     
     int32:running = 1i32;
     int64:fd = 0i64; // stdin
@@ -108,5 +105,5 @@ func:main = int32(int32:argc, wild int8->:argv) {
     
     drop(sys!!(SYS_MUNMAP, tr_map, 256i64));
     drop(nitpick_libc_mem_free(buf));
-    exit 0;
+    pass 0;
 };

@@ -32,16 +32,13 @@ func:write_hex = int32(int64:buf, int64:val, int64:len) {
     pass 0i32;
 };
 
-func:failsafe = int32(tbb32:err) {
-    drop(standard_failsafe(err));
-    exit 1;
-};
 
-func:main = int32(int32:argc, wild int8->:argv) {
+
+pub func:hostid_main = int32(int32:argc, wild int8->:argv) {
     int64:id = gethostid();
     
     int64:out_buf = sys!!(SYS_MMAP, 0i64, 16i64, 3i64, 34i64, -1i64, 0i64) ? 0i64; // MMAP
-    if (out_buf <= 0i64) { exit 1; }
+    if (out_buf <= 0i64) { pass 1; }
     
     // hostid is usually printed as 8 hex digits
     drop(write_hex(out_buf, id, 8i64));
@@ -51,5 +48,5 @@ func:main = int32(int32:argc, wild int8->:argv) {
     
     drop(sys!!(SYS_MUNMAP, out_buf, 16i64)); // MUNMAP
     
-    exit 0;
+    pass 0;
 };

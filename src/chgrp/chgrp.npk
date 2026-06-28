@@ -12,18 +12,15 @@ func:print_err = int32(string:s) {
     pass 0i32;
 };
 
-func:failsafe = int32(tbb32:err) {
-    drop(standard_failsafe(err));
-    exit 1;
-};
 
-func:main = int32(int32:argc, wild int8->:argv) {
+
+pub func:chgrp_main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     
     if (arg_count < 2i32) {
         drop(print_err("chgrp: missing operand\n"));
-        exit 1;
+        pass 1;
     }
     
     string:group_str = raw args_at(args, 1i32);
@@ -33,7 +30,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
         drop(print_err("chgrp: invalid group: '"));
         drop(print_err(group_str));
         drop(print_err("'\n"));
-        exit 1;
+        pass 1;
     }
     
     int32:i = 2i32;
@@ -52,5 +49,5 @@ func:main = int32(int32:argc, wild int8->:argv) {
         i = i + 1i32;
     }
     
-    exit ret;
+    pass ret;
 };

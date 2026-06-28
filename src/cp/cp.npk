@@ -9,13 +9,14 @@ extern func:npk_mem_write_byte = void(int64:ptr, int64:offset, int64:val);
 use "../vendor/sys_constants.npk".*;
 use "../vendor/nitpick_args.npk".*;
 use "../vendor/libc_ffi.npk".*;
+use "alist.npk".*;
 
 
 
 pub func:alist_pop_front = int64(int64:lst) {
-    if (raw alsize(lst) == 0i64) { pass -1i64; }
-    int64:v = raw alget(lst, 0i64);
-    drop(raw alremove(lst, 0i64));
+    if (raw alist_size(lst) == 0i64) { pass -1i64; }
+    int64:v = raw alist_get(lst, 0i64);
+    drop(raw alist_remove(lst, 0i64));
     pass v;
 };
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
@@ -54,10 +55,7 @@ func:ptr_to_string = string(int64:ptr) {
     pass s;
 };
 
-func:failsafe = int32(tbb32:err) {
-    drop(standard_failsafe(err));
-    exit 1;
-};
+
 
 func:copy_file = int32(string:src_path, string:dst_path) {
     int64:src_fd = sys(OPEN, src_path, 0i64, 0i64) ? -1i64;
@@ -187,7 +185,7 @@ func:copy_recursive = int32(string:src, string:dst, int32:recursive) {
                     
                     if (skip == 0i32) {
                         int64:name_copy = raw str_clone(name_ptr);
-                        drop(raw alpush(sl, name_copy));
+                        drop(raw alist_push(sl, name_copy));
                     }
                     bpos = bpos + reclen;
                 }
@@ -196,7 +194,7 @@ func:copy_recursive = int32(string:src, string:dst, int32:recursive) {
         
         drop(sys!!(SYS_MUNMAP, buf, 32768i64));
 
-        while (raw alsize(sl) > 0i64) {
+        while (raw alist_size(sl) > 0i64) {
             int64:child_ptr = raw alist_pop_front(sl);
             string:child_name = raw ptr_to_string(child_ptr);
             
@@ -216,7 +214,7 @@ func:copy_recursive = int32(string:src, string:dst, int32:recursive) {
     }
 };
 
-func:main = int32(int32:argc, wild int8->:argv) {
+pub func:cp_main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     
@@ -242,14 +240,14 @@ func:main = int32(int32:argc, wild int8->:argv) {
     
     if (non_flags < 2i32) {
         drop(print_err("cp: missing file operand\n"));
-        exit 1;
+        pass 1;
     }
     
     if (non_flags > 2i32) {
         drop(print_err("cp: only two non-flag arguments are supported for now\n"));
-        exit 1;
+        pass 1;
     }
     
     int32:status = raw copy_recursive(src_path, dst_path, recursive);
-    exit status;
+    pass status;
 };

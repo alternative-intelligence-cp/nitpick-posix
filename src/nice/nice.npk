@@ -41,19 +41,16 @@ func:print_int = int32(int64:val) {
     pass 0i32;
 };
 
-func:failsafe = int32(tbb32:err) {
-    drop(standard_failsafe(err));
-    exit 1;
-};
 
-func:main = int32(int32:argc, wild int8->:argv) {
+
+pub func:nice_main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     
     if (arg_count == 0i32) {
         int32:prio = getpriority(0i32, 0i32);
         drop(print_int(cast_unchecked<int64>(prio)));
-        exit 0;
+        pass 0;
     }
     
     int32:adjustment = 10i32;
@@ -130,7 +127,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     
     if (cmd_idx > cast_unchecked<int64>(arg_count)) {
         drop(print_err("nice: a command must be given with an adjustment\n"));
-        exit 125;
+        pass 125;
     }
     
     int32:prio = getpriority(0i32, 0i32);
@@ -140,5 +137,5 @@ func:main = int32(int32:argc, wild int8->:argv) {
     int64:res = raw sys_execvp_from(cmd_idx);
     
     drop(print_err("nice: failed to execute\n"));
-    exit 127;
+    pass 127;
 };

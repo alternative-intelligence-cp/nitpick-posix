@@ -10,12 +10,9 @@ func:print_str_safe = int32(string:s) {
     pass 0i32;
 };
 
-func:failsafe = int32(tbb32:err) {
-    drop(standard_failsafe(err));
-    exit 1;
-};
 
-func:main = int32(int32:argc, wild int8->:argv) {
+
+pub func:id_main = int32(int32:argc, wild int8->:argv) {
     int64:uid = sys!!(SYS_GETUID) ? -1i64;
     int64:gid = sys(GETGID) ? -1i64;
     int64:euid = sys(GETEUID) ? -1i64;
@@ -31,5 +28,5 @@ func:main = int32(int32:argc, wild int8->:argv) {
     drop(print_str_safe(string_from_int(egid)));
     drop(print_str_safe("\n"));
     
-    exit 0;
+    pass 0;
 };

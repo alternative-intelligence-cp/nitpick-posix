@@ -21,23 +21,20 @@ func:print_str_safe = int32(string:s) {
     pass 0i32;
 };
 
-func:failsafe = int32(tbb32:err) {
-    drop(standard_failsafe(err));
-    exit 1;
-};
 
-func:main = int32(int32:argc, wild int8->:argv) {
+
+pub func:stty_main = int32(int32:argc, wild int8->:argv) {
     int64:buf = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
-    if (buf < 0i64) { exit 1; }
+    if (buf < 0i64) { pass 1; }
     
     // TCGETS is 0x5401
     int64:res = sys!!(16i64, 0i64, 0x5401i64, buf) ? -1i64; // SYS_IOCTL
     
     if (res < 0i64) {
         drop(print_err("stty: 'standard input': Inappropriate ioctl for device\n"));
-        exit 1;
+        pass 1;
     }
     
     drop(sys!!(SYS_MUNMAP, buf, 4096i64));
-    exit 0;
+    pass 0;
 };

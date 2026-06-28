@@ -59,10 +59,7 @@ func:ptr_to_string = string(int64:ptr) {
     pass s;
 };
 
-func:failsafe = int32(tbb32:err) {
-    drop(standard_failsafe(err));
-    exit 1;
-};
+
 
 func:print_num = int32(int64:n) {
     if (n == 0i64) {
@@ -86,7 +83,7 @@ func:print_num = int32(int64:n) {
         i = i - 1i64;
     }
     npk_mem_write_byte(buf, digits, 0i64);
-    drop(print_str(buf));
+    drop(print_str(raw ptr_to_string(ok(buf))));
     drop(sys!!(SYS_MUNMAP, buf, 32i64));
     pass 0i32;
 };
@@ -228,7 +225,7 @@ func:list_dir = int32(string:dir, int32:print_header, int32:recursive, int32:sho
                         if (has_printed == 1i32) { drop(print_str_safe("  ")); }
                     }
                     
-                    drop(print_str(name_ptr));
+                    drop(print_str(raw ptr_to_string(ok(name_ptr))));
                     if (long_fmt == 1i32) { drop(print_str_safe("\n")); }
                     
                     has_printed = 1i32;
@@ -274,7 +271,7 @@ func:list_dir = int32(string:dir, int32:print_header, int32:recursive, int32:sho
     pass 0i32;
 };
 
-pub func:main = int32(int32:argc, wild int8->:argv) {
+pub func:ls_main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     ArgParser:p = raw Parser_create();
     p = raw Parser_add_flag(p, "-R", "recursive");
@@ -324,5 +321,5 @@ pub func:main = int32(int32:argc, wild int8->:argv) {
         }
     }
     
-    exit exit_status;
+    pass exit_status;
 };

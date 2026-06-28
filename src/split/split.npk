@@ -23,12 +23,9 @@ func:print_str_safe = int32(string:s) {
     pass 0i32;
 };
 
-func:failsafe = int32(tbb32:err) {
-    drop(standard_failsafe(err));
-    exit 1;
-};
 
-func:main = int32(int32:argc, wild int8->:argv) {
+
+pub func:split_main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     
@@ -67,7 +64,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
                 drop(print_err("split: cannot open '"));
                 drop(print_err(in_file));
                 drop(print_err("'\n"));
-                exit 1;
+                pass 1;
             }
             }
     defer { if (fd_in >= 0i64) { drop(sys(CLOSE, fd_in)); } }
@@ -75,7 +72,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     
     int64:buf_size = 65536i64; // 1MB buffer
     int64:buf = malloc(buf_size);
-    if (buf < 0i64) { exit 1; }
+    if (buf < 0i64) { pass 1; }
     
     int64:lines_in_current = 0i64;
     int64:fd_out = -1i64;
@@ -149,5 +146,5 @@ func:main = int32(int32:argc, wild int8->:argv) {
     }
     drop(nitpick_libc_mem_free(buf));
     
-    exit 0;
+    pass 0;
 };

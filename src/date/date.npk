@@ -26,17 +26,14 @@ func:mem_read_64 = int64(int64:ptr, int64:offset) {
     pass res;
 };
 
-func:failsafe = int32(tbb32:err) {
-    drop(standard_failsafe(err));
-    exit 1;
-};
 
-func:main = int32(int32:argc, wild int8->:argv) {
+
+pub func:date_main = int32(int32:argc, wild int8->:argv) {
     int64:ts = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
-    if (ts < 0i64) { exit 1; }
+    if (ts < 0i64) { pass 1; }
     
     int64:res = sys(CLOCK_GETTIME, 0i64, ts) ? -1i64;
-    if (res < 0i64) { exit 1; }
+    if (res < 0i64) { pass 1; }
     
     int64:sec = raw mem_read_64(ts, 0i64);
     
@@ -72,5 +69,5 @@ func:main = int32(int32:argc, wild int8->:argv) {
     drop(sys!!(SYS_MUNMAP, t_buf, 4096i64));
     
     drop(sys!!(SYS_MUNMAP, ts, 4096i64));
-    exit 0;
+    pass 0;
 };

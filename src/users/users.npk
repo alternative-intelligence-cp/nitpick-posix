@@ -3,6 +3,7 @@ use "../vendor/io_utils.npk".*;
 use "../vendor/mem_utils.npk".*;
 use "../vendor/sys_constants.npk".*;
 use "../vendor/libc_ffi.npk".*;
+use "alist.npk".*;
 use "../vendor/utmp_utils.npk".*;
 
 func:print_str = int32(string:s) {
@@ -11,15 +12,15 @@ func:print_str = int32(string:s) {
     pass 0i32;
 };
 
-pub func:failsafe = int32(tbb32:err) { drop(standard_failsafe(err)); exit 1; };
 
-pub func:main = int32(int32:argc, wild int8->:argv) {
+
+pub func:users_main = int32(int32:argc, wild int8->:argv) {
     int64:lst = raw utmp_read_users();
-    int64:count = raw alsize(lst);
+    int64:count = raw alist_size(lst);
     int64:idx = 0i64;
     while (idx < count) {
-        int64:u_ptr = raw alget(lst, idx);
-        int64:l_ptr = raw alget(lst, idx + 1i64);
+        int64:u_ptr = raw alist_get(lst, idx);
+        int64:l_ptr = raw alist_get(lst, idx + 1i64);
         string:user = raw ptr_to_string(ok(u_ptr));
         drop(print_str(user));
         if (idx + 2i64 < count) { drop(print_str(" ")); }
@@ -29,5 +30,5 @@ pub func:main = int32(int32:argc, wild int8->:argv) {
         idx = idx + 2i64;
     }
     drop(print_str("\n"));
-    exit 0;
+    pass 0;
 };

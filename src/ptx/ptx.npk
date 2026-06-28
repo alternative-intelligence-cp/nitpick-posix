@@ -5,7 +5,7 @@ use "../vendor/nitpick_args.npk".*;
 use "../vendor/sys_constants.npk".*;
 use "../vendor/libc_ffi.npk".*;
 
-pub func:failsafe = int32(tbb32:err) { drop(standard_failsafe(err)); exit 1; };
+
 
 extern func:npk_string_byte_at = int64(string:s, int64:idx);
 
@@ -43,18 +43,18 @@ func:print_permutation = int32(string:line) {
     pass 0i32;
 };
 
-pub func:main = int32(int32:argc, wild int8->:argv) {
+pub func:ptx_main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
-    if (arg_count < 2i32) { drop(print_err("ptx: missing operand\n")); exit 1; }
+    if (arg_count < 2i32) { drop(print_err("ptx: missing operand\n")); pass 1; }
     
     int64:fd = sys(OPEN, raw args_at(args, 1i32), 0i64, 0i64) ?! -1i64;
     defer { if (fd >= 0i64) { drop(sys(CLOSE, fd)); } }
-    if (fd < 0i64) { exit 1; }
+    if (fd < 0i64) { pass 1; }
     
     int64:state = raw io_buf_new(fd);
     int64:buf = sys!!(SYS_MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
-    if (buf <= 0i64) { exit 1; }
+    if (buf <= 0i64) { pass 1; }
     
     while (1 == 1) {
         int64:len = raw io_buf_readline(state, cast_unchecked<uint8->>(buf));
@@ -65,5 +65,5 @@ pub func:main = int32(int32:argc, wild int8->:argv) {
     
     drop(sys!!(SYS_MUNMAP, buf, 65536i64));
     drop(io_buf_free(state));
-    exit 0;
+    pass 0;
 };

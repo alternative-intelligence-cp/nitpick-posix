@@ -24,10 +24,7 @@ func:print_str_safe = int32(string:s) {
     pass 0i32;
 };
 
-func:failsafe = int32(tbb32:err) {
-    drop(standard_failsafe(err));
-    exit 1;
-};
+
 
 func:parse_int = int64(string:s) {
     int64:len = string_length(s);
@@ -68,13 +65,13 @@ func:parse_int = int64(string:s) {
     pass val;
 };
 
-pub func:main = int32(int32:argc, wild int8->:argv) {
+pub func:kill_main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     
     if (arg_count < 1i32) {
         drop(print_err("kill: usage: kill [-s sigspec | -n signum | -sigspec] pid | jobspec ... or kill -l [sigspec]\n"));
-        exit 1;
+        pass 1;
     }
     
     int64:sig = 15i64; // SIGTERM
@@ -88,7 +85,7 @@ pub func:main = int32(int32:argc, wild int8->:argv) {
             int64:parsed_sig = raw parse_int(nsig);
             if (parsed_sig < 0i64) {
                 drop(print_err("kill: arguments must be process or job IDs\n"));
-                exit 1;
+                pass 1;
             }
             if (parsed_sig > 0i64) {
                 sig = parsed_sig;
@@ -97,24 +94,24 @@ pub func:main = int32(int32:argc, wild int8->:argv) {
                 pid = raw parse_int(raw args_at(args, 2i32));
                 if (pid < 0i64) {
                     drop(print_err("kill: arguments must be process or job IDs\n"));
-                    exit 1;
+                    pass 1;
                 }
             } else {
                 drop(print_err("kill: missing pid\n"));
-                exit 1;
+                pass 1;
             }
         } else {
             pid = raw parse_int(arg1);
             if (pid < 0i64) {
                 drop(print_err("kill: arguments must be process or job IDs\n"));
-                exit 1;
+                pass 1;
             }
         }
     } else {
         pid = raw parse_int(arg1);
         if (pid < 0i64) {
             drop(print_err("kill: arguments must be process or job IDs\n"));
-            exit 1;
+            pass 1;
         }
     }
     
@@ -123,8 +120,8 @@ pub func:main = int32(int32:argc, wild int8->:argv) {
         drop(print_err("kill: ("));
         drop(print_err(arg1));
         drop(print_err(") - No such process\n"));
-        exit 1;
+        pass 1;
     }
     
-    exit 0;
+    pass 0;
 };

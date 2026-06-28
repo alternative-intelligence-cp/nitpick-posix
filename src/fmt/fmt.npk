@@ -23,10 +23,7 @@ func:print_str_safe = int32(string:s) {
     pass 0i32;
 };
 
-func:failsafe = int32(tbb32:err) {
-    drop(standard_failsafe(err));
-    exit 1;
-};
+
 
 func:is_space = int32(int32:c) {
     if (c == 32i32) { pass 1i32; }
@@ -36,7 +33,7 @@ func:is_space = int32(int32:c) {
     pass 0i32;
 };
 
-func:main = int32(int32:argc, wild int8->:argv) {
+pub func:fmt_main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     
@@ -53,7 +50,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
                 drop(print_err("fmt: cannot open '"));
                 drop(print_err(file));
                 drop(print_err("'\n"));
-                exit 1;
+                pass 1;
             }
             }
     defer { if (fd >= 0i64) { drop(sys(CLOSE, fd)); } }
@@ -108,5 +105,5 @@ func:main = int32(int32:argc, wild int8->:argv) {
     }
     
     drop(raw io_buf_free(fp));
-    exit 0;
+    pass 0;
 };

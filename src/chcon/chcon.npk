@@ -4,21 +4,18 @@ use "../vendor/mem_utils.npk".*;
 use "../vendor/sys_constants.npk".*;
 use "../vendor/nitpick_args.npk".*;
 
-pub func:failsafe = int32(tbb32:err) {
-    drop(standard_failsafe(err));
-    exit 1;
-};
 
-pub func:main = int32(int32:argc, wild int8->:argv) {
+
+pub func:chcon_main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     
     if (arg_count < 2i32) {
         drop(print_err("chcon: missing operand\n"));
-        exit 1;
+        pass 1;
     }
     
     // Minimal chcon: pretend to apply context to the given files.
-    // In a system without SELinux or Nitpick permissions set, just exit 0.
-    exit 0;
+    // In a system without SELinux or Nitpick permissions set, just pass 0.
+    pass 0;
 };

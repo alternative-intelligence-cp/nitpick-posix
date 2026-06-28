@@ -2,10 +2,7 @@
 
 use "../vendor/io_utils.npk".*;
 use "../vendor/mem_utils.npk".*;
-func:failsafe = int32(tbb32:err) {
-    drop(standard_failsafe(err));
-    exit 1;
-};
-func:main = int32(int32:argc, wild int8->:argv) {
-    exit 1;
+
+pub func:false_main = int32(int32:argc, wild int8->:argv) {
+    pass 1;
 };

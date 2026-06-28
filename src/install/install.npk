@@ -19,18 +19,15 @@ func:print_err = int32(string:s) {
     pass cast_unchecked<int32>(sys(WRITE, 2i64, s, len) ? -1i64);
 };
 
-func:failsafe = int32(tbb32:err) {
-    drop(standard_failsafe(err));
-    exit 1;
-};
 
-func:main = int32(int32:argc, wild int8->:argv) {
+
+pub func:install_main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
 
     if (arg_count != 2i32) {
         drop(print_err("usage: install <source> <destination>\n"));
-        exit 1;
+        pass 1;
     }
 
     string:src_path = raw args_at(args, 1i32);
@@ -42,7 +39,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
         drop(print_err("install: cannot stat '"));
         drop(print_err(src_path));
         drop(print_err("': No such file or directory\n"));
-        exit 1;
+        pass 1;
     }
     defer { if (src_fd >= 0i64) { drop(sys(CLOSE, src_fd)); } }
 
@@ -53,14 +50,14 @@ func:main = int32(int32:argc, wild int8->:argv) {
         drop(print_err("install: cannot create regular file '"));
         drop(print_err(dst_path));
         drop(print_err("': Permission denied or invalid path\n"));
-        exit 1;
+        pass 1;
     }
     defer { if (dst_fd >= 0i64) { drop(sys(CLOSE, dst_fd)); } }
 
     int64:buf = sys!!(SYS_MMAP, 0i64, 8192i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
     if (buf <= 0i64) {
         drop(print_err("install: internal memory allocation error\n"));
-        exit 1;
+        pass 1;
     }
 
     int32:running = 1i32;
@@ -92,9 +89,9 @@ func:main = int32(int32:argc, wild int8->:argv) {
         int64:chmod_res = sys!!(SYS_CHMOD, dst_path, 493i64) ? -1i64;
         if (chmod_res < 0i64) {
             drop(print_err("install: failed to change permissions\n"));
-            exit 1;
+            pass 1;
         }
     }
 
-    exit exit_status;
+    pass exit_status;
 };

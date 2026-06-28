@@ -25,10 +25,7 @@ func:print_str_safe = int32(string:s) {
 };
 
 
-func:failsafe = int32(tbb32:err) {
-    drop(standard_failsafe(err));
-    exit 1;
-};
+
 
 func:pad_left = string(string:s, int64:width) {
     int64:len = string_length(s);
@@ -50,12 +47,12 @@ func:pad_right = string(string:s, int64:width) {
     pass res;
 };
 
-func:main = int32(int32:argc, wild int8->:argv) {
+pub func:df_main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     
     int64:buf = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
-    if (buf < 0i64) { exit 1; }
+    if (buf < 0i64) { pass 1; }
     
     drop(print_str_safe("Filesystem     1K-blocks      Used Available Use% Mounted on\n"));
     
@@ -133,5 +130,5 @@ func:main = int32(int32:argc, wild int8->:argv) {
     }
     
     drop(sys!!(SYS_MUNMAP, buf, 4096i64));
-    exit 0;
+    pass 0;
 };

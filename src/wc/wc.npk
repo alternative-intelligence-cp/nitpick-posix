@@ -61,12 +61,9 @@ func:write_num = int64(int64:out_buf, int64:out_idx, int64:num) {
 };
 
 
-func:failsafe = int32(tbb32:err) {
-    drop(standard_failsafe(err));
-    exit 1;
-};
 
-pub func:main = int32(int32:argc, wild int8->:argv) {
+
+pub func:wc_main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     ArgParser:p = raw Parser_create();
     p = raw Parser_add_flag(p, "-l", "lines");
@@ -102,10 +99,10 @@ pub func:main = int32(int32:argc, wild int8->:argv) {
     }
 
     int64:buf = sys!!(SYS_MMAP, 0i64, 8192i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
-    if (buf <= 0i64) { exit 1; }
+    if (buf <= 0i64) { pass 1; }
     
     int64:out_buf = sys!!(SYS_MMAP, 0i64, 128i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
-    if (out_buf <= 0i64) { exit 1; }
+    if (out_buf <= 0i64) { pass 1; }
 
     int32:exit_status = 0i32;
     
@@ -257,5 +254,5 @@ pub func:main = int32(int32:argc, wild int8->:argv) {
 
     drop(sys!!(SYS_MUNMAP, out_buf, 128i64));
     drop(sys!!(SYS_MUNMAP, buf, 8192i64));
-    exit exit_status;
+    pass exit_status;
 };

@@ -18,10 +18,7 @@ func:print_err = int32(string:s) {
     pass cast_unchecked<int32>(sys(WRITE, 2i64, s, len) ? -1i64);
 };
 
-func:failsafe = int32(tbb32:err) {
-    drop(standard_failsafe(err));
-    exit 1;
-};
+
 
 func:write_line_num = int64(int64:out_buf, int64:out_idx, int64:line_num) {
     int64:idx = out_idx;
@@ -33,19 +30,19 @@ func:write_line_num = int64(int64:out_buf, int64:out_idx, int64:line_num) {
     int64:d5 = n % 10i64; n = n / 10i64;
     int64:d6 = n % 10i64;
     
-    if (line_num >= 100000i64) { drop(mem_write_byte_int64(out_buf, idx, 48i64 + d6)); } else { drop(mem_write_byte_int64(out_buf, idx, 32i64)); } idx = idx + 1i64;
-    if (line_num >= 10000i64) { drop(mem_write_byte_int64(out_buf, idx, 48i64 + d5)); } else { drop(mem_write_byte_int64(out_buf, idx, 32i64)); } idx = idx + 1i64;
-    if (line_num >= 1000i64) { drop(mem_write_byte_int64(out_buf, idx, 48i64 + d4)); } else { drop(mem_write_byte_int64(out_buf, idx, 32i64)); } idx = idx + 1i64;
-    if (line_num >= 100i64) { drop(mem_write_byte_int64(out_buf, idx, 48i64 + d3)); } else { drop(mem_write_byte_int64(out_buf, idx, 32i64)); } idx = idx + 1i64;
-    if (line_num >= 10i64) { drop(mem_write_byte_int64(out_buf, idx, 48i64 + d2)); } else { drop(mem_write_byte_int64(out_buf, idx, 32i64)); } idx = idx + 1i64;
-    drop(mem_write_byte_int64(out_buf, idx, 48i64 + d1)); idx = idx + 1i64;
+    if (line_num >= 100000i64) { drop(npk_mem_write_byte(out_buf, idx, 48i64 + d6)); } else { drop(npk_mem_write_byte(out_buf, idx, 32i64)); } idx = idx + 1i64;
+    if (line_num >= 10000i64) { drop(npk_mem_write_byte(out_buf, idx, 48i64 + d5)); } else { drop(npk_mem_write_byte(out_buf, idx, 32i64)); } idx = idx + 1i64;
+    if (line_num >= 1000i64) { drop(npk_mem_write_byte(out_buf, idx, 48i64 + d4)); } else { drop(npk_mem_write_byte(out_buf, idx, 32i64)); } idx = idx + 1i64;
+    if (line_num >= 100i64) { drop(npk_mem_write_byte(out_buf, idx, 48i64 + d3)); } else { drop(npk_mem_write_byte(out_buf, idx, 32i64)); } idx = idx + 1i64;
+    if (line_num >= 10i64) { drop(npk_mem_write_byte(out_buf, idx, 48i64 + d2)); } else { drop(npk_mem_write_byte(out_buf, idx, 32i64)); } idx = idx + 1i64;
+    drop(npk_mem_write_byte(out_buf, idx, 48i64 + d1)); idx = idx + 1i64;
     
-    drop(mem_write_byte_int64(out_buf, idx, 9i64)); idx = idx + 1i64; // '\t'
+    drop(npk_mem_write_byte(out_buf, idx, 9i64)); idx = idx + 1i64; // '\t'
     
     pass idx;
 };
 
-pub func:main = int32(int32:argc, wild int8->:argv) {
+pub func:cat_main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     ArgParser:p = raw Parser_create();
     p = raw Parser_add_flag(p, "-u", "unbuffered");
@@ -81,9 +78,9 @@ pub func:main = int32(int32:argc, wild int8->:argv) {
     int64:out_buf = 0i64;
     if (fmt_enabled == 1i32) {
         out_buf = sys!!(SYS_MMAP, 0i64, 32768i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
-        if (out_buf <= 0i64) { exit 1; }
+        if (out_buf <= 0i64) { pass 1; }
     }
-    if (buf <= 0i64) { exit 1; }
+    if (buf <= 0i64) { pass 1; }
 
     int32:exit_status = 0i32;
 
@@ -151,7 +148,7 @@ pub func:main = int32(int32:argc, wild int8->:argv) {
                             // FORMATTING PATH
                             int64:in_idx = 0i64;
                             while (in_idx < bytes_read) {
-                                int64:c = raw mem_read_byte_int64(buf, in_idx);
+                                int64:c = npk_mem_read_byte(buf, in_idx);
                                 
                                 if (is_bol == 1i32) {
                                     if (flag_b == 1i32) {
@@ -170,43 +167,43 @@ pub func:main = int32(int32:argc, wild int8->:argv) {
 
                                 if (flag_v == 1i32) {
                                     if (c == 9i64) {
-                                        drop(mem_write_byte_int64(out_buf, out_idx, c)); out_idx = out_idx + 1i64;
+                                        drop(npk_mem_write_byte(out_buf, out_idx, c)); out_idx = out_idx + 1i64;
                                     } else {
                                         if (c == 10i64) {
-                                            drop(mem_write_byte_int64(out_buf, out_idx, c)); out_idx = out_idx + 1i64;
+                                            drop(npk_mem_write_byte(out_buf, out_idx, c)); out_idx = out_idx + 1i64;
                                         } else {
                                             if (c < 32i64) {
-                                                drop(mem_write_byte_int64(out_buf, out_idx, 94i64)); out_idx = out_idx + 1i64;
-                                                drop(mem_write_byte_int64(out_buf, out_idx, c + 64i64)); out_idx = out_idx + 1i64;
+                                                drop(npk_mem_write_byte(out_buf, out_idx, 94i64)); out_idx = out_idx + 1i64;
+                                                drop(npk_mem_write_byte(out_buf, out_idx, c + 64i64)); out_idx = out_idx + 1i64;
                                             } else {
                                                 if (c == 127i64) {
-                                                    drop(mem_write_byte_int64(out_buf, out_idx, 94i64)); out_idx = out_idx + 1i64;
-                                                    drop(mem_write_byte_int64(out_buf, out_idx, 63i64)); out_idx = out_idx + 1i64;
+                                                    drop(npk_mem_write_byte(out_buf, out_idx, 94i64)); out_idx = out_idx + 1i64;
+                                                    drop(npk_mem_write_byte(out_buf, out_idx, 63i64)); out_idx = out_idx + 1i64;
                                                 } else {
                                                     if (c > 127i64) {
-                                                        drop(mem_write_byte_int64(out_buf, out_idx, 77i64)); out_idx = out_idx + 1i64;
-                                                        drop(mem_write_byte_int64(out_buf, out_idx, 45i64)); out_idx = out_idx + 1i64;
+                                                        drop(npk_mem_write_byte(out_buf, out_idx, 77i64)); out_idx = out_idx + 1i64;
+                                                        drop(npk_mem_write_byte(out_buf, out_idx, 45i64)); out_idx = out_idx + 1i64;
                                                         int64:c2 = c - 128i64;
                                                         if (c2 < 32i64) {
-                                                            drop(mem_write_byte_int64(out_buf, out_idx, 94i64)); out_idx = out_idx + 1i64;
-                                                            drop(mem_write_byte_int64(out_buf, out_idx, c2 + 64i64)); out_idx = out_idx + 1i64;
+                                                            drop(npk_mem_write_byte(out_buf, out_idx, 94i64)); out_idx = out_idx + 1i64;
+                                                            drop(npk_mem_write_byte(out_buf, out_idx, c2 + 64i64)); out_idx = out_idx + 1i64;
                                                         } else {
                                                             if (c2 == 127i64) {
-                                                                drop(mem_write_byte_int64(out_buf, out_idx, 94i64)); out_idx = out_idx + 1i64;
-                                                                drop(mem_write_byte_int64(out_buf, out_idx, 63i64)); out_idx = out_idx + 1i64;
+                                                                drop(npk_mem_write_byte(out_buf, out_idx, 94i64)); out_idx = out_idx + 1i64;
+                                                                drop(npk_mem_write_byte(out_buf, out_idx, 63i64)); out_idx = out_idx + 1i64;
                                                             } else {
-                                                                drop(mem_write_byte_int64(out_buf, out_idx, c2)); out_idx = out_idx + 1i64;
+                                                                drop(npk_mem_write_byte(out_buf, out_idx, c2)); out_idx = out_idx + 1i64;
                                                             }
                                                         }
                                                     } else {
-                                                        drop(mem_write_byte_int64(out_buf, out_idx, c)); out_idx = out_idx + 1i64;
+                                                        drop(npk_mem_write_byte(out_buf, out_idx, c)); out_idx = out_idx + 1i64;
                                                     }
                                                 }
                                             }
                                         }
                                     }
                                 } else {
-                                    drop(mem_write_byte_int64(out_buf, out_idx, c)); out_idx = out_idx + 1i64;
+                                    drop(npk_mem_write_byte(out_buf, out_idx, c)); out_idx = out_idx + 1i64;
                                 }
 
                                 if (c == 10i64) {
@@ -249,5 +246,5 @@ pub func:main = int32(int32:argc, wild int8->:argv) {
         drop(sys!!(SYS_MUNMAP, out_buf, 32768i64));
     }
     
-    exit exit_status;
+    pass exit_status;
 };

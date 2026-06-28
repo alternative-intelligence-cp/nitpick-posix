@@ -23,10 +23,7 @@ func:print_out = int32(string:s) {
     pass cast_unchecked<int32>(sys(WRITE, 1i64, s, len) ? -1i64);
 };
 
-func:failsafe = int32(tbb32:err) {
-    drop(standard_failsafe(err));
-    exit 1;
-};
+
 
 func:hash_file = int32(string:filename) {
     int64:fd = sys(OPEN, filename, 0i64, 0i64) ? -1i64;
@@ -71,7 +68,7 @@ func:hash_file = int32(string:filename) {
     pass 0i32;
 };
 
-func:main = int32(int32:argc, wild int8->:argv) {
+pub func:sha256sum_main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     
@@ -91,8 +88,8 @@ func:main = int32(int32:argc, wild int8->:argv) {
 
     if (non_flags == 0i32) {
         drop(print_err("usage: sha256sum <file>\n"));
-        exit 1;
+        pass 1;
     }
 
-    exit exit_status;
+    pass exit_status;
 };

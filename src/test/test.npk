@@ -12,18 +12,15 @@ use "../vendor/libc_ffi.npk".*;
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
 
-func:failsafe = int32(tbb32:err) {
-    drop(standard_failsafe(err));
-    exit 1;
-};
+
 
 extern func:npk_mem_read_int32 = int32(int64:ptr, int64:offset);
 
-func:main = int32(int32:argc, wild int8->:argv) {
+pub func:test_main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     
-    // POSIX test: exit 0 for true, 1 for false, >1 for error
+    // POSIX test: pass 0 for true, 1 for false, >1 for error
     
     // If command name was '[', then last arg must be ']'
     // But we'll ignore that for simplicity or handle it implicitly if we want.
@@ -38,12 +35,12 @@ func:main = int32(int32:argc, wild int8->:argv) {
     }
     
     if (arg_count == 0i32) {
-        exit 1; // test with no args is false
+        pass 1; // test with no args is false
     }
     
     if (arg_count == 1i32) {
         string:s = raw args_at(args, 1i32);
-        if (string_length(s) > 0i64) { exit 0; } else { exit 1; }
+        if (string_length(s) > 0i64) { pass 0; } else { pass 1; }
     }
     
     if (arg_count == 2i32) {
@@ -51,17 +48,17 @@ func:main = int32(int32:argc, wild int8->:argv) {
         string:s = raw args_at(args, 2i32);
         
         if (string_equals(op, "-z")) {
-            if (string_length(s) == 0i64) { exit 0; } else { exit 1; }
+            if (string_length(s) == 0i64) { pass 0; } else { pass 1; }
         }
         if (string_equals(op, "-n")) {
-            if (string_length(s) > 0i64) { exit 0; } else { exit 1; }
+            if (string_length(s) > 0i64) { pass 0; } else { pass 1; }
         }
         
         if (string_equals(op, "-e")) {
             int64:buf = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
             int64:res = sys!!(SYS_STAT, s, buf) ? -1i64; // SYS_STAT
             drop(sys!!(SYS_MUNMAP, buf, 4096i64));
-            if (res >= 0i64) { exit 0; } else { exit 1; }
+            if (res >= 0i64) { pass 0; } else { pass 1; }
         }
         
         if (string_equals(op, "-d")) {
@@ -77,10 +74,10 @@ func:main = int32(int32:argc, wild int8->:argv) {
                 int32:m = mode / 4096i32;
                 int32:m_type = m - (m / 16i32) * 16i32; // mode & 15
                 if (m_type == 4i32) { isdir = 1i32; }
-                if (isdir == 1i32) { exit 0; } else { exit 1; }
+                if (isdir == 1i32) { pass 0; } else { pass 1; }
             } else {
                 drop(sys!!(SYS_MUNMAP, buf, 4096i64));
-                exit 1;
+                pass 1;
             }
         }
         
@@ -95,14 +92,14 @@ func:main = int32(int32:argc, wild int8->:argv) {
                 int32:m_type = m - (m / 16i32) * 16i32; // mode & 15
                 // S_IFREG is 0100000 = 32768 => 8
                 if (m_type == 8i32) { isreg = 1i32; }
-                if (isreg == 1i32) { exit 0; } else { exit 1; }
+                if (isreg == 1i32) { pass 0; } else { pass 1; }
             } else {
                 drop(sys!!(SYS_MUNMAP, buf, 4096i64));
-                exit 1;
+                pass 1;
             }
         }
         
-        exit 1; // unknown unary op
+        pass 1; // unknown unary op
     }
     
     if (arg_count == 3i32) {
@@ -111,17 +108,17 @@ func:main = int32(int32:argc, wild int8->:argv) {
         string:arg2 = raw args_at(args, 3i32);
         
         if (string_equals(op, "=")) {
-            if (string_equals(arg1, arg2)) { exit 0; } else { exit 1; }
+            if (string_equals(arg1, arg2)) { pass 0; } else { pass 1; }
         }
         
         if (string_equals(op, "!=")) {
-            if (string_equals(arg1, arg2)) { exit 1; } else { exit 0; }
+            if (string_equals(arg1, arg2)) { pass 1; } else { pass 0; }
         }
         
         // Assume false for unknown binary op
-        exit 1;
+        pass 1;
     }
     
     // Posix test logic for more args is complex.
-    exit 1;
+    pass 1;
 };

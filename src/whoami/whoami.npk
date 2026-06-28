@@ -8,7 +8,7 @@ use "../vendor/nitpick_args.npk".*;
 use "../vendor/sys_constants.npk".*;
 use "../vendor/libc_ffi.npk".*;
 
-extern func:npk_mem_read_string = string(void*:ptr, int64:max_len);
+extern func:npk_mem_read_string = string(int64:ptr, int64:max_len);
 extern func:npk_mem_write_byte = void(int64:ptr, int64:offset, int64:val);
 
 
@@ -18,12 +18,9 @@ func:print_str_safe = int32(string:s) {
     pass 0i32;
 };
 
-func:failsafe = int32(tbb32:err) {
-    drop(standard_failsafe(err));
-    exit 1;
-};
 
-func:main = int32(int32:argc, wild int8->:argv) {
+
+pub func:whoami_main = int32(int32:argc, wild int8->:argv) {
     int64:uid = sys!!(SYS_GETUID) ? -1i64;
     string:uid_str = string_from_int(uid);
     
@@ -35,7 +32,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
         // fallback to just printing uid
         drop(print_str_safe(uid_str));
         drop(print_str_safe("\n"));
-        exit 0;
+        pass 0;
     }
     
     string:username = "";
@@ -53,10 +50,10 @@ func:main = int32(int32:argc, wild int8->:argv) {
         } else {
             if (c == 58i32) { // colon
                 if (field_index == 0i64) {
-                    username = npk_mem_read_string(cast_unchecked<void->>(cf_buf), cf_len);
+                    username = npk_mem_read_string(cf_buf, cf_len);
                 } else {
                     if (field_index == 2i64) {
-                        string:current_field = npk_mem_read_string(cast_unchecked<void->>(cf_buf), cf_len);
+                        string:current_field = npk_mem_read_string(cf_buf, cf_len);
                         if (string_equals(current_field, uid_str)) {
                             // Match!
                             drop(print_str_safe(username));
@@ -64,7 +61,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
                             drop(nitpick_libc_mem_free(cf_buf));
                             int64:fd = (<- (cast_unchecked<int64->>(fp + 0i64)));
                             drop(raw io_buf_free(fp));
-                            exit 0;
+                            pass 0;
                         }
                     }
                 }
@@ -87,5 +84,5 @@ func:main = int32(int32:argc, wild int8->:argv) {
     // fallback if not found
     drop(print_str_safe(uid_str));
     drop(print_str_safe("\n"));
-    exit 0;
+    pass 0;
 };

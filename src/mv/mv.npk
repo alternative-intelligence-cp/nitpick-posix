@@ -19,18 +19,15 @@ func:print_err = int32(string:s) {
     pass cast_unchecked<int32>(sys(WRITE, 2i64, s, len) ? -1i64);
 };
 
-func:failsafe = int32(tbb32:err) {
-    drop(standard_failsafe(err));
-    exit 1;
-};
 
-func:main = int32(int32:argc, wild int8->:argv) {
+
+pub func:mv_main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     
     if (arg_count != 2i32) {
         drop(print_err("usage: mv <source> <destination>\n"));
-        exit 1;
+        pass 1;
     }
     
     string:src = raw args_at(args, 1i32);
@@ -44,8 +41,8 @@ func:main = int32(int32:argc, wild int8->:argv) {
         drop(print_err("' to '"));
         drop(print_err(dst));
         drop(print_err("'\n"));
-        exit 1;
+        pass 1;
     }
     
-    exit 0;
+    pass 0;
 };

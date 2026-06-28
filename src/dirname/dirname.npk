@@ -24,25 +24,22 @@ func:print_err = int32(string:s) {
     pass 0i32;
 };
 
-func:failsafe = int32(tbb32:err) {
-    drop(standard_failsafe(err));
-    exit 1;
-};
 
-func:main = int32(int32:argc, wild int8->:argv) {
+
+pub func:dirname_main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     
     if (arg_count < 1i32) {
         drop(print_err("dirname: missing operand\n"));
-        exit 1;
+        pass 1;
     }
     
     string:path = raw args_at(args, 1i32);
     int64:len = string_length(path);
     if (len == 0i64) {
         drop(print_str_safe(".\n"));
-        exit 0;
+        pass 0;
     }
     
     // Step 1: strip trailing slashes (except the very first character if it's the only one)
@@ -63,7 +60,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     if (found_end == 0i32) {
         // all slashes!
         drop(print_str_safe("/\n"));
-        exit 0;
+        pass 0;
     }
     
     // Step 2: find the last slash before real_end
@@ -84,7 +81,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     if (found_slash == 0i32) {
         // no slashes before the basename
         drop(print_str_safe(".\n"));
-        exit 0;
+        pass 0;
     }
     
     // Step 3: strip trailing slashes of the directory part
@@ -105,12 +102,12 @@ func:main = int32(int32:argc, wild int8->:argv) {
     if (found_dir_end == 0i32) {
         // directory part is just "/"
         drop(print_str_safe("/\n"));
-        exit 0;
+        pass 0;
     }
     
     string:dir = string_substring(path, 0i64, dir_end + 1i64);
     drop(print_str_safe(dir));
     drop(print_str_safe("\n"));
     
-    exit 0;
+    pass 0;
 };

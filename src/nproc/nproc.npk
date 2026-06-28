@@ -13,16 +13,13 @@ func:print_str_safe = int32(string:s) {
     pass 0i32;
 };
 
-func:failsafe = int32(tbb32:err) {
-    drop(standard_failsafe(err));
-    exit 1;
-};
 
-func:main = int32(int32:argc, wild int8->:argv) {
+
+pub func:nproc_main = int32(int32:argc, wild int8->:argv) {
     int64:fp = fopen("/proc/cpuinfo", "r");
     if (fp == 0i64) {
         drop(print_str_safe("1\n")); // default if missing
-        exit 0;
+        pass 0;
     }
     
     int64:count = 0i64;
@@ -60,5 +57,5 @@ func:main = int32(int32:argc, wild int8->:argv) {
     drop(print_str_safe(string_from_int(count)));
     drop(print_str_safe("\n"));
     
-    exit 0;
+    pass 0;
 };

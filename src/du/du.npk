@@ -4,6 +4,7 @@ use "../vendor/mem_utils.npk".*;
 use "../vendor/sys_constants.npk".*;
 use "../vendor/nitpick_args.npk".*;
 use "../vendor/libc_ffi.npk".*;
+use "alist.npk".*;
 
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
@@ -17,7 +18,7 @@ func:print_str_safe = int32(string:s) {
     pass 0i32;
 };
 
-pub func:failsafe = int32(tbb32:err) { drop(standard_failsafe(err)); exit 1; };
+
 
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
@@ -96,17 +97,17 @@ func:du_walk = int64(string:path, int64:statbuf) {
                                 string:child_path = `&{path}/`;
                                 if (string_equals(path, "/")) { child_path = "/"; }
                                 child_path = `&{child_path}&{cname}`;
-                                drop(raw alpush(dirs_sl, strdup(child_path)));
+                                drop(raw alist_push(dirs_sl, strdup(child_path)));
                             }
                             bpos = bpos + reclen;
                         }
                     }
                 }
                 
-                int64:slen = raw alsize(dirs_sl);
+                int64:slen = raw alist_size(dirs_sl);
                 int64:s_idx = 0i64;
                 while (s_idx < slen) {
-                    int64:n_ptr = ok(raw alget(dirs_sl, s_idx));
+                    int64:n_ptr = ok(raw alist_get(dirs_sl, s_idx));
                     string:child_path = raw ptr_to_string(n_ptr);
                     int64:w_sz = raw du_walk(child_path, statbuf);
                     total_size = total_size + w_sz;
@@ -127,12 +128,12 @@ func:du_walk = int64(string:path, int64:statbuf) {
     pass total_size;
 };
 
-pub func:main = int32(int32:argc, wild int8->:argv) {
+pub func:du_main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     
     int64:statbuf = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ?! -1i64;
-    if (statbuf < 0i64) { exit 1; }
+    if (statbuf < 0i64) { pass 1; }
     
     int32:i = 1i32;
     if (arg_count < 1i32) {
@@ -146,5 +147,5 @@ pub func:main = int32(int32:argc, wild int8->:argv) {
     }
     
     drop(sys!!(SYS_MUNMAP, statbuf, 4096i64));
-    exit 0;
+    pass 0;
 };

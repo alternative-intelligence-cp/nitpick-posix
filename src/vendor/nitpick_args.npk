@@ -5,7 +5,7 @@ use "unsafe.npk".*;
 
 
 extern "libc" {
-    pub func:npk_mem_read_string = string(void*:ptr, int64:len);
+    pub func:npk_mem_read_string = string(int64:ptr, int64:len);
 }
 
 pub func:args_load_native = string(int32:argc, wild int8->:argv) {

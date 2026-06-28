@@ -5,34 +5,34 @@ use "../vendor/nitpick_args.npk".*;
 use "../vendor/sys_constants.npk".*;
 use "../vendor/libc_ffi.npk".*;
 
-pub func:failsafe = int32(tbb32:err) { drop(standard_failsafe(err)); exit 1; };
+
 
 extern func:npk_string_byte_at = int64(string:s, int64:idx);
 
 func:read_i64_local = int64(int64:ptr, int64:offset) {
     int64:p = ptr + (offset * 8i64);
-    int64:v0 = raw safe_mem_read_byte(cast_unchecked<uint8->>(p), 0i64);
-    int64:v1 = raw safe_mem_read_byte(cast_unchecked<uint8->>(p), 1i64);
-    int64:v2 = raw safe_mem_read_byte(cast_unchecked<uint8->>(p), 2i64);
-    int64:v3 = raw safe_mem_read_byte(cast_unchecked<uint8->>(p), 3i64);
-    int64:v4 = raw safe_mem_read_byte(cast_unchecked<uint8->>(p), 4i64);
-    int64:v5 = raw safe_mem_read_byte(cast_unchecked<uint8->>(p), 5i64);
-    int64:v6 = raw safe_mem_read_byte(cast_unchecked<uint8->>(p), 6i64);
-    int64:v7 = raw safe_mem_read_byte(cast_unchecked<uint8->>(p), 7i64);
+    int64:v0 = npk_mem_read_byte(p, 0i64);
+    int64:v1 = npk_mem_read_byte(p, 1i64);
+    int64:v2 = npk_mem_read_byte(p, 2i64);
+    int64:v3 = npk_mem_read_byte(p, 3i64);
+    int64:v4 = npk_mem_read_byte(p, 4i64);
+    int64:v5 = npk_mem_read_byte(p, 5i64);
+    int64:v6 = npk_mem_read_byte(p, 6i64);
+    int64:v7 = npk_mem_read_byte(p, 7i64);
     pass v0 + (v1 * 256i64) + (v2 * 65536i64) + (v3 * 16777216i64) + (v4 * 4294967296i64) + (v5 * 1099511627776i64) + (v6 * 281474976710656i64) + (v7 * 72057594037927936i64);
 };
 
 func:write_i64_local = int32(int64:ptr, int64:offset, int64:val) {
     int64:p = ptr + (offset * 8i64);
     int64:v = val;
-    drop(safe_mem_write_byte(cast_unchecked<uint8->>(p), 0i64, v - ((v / 256i64) * 256i64))); v = v / 256i64;
-    drop(safe_mem_write_byte(cast_unchecked<uint8->>(p), 1i64, v - ((v / 256i64) * 256i64))); v = v / 256i64;
-    drop(safe_mem_write_byte(cast_unchecked<uint8->>(p), 2i64, v - ((v / 256i64) * 256i64))); v = v / 256i64;
-    drop(safe_mem_write_byte(cast_unchecked<uint8->>(p), 3i64, v - ((v / 256i64) * 256i64))); v = v / 256i64;
-    drop(safe_mem_write_byte(cast_unchecked<uint8->>(p), 4i64, v - ((v / 256i64) * 256i64))); v = v / 256i64;
-    drop(safe_mem_write_byte(cast_unchecked<uint8->>(p), 5i64, v - ((v / 256i64) * 256i64))); v = v / 256i64;
-    drop(safe_mem_write_byte(cast_unchecked<uint8->>(p), 6i64, v - ((v / 256i64) * 256i64))); v = v / 256i64;
-    drop(safe_mem_write_byte(cast_unchecked<uint8->>(p), 7i64, v - ((v / 256i64) * 256i64)));
+    drop(npk_mem_write_byte(p, 0i64, v - ((v / 256i64) * 256i64))); v = v / 256i64;
+    drop(npk_mem_write_byte(p, 1i64, v - ((v / 256i64) * 256i64))); v = v / 256i64;
+    drop(npk_mem_write_byte(p, 2i64, v - ((v / 256i64) * 256i64))); v = v / 256i64;
+    drop(npk_mem_write_byte(p, 3i64, v - ((v / 256i64) * 256i64))); v = v / 256i64;
+    drop(npk_mem_write_byte(p, 4i64, v - ((v / 256i64) * 256i64))); v = v / 256i64;
+    drop(npk_mem_write_byte(p, 5i64, v - ((v / 256i64) * 256i64))); v = v / 256i64;
+    drop(npk_mem_write_byte(p, 6i64, v - ((v / 256i64) * 256i64))); v = v / 256i64;
+    drop(npk_mem_write_byte(p, 7i64, v - ((v / 256i64) * 256i64)));
     pass 0i32;
 };
 
@@ -57,8 +57,8 @@ func:get_node_id_local = int64(
             int32:match = 1i32;
             int64:j = 0i64;
             while (j < wlen) {
-                int64:c1 = raw safe_mem_read_byte(cast_unchecked<uint8->>(text_pool), st + j);
-                int64:c2 = raw safe_mem_read_byte(cast_unchecked<uint8->>(buf), word_start + j);
+                int64:c1 = npk_mem_read_byte(text_pool, st + j);
+                int64:c2 = npk_mem_read_byte(buf, word_start + j);
                 if (c1 != c2) {
                     match = 0i32;
                     break;
@@ -75,7 +75,7 @@ func:get_node_id_local = int64(
     drop(write_i64_local(node_lens, new_id, wlen));
     int64:j = 0i64;
     while (j < wlen) {
-        drop(safe_mem_write_byte(cast_unchecked<uint8->>(text_pool), text_len, raw safe_mem_read_byte(cast_unchecked<uint8->>(buf), word_start + j)));
+        drop(npk_mem_write_byte(text_pool, text_len, npk_mem_read_byte(buf, word_start + j)));
         text_len = text_len + 1i64;
         j = j + 1i64;
     }
@@ -84,10 +84,10 @@ func:get_node_id_local = int64(
     pass new_id;
 };
 
-pub func:main = int32(int32:argc, wild int8->:argv) {
+pub func:tsort_main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
-    if (arg_count > 2i32) { drop(print_err("tsort: extra operand\n")); exit 1; }
+    if (arg_count > 2i32) { drop(print_err("tsort: extra operand\n")); pass 1; }
     
     int64:fd = 0i64;
     if (arg_count == 2i32) {
@@ -99,10 +99,10 @@ pub func:main = int32(int32:argc, wild int8->:argv) {
         }
     }
     defer { if (fd > 0i64) { drop(sys(CLOSE, fd)); } }
-    if (fd < 0i64) { drop(print_err("tsort: open failed\n")); exit 1; }
+    if (fd < 0i64) { drop(print_err("tsort: open failed\n")); pass 1; }
     
     int64:buf = sys!!(SYS_MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
-    if (buf <= 0i64) { exit 1; }
+    if (buf <= 0i64) { pass 1; }
     
     int64:text_pool = sys!!(SYS_MMAP, 0i64, 1048576i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
     int64:node_starts = sys!!(SYS_MMAP, 0i64, 8000i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
@@ -128,7 +128,7 @@ pub func:main = int32(int32:argc, wild int8->:argv) {
             in_pos = 0i64;
         }
         
-        int64:c = raw safe_mem_read_byte(cast_unchecked<uint8->>(buf), in_pos);
+        int64:c = npk_mem_read_byte(buf, in_pos);
         in_pos = in_pos + 1i64;
         
         if (c == 32i64 || c == 9i64 || c == 10i64) {
@@ -139,8 +139,8 @@ pub func:main = int32(int32:argc, wild int8->:argv) {
                 } else {
                     if (prev_node != node_id) {
                         int64:adj_idx = prev_node * 1000i64 + node_id;
-                        if (raw safe_mem_read_byte(cast_unchecked<uint8->>(adj), adj_idx) == 0i64) {
-                            drop(safe_mem_write_byte(cast_unchecked<uint8->>(adj), adj_idx, 1i64));
+                        if (npk_mem_read_byte(adj, adj_idx) == 0i64) {
+                            drop(npk_mem_write_byte(adj, adj_idx, 1i64));
                             int64:old_deg = raw read_i64_local(in_degree, node_id);
                             drop(write_i64_local(in_degree, node_id, old_deg + 1i64));
                         }
@@ -151,7 +151,7 @@ pub func:main = int32(int32:argc, wild int8->:argv) {
             }
         } else {
             if (word_len < 4096i64) {
-                drop(safe_mem_write_byte(cast_unchecked<uint8->>(word_buf), word_len, c));
+                drop(npk_mem_write_byte(word_buf, word_len, c));
                 word_len = word_len + 1i64;
             }
         }
@@ -161,12 +161,12 @@ pub func:main = int32(int32:argc, wild int8->:argv) {
         int64:node_id = raw get_node_id_local(word_buf, 0i64, word_len, text_pool, state_arr, node_starts, node_lens);
         if (prev_node == -1i64) {
             drop(print_err("tsort: odd input of tokens\n"));
-            exit 1;
+            pass 1;
         } else {
             if (prev_node != node_id) {
                 int64:adj_idx = prev_node * 1000i64 + node_id;
-                if (raw safe_mem_read_byte(cast_unchecked<uint8->>(adj), adj_idx) == 0i64) {
-                    drop(safe_mem_write_byte(cast_unchecked<uint8->>(adj), adj_idx, 1i64));
+                if (npk_mem_read_byte(adj, adj_idx) == 0i64) {
+                    drop(npk_mem_write_byte(adj, adj_idx, 1i64));
                     int64:old_deg = raw read_i64_local(in_degree, node_id);
                     drop(write_i64_local(in_degree, node_id, old_deg + 1i64));
                 }
@@ -177,7 +177,7 @@ pub func:main = int32(int32:argc, wild int8->:argv) {
     
     if (prev_node != -1i64) {
         drop(print_err("tsort: odd input of tokens\n"));
-        exit 1;
+        pass 1;
     }
     
     // Kahn's algorithm
@@ -198,7 +198,7 @@ pub func:main = int32(int32:argc, wild int8->:argv) {
         
         if (found == -1i64) {
             drop(print_err("tsort: input contains a loop\n"));
-            exit 1;
+            pass 1;
         }
         
         drop(write_i64_local(visited, found, 1i64));
@@ -220,7 +220,7 @@ pub func:main = int32(int32:argc, wild int8->:argv) {
         int64:k = 0i64;
         while (k < nodes_count) {
             int64:adj_idx = found * 1000i64 + k;
-            if (raw safe_mem_read_byte(cast_unchecked<uint8->>(adj), adj_idx) == 1i64) {
+            if (npk_mem_read_byte(adj, adj_idx) == 1i64) {
                 int64:old_deg = 0i64;
                 old_deg = raw read_i64_local(in_degree, k);
                 drop(write_i64_local(in_degree, k, old_deg - 1i64));
@@ -236,5 +236,5 @@ pub func:main = int32(int32:argc, wild int8->:argv) {
     drop(sys!!(SYS_MUNMAP, node_lens, 8000i64));
     drop(sys!!(SYS_MUNMAP, node_starts, 8000i64));
     drop(sys!!(SYS_MUNMAP, buf, 65536i64));
-    exit 0;
+    pass 0;
 };

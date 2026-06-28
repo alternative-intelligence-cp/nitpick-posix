@@ -22,10 +22,7 @@ func:print_str_safe = int32(string:s) {
     pass 0i32;
 };
 
-func:failsafe = int32(tbb32:err) {
-    drop(standard_failsafe(err));
-    exit 1;
-};
+
 
 func:hex_char = int32(int32:nibble) {
     if (nibble == 0i32) { pass 48i32; }
@@ -71,7 +68,7 @@ func:hex_addr = int32(int64:out_state, int64:addr) {
 };
 
 extern func:npk_mem_write_byte = int64(int64:ptr, int64:offset, int64:val);
-func:main = int32(int32:argc, wild int8->:argv) {
+pub func:od_main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     
@@ -87,7 +84,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
                 drop(print_err("od: cannot open '"));
                 drop(print_err(file));
                 drop(print_err("'\n"));
-                exit 1;
+                pass 1;
             }
             defer { if (fd >= 0i64) { drop(sys(CLOSE, fd)); } }
             fp = raw io_buf_new(fd);
@@ -100,7 +97,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     int32:running = 1i32;
     
     int64:buf = sys!!(SYS_MMAP, 0i64, 16i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
-    if (buf < 0i64) { exit 1; }
+    if (buf < 0i64) { pass 1; }
     
     int64:out_state = raw io_buf_new(1i64);
     
@@ -169,5 +166,5 @@ func:main = int32(int32:argc, wild int8->:argv) {
     int64:fd_fp = (<- (cast_unchecked<int64->>(fp + 0i64)));
     drop(raw io_buf_free(fp));
     drop(sys!!(SYS_MUNMAP, buf, 16i64));
-    exit 0;
+    pass 0;
 };

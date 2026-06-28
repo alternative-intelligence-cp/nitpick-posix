@@ -23,18 +23,15 @@ func:print_str_safe = int32(string:s) {
     pass 0i32;
 };
 
-func:failsafe = int32(tbb32:err) {
-    drop(standard_failsafe(err));
-    exit 1;
-};
 
-func:main = int32(int32:argc, wild int8->:argv) {
+
+pub func:cmp_main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     
     if (arg_count < 2i32) {
         drop(print_err("cmp: missing operand\n"));
-        exit 2;
+        pass 2;
     }
     
     string:file1 = raw args_at(args, 1i32);
@@ -45,7 +42,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
         drop(print_err("cmp: cannot open '"));
         drop(print_err(file1));
         drop(print_err("'\n"));
-        exit 2;
+        pass 2;
     }
     defer { if (fd1 >= 0i64) { drop(sys(CLOSE, fd1)); } }
     int64:fp1 = raw io_buf_new(fd1);
@@ -55,7 +52,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
         drop(print_err("cmp: cannot open '"));
         drop(print_err(file2));
         drop(print_err("'\n"));
-        exit 2;
+        pass 2;
     }
     defer { if (fd2 >= 0i64) { drop(sys(CLOSE, fd2)); } }
     int64:fp2 = raw io_buf_new(fd2);
@@ -73,13 +70,13 @@ func:main = int32(int32:argc, wild int8->:argv) {
                 drop(print_str_safe("cmp: EOF on "));
                 drop(print_str_safe(file1));
                 drop(print_str_safe("\n"));
-                exit 1;
+                pass 1;
             }
             if (c2 < 0i32) {
                 drop(print_str_safe("cmp: EOF on "));
                 drop(print_str_safe(file2));
                 drop(print_str_safe("\n"));
-                exit 1;
+                pass 1;
             }
             
             drop(print_str_safe(file1));
@@ -90,7 +87,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
             drop(print_str_safe(", line "));
             drop(print_str_safe(string_from_int(line_num)));
             drop(print_str_safe("\n"));
-            exit 1;
+            pass 1;
         }
         
         if (c1 < 0i32) {
@@ -107,5 +104,5 @@ func:main = int32(int32:argc, wild int8->:argv) {
     int64:fd_2 = (<- (cast_unchecked<int64->>(fp2 + 0i64)));
     drop(raw io_buf_free(fp1));
     drop(raw io_buf_free(fp2));
-    exit 0;
+    pass 0;
 };

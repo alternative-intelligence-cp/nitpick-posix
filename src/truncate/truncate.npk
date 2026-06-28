@@ -18,12 +18,9 @@ func:print_err = int32(string:s) {
     pass 0i32;
 };
 
-func:failsafe = int32(tbb32:err) {
-    drop(standard_failsafe(err));
-    exit 1;
-};
 
-func:main = int32(int32:argc, wild int8->:argv) {
+
+pub func:truncate_main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     
@@ -42,7 +39,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
         } else {
             if (size == -1i64) {
                 drop(print_err("truncate: missing size\n"));
-                exit 1;
+                pass 1;
             }
             has_file = 1i32;
             // SYS_TRUNCATE is 76
@@ -59,8 +56,8 @@ func:main = int32(int32:argc, wild int8->:argv) {
     
     if (has_file == 0i32) {
         drop(print_err("truncate: missing file operand\n"));
-        exit 1;
+        pass 1;
     }
     
-    exit ret;
+    pass ret;
 };

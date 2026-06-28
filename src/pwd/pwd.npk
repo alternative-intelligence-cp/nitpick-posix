@@ -13,19 +13,16 @@ func:print_err = int32(string:s) {
     pass cast_unchecked<int32>(sys(WRITE, 2i64, s, len) ? -1i64);
 };
 
-func:failsafe = int32(tbb32:err) {
-    drop(standard_failsafe(err));
-    exit 1;
-};
 
-func:main = int32(int32:argc, wild int8->:argv) {
+
+pub func:pwd_main = int32(int32:argc, wild int8->:argv) {
     any->:buf = cast_unchecked<any->>(alloc(4096i64));
     defer { free(buf); }
     
     int64:res = sys!!(SYS_GETCWD, cast_unchecked<int64>(buf), 4096i64) ? -1i64;
     if (res < 0i64) {
         drop(print_err("pwd: error getting current working directory\n"));
-        exit 1;
+        pass 1;
     }
     
     // find length
@@ -47,5 +44,5 @@ func:main = int32(int32:argc, wild int8->:argv) {
     string:cwd = npk_mem_read_string(cast_unchecked<int64>(buf), len);
     drop(sys(WRITE, 1i64, cwd, len));
     drop(sys(WRITE, 1i64, "\n", 1i64));
-    exit 0;
+    pass 0;
 };

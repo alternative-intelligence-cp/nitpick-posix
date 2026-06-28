@@ -9,13 +9,14 @@ extern func:npk_mem_write_byte = void(int64:ptr, int64:offset, int64:val);
 use "../vendor/nitpick_args.npk".*;
 use "../vendor/sys_constants.npk".*;
 use "../vendor/libc_ffi.npk".*;
+use "alist.npk".*;
 
 
 
 pub func:alist_pop_front = int64(int64:lst) {
-    if (raw alsize(lst) == 0i64) { pass -1i64; }
-    int64:v = raw alget(lst, 0i64);
-    drop(raw alremove(lst, 0i64));
+    if (raw alist_size(lst) == 0i64) { pass -1i64; }
+    int64:v = raw alist_get(lst, 0i64);
+    drop(raw alist_remove(lst, 0i64));
     pass ok(v);
 };
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
@@ -72,10 +73,7 @@ func:strcmp = int32(int64:s1, int64:s2) {
     pass 0i32;
 };
 
-func:failsafe = int32(tbb32:err) {
-    drop(standard_failsafe(err));
-    exit 1;
-};
+
 
 func:read_lines = int64(string:filename, int64:sl) {
     int64:fd = sys(OPEN, filename, 0i64, 0i64) ? -1i64;
@@ -106,7 +104,7 @@ func:read_lines = int64(string:filename, int64:sl) {
                 line_len = line_len + 1i64;
                 if (c == 10i64) { // '\n'
                     npk_mem_write_byte(line_buf, line_len, 0i64);
-                    drop(raw alpush(sl, raw str_clone(line_buf)));
+                    drop(raw alist_push(sl, raw str_clone(line_buf)));
                     line_len = 0i64;
                 }
                 pos = pos + 1i64;
@@ -116,7 +114,7 @@ func:read_lines = int64(string:filename, int64:sl) {
 
     if (line_len > 0i64) {
         npk_mem_write_byte(line_buf, line_len, 0i64);
-        drop(raw alpush(sl, raw str_clone(line_buf)));
+        drop(raw alist_push(sl, raw str_clone(line_buf)));
     }
 
     drop(nitpick_libc_mem_free(line_buf));
@@ -124,7 +122,7 @@ func:read_lines = int64(string:filename, int64:sl) {
     pass sl;
 };
 
-func:main = int32(int32:argc, wild int8->:argv) {
+pub func:comm_main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     
@@ -145,7 +143,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
 
     if (non_flags < 2i32) {
         drop(print_err("usage: comm FILE1 FILE2\n"));
-        exit 1;
+        pass 1;
     }
 
     int64:fd1 = sys(OPEN, f1, 0i64, 0i64) ? -1i64;
@@ -153,8 +151,8 @@ func:main = int32(int32:argc, wild int8->:argv) {
     int64:fd2 = sys(OPEN, f2, 0i64, 0i64) ? -1i64;
     defer { if (fd2 >= 0i64) { drop(sys(CLOSE, fd2)); } }
     
-    if (fd1 < 0i64) { drop(print_err("comm: cannot open ")); drop(print_err(f1)); drop(print_err("\n")); exit 1; }
-    if (fd2 < 0i64) { drop(print_err("comm: cannot open ")); drop(print_err(f2)); drop(print_err("\n")); exit 1; }
+    if (fd1 < 0i64) { drop(print_err("comm: cannot open ")); drop(print_err(f1)); drop(print_err("\n")); pass 1; }
+    if (fd2 < 0i64) { drop(print_err("comm: cannot open ")); drop(print_err(f2)); drop(print_err("\n")); pass 1; }
     
     int64:state1 = raw io_buf_new(fd1);
     int64:state2 = raw io_buf_new(fd2);
@@ -162,14 +160,14 @@ func:main = int32(int32:argc, wild int8->:argv) {
     int64:p1 = malloc(65536i64);
     int64:p2 = malloc(65536i64);
     
-    int64:len1 = raw io_buf_readline(state1, cast_unchecked<uint8->>(p1));
-    int64:len2 = raw io_buf_readline(state2, cast_unchecked<uint8->>(p2));
+    int64:len1 = raw io_buf_readline(state1, cast_unchecked<uint8->>(p1), 4096i64);
+    int64:len2 = raw io_buf_readline(state2, cast_unchecked<uint8->>(p2), 4096i64);
 
     while (1i32 == 1i32) {
         if (len1 == 0i64) {
             if (len2 == 0i64) {
                 // both empty
-                exit 0;
+                pass 0;
             }
         }
         
@@ -177,30 +175,30 @@ func:main = int32(int32:argc, wild int8->:argv) {
             // print col 2
             drop(print_out("\t"));
             drop(print_out(raw ptr_to_string(p2)));
-            len2 = raw io_buf_readline(state2, cast_unchecked<uint8->>(p2));
+            len2 = raw io_buf_readline(state2, cast_unchecked<uint8->>(p2), 4096i64);
         } else {
             if (len2 == 0i64) {
                 // print col 1
                 drop(print_out(raw ptr_to_string(p1)));
-                len1 = raw io_buf_readline(state1, cast_unchecked<uint8->>(p1));
+                len1 = raw io_buf_readline(state1, cast_unchecked<uint8->>(p1), 4096i64);
             } else {
                 int32:cmp = raw strcmp(p1, p2);
                 if (cmp == 0i32) {
                     // print col 3
                     drop(print_out("\t\t"));
                     drop(print_out(raw ptr_to_string(p1)));
-                    len1 = raw io_buf_readline(state1, cast_unchecked<uint8->>(p1));
-                    len2 = raw io_buf_readline(state2, cast_unchecked<uint8->>(p2));
+                    len1 = raw io_buf_readline(state1, cast_unchecked<uint8->>(p1), 4096i64);
+                    len2 = raw io_buf_readline(state2, cast_unchecked<uint8->>(p2), 4096i64);
                 } else {
                     if (cmp < 0i32) {
                         // print col 1
                         drop(print_out(raw ptr_to_string(p1)));
-                        len1 = raw io_buf_readline(state1, cast_unchecked<uint8->>(p1));
+                        len1 = raw io_buf_readline(state1, cast_unchecked<uint8->>(p1), 4096i64);
                     } else {
                         // print col 2
                         drop(print_out("\t"));
                         drop(print_out(raw ptr_to_string(p2)));
-                        len2 = raw io_buf_readline(state2, cast_unchecked<uint8->>(p2));
+                        len2 = raw io_buf_readline(state2, cast_unchecked<uint8->>(p2), 4096i64);
                     }
                 }
             }
@@ -212,5 +210,5 @@ func:main = int32(int32:argc, wild int8->:argv) {
     drop(nitpick_libc_mem_free(p1));
     drop(nitpick_libc_mem_free(p2));
     
-    exit 0;
+    pass 0;
 };

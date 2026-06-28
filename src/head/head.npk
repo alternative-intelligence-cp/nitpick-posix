@@ -30,12 +30,9 @@ func:print_str = int32(string:s) {
     pass cast_unchecked<int32>(sys(WRITE, 1i64, s, len) ? -1i64);
 };
 
-func:failsafe = int32(tbb32:err) {
-    drop(standard_failsafe(err));
-    exit 1;
-};
 
-func:main = int32(int32:argc, wild int8->:argv) {
+
+pub func:head_main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     
@@ -76,7 +73,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     }
 
     int64:buf = sys!!(SYS_MMAP, 0i64, 8192i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
-    if (buf <= 0i64) { exit 1; }
+    if (buf <= 0i64) { pass 1; }
     
     int32:exit_status = 0i32;
     int32:n_iters = arg_count;
@@ -181,5 +178,5 @@ func:main = int32(int32:argc, wild int8->:argv) {
     }
     
     drop(sys!!(SYS_MUNMAP, buf, 8192i64));
-    exit exit_status;
+    pass exit_status;
 };

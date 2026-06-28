@@ -15,23 +15,23 @@ func:print_err = int32(string:s) {
     pass 0i32;
 };
 
-pub func:failsafe = int32(tbb32:err) { drop(standard_failsafe(err)); exit 1; };
 
-pub func:main = int32(int32:argc, wild int8->:argv) {
+
+pub func:shred_main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     
-    if (arg_count < 1i32) { exit 0; }
+    if (arg_count < 1i32) { pass 0; }
     
     int64:stat_buf = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
     int64:rand_buf = sys!!(SYS_MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
-    if (stat_buf < 0i64) { exit 1; }
-    if (rand_buf < 0i64) { exit 1; }
+    if (stat_buf < 0i64) { pass 1; }
+    if (rand_buf < 0i64) { pass 1; }
     
     int64:urandom_fd = sys(OPEN, "/dev/urandom", 0i64, 0i64) ? -1i64;
     if (urandom_fd < 0i64) {
         drop(print_err("shred: cannot open /dev/urandom\n"));
-        exit 1;
+        pass 1;
     }
     defer { if (urandom_fd >= 0i64) { drop(sys(CLOSE, urandom_fd)); } }
     
@@ -66,11 +66,11 @@ pub func:main = int32(int32:argc, wild int8->:argv) {
                         // Fill rand_buf with random data
                         int64:rn = sys(READ, urandom_fd, rand_buf, to_write) ? -1i64;
                         if (rn <= 0i64) {
-                            written = size; // exit loop
+                            written = size; // pass loop
                         } else {
                             int64:w = sys(WRITE, fd, rand_buf, rn) ? -1i64;
                             if (w <= 0i64) {
-                                written = size; // exit loop
+                                written = size; // pass loop
                             } else {
                                 written = written + w;
                             }
@@ -87,5 +87,5 @@ pub func:main = int32(int32:argc, wild int8->:argv) {
     
     drop(sys!!(SYS_MUNMAP, stat_buf, 4096i64));
     drop(sys!!(SYS_MUNMAP, rand_buf, 65536i64));
-    exit ret;
+    pass ret;
 };

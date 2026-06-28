@@ -11,16 +11,16 @@ func:print_err = int32(string:s) {
     pass 0i32;
 };
 
-pub func:failsafe = int32(tbb32:err) { drop(standard_failsafe(err)); exit 1; };
+
 
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
 
-pub func:main = int32(int32:argc, wild int8->:argv) {
+pub func:stdbuf_main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     
-    if (arg_count < 2i32) { exit 0; }
+    if (arg_count < 2i32) { pass 0; }
     
     string:mode_i = "";
     string:mode_o = "";
@@ -64,7 +64,7 @@ pub func:main = int32(int32:argc, wild int8->:argv) {
         }
     }
     
-    if (cmd_idx > cast_unchecked<int64>(arg_count)) { exit 0; }
+    if (cmd_idx > cast_unchecked<int64>(arg_count)) { pass 0; }
     
     int64:buf = sys!!(SYS_MMAP, 0i64, 16384i64, 3i64, 34i64, -1i64, 0i64) ?! 0i64;
     int64:fd = sys(OPEN, "/proc/self/cmdline", 0i64, 0i64) ?! -1i64;
@@ -188,5 +188,5 @@ pub func:main = int32(int32:argc, wild int8->:argv) {
     }
     
     drop(print_err("stdbuf: failed to execute command\n"));
-    exit 1;
+    pass 1;
 };

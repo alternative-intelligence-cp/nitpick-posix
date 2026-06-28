@@ -19,12 +19,9 @@ func:print_err = int32(string:s) {
     pass cast_unchecked<int32>(sys(WRITE, 2i64, s, len) ? -1i64);
 };
 
-func:failsafe = int32(tbb32:err) {
-    drop(standard_failsafe(err));
-    exit 1;
-};
 
-func:main = int32(int32:argc, wild int8->:argv) {
+
+pub func:ln_main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     
@@ -51,11 +48,11 @@ func:main = int32(int32:argc, wild int8->:argv) {
     
     if (string_length(target) == 0i64) {
         drop(print_err("usage: ln [-s] <target> <link_name>\n"));
-        exit 1;
+        pass 1;
     }
     if (string_length(linkname) == 0i64) {
         drop(print_err("usage: ln [-s] <target> <link_name>\n"));
-        exit 1;
+        pass 1;
     }
     
     int64:res = 0i64;
@@ -71,8 +68,8 @@ func:main = int32(int32:argc, wild int8->:argv) {
         drop(print_err("ln: failed to create link '"));
         drop(print_err(linkname));
         drop(print_err("'\n"));
-        exit 1;
+        pass 1;
     }
     
-    exit 0;
+    pass 0;
 };

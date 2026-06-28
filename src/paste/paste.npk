@@ -14,18 +14,14 @@ use "../vendor/libc_ffi.npk".*;
 // using io_utils functions
 
 
-func:failsafe = int32(tbb32:err) {
-    drop(standard_failsafe(err));
-    exit 1;
-};
 
-func:main = int32(int32:argc, wild int8->:argv) {
+
+pub func:paste_main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     
     if (arg_count < 1i32) {
-        // no files, just exit
-        exit 0;
+        // no files, just pass pass 0;
     }
     
     int64:fp_array = malloc(cast_unchecked<int64>(arg_count) * 8i64);
@@ -101,5 +97,5 @@ func:main = int32(int32:argc, wild int8->:argv) {
     }
     
     drop(free(cast_unchecked<void->>(fp_array)));
-    exit 0;
+    pass 0;
 };

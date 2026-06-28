@@ -46,24 +46,21 @@ func:mem_read_32 = int64(int64:ptr, int64:offset) {
     pass res;
 };
 
-func:failsafe = int32(tbb32:err) {
-    drop(standard_failsafe(err));
-    exit 1;
-};
 
-func:main = int32(int32:argc, wild int8->:argv) {
+
+pub func:stat_main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     
     if (arg_count < 1i32) {
         drop(print_err("stat: missing operand\n"));
-        exit 1;
+        pass 1;
     }
     
     string:file = raw args_at(args, 1i32);
     
     int64:buf = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
-    if (buf < 0i64) { exit 1; }
+    if (buf < 0i64) { pass 1; }
     
     // NEWFSTATAT(dirfd, pathname, statbuf, flags)
     // -100 is AT_FDCWD
@@ -72,7 +69,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
         drop(print_err("stat: cannot stat '"));
         drop(print_err(file));
         drop(print_err("'\n"));
-        exit 1;
+        pass 1;
     }
     
     // Parse stat buffer (Linux x86_64 struct stat)
@@ -112,5 +109,5 @@ func:main = int32(int32:argc, wild int8->:argv) {
     drop(print_str_safe(")\n"));
     
     drop(sys!!(SYS_MUNMAP, buf, 4096i64));
-    exit 0;
+    pass 0;
 };

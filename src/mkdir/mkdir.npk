@@ -19,18 +19,15 @@ func:print_err = int32(string:s) {
     pass cast_unchecked<int32>(sys(WRITE, 2i64, s, len) ? -1i64);
 };
 
-func:failsafe = int32(tbb32:err) {
-    drop(standard_failsafe(err));
-    exit 1;
-};
 
-func:main = int32(int32:argc, wild int8->:argv) {
+
+pub func:mkdir_main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     
     if (arg_count < 1i32) {
         drop(print_err("usage: mkdir <directory>\n"));
-        exit 1;
+        pass 1;
     }
     
     int32:i = 1i32;
@@ -48,5 +45,5 @@ func:main = int32(int32:argc, wild int8->:argv) {
         i = i + 1i32;
     }
     
-    exit exit_status;
+    pass exit_status;
 };

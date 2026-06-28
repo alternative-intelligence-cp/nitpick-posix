@@ -21,10 +21,7 @@ func:print_err = int32(string:s) {
     pass cast_unchecked<int32>(sys(WRITE, 2i64, s, len) ? -1i64);
 };
 
-func:failsafe = int32(tbb32:err) {
-    drop(standard_failsafe(err));
-    exit 1;
-};
+
 
 // Write 8-byte little-endian value
 func:mem_write_64 = int32(int64:ptr, int64:offset, int64:value) {
@@ -38,13 +35,13 @@ func:mem_write_64 = int32(int64:ptr, int64:offset, int64:value) {
     pass 0i32;
 };
 
-func:main = int32(int32:argc, wild int8->:argv) {
+pub func:sleep_main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     
     if (arg_count < 1i32) {
         drop(print_err("sleep: missing operand\n"));
-        exit 1;
+        pass 1;
     }
     
     string:arg = raw args_at(args, 1i32);
@@ -53,13 +50,13 @@ func:main = int32(int32:argc, wild int8->:argv) {
     
     if (seconds < 0i64) {
         drop(print_err("sleep: invalid time interval\n"));
-        exit 1;
+        pass 1;
     }
     
     // allocate 16 bytes for struct timespec
     int64:req = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
     if (req < 0i64) {
-        exit 1;
+        pass 1;
     }
     
     drop(mem_write_64(req, 0i64, seconds)); // tv_sec
@@ -70,8 +67,8 @@ func:main = int32(int32:argc, wild int8->:argv) {
     drop(sys!!(SYS_MUNMAP, req, 4096i64));
     
     if (res < 0i64) {
-        exit 1;
+        pass 1;
     }
     
-    exit 0;
+    pass 0;
 };

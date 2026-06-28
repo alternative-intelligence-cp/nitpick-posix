@@ -19,10 +19,7 @@ func:print_err = int32(string:s) {
     pass cast_unchecked<int32>(sys(WRITE, 2i64, s, len) ? -1i64);
 };
 
-func:failsafe = int32(tbb32:err) {
-    drop(standard_failsafe(err));
-    exit 1;
-};
+
 
 func:parse_octal = int64(string:s) {
     int64:len = string_length(s);
@@ -41,13 +38,13 @@ func:parse_octal = int64(string:s) {
     pass mode;
 };
 
-func:main = int32(int32:argc, wild int8->:argv) {
+pub func:chmod_main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     
     if (arg_count < 2i32) {
         drop(print_err("usage: chmod <octal_mode> <file>\n"));
-        exit 1;
+        pass 1;
     }
     
     string:mode_str = raw args_at(args, 1i32);
@@ -68,5 +65,5 @@ func:main = int32(int32:argc, wild int8->:argv) {
         i = i + 1i32;
     }
     
-    exit exit_status;
+    pass exit_status;
 };

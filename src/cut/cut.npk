@@ -21,10 +21,7 @@ func:print_err = int32(string:s) {
     pass 0i32;
 };
 
-func:failsafe = int32(tbb32:err) {
-    drop(standard_failsafe(err));
-    exit 1;
-};
+
 
 func:char_to_ascii = int64(string:s) {
     if (string_length(s) == 0i64) { pass 0i64; }
@@ -39,7 +36,7 @@ func:char_to_ascii = int64(string:s) {
     pass 0i64;
 };
 
-func:main = int32(int32:argc, wild int8->:argv) {
+pub func:cut_main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     
@@ -86,7 +83,7 @@ func:main = int32(int32:argc, wild int8->:argv) {
     
     if (target_field == 0i64) {
         drop(print_err("cut: you must specify a list of bytes, characters, or fields\n"));
-        exit 1;
+        pass 1;
     }
     
     int64:fd = 0i64;
@@ -97,14 +94,14 @@ func:main = int32(int32:argc, wild int8->:argv) {
             drop(print_err("cut: cannot open '"));
             drop(print_err(file));
             drop(print_err("'\n"));
-            exit 1;
+            pass 1;
         }
         }
     defer { if (fd >= 0i64) { drop(sys(CLOSE, fd)); } }
     
     int64:buf_size = 65536i64; // 1MB buffer
     int64:buf = malloc(buf_size);
-    if (buf < 0i64) { exit 1; }
+    if (buf < 0i64) { pass 1; }
     
     int64:current_field = 1i64;
     int32:running = 1i32;
@@ -150,5 +147,5 @@ func:main = int32(int32:argc, wild int8->:argv) {
     }
     drop(nitpick_libc_mem_free(buf));
     
-    exit 0;
+    pass 0;
 };

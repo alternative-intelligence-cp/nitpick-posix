@@ -19,12 +19,9 @@ func:print_str = int32(string:s) {
     pass cast_unchecked<int32>(sys(WRITE, 1i64, s, len) ? -1i64);
 };
 
-func:failsafe = int32(tbb32:err) {
-    drop(standard_failsafe(err));
-    exit 1;
-};
 
-func:main = int32(int32:argc, wild int8->:argv) {
+
+pub func:echo_main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     
@@ -51,5 +48,5 @@ func:main = int32(int32:argc, wild int8->:argv) {
         drop(print_str("\n"));
     }
     
-    exit 0;
+    pass 0;
 };

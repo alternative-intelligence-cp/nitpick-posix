@@ -20,14 +20,7 @@ func:print_str_safe = int32(string:s) {
     pass 0i32;
 };
 
-func:failsafe = int32(tbb32:err) {
-    int64:e = cast_unchecked<int64>(err);
-    if (e == 2i64) {
-        exit 2;
-    }
-    drop(standard_failsafe(err));
-    exit 1;
-};
+
 
 pub int32:expr_pos = 1i32;
 pub int32:expr_argc = 0i32;
@@ -145,14 +138,14 @@ func:parse_or = int64() {
     pass left;
 };
 
-pub func:main = int32(int32:argc, wild int8->:argv) {
+pub func:expr_main = int32(int32:argc, wild int8->:argv) {
     expr_args = raw args_load_native(argc, argv);
     expr_argc = raw args_count(expr_args);
     expr_pos = 1i32;
     
     if (expr_argc < 1i32) {
         drop(print_err("expr: missing operand\n"));
-        exit 1;
+        pass 1;
     }
     
     int64:val = raw parse_or();
@@ -160,6 +153,6 @@ pub func:main = int32(int32:argc, wild int8->:argv) {
     drop(print_str_safe(string_from_int(val)));
     drop(print_str_safe("\n"));
     
-    if (val == 0i64) { exit 1; }
-    exit 0;
+    if (val == 0i64) { pass 1; }
+    pass 0;
 };

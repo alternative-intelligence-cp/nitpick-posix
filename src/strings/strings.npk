@@ -24,10 +24,7 @@ func:print_str_safe = int32(string:s) {
     pass 0i32;
 };
 
-func:failsafe = int32(tbb32:err) {
-    drop(standard_failsafe(err));
-    exit 1;
-};
+
 
 func:is_printable = int32(int64:c) {
     if (c == 9i64) { pass 1i32; } // tab
@@ -37,20 +34,20 @@ func:is_printable = int32(int64:c) {
     pass 0i32;
 };
 
-func:main = int32(int32:argc, wild int8->:argv) {
+pub func:strings_main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     
     int64:buf_size = 65536i64; // 1MB buffer
     int64:buf = malloc(buf_size);
-    if (buf < 0i64) { exit 1; }
+    if (buf < 0i64) { pass 1; }
     
     int32:i = 1i32;
     int32:ret = 0i32;
     
     if (arg_count < 1i32) {
         drop(print_err("strings: missing operand\n"));
-        exit 1;
+        pass 1;
     }
     
     while (i <= arg_count) {
@@ -104,5 +101,5 @@ func:main = int32(int32:argc, wild int8->:argv) {
     }
     
     drop(nitpick_libc_mem_free(buf));
-    exit ret;
+    pass ret;
 };
