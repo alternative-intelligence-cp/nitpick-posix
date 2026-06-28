@@ -1,0 +1,221 @@
+// cal.npk
+
+use "vendor/io_utils.npk".*;
+use "vendor/mem_utils.npk".*;
+use "vendor/sys_constants.npk".*;
+use "stdlib/string.npk".*;
+use "alist.npk".*;
+
+use "vendor/nitpick_args.npk".*;
+
+
+
+
+
+
+
+func:read_int64 = int64(int64:ptr) {
+    int64:b0 = npk_mem_read_byte(ptr, 0i64);
+    int64:b1 = npk_mem_read_byte(ptr, 1i64);
+    int64:b2 = npk_mem_read_byte(ptr, 2i64);
+    int64:b3 = npk_mem_read_byte(ptr, 3i64);
+    int64:b4 = npk_mem_read_byte(ptr, 4i64);
+    int64:b5 = npk_mem_read_byte(ptr, 5i64);
+    int64:b6 = npk_mem_read_byte(ptr, 6i64);
+    int64:b7 = npk_mem_read_byte(ptr, 7i64);
+    pass b0 + (b1 * 256i64) + (b2 * 65536i64) + (b3 * 16777216i64) + (b4 * 4294967296i64) + (b5 * 1099511627776i64) + (b6 * 281474976710656i64) + (b7 * 72057594037927936i64);
+};
+
+func:is_leap_year = int64(int64:year) {
+    if ((year % 4i64 == 0i64 && year % 100i64 != 0i64) || (year % 400i64 == 0i64)) { pass 1i64; }
+    pass 0i64;
+};
+
+func:days_in_month = int64(int64:year, int64:month) {
+    if (month == 2i64) { pass 28i64 + raw is_leap_year(year); }
+    if (month == 4i64 || month == 6i64 || month == 9i64 || month == 11i64) { pass 30i64; }
+    pass 31i64;
+};
+
+func:get_start_dow = int64(int64:year, int64:month) {
+    int64:y = year - 1i64;
+    int64:days = y * 365i64 + y / 4i64 - y / 100i64 + y / 400i64;
+    int64:m = 1i64;
+    while (m < month) {
+        days = days + raw days_in_month(year, m);
+        m = m + 1i64;
+    }
+    pass (1i64 + days) % 7i64;
+};
+
+func:print_month_header = int32(int64:year, int64:month) {
+    string:mstr = "";
+    if (month == 1i64) { mstr = "January"; }
+    else if (month == 2i64) { mstr = "February"; }
+    else if (month == 3i64) { mstr = "March"; }
+    else if (month == 4i64) { mstr = "April"; }
+    else if (month == 5i64) { mstr = "May"; }
+    else if (month == 6i64) { mstr = "June"; }
+    else if (month == 7i64) { mstr = "July"; }
+    else if (month == 8i64) { mstr = "August"; }
+    else if (month == 9i64) { mstr = "September"; }
+    else if (month == 10i64) { mstr = "October"; }
+    else if (month == 11i64) { mstr = "November"; }
+    else if (month == 12i64) { mstr = "December"; }
+    
+    int64:len = string_length(mstr) + 5i64;
+    int64:pad = (20i64 - len) / 2i64;
+    int64:i = 0i64;
+    while (i < pad) { drop(sys(WRITE, 1i64, " ", 1i64) ? -1i64); i = i + 1i64; }
+    drop(sys(WRITE, 1i64, mstr, string_length(mstr)) ? -1i64);
+    drop(sys(WRITE, 1i64, " ", 1i64) ? -1i64);
+    
+    int64:st = raw alist(64i64);
+    int64:y_len = 0i64;
+    int64:temp_y = year;
+    if (temp_y == 0i64) {
+        drop(alist_push(st, 48i64));
+        y_len = 1i64;
+    } else {
+        while (temp_y > 0i64) {
+            int64:d = temp_y % 10i64;
+            drop(alist_push(st, d + 48i64));
+            y_len = y_len + 1i64;
+            temp_y = temp_y / 10i64;
+        }
+    }
+    while (y_len > 0i64) {
+        int64:c = raw alist_get(st, raw alist_size(st) - 1i64);
+        drop(raw alist_remove(st, raw alist_size(st) - 1i64));
+        string:s_char = string_from_char(@cast_unchecked<int8>(c));
+        drop(sys(WRITE, 1i64, s_char, 1i64) ? -1i64);
+        y_len = y_len - 1i64;
+    }
+    drop(sys(WRITE, 1i64, "\n", 1i64) ? -1i64);
+    drop(sys(WRITE, 1i64, "Su Mo Tu We Th Fr Sa\n", 21i64) ? -1i64);
+    
+    pass 0i32;
+};
+
+func:print_cal = int32(int64:year, int64:month) {
+    drop(print_month_header(year, month));
+    
+    int64:dow = raw get_start_dow(year, month);
+    int64:days = raw days_in_month(year, month);
+    
+    int64:col = dow;
+    int64:day = 1i64;
+    int64:first_in_week = 1i64;
+    
+    int64:s = 0i64;
+    while (s < dow) {
+        if (s == 0i64) { drop(sys(WRITE, 1i64, "  ", 2i64) ? -1i64); }
+        else { drop(sys(WRITE, 1i64, "   ", 3i64) ? -1i64); }
+        s = s + 1i64;
+    }
+    if (dow == 0i64) { first_in_week = 1i64; } else { first_in_week = 0i64; }
+    
+    while (day <= days) {
+        if (first_in_week == 0i64) {
+            drop(sys(WRITE, 1i64, " ", 1i64) ? -1i64);
+        }
+        
+        if (day < 10i64) {
+            drop(sys(WRITE, 1i64, " ", 1i64) ? -1i64);
+            wild int8->:dbuf_alloc_ptr = alloc(1i64);
+    int64:dbuf = @cast_unchecked<int64>(dbuf_alloc_ptr);
+    defer { free(dbuf_alloc_ptr); }
+            drop(npk_mem_write_byte(dbuf, 0i64, cast_unchecked<int32>(day + 48i64)));
+            drop(sys(WRITE, 1i64, dbuf, 1i64));
+            
+        } else {
+            wild int8->:dbuf_alloc_ptr = alloc(2i64);
+    int64:dbuf = @cast_unchecked<int64>(dbuf_alloc_ptr);
+            defer { free(dbuf_alloc_ptr); }
+            drop(npk_mem_write_byte(dbuf, 0i64, cast_unchecked<int32>((day / 10i64) + 48i64)));
+            drop(npk_mem_write_byte(dbuf, 1i64, cast_unchecked<int32>((day % 10i64) + 48i64)));
+            drop(sys(WRITE, 1i64, dbuf, 2i64));
+        }
+        
+        first_in_week = 0i64;
+        col = col + 1i64;
+        if (col == 7i64) {
+            drop(sys(WRITE, 1i64, "\n", 1i64) ? -1i64);
+            col = 0i64;
+            first_in_week = 1i64;
+        }
+        day = day + 1i64;
+    }
+    if (col != 0i64) {
+        drop(sys(WRITE, 1i64, "\n", 1i64) ? -1i64);
+    }
+    pass 0i32;
+};
+
+pub func:cal_main = int32(int32:argc, wild int8->:argv) {
+    string:args = raw args_load_native(argc, argv);
+    ArgParser:parser = raw Parser_create();
+    parser = raw Parser_add_flag(parser, "--help", "display this help and exit");
+    parser = raw Parser_add_flag(parser, "--version", "output version information and exit");
+    int64:parsed_args = raw Parser_parse(parser, args, 0i64);
+    argc = raw args_count(args);
+    int64:year = 0i64;
+    int64:month = 0i64;
+    
+    if (argc == 2i32) {
+        month = string_to_int(raw args_at(args, 0i32));
+        year = string_to_int(raw args_at(args, 1i32));
+    } else if (argc == 1i32) {
+        year = string_to_int(raw args_at(args, 0i32));
+    } else if (argc == 0i32) {
+        wild int8->:tv_alloc_ptr = alloc(16i64);
+    int64:tv = @cast_unchecked<int64>(tv_alloc_ptr);
+    defer { free(tv_alloc_ptr); }
+        drop(sys!!(SYS_GETTIMEOFDAY, @cast_unchecked<int64>(tv), 0i64));
+        int64:sec = raw read_int64(@cast_unchecked<int64>(tv));
+        
+        
+        int64:days = sec / 86400i64;
+        year = 1970i64;
+        while (1i32 == 1i32) {
+            int64:y_days = 365i64 + raw is_leap_year(year);
+            if (days >= y_days) {
+                days = days - y_days;
+                year = year + 1i64;
+            } else {
+                break;
+            }
+        }
+        month = 1i64;
+        while (month <= 12i64) {
+            int64:m_days = raw days_in_month(year, month);
+            if (days >= m_days) {
+                days = days - m_days;
+                month = month + 1i64;
+            } else {
+                break;
+            }
+        }
+    } else {
+        drop(print_err("Usage: cal [month] [year]\n"));
+        pass 1i32;
+    }
+    
+    if (month == 0i64 && year > 0i64) {
+        int64:m = 1i64;
+        while (m <= 12i64) {
+            drop(print_cal(year, m));
+            if (m != 12i64) { drop(sys(WRITE, 1i64, "\n", 1i64) ? -1i64); }
+            m = m + 1i64;
+        }
+        if (month >= 1i64) {
+            if (month <= 12i64) {
+                drop(print_cal(year, month));
+                pass 0i32;
+            }
+        }
+        drop(print_err("cal: invalid month\n"));
+        pass 1i32;
+    }
+    pass 0i32;
+};

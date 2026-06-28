@@ -182,7 +182,7 @@ pub func:comm_main = int32(int32:argc, wild int8->:argv) {
                 drop(print_out(raw ptr_to_string(p1)));
                 len1 = raw io_buf_readline(state1, cast_unchecked<uint8->>(p1), 4096i64);
             } else {
-                int32:cmp = raw strcmp(p1, p2);
+                int32:cmp = strcmp(raw ptr_to_string(p1), raw ptr_to_string(p2));
                 if (cmp == 0i32) {
                     // print col 3
                     drop(print_out("\t\t"));

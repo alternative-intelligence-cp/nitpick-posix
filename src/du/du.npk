@@ -23,7 +23,6 @@ func:print_str_safe = int32(string:s) {
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
 extern "libc" {
-    func:strdup = int64(string:s);
 }
 
 func:int_to_str = string(int64:val) {

@@ -1,15 +1,13 @@
 // groups.npk
 
-
-
 use "../vendor/io_utils.npk".*;
 use "../vendor/mem_utils.npk".*;
 use "../vendor/nitpick_args.npk".*;
 use "../vendor/sys_constants.npk".*;
+use "../vendor/libc_ffi.npk".*;
 
-
-extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
-
+extern func:npk_mem_read_string = string(int64:ptr, int64:max_len);
+extern func:npk_mem_write_byte = void(int64:ptr, int64:offset, int64:val);
 
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
@@ -23,14 +21,7 @@ func:print_str_safe = int32(string:s) {
     pass 0i32;
 };
 
-
-
 func:contains = int32(string:haystack, string:needle) {
-    // Basic comma-separated containment check
-    // "root,randy,bin" -> search for "randy"
-    // Since string splitting is hard, we just check if it contains the substring.
-    // In nitpick we don't have string_contains!
-    // We have string_substring.
     int64:len_h = string_length(haystack);
     int64:len_n = string_length(needle);
     if (len_n == 0i64) { pass 1i32; }
@@ -40,7 +31,6 @@ func:contains = int32(string:haystack, string:needle) {
     while (i <= len_h - len_n) {
         string:sub = string_substring(haystack, i, i + len_n);
         if (string_equals(sub, needle)) {
-            // make sure it's bounded by commas or ends
             int32:valid = 1i32;
             if (i > 0i64) {
                 if (string_equals(string_substring(haystack, i - 1i64, i), ",")) {
@@ -70,49 +60,41 @@ pub func:groups_main = int32(int32:argc, wild int8->:argv) {
     string:target_user = "";
     int64:target_gid = -1i64;
     
+    int64:cf_buf = malloc(4096i64);
+    
     if (arg_count >= 1i32) {
         target_user = raw args_at(args, 1i32);
-        // We'd have to find their primary GID from /etc/passwd
         int64:fd_pw = sys(OPEN, "/etc/passwd", 0i64, 0i64) ? -1i64;
         defer { if (fd_pw >= 0i64) { drop(sys(CLOSE, fd_pw)); } }
         int64:fp_pw = 0i64;
         if (fd_pw >= 0i64) { fp_pw = raw io_buf_new(fd_pw); }
         if (fp_pw != 0i64) {
-            int32:running = 1i32;
-            while (running == 1i32) {
-                string:line = "";
-                int32:c = raw io_buf_getc(fp_pw);
-                if (c < 0i32) {
-                    running = 0i32;
-                } else {
-                    while (c >= 0i32) {
-                        if (c == 10i32) { c = -1i32; }
-                        else {
-                            line = string_concat(line, string_from_char(cast_unchecked<int8>(c)));
-                            c = raw io_buf_getc(fp_pw);
-                        }
-                    }
-                    // parse line: user:x:uid:gid:...
-                    int64:len = string_length(line);
-                    int64:j = 0i64;
-                    int64:col = 0i64;
-                    string:u = "";
-                    string:g = "";
-                    while (j < len) {
-                        string:ch = string_substring(line, j, j+1i64);
-                        if (string_equals(ch, ":")) {
-                            col = col + 1i64;
-                        } else {
-                            if (col == 0i64) { u = string_concat(u, ch); }
-                            if (col == 3i64) { g = string_concat(g, ch); }
-                        }
-                        j = j + 1i64;
-                    }
+            int64:cf_len = 0i64;
+            int64:field_index = 0i64;
+            string:u = "";
+            string:g = "";
+            int32:c = raw io_buf_getc(fp_pw);
+            while (c >= 0i32) {
+                if (c == 10i32) {
                     if (string_equals(u, target_user)) {
                         target_gid = string_to_int(g);
-                        running = 0i32;
+                        c = -1i32; // exit loop
+                    }
+                    u = ""; g = "";
+                    cf_len = 0i64; field_index = 0i64;
+                } else {
+                    if (c == 58i32) {
+                        if (field_index == 0i64) { u = npk_mem_read_string(cf_buf, cf_len); }
+                        if (field_index == 3i64) { g = npk_mem_read_string(cf_buf, cf_len); }
+                        cf_len = 0i64; field_index = field_index + 1i64;
+                    } else {
+                        if (cf_len < 4096i64) {
+                            npk_mem_write_byte(cf_buf, cf_len, cast_unchecked<int64>(c));
+                            cf_len = cf_len + 1i64;
+                        }
                     }
                 }
+                if (c >= 0i32) { c = raw io_buf_getc(fp_pw); }
             }
             int64:fd = (<- (cast_unchecked<int64->>(fp_pw + 0i64)));
             drop(raw io_buf_free(fp_pw));
@@ -126,43 +108,33 @@ pub func:groups_main = int32(int32:argc, wild int8->:argv) {
         int64:fp_pw = 0i64;
         if (fd_pw >= 0i64) { fp_pw = raw io_buf_new(fd_pw); }
         if (fp_pw != 0i64) {
-            int32:running = 1i32;
-            while (running == 1i32) {
-                string:line = "";
-                int32:c = raw io_buf_getc(fp_pw);
-                if (c < 0i32) {
-                    running = 0i32;
-                } else {
-                    while (c >= 0i32) {
-                        if (c == 10i32) { c = -1i32; }
-                        else {
-                            line = string_concat(line, string_from_char(cast_unchecked<int8>(c)));
-                            c = raw io_buf_getc(fp_pw);
-                        }
-                    }
-                    int64:len = string_length(line);
-                    int64:j = 0i64;
-                    int64:col = 0i64;
-                    string:u = "";
-                    string:i_uid = "";
-                    string:g = "";
-                    while (j < len) {
-                        string:ch = string_substring(line, j, j+1i64);
-                        if (string_equals(ch, ":")) {
-                            col = col + 1i64;
-                        } else {
-                            if (col == 0i64) { u = string_concat(u, ch); }
-                            if (col == 2i64) { i_uid = string_concat(i_uid, ch); }
-                            if (col == 3i64) { g = string_concat(g, ch); }
-                        }
-                        j = j + 1i64;
-                    }
+            int64:cf_len = 0i64;
+            int64:field_index = 0i64;
+            string:u = ""; string:i_uid = ""; string:g = "";
+            int32:c = raw io_buf_getc(fp_pw);
+            while (c >= 0i32) {
+                if (c == 10i32) {
                     if (string_equals(i_uid, uid_str)) {
                         target_user = u;
                         target_gid = string_to_int(g);
-                        running = 0i32;
+                        c = -1i32; // exit loop
+                    }
+                    u = ""; i_uid = ""; g = "";
+                    cf_len = 0i64; field_index = 0i64;
+                } else {
+                    if (c == 58i32) {
+                        if (field_index == 0i64) { u = npk_mem_read_string(cf_buf, cf_len); }
+                        if (field_index == 2i64) { i_uid = npk_mem_read_string(cf_buf, cf_len); }
+                        if (field_index == 3i64) { g = npk_mem_read_string(cf_buf, cf_len); }
+                        cf_len = 0i64; field_index = field_index + 1i64;
+                    } else {
+                        if (cf_len < 4096i64) {
+                            npk_mem_write_byte(cf_buf, cf_len, cast_unchecked<int64>(c));
+                            cf_len = cf_len + 1i64;
+                        }
                     }
                 }
+                if (c >= 0i32) { c = raw io_buf_getc(fp_pw); }
             }
             int64:fd = (<- (cast_unchecked<int64->>(fp_pw + 0i64)));
             drop(raw io_buf_free(fp_pw));
@@ -170,7 +142,9 @@ pub func:groups_main = int32(int32:argc, wild int8->:argv) {
     }
     
     if (string_length(target_user) == 0i64) {
-        drop(print_err("groups: cannot find user\n"));
+        drop(print_err("groups: cannot find user
+"));
+        drop(nitpick_libc_mem_free(cf_buf));
         pass 1;
     }
     
@@ -179,47 +153,22 @@ pub func:groups_main = int32(int32:argc, wild int8->:argv) {
     
     int64:fd_g = sys(OPEN, "/etc/group", 0i64, 0i64) ? -1i64;
     if (fd_g < 0i64) {
-        drop(print_err("groups: cannot open /etc/group\n"));
+        drop(print_err("groups: cannot open /etc/group
+"));
+        drop(nitpick_libc_mem_free(cf_buf));
         pass 1;
     }
     defer { if (fd_g >= 0i64) { drop(sys(CLOSE, fd_g)); } }
     int64:fp = raw io_buf_new(fd_g);
     
-    int32:running2 = 1i32;
     int32:first = 1i32;
+    int64:cf_len = 0i64;
+    int64:field_index = 0i64;
+    string:g_name = ""; string:g_id = ""; string:g_list = "";
     
-    while (running2 == 1i32) {
-        string:line = "";
-        int32:c = raw io_buf_getc(fp);
-        if (c < 0i32) {
-            running2 = 0i32;
-        } else {
-            while (c >= 0i32) {
-                if (c == 10i32) { c = -1i32; }
-                else {
-                    line = string_concat(line, string_from_char(cast_unchecked<int8>(c)));
-                    c = raw io_buf_getc(fp);
-                }
-            }
-            // parse line: group_name:password:GID:user_list
-            int64:len = string_length(line);
-            int64:j = 0i64;
-            int64:col = 0i64;
-            string:g_name = "";
-            string:g_id = "";
-            string:g_list = "";
-            while (j < len) {
-                string:ch = string_substring(line, j, j+1i64);
-                if (string_equals(ch, ":")) {
-                    col = col + 1i64;
-                } else {
-                    if (col == 0i64) { g_name = string_concat(g_name, ch); }
-                    if (col == 2i64) { g_id = string_concat(g_id, ch); }
-                    if (col == 3i64) { g_list = string_concat(g_list, ch); }
-                }
-                j = j + 1i64;
-            }
-            
+    int32:c = raw io_buf_getc(fp);
+    while (c >= 0i32) {
+        if (c == 10i32) {
             if (string_to_int(g_id) == target_gid) {
                 if (first == 0i32) { drop(print_str_safe(" ")); }
                 drop(print_str_safe(g_name));
@@ -231,11 +180,28 @@ pub func:groups_main = int32(int32:argc, wild int8->:argv) {
                     first = 0i32;
                 }
             }
+            g_name = ""; g_id = ""; g_list = "";
+            cf_len = 0i64; field_index = 0i64;
+        } else {
+            if (c == 58i32) {
+                if (field_index == 0i64) { g_name = npk_mem_read_string(cf_buf, cf_len); }
+                if (field_index == 2i64) { g_id = npk_mem_read_string(cf_buf, cf_len); }
+                if (field_index == 3i64) { g_list = npk_mem_read_string(cf_buf, cf_len); }
+                cf_len = 0i64; field_index = field_index + 1i64;
+            } else {
+                if (cf_len < 4096i64) {
+                    npk_mem_write_byte(cf_buf, cf_len, cast_unchecked<int64>(c));
+                    cf_len = cf_len + 1i64;
+                }
+            }
         }
+        c = raw io_buf_getc(fp);
     }
     
-    drop(print_str_safe("\n"));
+    drop(print_str_safe("
+"));
     int64:fd_fp = (<- (cast_unchecked<int64->>(fp + 0i64)));
     drop(raw io_buf_free(fp));
+    drop(nitpick_libc_mem_free(cf_buf));
     pass 0;
 };

@@ -1,0 +1,5 @@
+use "sys_constants.npk".*;
+pub func:proc_exit = NIL(int32:code) {
+    drop(sys!!!(SYS_EXIT_GROUP, (@cast_unchecked<int64>(code)), 0i64, 0i64, 0i64, 0i64, 0i64));
+    pass NIL;
+};

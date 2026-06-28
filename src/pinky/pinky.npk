@@ -93,9 +93,9 @@ pub func:pinky_main = int32(int32:argc, wild int8->:argv) {
             }
         }
         
-        drop(print_str(pad_right(user, 9i64)));
-        drop(print_str(pad_right(user, 21i64))); // name fallback
-        drop(print_str(pad_right(tty, 9i64)));
+        drop(print_str(raw pad_right(user, 9i64)));
+        drop(print_str(raw pad_right(user, 21i64))); // name fallback
+        drop(print_str(raw pad_right(tty, 9i64)));
         drop(print_str("       ")); // Idle empty
         drop(print_str(fmt_date));
         drop(print_str("\n"));

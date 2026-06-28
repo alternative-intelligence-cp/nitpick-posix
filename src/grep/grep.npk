@@ -1,0 +1,322 @@
+// grep.npk
+
+use "vendor/io_utils.npk".*;
+use "vendor/mem_utils.npk".*;
+use "vendor/sys_constants.npk".*;
+use "stdlib/string.npk".*;
+
+
+
+use "vendor/nitpick_args.npk".*;
+use "vendor/libc_ffi.npk".*;
+
+
+
+
+
+
+
+
+
+    pub struct:GrepFlags = {
+        int64:v;
+        int64:n;
+        int64:c;
+        int64:i;
+    };
+
+func:print_uint = int32(int64:val) {
+    if (val == 0i64) {
+        drop(print_out("0"));
+        pass 0i32;
+    }
+    int64:buf = sys!!(SYS_MMAP, 0i64, 32i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    defer { drop(sys!!(SYS_MUNMAP, buf, 32i64)); }
+    int64:v = val;
+    int64:i = 0i64;
+    while (v > 0i64) {
+        drop(npk_mem_write_byte(buf, i, (v % 10i64) + 48i64));
+        v = v / 10i64;
+        i = i + 1i64;
+    }
+    int64:j = 0i64;
+    int64:k = i - 1i64;
+    while (j < k) {
+        int64:tmp = npk_mem_read_byte(buf, j);
+        drop(npk_mem_write_byte(buf, j, npk_mem_read_byte(buf, k)));
+        drop(npk_mem_write_byte(buf, k, tmp));
+        j = j + 1i64;
+        k = k - 1i64;
+    }
+    drop(sys(WRITE, 1i64, buf, i));
+    
+    pass 0i32;
+};
+
+
+func:npk_string_from_buf = string(int64:buf, int64:offset, int64:len) {
+    drop(npk_mem_write_byte(buf, offset + len, 0i64));
+    pass string_from_cstr(buf + offset);
+};
+
+func:process_file = int32(string:filename, int64:preg, GrepFlags:flags, int32:print_filename) {
+    int64:fd = 0i64;
+    int32:has_matched_any = 0i32;
+    int32:ignore_case = @cast_unchecked<int32>(flags.i);
+    if (string_equals(filename, "-") == false) {
+        string:c_filename = string_concat(filename, string_from_char(@cast_unchecked<int8>(0i64)));
+        
+        fd = sys(OPEN, c_filename, 0i64, 0i64) ? -1i64;
+    }
+    defer { if (fd > 2i64) { drop(sys(CLOSE, fd)); } }
+    
+    
+    int64:buf = sys!!(SYS_MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    defer { if (buf > 0i64) { drop(sys!!(SYS_MUNMAP, buf, 65536i64)); } }
+    if (buf <= 0i64) { fail 1; }
+    
+    int64:line_cap = 65536i64;
+    int64:line_buf = sys!!(SYS_MMAP, 0i64, line_cap, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    defer { if (line_buf > 0i64) { drop(sys!!(SYS_MUNMAP, line_buf, line_cap)); } }
+    if (line_buf <= 0i64) { fail 1; }
+    int64:line_len = 0i64;
+    int64:line_num = 1i64;
+    int64:match_count = 0i64;
+    int32:has_matched_any = 0i32;
+    
+    int32:running = 1i32;
+    int64:file_size = sys(LSEEK, fd, 0i64, 2i64) ? -1i64; // SEEK_END
+    int64:mmap_ptr = -1i64;
+    
+    if (file_size > 0i64) {
+        mmap_ptr = sys!!(SYS_MMAP, 0i64, file_size, 1i64, 2i64, fd, 0i64) ? -1i64; // PROT_READ, MAP_PRIVATE
+        if (mmap_ptr > 0i64) {
+            int64:i = 0i64;
+            while (i < file_size) {
+                int64:c = npk_mem_read_byte(mmap_ptr, i);
+                if (c == 10i64) {
+                    string:line_str = raw npk_string_from_buf(@cast_unchecked<int64>(line_buf), 0i64, line_len);
+                    int32:matched = 0i32;
+                    if (regexec(preg, line_str, 0i64, 0i64, 0i32) == 0i32) { matched = 1i32; }
+                    
+                    int32:should_print = 0i32;
+                    if (flags.v == 1i64) {
+                        if (matched == 0i32) { should_print = 1i32; }
+                    } else {
+                        if (matched == 1i32) { should_print = 1i32; }
+                    }
+                    
+                    if (should_print == 1i32) {
+                        match_count = match_count + 1i64;
+                        has_matched_any = 1i32;
+                        
+                        if (flags.c == 0i64) {
+                            if (print_filename == 1i32) {
+                                drop(print_out(filename));
+                                drop(print_out(":"));
+                            }
+                            if (flags.n == 1i64) {
+                                drop(print_uint(line_num));
+                                drop(print_out(":"));
+                            }
+                            drop(sys(WRITE, 1i64, @cast_unchecked<int64>(line_buf), line_len) ? -1i64);
+                            drop(print_out("\n"));
+                        }
+                    }
+                    
+                    line_len = 0i64;
+                    line_num = line_num + 1i64;
+                } else {
+                    if (line_len >= line_cap - 1i64) {
+                        int64:new_line_buf = sys(MREMAP, line_buf, line_cap, line_cap * 2i64, 1i64) ? 0i64; // SYS_MREMAP
+                        line_buf = new_line_buf;
+                        line_cap = line_cap * 2i64;
+                    }
+                    drop(npk_mem_write_byte(line_buf, line_len, cast_unchecked<int32>(c)));
+                    line_len = line_len + 1i64;
+                }
+                i = i + 1i64;
+            }
+            drop(sys!!(SYS_MUNMAP, mmap_ptr, file_size));
+            running = 0i32;
+        } else {
+            drop(sys(LSEEK, fd, 0i64, 0i64)); // Rewind to start
+        }
+    }
+    
+    while (running == 1i32) {
+        int64:bytes_read = sys(READ, fd, @cast_unchecked<int64>(buf), 65536i64) ? -1i64;
+        if (bytes_read <= 0i64) {
+            running = 0i32;
+        } else {
+            int64:i = 0i64;
+            while (i < bytes_read) {
+                int64:c = npk_mem_read_byte(buf, i);
+                if (c == 10i64) {
+                    string:line_str = raw npk_string_from_buf(@cast_unchecked<int64>(line_buf), 0i64, line_len);
+                    int32:matched = 0i32;
+                    if (regexec(preg, line_str, 0i64, 0i64, 0i32) == 0i32) { matched = 1i32; }
+                    
+                    int32:should_print = 0i32;
+                    if (flags.v == 1i64) {
+                        if (matched == 0i32) { should_print = 1i32; }
+                    } else {
+                        if (matched == 1i32) { should_print = 1i32; }
+                    }
+                    
+                    if (should_print == 1i32) {
+                        match_count = match_count + 1i64;
+                        has_matched_any = 1i32;
+                        
+                        if (flags.c == 0i64) {
+                            if (print_filename == 1i32) {
+                                drop(print_out(filename));
+                                drop(print_out(":"));
+                            }
+                            if (flags.n == 1i64) {
+                                drop(print_uint(line_num));
+                                drop(print_out(":"));
+                            }
+                            drop(sys(WRITE, 1i64, @cast_unchecked<int64>(line_buf), line_len) ? -1i64);
+                            drop(print_out("\n"));
+                        }
+                    }
+                    
+                    line_len = 0i64;
+                    line_num = line_num + 1i64;
+                } else {
+                    if (line_len >= line_cap - 1i64) {
+                        int64:new_line_buf = sys(MREMAP, line_buf, line_cap, line_cap * 2i64, 1i64) ? 0i64; // SYS_MREMAP
+                        line_buf = new_line_buf;
+                        line_cap = line_cap * 2i64;
+                    }
+                    drop(npk_mem_write_byte(line_buf, line_len, cast_unchecked<int32>(c)));
+                    line_len = line_len + 1i64;
+                }
+                i = i + 1i64;
+            }
+        }
+    }
+    
+    if (line_len > 0i64) {
+        string:line_str = raw npk_string_from_buf(@cast_unchecked<int64>(line_buf), 0i64, line_len);
+        int32:matched = 0i32;
+                    if (regexec(preg, line_str, 0i64, 0i64, 0i32) == 0i32) { matched = 1i32; }
+        
+        int32:should_print = 0i32;
+        if (flags.v == 1i64) {
+            if (matched == 0i32) { should_print = 1i32; }
+        } else {
+            if (matched == 1i32) { should_print = 1i32; }
+        }
+        
+        if (should_print == 1i32) {
+            match_count = match_count + 1i64;
+            has_matched_any = 1i32;
+            
+            if (flags.c == 0i64) {
+                if (print_filename == 1i32) {
+                    drop(print_out(filename));
+                    drop(print_out(":"));
+                }
+                if (flags.n == 1i64) {
+                    drop(print_uint(line_num));
+                    drop(print_out(":"));
+                }
+                drop(sys(WRITE, 1i64, @cast_unchecked<int64>(line_buf), line_len) ? -1i64);
+                drop(print_out("\n"));
+            }
+        }
+    }
+    
+    if (flags.c == 1i64) {
+        if (print_filename == 1i32) {
+            drop(print_out(filename));
+            drop(print_out(":"));
+        }
+        drop(print_uint(match_count));
+        drop(print_out("\n"));
+    }
+    
+    drop(sys!!(SYS_MUNMAP, buf, 65536i64)); // MUNMAP
+    drop(sys!!(SYS_MUNMAP, line_buf, line_cap));
+    
+    
+    if (has_matched_any == 1i32) { pass 0i32; }
+    pass 1i32;
+};
+
+pub func:grep_main = int32(int32:argc, wild int8->:argv) {
+    string:args = raw args_load_native(argc, argv);
+    ArgParser:p = raw Parser_create();
+    p = raw Parser_add_flag(p, "-v", "invert-match");
+    p = raw Parser_add_flag(p, "-n", "line-number");
+    p = raw Parser_add_flag(p, "-c", "count");
+    p = raw Parser_add_flag(p, "-i", "ignore-case");
+    int64:ht = ahash(1024i64);
+    int64:parsed = raw Parser_parse(p, args, ht);
+    
+    GrepFlags:flags_obj = GrepFlags{ v: 0i64, n: 0i64, c: 0i64, i: 0i64 };
+    if (string_equals(raw ahget_str(parsed, "-v"), "1")) { flags_obj.v = 1i64; }
+    if (string_equals(raw ahget_str(parsed, "-n"), "1")) { flags_obj.n = 1i64; }
+    if (string_equals(raw ahget_str(parsed, "-c"), "1")) { flags_obj.c = 1i64; }
+    if (string_equals(raw ahget_str(parsed, "-i"), "1")) { flags_obj.i = 1i64; }
+    
+    string:pattern = raw ahget_str(parsed, "pos&0");
+    int32:pattern_set = 0i32;
+    if (string_length(pattern) > 0i64) { pattern_set = 1i32; }
+    
+    int64:preg = malloc(64i64);
+    defer { drop(nitpick_libc_mem_free(preg)); }
+    
+    int32:cflags = 1i32; // REG_EXTENDED
+    if (flags_obj.i == 1i64) { cflags = cflags | 2i32; } // REG_ICASE
+    
+    if (pattern_set == 1i32) {
+        int32:rc = regcomp(preg, pattern, cflags);
+        if (rc != 0i32) {
+            drop(print_err("grep: invalid regular expression\n"));
+            pass 2i32;
+        }
+    }
+    defer { if (pattern_set == 1i32) { drop(regfree(preg)); } }
+    
+    int32:dir_count = 0i32;
+    while (1i32 == 1i32) {
+        string:pos_key = string_concat("pos", string_from_int(@cast_unchecked<int64>(dir_count + 1i32)));
+        if (string_length(raw ahget_str(parsed, pos_key)) == 0i64) { break; }
+        dir_count = dir_count + 1i32;
+    }
+    
+    int32:exit_status = 1i32;
+    int32:res1 = 0i32;
+    int32:print_filename = 0i32;
+    int32:current_file_idx = 0i32;
+    int32:res2 = 0i32;
+    string:tok = "";
+    
+    if (pattern_set == 0i32) {
+        drop(print_err("Usage: grep [OPTION]... PATTERNS [FILE]...\n"));
+        pass 2;
+    }
+    
+    if (dir_count == 0i32) {
+        res1 = raw process_file("-", preg, flags_obj, 0i32);
+        if (res1 == 0i32) { exit_status = 0i32; }
+    } else {
+        if (dir_count > 1i32) { print_filename = 1i32; }
+        
+        current_file_idx = 0i32;
+        while (current_file_idx < dir_count) {
+            string:pos_key = string_concat("pos", string_from_int(@cast_unchecked<int64>(current_file_idx + 1i32)));
+            tok = raw ahget_str(parsed, pos_key);
+            if (string_length(tok) > 0i64) {
+                res2 = raw process_file(tok, preg, flags_obj, print_filename);
+                if (res2 == 0i32) { exit_status = 0i32; }
+            }
+            current_file_idx = current_file_idx + 1i32;
+        }
+    }
+    
+    pass exit_status;
+};

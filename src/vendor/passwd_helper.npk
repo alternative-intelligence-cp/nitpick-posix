@@ -1,0 +1,105 @@
+extern func:npk_mem_read_string = string(int64:ptr, int64:len);
+// vendor/passwd_helper.npk
+use "stdlib/string.npk".*;
+use "file_helper.npk".*;
+
+pub func:get_user_by_uid = string(int64:uid) {
+    string:content = raw read_file_to_string("/etc/passwd");
+    if (string_length(content) == 0i64) {
+        pass "";
+    }
+    string:uid_str = string_from_int(uid);
+    int64:lines = raw str_split(content, "\n");
+    int64:num_lines = raw str_split_count(lines);
+    string:res = "";
+    int64:i = 0i64;
+    while (i < num_lines) {
+        string:line = raw str_split_get(lines, i);
+        if (string_length(line) > 0i64) {
+            int64:fields = raw str_split(line, ":");
+            if (raw str_split_count(fields) >= 3i64) {
+                string:f_uid = raw str_split_get(fields, 2i64);
+                if (string_equals(f_uid, uid_str)) {
+                    res = raw str_split_get(fields, 0i64);
+                    drop(str_split_free(fields));
+                    drop(str_split_free(lines));
+                    pass res;
+                }
+            }
+            drop(str_split_free(fields));
+        }
+        i = i + 1i64;
+    }
+    drop(str_split_free(lines));
+    pass "";
+};
+
+pub func:get_gecos_by_uid = string(int64:uid) {
+    string:content = raw read_file_to_string("/etc/passwd");
+    if (string_length(content) == 0i64) {
+        pass "";
+    }
+    string:uid_str = string_from_int(uid);
+    int64:lines = raw str_split(content, "\n");
+    int64:num_lines = raw str_split_count(lines);
+    string:res = "";
+    int64:i = 0i64;
+    while (i < num_lines) {
+        string:line = raw str_split_get(lines, i);
+        if (string_length(line) > 0i64) {
+            int64:fields = raw str_split(line, ":");
+            if (raw str_split_count(fields) >= 5i64) {
+                string:f_uid = raw str_split_get(fields, 2i64);
+                if (string_equals(f_uid, uid_str)) {
+                    res = raw str_split_get(fields, 4i64);
+                    
+                    // GECOS fields are comma separated, just get the first part (Full Name)
+                    int64:sub_fields = raw str_split(res, ",");
+                    if (raw str_split_count(sub_fields) > 0i64) {
+                        res = raw str_split_get(sub_fields, 0i64);
+                    }
+                    drop(str_split_free(sub_fields));
+                    
+                    drop(str_split_free(fields));
+                    drop(str_split_free(lines));
+                    pass res;
+                }
+            }
+            drop(str_split_free(fields));
+        }
+        i = i + 1i64;
+    }
+    drop(str_split_free(lines));
+    pass "";
+};
+
+pub func:get_group_by_gid = string(int64:gid) {
+    string:content = raw read_file_to_string("/etc/group");
+    if (string_length(content) == 0i64) {
+        pass "";
+    }
+    string:gid_str = string_from_int(gid);
+    int64:lines = raw str_split(content, "\n");
+    int64:num_lines = raw str_split_count(lines);
+    string:res = "";
+    int64:i = 0i64;
+    while (i < num_lines) {
+        string:line = raw str_split_get(lines, i);
+        if (string_length(line) > 0i64) {
+            int64:fields = raw str_split(line, ":");
+            if (raw str_split_count(fields) >= 3i64) {
+                string:f_gid = raw str_split_get(fields, 2i64);
+                if (string_equals(f_gid, gid_str)) {
+                    res = raw str_split_get(fields, 0i64);
+                    drop(str_split_free(fields));
+                    drop(str_split_free(lines));
+                    pass res;
+                }
+            }
+            drop(str_split_free(fields));
+        }
+        i = i + 1i64;
+    }
+    drop(str_split_free(lines));
+    pass "";
+};

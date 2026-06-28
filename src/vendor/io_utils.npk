@@ -1,0 +1,186 @@
+// io_utils.npk
+use "stdlib/string.npk".*;
+use "proc_exit_shim.npk".*;
+
+extern func:npk_string_byte_at = int64(string:s, int64:idx);
+
+use "sys_constants.npk".*;
+use "libc_ffi.npk".*;
+use "unsafe.npk".*;
+use "mem_utils.npk".*;
+
+pub func:print_out = int32(string:s) {
+    int64:len = string_length(s);
+    if (len > 0i64) { drop(sys(WRITE, 1i64, s, len) ? -1i64); }
+    pass 0i32;
+};
+
+pub func:print_err = int32(string:s) {
+    int64:len = string_length(s);
+    drop(sys(WRITE, 2i64, s, len));
+    pass 0i32;
+};
+
+pub func:print_str = int32(string:s) {
+    int64:len = string_length(s);
+    drop(sys(WRITE, 1i64, s, len));
+    pass 0i32;
+};
+
+pub func:print_str_safe = int32(string:s) {
+    int64:len = string_length(s);
+    drop(sys(WRITE, 1i64, s, len));
+    pass 0i32;
+};
+
+pub func:print_str_ptr = int32(int64:ptr) {
+    int64:len = 0i64;
+    while (npk_mem_read_byte(ptr, len) != 0i64) {
+        len = len + 1i64;
+    }
+    drop(sys(WRITE, 1i64, ptr, len));
+    pass 0i32;
+};
+
+pub func:io_buf_new = int64(int64:fd) {
+    int64:state_raw = malloc(4096i64);
+    int64:data_raw = malloc(65536i64);
+    wild int64->:state64 = @cast_unchecked<int64->>(state_raw);
+    
+    <- (@ptr_add<int64>(state64, 0i64)) = fd;
+    <- (@ptr_add<int64>(state64, 1i64)) = 0i64;
+    <- (@ptr_add<int64>(state64, 2i64)) = 0i64;
+    <- (@ptr_add<int64>(state64, 3i64)) = data_raw;
+    <- (@ptr_add<int64>(state64, 4i64)) = state_raw;
+    
+    pass state_raw;
+};
+
+pub func:io_buf_getc = int32(int64:state) {
+    wild int64->:state64 = @cast_unchecked<int64->>(state);
+    int64:pos = <- (@ptr_add<int64>(state64, 1i64));
+    int64:len = <- (@ptr_add<int64>(state64, 2i64));
+    
+    if (pos >= len) {
+        int64:fd = <- (@ptr_add<int64>(state64, 0i64));
+        int64:data_raw = <- (@ptr_add<int64>(state64, 3i64));
+        
+        int64:nread = sys(READ, fd, data_raw, 65536i64) ? -1i64;
+        if (nread <= 0i64) { pass -1i32; }
+        
+        len = nread;
+        pos = 0i64;
+        <- (@ptr_add<int64>(state64, 2i64)) = len;
+    }
+    
+    int64:data_raw = <- (@ptr_add<int64>(state64, 3i64));
+    wild uint8->:data = @cast_unchecked<uint8->>(data_raw);
+    int64:c = @cast_unchecked<int64>((<- (@ptr_add<uint8>(data, pos))));
+    <- (@ptr_add<int64>(state64, 1i64)) = pos + 1i64;
+    
+    pass @cast_unchecked<int32>(c);
+};
+
+pub func:io_buf_putc = int32(int64:state, int32:c) {
+    wild int64->:state64 = @cast_unchecked<int64->>(state);
+    int64:pos = <- (@ptr_add<int64>(state64, 1i64));
+    
+    if (pos >= 65536i64) {
+        int64:fd = <- (@ptr_add<int64>(state64, 0i64));
+        int64:data_raw = <- (@ptr_add<int64>(state64, 3i64));
+        drop(sys(WRITE, fd, data_raw, 65536i64));
+        pos = 0i64;
+        <- (@ptr_add<int64>(state64, 1i64)) = 0i64;
+    }
+    
+    int64:data_raw = <- (@ptr_add<int64>(state64, 3i64));
+    wild uint8->:data = @cast_unchecked<uint8->>(data_raw);
+    <- (@ptr_add<uint8>(data, pos)) = @cast_unchecked<uint8>(@cast_unchecked<int64>(c));
+    
+    <- (@ptr_add<int64>(state64, 1i64)) = pos + 1i64;
+    pass 0i32;
+};
+
+pub func:io_buf_flush = int32(int64:state) {
+    wild int64->:state64 = @cast_unchecked<int64->>(state);
+    int64:pos = <- (@ptr_add<int64>(state64, 1i64));
+    if (pos > 0i64) {
+        int64:fd = <- (@ptr_add<int64>(state64, 0i64));
+        int64:data_raw = <- (@ptr_add<int64>(state64, 3i64));
+        drop(sys(WRITE, fd, data_raw, pos));
+        <- (@ptr_add<int64>(state64, 1i64)) = 0i64;
+    }
+    pass 0i32;
+};
+
+pub func:io_buf_puts = int32(int64:state, string:s) {
+    int64:len = string_length(s);
+    int64:i = 0i64;
+    while (i < len) {
+        int64:c = npk_string_byte_at(s, i);
+        drop(io_buf_putc(state, @cast_unchecked<int32>(c)));
+        i = i + 1i64;
+    }
+    pass 0i32;
+};
+
+pub func:npk_strerror = string(int64:err) {
+    if (err == 1i64) { pass "Operation not permitted"; }
+    if (err == 2i64) { pass "No such file or directory"; }
+    if (err == 3i64) { pass "No such process"; }
+    if (err == 4i64) { pass "Interrupted system call"; }
+    if (err == 5i64) { pass "I/O error"; }
+    if (err == 6i64) { pass "No such device or address"; }
+    if (err == 9i64) { pass "Bad file number"; }
+    if (err == 11i64) { pass "Try again"; }
+    if (err == 12i64) { pass "Out of memory"; }
+    if (err == 13i64) { pass "Permission denied"; }
+    if (err == 14i64) { pass "Bad address"; }
+    if (err == 16i64) { pass "Device or resource busy"; }
+    if (err == 17i64) { pass "File exists"; }
+    if (err == 19i64) { pass "No such device"; }
+    if (err == 20i64) { pass "Not a directory"; }
+    if (err == 21i64) { pass "Is a directory"; }
+    if (err == 22i64) { pass "Invalid argument"; }
+    if (err == 23i64) { pass "File table overflow"; }
+    if (err == 24i64) { pass "Too many open files"; }
+    if (err == 25i64) { pass "Not a typewriter"; }
+    if (err == 27i64) { pass "File too large"; }
+    if (err == 28i64) { pass "No space left on device"; }
+    if (err == 29i64) { pass "Illegal seek"; }
+    if (err == 30i64) { pass "Read-only file system"; }
+    if (err == 31i64) { pass "Too many links"; }
+    if (err == 32i64) { pass "Broken pipe"; }
+    if (err == 33i64) { pass "Math argument out of domain of func"; }
+    if (err == 34i64) { pass "Math result not representable"; }
+    pass "Unknown error";
+};
+
+pub func:io_buf_free = int32(int64:state) {
+    wild int64->:state64 = @cast_unchecked<int64->>(state);
+    int64:data_raw = <- (@ptr_add<int64>(state64, 3i64));
+    int64:state_raw = <- (@ptr_add<int64>(state64, 4i64));
+    drop(nitpick_libc_mem_free(data_raw));
+    drop(nitpick_libc_mem_free(state_raw));
+    pass 0i32;
+};
+
+pub func:io_buf_readline = int64(int64:state, wild uint8->:line_buf, int64:max_len) {
+    int64:line_len = 0i64;
+    while (1i32 == 1i32) {
+        if (line_len >= max_len - 1i64) { break; }
+        int32:c = io_buf_getc(state) ? -1i32;
+        if (c < 0i32) { break; }
+        drop(<- (@ptr_add<uint8>(line_buf, line_len)) = @cast_unchecked<uint8>(c));
+        line_len = line_len + 1i64;
+        if (c == 10i32) { break; }
+    }
+    if (line_len > 0i64) {
+        drop(<- (@ptr_add<uint8>(line_buf, line_len)) = 0u8);
+    }
+    pass line_len;
+};
+
+pub func:standard_failsafe = NIL(tbb32:err) {
+    drop(print_err("failsafe triggered\n"));
+};

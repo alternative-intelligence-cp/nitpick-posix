@@ -1,0 +1,273 @@
+use "vendor/io_utils.npk".*;
+use "vendor/mem_utils.npk".*;
+use "vendor/nitpick_args.npk".*;
+use "vendor/sys_constants.npk".*;
+use "stdlib/string.npk".*;
+
+use "arch/arch.npk".*;
+use "b2sum/b2sum.npk".*;
+use "base32/base32.npk".*;
+use "base64/base64.npk".*;
+use "basename/basename.npk".*;
+use "cal/cal.npk".*;
+use "cat/cat.npk".*;
+use "chcon/chcon.npk".*;
+use "chgrp/chgrp.npk".*;
+use "chmod/chmod.npk".*;
+use "chown/chown.npk".*;
+use "chroot/chroot.npk".*;
+use "cksum/cksum.npk".*;
+use "clear/clear.npk".*;
+use "cmp/cmp.npk".*;
+use "comm/comm.npk".*;
+use "cp/cp.npk".*;
+use "csplit/csplit.npk".*;
+use "cut/cut.npk".*;
+use "date/date.npk".*;
+use "dd/dd.npk".*;
+use "df/df.npk".*;
+use "dirname/dirname.npk".*;
+use "du/du.npk".*;
+use "echo/echo.npk".*;
+use "env/env.npk".*;
+use "exec_stub/exec_stub.npk".*;
+use "exit0_stub/exit0_stub.npk".*;
+use "expand/expand.npk".*;
+use "expr/expr.npk".*;
+use "factor/factor.npk".*;
+use "false/false.npk".*;
+use "find/find.npk".*;
+use "fmt/fmt.npk".*;
+use "fold/fold.npk".*;
+use "grep/grep.npk".*;
+use "groups/groups.npk".*;
+use "head/head.npk".*;
+use "hostid/hostid.npk".*;
+use "hostname/hostname.npk".*;
+use "id/id.npk".*;
+use "install/install.npk".*;
+use "join/join.npk".*;
+use "kill/kill.npk".*;
+use "link/link.npk".*;
+use "ln/ln.npk".*;
+use "logname/logname.npk".*;
+use "ls/ls.npk".*;
+use "md5sum/md5sum.npk".*;
+use "mkdir/mkdir.npk".*;
+use "mkfifo/mkfifo.npk".*;
+use "mknod/mknod.npk".*;
+use "mktemp/mktemp.npk".*;
+use "mv/mv.npk".*;
+use "nice/nice.npk".*;
+use "nl/nl.npk".*;
+use "nohup/nohup.npk".*;
+use "nproc/nproc.npk".*;
+use "numfmt/numfmt.npk".*;
+use "od/od.npk".*;
+use "paste/paste.npk".*;
+use "pathchk/pathchk.npk".*;
+use "pinky/pinky.npk".*;
+use "pr/pr.npk".*;
+use "printenv/printenv.npk".*;
+use "printf/printf.npk".*;
+use "ptx/ptx.npk".*;
+use "pwd/pwd.npk".*;
+use "readlink/readlink.npk".*;
+use "realpath/realpath.npk".*;
+use "rm/rm.npk".*;
+use "rmdir/rmdir.npk".*;
+use "runcon/runcon.npk".*;
+use "seq/seq.npk".*;
+use "sha1sum/sha1sum.npk".*;
+use "sha256sum/sha256sum.npk".*;
+use "shred/shred.npk".*;
+use "sleep/sleep.npk".*;
+use "sort/sort.npk".*;
+use "split/split.npk".*;
+use "stat/stat.npk".*;
+use "stdbuf/stdbuf.npk".*;
+use "strings/strings.npk".*;
+use "stty/stty.npk".*;
+use "stub/stub.npk".*;
+use "sum/sum.npk".*;
+use "sync/sync.npk".*;
+use "sys_stub/sys_stub.npk".*;
+use "tac/tac.npk".*;
+    ////use "tail/tail.npk".*;
+    //use "tee/tee.npk".*;
+    //use "test/test.npk".*;
+
+
+
+use "timeout/timeout.npk".*;
+use "touch/touch.npk".*;
+use "tr/tr.npk".*;
+use "true/true.npk".*;
+use "truncate/truncate.npk".*;
+use "tsort/tsort.npk".*;
+use "tty/tty.npk".*;
+use "uname/uname.npk".*;
+use "unexpand/unexpand.npk".*;
+use "uniq/uniq.npk".*;
+use "unlink/unlink.npk".*;
+use "uptime/uptime.npk".*;
+use "users/users.npk".*;
+use "wc/wc.npk".*;
+use "who/who.npk".*;
+use "whoami/whoami.npk".*;
+use "xargs/xargs.npk".*;
+use "yes/yes.npk".*;
+
+extern func:npk_string_byte_at = int64(string:s, int64:offset);
+
+func:get_basename = string(string:path) {
+    int64:len = string_length(path);
+    int64:i = len - 1i64;
+    while (i >= 0i64) {
+        if (npk_string_byte_at(path, i) == 47i64) {
+            pass string_substring(path, i + 1i64, len);
+        }
+        i = i - 1i64;
+    }
+    pass path;
+};
+
+pub func:main = int32(int32:argc, wild int8->:argv) {
+    string:args = raw args_load_native(argc, argv);
+    string:prog = raw get_basename(raw args_program(args));
+
+    if (string_equals(prog, "npk_coreutils")) {
+        if (argc > 1i32) {
+            prog = raw args_at(args, 1i32);
+        } else {
+            drop(print_err("npk_coreutils: multi-call binary\n"));
+            exit(0i32);
+        }
+    }
+
+    if (string_equals(prog, "arch")) { exit(raw arch_main(argc, argv)); }
+    if (string_equals(prog, "b2sum")) { exit(raw b2sum_main(argc, argv)); }
+    if (string_equals(prog, "base32")) { exit(raw base32_main(argc, argv)); }
+    if (string_equals(prog, "base64")) { exit(raw base64_main(argc, argv)); }
+    if (string_equals(prog, "basename")) { exit(raw basename_main(argc, argv)); }
+    if (string_equals(prog, "cal")) { exit(raw cal_main(argc, argv)); }
+    if (string_equals(prog, "cat")) { exit(raw cat_main(argc, argv)); }
+    if (string_equals(prog, "chcon")) { exit(raw chcon_main(argc, argv)); }
+    if (string_equals(prog, "chgrp")) { exit(raw chgrp_main(argc, argv)); }
+    if (string_equals(prog, "chmod")) { exit(raw chmod_main(argc, argv)); }
+    if (string_equals(prog, "chown")) { exit(raw chown_main(argc, argv)); }
+    if (string_equals(prog, "chroot")) { exit(raw chroot_main(argc, argv)); }
+    if (string_equals(prog, "cksum")) { exit(raw cksum_main(argc, argv)); }
+    if (string_equals(prog, "clear")) { exit(raw clear_main(argc, argv)); }
+    if (string_equals(prog, "cmp")) { exit(raw cmp_main(argc, argv)); }
+    if (string_equals(prog, "comm")) { exit(raw comm_main(argc, argv)); }
+    if (string_equals(prog, "cp")) { exit(raw cp_main(argc, argv)); }
+    if (string_equals(prog, "csplit")) { exit(raw csplit_main(argc, argv)); }
+    if (string_equals(prog, "cut")) { exit(raw cut_main(argc, argv)); }
+    if (string_equals(prog, "date")) { exit(raw date_main(argc, argv)); }
+    if (string_equals(prog, "dd")) { exit(raw dd_main(argc, argv)); }
+    if (string_equals(prog, "df")) { exit(raw df_main(argc, argv)); }
+    if (string_equals(prog, "dirname")) { exit(raw dirname_main(argc, argv)); }
+    if (string_equals(prog, "du")) { exit(raw du_main(argc, argv)); }
+    if (string_equals(prog, "echo")) { exit(raw echo_main(argc, argv)); }
+    if (string_equals(prog, "env")) { exit(raw env_main(argc, argv)); }
+    if (string_equals(prog, "mknod")) { exit(raw exit0_stub_main(argc, argv)); }
+    if (string_equals(prog, "pathchk")) { exit(raw exit0_stub_main(argc, argv)); }
+    if (string_equals(prog, "dircolors")) { exit(raw exit0_stub_main(argc, argv)); }
+    if (string_equals(prog, "expand")) { exit(raw expand_main(argc, argv)); }
+    if (string_equals(prog, "expr")) { exit(raw expr_main(argc, argv)); }
+    if (string_equals(prog, "factor")) { exit(raw factor_main(argc, argv)); }
+    if (string_equals(prog, "false")) { exit(raw false_main(argc, argv)); }
+    if (string_equals(prog, "find")) { exit(raw find_main(argc, argv)); }
+    if (string_equals(prog, "fmt")) { exit(raw fmt_main(argc, argv)); }
+    if (string_equals(prog, "fold")) { exit(raw fold_main(argc, argv)); }
+    if (string_equals(prog, "grep")) { exit(raw grep_main(argc, argv)); }
+    if (string_equals(prog, "groups")) { exit(raw groups_main(argc, argv)); }
+    if (string_equals(prog, "head")) { exit(raw head_main(argc, argv)); }
+    if (string_equals(prog, "hostid")) { exit(raw hostid_main(argc, argv)); }
+    if (string_equals(prog, "hostname")) { exit(raw hostname_main(argc, argv)); }
+    if (string_equals(prog, "id")) { exit(raw id_main(argc, argv)); }
+    if (string_equals(prog, "install")) { exit(raw install_main(argc, argv)); }
+    if (string_equals(prog, "join")) { exit(raw join_main(argc, argv)); }
+    if (string_equals(prog, "kill")) { exit(raw kill_main(argc, argv)); }
+    if (string_equals(prog, "link")) { exit(raw link_main(argc, argv)); }
+    if (string_equals(prog, "ln")) { exit(raw ln_main(argc, argv)); }
+    if (string_equals(prog, "logname")) { exit(raw logname_main(argc, argv)); }
+    if (string_equals(prog, "ls")) { exit(raw ls_main(argc, argv)); }
+    if (string_equals(prog, "dir")) { exit(raw ls_main(argc, argv)); }
+    if (string_equals(prog, "vdir")) { exit(raw ls_main(argc, argv)); }
+    if (string_equals(prog, "md5sum")) { exit(raw md5sum_main(argc, argv)); }
+    if (string_equals(prog, "mkdir")) { exit(raw mkdir_main(argc, argv)); }
+    if (string_equals(prog, "mkfifo")) { exit(raw mkfifo_main(argc, argv)); }
+    if (string_equals(prog, "mknod")) { exit(raw mknod_main(argc, argv)); }
+    if (string_equals(prog, "mktemp")) { exit(raw mktemp_main(argc, argv)); }
+    if (string_equals(prog, "mv")) { exit(raw mv_main(argc, argv)); }
+    if (string_equals(prog, "nice")) { exit(raw nice_main(argc, argv)); }
+    if (string_equals(prog, "nl")) { exit(raw nl_main(argc, argv)); }
+    if (string_equals(prog, "nohup")) { exit(raw nohup_main(argc, argv)); }
+    if (string_equals(prog, "nproc")) { exit(raw nproc_main(argc, argv)); }
+    if (string_equals(prog, "numfmt")) { exit(raw numfmt_main(argc, argv)); }
+    if (string_equals(prog, "od")) { exit(raw od_main(argc, argv)); }
+    if (string_equals(prog, "paste")) { exit(raw paste_main(argc, argv)); }
+    if (string_equals(prog, "pathchk")) { exit(raw pathchk_main(argc, argv)); }
+    if (string_equals(prog, "pinky")) { exit(raw pinky_main(argc, argv)); }
+    if (string_equals(prog, "pr")) { exit(raw pr_main(argc, argv)); }
+    if (string_equals(prog, "printenv")) { exit(raw printenv_main(argc, argv)); }
+    if (string_equals(prog, "printf")) { exit(raw printf_main(argc, argv)); }
+    if (string_equals(prog, "ptx")) { exit(raw ptx_main(argc, argv)); }
+    if (string_equals(prog, "pwd")) { exit(raw pwd_main(argc, argv)); }
+    if (string_equals(prog, "readlink")) { exit(raw readlink_main(argc, argv)); }
+    if (string_equals(prog, "realpath")) { exit(raw realpath_main(argc, argv)); }
+    if (string_equals(prog, "rm")) { exit(raw rm_main(argc, argv)); }
+    if (string_equals(prog, "rmdir")) { exit(raw rmdir_main(argc, argv)); }
+    if (string_equals(prog, "runcon")) { exit(raw runcon_main(argc, argv)); }
+    if (string_equals(prog, "seq")) { exit(raw seq_main(argc, argv)); }
+    if (string_equals(prog, "sha1sum")) { exit(raw sha1sum_main(argc, argv)); }
+    if (string_equals(prog, "sha256sum")) { exit(raw sha256sum_main(argc, argv)); }
+    if (string_equals(prog, "shred")) { exit(raw shred_main(argc, argv)); }
+    if (string_equals(prog, "sleep")) { exit(raw sleep_main(argc, argv)); }
+    if (string_equals(prog, "sort")) { exit(raw sort_main(argc, argv)); }
+    if (string_equals(prog, "split")) { exit(raw split_main(argc, argv)); }
+    if (string_equals(prog, "stat")) { exit(raw stat_main(argc, argv)); }
+    if (string_equals(prog, "stdbuf")) { exit(raw stdbuf_main(argc, argv)); }
+    if (string_equals(prog, "strings")) { exit(raw strings_main(argc, argv)); }
+    if (string_equals(prog, "stty")) { exit(raw stty_main(argc, argv)); }
+    if (string_equals(prog, "csplit")) { exit(raw stub_main(argc, argv)); }
+    if (string_equals(prog, "join")) { exit(raw stub_main(argc, argv)); }
+    if (string_equals(prog, "ptx")) { exit(raw stub_main(argc, argv)); }
+    if (string_equals(prog, "tsort")) { exit(raw stub_main(argc, argv)); }
+    if (string_equals(prog, "numfmt")) { exit(raw stub_main(argc, argv)); }
+    if (string_equals(prog, "sum")) { exit(raw sum_main(argc, argv)); }
+    if (string_equals(prog, "sync")) { exit(raw sync_main(argc, argv)); }
+    if (string_equals(prog, "tac")) { exit(raw tac_main(argc, argv)); }
+    
+    
+    //test removed
+    if (string_equals(prog, "timeout")) { exit(raw timeout_main(argc, argv)); }
+    if (string_equals(prog, "touch")) { exit(raw touch_main(argc, argv)); }
+    if (string_equals(prog, "tr")) { exit(raw tr_main(argc, argv)); }
+    if (string_equals(prog, "true")) { exit(raw true_main(argc, argv)); }
+    if (string_equals(prog, "truncate")) { exit(raw truncate_main(argc, argv)); }
+    if (string_equals(prog, "tsort")) { exit(raw tsort_main(argc, argv)); }
+    if (string_equals(prog, "tty")) { exit(raw tty_main(argc, argv)); }
+    if (string_equals(prog, "uname")) { exit(raw uname_main(argc, argv)); }
+    if (string_equals(prog, "unexpand")) { exit(raw unexpand_main(argc, argv)); }
+    if (string_equals(prog, "uniq")) { exit(raw uniq_main(argc, argv)); }
+    if (string_equals(prog, "unlink")) { exit(raw unlink_main(argc, argv)); }
+    if (string_equals(prog, "uptime")) { exit(raw uptime_main(argc, argv)); }
+    if (string_equals(prog, "users")) { exit(raw users_main(argc, argv)); }
+    if (string_equals(prog, "wc")) { exit(raw wc_main(argc, argv)); }
+    if (string_equals(prog, "who")) { exit(raw who_main(argc, argv)); }
+    if (string_equals(prog, "whoami")) { exit(raw whoami_main(argc, argv)); }
+    if (string_equals(prog, "xargs")) { exit(raw xargs_main(argc, argv)); }
+    if (string_equals(prog, "yes")) { exit(raw yes_main(argc, argv)); }
+
+    drop(print_err(prog));
+    drop(print_err(": applet not found\n"));
+    exit(1i32);
+};
+
+pub func:failsafe = int32(tbb32:err) {
+    drop(standard_failsafe(err));
+    exit 1;
+};

@@ -87,27 +87,27 @@ pub func:uname_main = int32(int32:argc, wild int8->:argv) {
     
     if (print_sysname != 0i64) {
         if (printed != 0i64) { drop(print_str_safe(" ")); }
-        drop(print_str(buf)); // sysname
+        drop(print_str(raw ptr_to_string(buf))); // sysname
         printed = 1i64;
     }
     if (print_nodename != 0i64) {
         if (printed != 0i64) { drop(print_str_safe(" ")); }
-        drop(print_str(buf + 65i64)); // nodename
+        drop(print_str(raw ptr_to_string(buf + 65i64))); // nodename
         printed = 1i64;
     }
     if (print_release != 0i64) {
         if (printed != 0i64) { drop(print_str_safe(" ")); }
-        drop(print_str(buf + 130i64)); // release
+        drop(print_str(raw ptr_to_string(buf + 130i64))); // release
         printed = 1i64;
     }
     if (print_version != 0i64) {
         if (printed != 0i64) { drop(print_str_safe(" ")); }
-        drop(print_str(buf + 195i64)); // version
+        drop(print_str(raw ptr_to_string(buf + 195i64))); // version
         printed = 1i64;
     }
     if (print_machine != 0i64) {
         if (printed != 0i64) { drop(print_str_safe(" ")); }
-        drop(print_str(buf + 260i64)); // machine
+        drop(print_str(raw ptr_to_string(buf + 260i64))); // machine
         printed = 1i64;
     }
     

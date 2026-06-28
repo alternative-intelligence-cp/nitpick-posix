@@ -1,0 +1,56 @@
+// pathchk.npk
+
+use "vendor/io_utils.npk".*;
+use "vendor/mem_utils.npk".*;
+use "vendor/sys_constants.npk".*;
+use "vendor/nitpick_args.npk".*;
+use "stdlib/string.npk".*;
+
+
+
+pub func:pathchk_main = int32(int32:argc, wild int8->:argv) {
+    string:args = raw args_load_native(argc, argv);
+    int32:arg_count = raw args_count(args);
+    
+    if (arg_count < 1i32) {
+        drop(print_err("pathchk: missing operand\n"));
+        pass 1i32;
+    }
+    
+    int32:i = 1i32;
+    int32:has_error = 0i32;
+    
+    while (i < arg_count) {
+        string:path = raw args_at(args, i);
+        int64:len = string_length(path);
+        
+        if (len == 0i64) {
+            drop(print_err("pathchk: empty path name\n"));
+            has_error = 1i32;
+        } else {
+            if (len > 4096i64) {
+                drop(print_err("pathchk: path name is too long\n"));
+                has_error = 1i32;
+            } else {
+                int64:comps = raw str_split(path, "/");
+                int64:num_comps = raw str_split_count(comps);
+                int64:j = 0i64;
+                while (j < num_comps) {
+                    string:comp = raw str_split_get(comps, j);
+                    if (string_length(comp) > 255i64) {
+                        drop(print_err("pathchk: path component is too long\n"));
+                        has_error = 1i32;
+                    }
+                    j = j + 1i64;
+                }
+                drop(str_split_free(comps));
+            }
+        }
+        i = i + 1i32;
+    }
+    
+    if (has_error == 1i32) {
+        pass 1i32;
+    }
+    pass 0i32;
+};

@@ -1,0 +1,75 @@
+// mknod.npk
+
+use "vendor/io_utils.npk".*;
+use "vendor/mem_utils.npk".*;
+use "vendor/sys_constants.npk".*;
+use "stdlib/string.npk".*;
+use "vendor/nitpick_args.npk".*;
+
+
+
+
+
+
+
+pub func:mknod_main = int32(int32:argc, wild int8->:argv) {
+    string:args = raw args_load_native(argc, argv);
+    ArgParser:parser = raw Parser_create();
+    parser = raw Parser_add_flag(parser, "--help", "display this help and exit");
+    parser = raw Parser_add_flag(parser, "--version", "output version information and exit");
+    int64:dummy = raw Parser_parse(parser, args, 0i64);
+    argc = raw args_count(args);
+    
+    if (argc >= 2i32) {
+        string:arg1 = raw args_at(args, 1i32);
+        if (string_equals(arg1, "--help")) {
+            drop(print_out("Usage: mknod [OPTION]... NAME TYPE [MAJOR MINOR]\nCreate the special file NAME of the given TYPE.\n\n      --help     display this help and exit\n      --version  output version information and exit\n"));
+            pass 0i32;
+        }
+        if (string_equals(arg1, "--version")) {
+            drop(print_out("mknod (nitpick-posix) 1.0\n"));
+            pass 0i32;
+        }
+    }
+    
+    if (argc < 3i32) {
+        drop(print_err("mknod: missing operand\n"));
+        pass 1i32;
+    }
+    
+    string:m_name = raw args_at(args, 1i32);
+    string:m_type = raw args_at(args, 2i32);
+    
+    int64:mode = 0i64;
+    int64:dev = 0i64;
+    
+    if (string_equals(m_type, "p")) {
+        mode = 4096i64 + 438i64; // S_IFIFO (010000 = 4096) + 0666
+    } else {
+        if (string_equals(m_type, "b") || string_equals(m_type, "c")) {
+            if (argc < 5i32) {
+                drop(print_err("mknod: missing major/minor for special file\n"));
+                pass 1i32;
+            }
+            int64:major = string_to_int(raw args_at(args, 3i32));
+            int64:minor = string_to_int(raw args_at(args, 4i32));
+            
+            // dev = makedev: (major & 0xfff) << 8 | (minor & 0xff) | ((minor & ~0xff) << 12) | ((major & ~0xfff) << 32)
+            // Since nitpick doesn't have bitwise and/or yet natively maybe, we'll do basic math:
+            // linux makedev is usually minor + (major * 256) for small numbers.
+            dev = (major * 256i64) + minor;
+            
+            if (string_equals(m_type, "b")) {
+                mode = 24576i64 + 438i64; // S_IFBLK 060000
+            } else {
+                mode = 8192i64 + 438i64; // S_IFCHR 020000
+            }
+        } else {
+            drop(print_err("mknod: invalid m_type\n"));
+            pass 1i32;
+        }
+    }
+    int64:res = sys!!(SYS_MKNOD, m_name, mode, dev) ? -1i64; // SYS_mknod = 133
+    
+    pass 0i32;
+};

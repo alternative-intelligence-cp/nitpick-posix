@@ -214,6 +214,19 @@ func:copy_recursive = int32(string:src, string:dst, int32:recursive) {
     }
 };
 
+
+func:basename = string(string:path) {
+    int64:len = string_length(path);
+    int64:i = len - 1i64;
+    while (i >= 0i64) {
+        if (string_equals(string_substring(path, i, i + 1i64), "/")) {
+            pass string_substring(path, i + 1i64, len);
+        }
+        i = i - 1i64;
+    }
+    pass path;
+};
+
 pub func:cp_main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
@@ -223,31 +236,64 @@ pub func:cp_main = int32(int32:argc, wild int8->:argv) {
     if (raw args_has(args, "-r")) { recursive = 1i32; }
     if (raw args_has(args, "--recursive")) { recursive = 1i32; }
     
-    // find non-flag arguments
-    string:src_path = "";
-    string:dst_path = "";
+    int64:src_list = raw alist(128i64);
+    string:dst = "";
     int32:non_flags = 0i32;
+    
     int32:i = 1i32;
     while (i <= arg_count) {
         string:arg = raw args_at(args, i);
         if (string_starts_with(arg, "-") == false) {
-            if (non_flags == 0i32) { src_path = arg; }
-            else { if (non_flags == 1i32) { dst_path = arg; } }
+            drop(raw alist_push(src_list, strdup(arg)));
             non_flags = non_flags + 1i32;
         }
         i = i + 1i32;
     }
     
     if (non_flags < 2i32) {
-        drop(print_err("cp: missing file operand\n"));
+        drop(print_err("cp: missing file operand
+"));
         pass 1;
     }
+    
+    int64:last_idx = raw alist_size(src_list) - 1i64;
+    dst = raw ptr_to_string(raw alist_get(src_list, last_idx));
+    drop(raw alist_remove(src_list, last_idx));
+    
+    int64:statbuf = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    int64:res = sys!!(4i64, dst, statbuf) ? -1i64; // STAT
+    int64:is_dir = 0i64;
+    if (res >= 0i64) {
+        int64:b0 = npk_mem_read_byte(statbuf, 24i64);
+        int64:b1 = npk_mem_read_byte(statbuf, 25i64);
+        int64:b2 = npk_mem_read_byte(statbuf, 26i64);
+        int64:b3 = npk_mem_read_byte(statbuf, 27i64);
+        int64:mode = b0 | (b1 << 8i64) | (b2 << 16i64) | (b3 << 24i64);
+        is_dir = mode & 16384i64;
+    }
+    drop(sys!!(SYS_MUNMAP, statbuf, 4096i64));
     
     if (non_flags > 2i32) {
-        drop(print_err("cp: only two non-flag arguments are supported for now\n"));
-        pass 1;
+        if (is_dir == 0i64) {
+            drop(print_err("cp: target '"));
+            drop(print_err(dst));
+            drop(print_err("' is not a directory
+"));
+            pass 1;
+        }
     }
     
-    int32:status = raw copy_recursive(src_path, dst_path, recursive);
-    pass status;
+    int32:exit_status = 0i32;
+    while (raw alist_size(src_list) > 0i64) {
+        string:src_file = raw ptr_to_string(raw alist_pop_front(src_list));
+        string:target = dst;
+        if (is_dir != 0i64) {
+            string:bname = raw basename(src_file);
+            target = string_concat(dst, string_concat("/", bname));
+        }
+        int32:status = raw copy_recursive(src_file, target, recursive);
+        if (status != 0i32) { exit_status = 1i32; }
+    }
+    
+    pass exit_status;
 };

@@ -25,7 +25,7 @@ func:print_out = int32(string:s) {
 
 
 
-func:hash_file = int32(string:filename) {
+func:sha1sum_hash_file = int32(string:filename) {
     int64:fd = sys(OPEN, filename, 0i64, 0i64) ? -1i64;
     if (fd < 0i64) {
         drop(print_err("sha1sum: cannot open '"));
@@ -79,7 +79,7 @@ pub func:sha1sum_main = int32(int32:argc, wild int8->:argv) {
     while (i <= arg_count) {
         string:arg = raw args_at(args, i);
         if (string_starts_with(arg, "-") == false) {
-            int32:res = raw hash_file(arg);
+            int32:res = raw sha1sum_hash_file(arg);
             if (res != 0i32) { exit_status = 1i32; }
             non_flags = non_flags + 1i32;
         }

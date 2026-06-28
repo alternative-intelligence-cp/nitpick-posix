@@ -3,11 +3,31 @@ use "../vendor/io_utils.npk".*;
 use "../vendor/mem_utils.npk".*;
 use "../vendor/sys_constants.npk".*;
 use "../vendor/libc_ffi.npk".*;
+use "../vendor/nitpick_args.npk".*;
 
 
 
 
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
+
+func:ptr_to_string = string(int64:ptr) {
+    string:s = "";
+    int64:i = 0i64;
+    while (npk_mem_read_byte(ptr, i) != 0i64) {
+        int64:c = npk_mem_read_byte(ptr, i);
+        s = string_concat(s, string_from_char(cast_unchecked<int8>(c)));
+        i = i + 1i64;
+    }
+    pass s;
+};
+
+func:print_str = int32(int64:s) {
+    int64:len = 0i64;
+    while (npk_mem_read_byte(s, len) != 0i64) {
+        len = len + 1i64;
+    }
+    pass cast_unchecked<int32>(sys(WRITE, 1i64, s, len) ? -1i64);
+};
 
 func:print_str_safe = int32(string:s) {
     int64:len = string_length(s);
@@ -29,45 +49,66 @@ func:mem_read_64 = int64(int64:ptr, int64:offset) {
 
 
 pub func:date_main = int32(int32:argc, wild int8->:argv) {
+    string:args = raw args_load_native(argc, argv);
+    int32:arg_count = raw args_count(args);
+    string:fmt = "";
+    if (arg_count >= 1i32) {
+        string:arg1 = raw args_at(args, 1i32);
+        if (string_starts_with(arg1, "+")) {
+            fmt = string_substring(arg1, 1i64, string_length(arg1));
+        }
+    }
+
     int64:ts = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
     if (ts < 0i64) { pass 1; }
-    
+
     int64:res = sys(CLOCK_GETTIME, 0i64, ts) ? -1i64;
     if (res < 0i64) { pass 1; }
-    
+
     int64:sec = raw mem_read_64(ts, 0i64);
-    
-    // allocate an 8-byte buffer for time_t
+
     int64:t_buf = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
     <- (cast_unchecked<int64->>(t_buf + 0i64)) = sec;
     
-    int64:c_ptr = ctime(t_buf);
-    string:ctime_str = "";
-    if (c_ptr != 0i64) {
-        int64:j = 0i64;
-        int32:reading = 1i32;
-        while (reading == 1i32) {
-            int64:c = npk_mem_read_byte(c_ptr, j);
-            if (c == 0i64) {
-                reading = 0i32;
-            } else {
-                if (c == 10i64) {
+    if (string_length(fmt) > 0i64) {
+        int64:tm_ptr = localtime(t_buf);
+        int64:s_buf = malloc(4096i64);
+        int64:sz = strftime(s_buf, 4096i64, fmt, tm_ptr);
+        if (sz > 0i64) {
+            drop(print_str(raw ptr_to_string(ok(s_buf))));
+            drop(print_str_safe("
+"));
+        }
+        drop(nitpick_libc_mem_free(s_buf));
+    } else {
+        int64:c_ptr = ctime(t_buf);
+        string:ctime_str = "";
+        if (c_ptr != 0i64) {
+            int64:j = 0i64;
+            int32:reading = 1i32;
+            while (reading == 1i32) {
+                int64:c = npk_mem_read_byte(c_ptr, j);
+                if (c == 0i64) {
                     reading = 0i32;
                 } else {
-                    ctime_str = string_concat(ctime_str, string_from_char(cast_unchecked<int8>(c)));
+                    if (c == 10i64) {
+                        reading = 0i32;
+                    } else {
+                        ctime_str = string_concat(ctime_str, string_from_char(cast_unchecked<int8>(c)));
+                    }
                 }
+                j = j + 1i64;
             }
-            j = j + 1i64;
+        } else {
+            ctime_str = string_from_int(sec);
         }
-    } else {
-        ctime_str = string_from_int(sec);
+
+        drop(print_str_safe(ctime_str));
+        drop(print_str_safe("
+"));
     }
-    
-    drop(print_str_safe(ctime_str));
-    drop(print_str_safe("\n"));
-    
+
     drop(sys!!(SYS_MUNMAP, t_buf, 4096i64));
-    
     drop(sys!!(SYS_MUNMAP, ts, 4096i64));
     pass 0;
 };

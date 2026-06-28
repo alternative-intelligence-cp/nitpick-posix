@@ -1,0 +1,350 @@
+// find.npk
+use "vendor/libc_ffi.npk".*;
+
+use "vendor/io_utils.npk".*;
+use "vendor/mem_utils.npk".*;
+use "vendor/sys_constants.npk".*;
+
+use "stdlib/string.npk".*;
+
+use "vendor/nitpick_args.npk".*;
+
+
+
+
+
+
+
+
+
+
+
+func:str_clone_str = int64(string:s) {
+    pass strdup(s);
+};
+
+func:glob_match_impl = int32(string:p, string:t, int64:pi, int64:ti) {
+    int64:plen = string_length(p);
+    int64:tlen = string_length(t);
+    
+    if (pi == plen && ti == tlen) { pass 1i32; }
+    if (pi == plen) { pass 0i32; }
+    
+    int64:pc = npk_mem_read_byte(string_to_cstr(p), pi);
+    
+    if (pc == 42i64) { // '*'
+        if (ti < tlen) {
+            if (raw glob_match_impl(p, t, pi, ti + 1i64) == 1i32) { pass 1i32; }
+        }
+        pass raw glob_match_impl(p, t, pi + 1i64, ti);
+    }
+    
+    if (ti == tlen) { pass 0i32; }
+    int64:tc = npk_mem_read_byte(string_to_cstr(t), ti);
+    
+    if (pc == 63i64 || pc == tc) { // '?'
+        pass raw glob_match_impl(p, t, pi + 1i64, ti + 1i64);
+    }
+    
+    pass 0i32;
+};
+
+func:glob_match = int32(string:pattern, string:text) {
+    pass raw glob_match_impl(pattern, text, 0i64, 0i64);
+};
+
+
+    pub struct:FindFlags = {
+    int32:has_name;
+    int64:name_ptr;
+    int32:has_type;
+    int64:type_val;
+    int32:has_size;
+    int64:size_val;
+    int64:size_cmp;
+};
+
+func:mem_write_64 = int32(int64:ptr, int64:offset, int64:val) {
+    int64:i = 0i64;
+    while (i < 8i64) {
+        int64:b = (val >> (i * 8i64)) & 255i64;
+        drop(npk_mem_write_byte(ptr, offset + i, cast_unchecked<int32>(b)));
+        i = i + 1i64;
+    }
+    pass 0i32;
+};
+
+func:mem_read_64 = int64(int64:ptr, int64:offset) {
+    int64:res = 0i64;
+    int64:i = 0i64;
+    while (i < 8i64) {
+        int64:b = npk_mem_read_byte(ptr, offset + i);
+        res = res | (b << (i * 8i64));
+        i = i + 1i64;
+    }
+    pass res;
+};
+
+func:mem_read_32 = int64(int64:ptr, int64:offset) {
+    int64:res = 0i64;
+    int64:i = 0i64;
+    while (i < 4i64) {
+        int64:b = @cast_unchecked<int64>((npk_mem_read_byte(ptr, offset + i)));
+        res = res | (b << (i * 8i64));
+        i = i + 1i64;
+    }
+    pass res;
+};
+
+func:evaluate_file = int32(string:path, string:basename, FindFlags->:flags, int64:dtype, int64:statbuf) {
+    int32:has_name1 = flags->has_name;
+    if (has_name1 == 1i32) {
+        string:pat = raw ptr_to_string(flags->name_ptr );
+        if (raw glob_match(pat, basename) == 0i32) { pass 0i32; }
+    }
+    
+    int32:has_type = flags->has_type;
+    if (has_type == 1i32) {
+        int64:req_type = flags->type_val;
+        if (req_type == 4i64 && dtype != 4i64) { pass 0i32; } // d
+        if (req_type == 8i64 && dtype != 8i64) { pass 0i32; } // f
+        if (req_type == 10i64 && dtype != 10i64) { pass 0i32; } // l
+    }
+    
+    int32:has_size = flags->has_size;
+    if (has_size == 1i32) {
+        int64:size = nitpick_libc_mem_read_i64(statbuf, 48i64);
+        int64:req_size = flags->size_val;
+        int64:cmp = flags->size_cmp;
+        
+        if (cmp == 0i64 && size != req_size) { pass 0i32; }
+        if (cmp == -1i64 && size >= req_size) { pass 0i32; }
+        if (cmp == 1i64 && size <= req_size) { pass 0i32; }
+    }
+    
+    pass 1i32;
+};
+
+func:walk_dir_at = int32(int64:dirfd, string:name, string:dir, FindFlags->:flags) {
+    wild int8->:statbuf_alloc_alloc_ptr = alloc(4096i64);
+    int64:statbuf_alloc = @cast_unchecked<int64>(statbuf_alloc_alloc_ptr);
+    defer { dalloc(statbuf_alloc_alloc_ptr); }
+    int64:statbuf = @cast_unchecked<int64>(statbuf_alloc);
+    
+    int64:res = sys!!(SYS_NEWFSTATAT, dirfd, name, statbuf, 256i64) ? -1i64; // AT_SYMLINK_NOFOLLOW
+    if (res >= 0i64) {
+        int64:mode = raw mem_read_32(statbuf, 24i64);
+        int64:dtype = 8i64; // Default to file
+        if ((mode & 61440i64) == 16384i64) { dtype = 4i64; } // dir
+        else if ((mode & 61440i64) == 40960i64) { dtype = 10i64; } // symlink
+        
+        int64:len = string_length(dir);
+        int64:idx = len - 1i64;
+        while (idx >= 0i64 && npk_mem_read_byte(string_to_cstr(dir), idx) != 47i64) { idx = idx - 1i64; }
+        string:basename = dir;
+        if (idx >= 0i64 && idx < len - 1i64) {
+            basename = string_substring(dir, idx + 1i64, len);
+        }
+        
+        if (raw evaluate_file(dir, basename, flags, dtype, statbuf) == 1i32) {
+            drop(print_out(dir));
+            drop(print_out("\n"));
+        }
+    }
+    
+    int64:fd = sys!!(SYS_OPENAT, dirfd, name, 196608i64, 0i64) ? -1i64; // O_RDONLY | O_DIRECTORY | O_NOFOLLOW
+    if (fd >= 0i64) {
+        wild int8->:buf_alloc_alloc_ptr = alloc(32768i64);
+        int64:buf_alloc = @cast_unchecked<int64>(buf_alloc_alloc_ptr);
+        defer { dalloc(buf_alloc_alloc_ptr); }
+        int64:buf = @cast_unchecked<int64>(buf_alloc);
+        
+        if (buf >= 0i64) {
+            int64:dirs_cap = 8192i64;
+            int64:dirs_len = 0i64;
+            int64:dirs_sl = malloc(dirs_cap * 16i64); // stores name and path
+            defer { if (dirs_sl != 0i64) { drop(nitpick_libc_mem_free(dirs_sl)); } }
+            int32:running = 1i32;
+            
+            while (running == 1i32) {
+                int64:nread = sys!!(SYS_GETDENTS64, fd, buf, 32768i64) ? -1i64; // GETDENTS64
+                if (nread <= 0i64) {
+                    running = 0i32;
+                } else {
+                    int64:bpos = 0i64;
+                    while (bpos < nread) {
+                        int64:ent_ptr = @cast_unchecked<int64>(buf) + bpos;
+                        int64:reclen = @cast_unchecked<int64>((npk_mem_read_byte(ent_ptr, 16i64))) | (@cast_unchecked<int64>((npk_mem_read_byte(ent_ptr, 17i64))) << 8i64);
+                        int64:dtype = @cast_unchecked<int64>((npk_mem_read_byte(ent_ptr, 18i64)));
+                        int64:name_ptr = ent_ptr + 19i64;
+                        
+                        string:cname = raw ptr_to_string(name_ptr);
+                        if (string_equals(cname, ".") == false && string_equals(cname, "..") == false) {
+                            string:child_path = `&{dir}/`;
+                            if (string_equals(dir, "/")) { child_path = "/"; }
+                            child_path = `&{child_path}&{cname}`;
+                            
+                            if (dtype == 4i64 || dtype == 0i64) {
+                                int64:name_cloned = raw str_clone_str(cname);
+                                int64:path_cloned = raw str_clone_str(child_path);
+                                if (dirs_len < dirs_cap) {
+                                    drop(raw mem_write_64(dirs_sl, dirs_len * 16i64, name_cloned));
+                                    drop(raw mem_write_64(dirs_sl, dirs_len * 16i64 + 8i64, path_cloned));
+                                    dirs_len = dirs_len + 1i64;
+                                } else {
+                                    drop(print_err("find: directory queue capacity exceeded\n"));
+                                    pass 0i32;
+                                }
+                            } else {
+                                int64:cres = sys!!(SYS_NEWFSTATAT, dir, cname, statbuf, 256i64) ? -1i64;
+                                if (cres >= 0i64) {
+                                    if (raw evaluate_file(child_path, cname, flags, dtype, statbuf) == 1i32) {
+                                        drop(print_out(child_path));
+                                        drop(print_out("\n"));
+                                    }
+                                }
+                            }
+                        }
+                        
+                        bpos = bpos + reclen;
+                    }
+                }
+            }
+            
+            int64:slen = dirs_len;
+            int64:s_idx = 0i64;
+            while (s_idx < slen) {
+                int64:cname_ptr = raw mem_read_64(dirs_sl, s_idx * 16i64);
+                int64:cpath_ptr = raw mem_read_64(dirs_sl, s_idx * 16i64 + 8i64);
+                string:child_name = ptr_to_string(cname_ptr) ? "";
+                string:child_path = ptr_to_string(cpath_ptr) ? "";
+                drop(walk_dir_at(fd, child_name, child_path, flags));
+                free(@cast_unchecked<int8->>(cname_ptr));
+                free(@cast_unchecked<int8->>(cpath_ptr));
+                s_idx = s_idx + 1i64;
+            }
+            drop(0i32);
+        }
+    }
+    defer { if (fd >= 0i64) { drop(sys(CLOSE, fd)); } }
+    
+    pass 0i32;
+};
+
+pub func:find_main = int32(int32:argc, wild int8->:argv) {
+    string:args = raw args_load_native(argc, argv);
+    ArgParser:parser = raw Parser_create();
+    parser = raw Parser_add_flag(parser, "--help", "display this help and exit");
+    parser = raw Parser_add_flag(parser, "--version", "output version information and exit");
+    int64:dummy = raw Parser_parse(parser, args, 0i64);
+    argc = raw args_count(args);
+    FindFlags:flags_obj = FindFlags{ has_name: 0i32, name_ptr: 0i64, has_type: 0i32, type_val: 0i64, has_size: 0i32, size_val: 0i64, size_cmp: 0i64 };
+    FindFlags->:flags = @flags_obj;
+    
+    int64:roots_cap = 1024i64;
+    int64:roots_len = 0i64;
+    int64:roots_sl = malloc(roots_cap * 8i64);
+    defer { if (roots_sl != 0i64) { drop(nitpick_libc_mem_free(roots_sl)); } }
+    
+    int32:i = 0i32;
+    int32:parsing_args = 0i32;
+    while (i < argc) {
+        string:arg = raw args_at(args, i);
+        
+        if (string_equals(arg, "-name")) {
+            parsing_args = 1i32;
+            i = i + 1i32;
+            if (i < argc) {
+                flags->has_name = 1i32;
+                flags->name_ptr = raw str_clone_str(raw args_at(args, i));
+            }
+        } else if (string_equals(arg, "-type")) {
+            parsing_args = 1i32;
+            i = i + 1i32;
+            if (i < argc) {
+                string:t = raw args_at(args, i);
+                flags->has_type = 1i32;
+                if (string_equals(t, "d")) { flags->type_val = 4i64; }
+                else if (string_equals(t, "f")) { flags->type_val = 8i64; }
+                else if (string_equals(t, "l")) { flags->type_val = 10i64; }
+                else { flags->type_val = 0i64; }
+            }
+        } else if (string_equals(arg, "-size")) {
+            parsing_args = 1i32;
+            i = i + 1i32;
+            if (i < argc) {
+                string:s = raw args_at(args, i);
+                flags->has_size = 1i32;
+                int64:cmp = 0i64;
+                int64:start_idx = 0i64;
+                if (npk_mem_read_byte(string_to_cstr(s), 0i64) == 43i64) { cmp = 1i64; start_idx = 1i64; } // '+'
+                else if (npk_mem_read_byte(string_to_cstr(s), 0i64) == 45i64) { cmp = -1i64; start_idx = 1i64; } // '-'
+                
+                int64:val = 0i64;
+                int64:len = string_length(s);
+                int64:multiplier = 1i64;
+                
+                if (npk_mem_read_byte(string_to_cstr(s), len - 1i64) == 99i64) { // 'c' bytes
+                    len = len - 1i64;
+                } else if (npk_mem_read_byte(string_to_cstr(s), len - 1i64) == 107i64) { // 'k' kilobytes
+                    multiplier = 1024i64;
+                    len = len - 1i64;
+                } else if (npk_mem_read_byte(string_to_cstr(s), len - 1i64) == 77i64) { // 'M' megabytes
+                    multiplier = 1048576i64;
+                    len = len - 1i64;
+                } else if (npk_mem_read_byte(string_to_cstr(s), len - 1i64) == 71i64) { // 'G' gigabytes
+                    multiplier = 1073741824i64;
+                    len = len - 1i64;
+                }
+                
+                int64:k = start_idx;
+                while (k < len) {
+                    val = val * 10i64 + (npk_mem_read_byte(string_to_cstr(s), k) - 48i64);
+                    k = k + 1i64;
+                }
+                
+                flags->size_cmp = cmp;
+                flags->size_val = val * multiplier;
+            }
+        } else {
+            if (parsing_args == 0i32) {
+                int64:cloned = raw str_clone_str(arg);
+                if (roots_len < roots_cap) {
+                    drop(raw mem_write_64(roots_sl, roots_len * 8i64, cloned));
+                    roots_len = roots_len + 1i64;
+                }
+            } else {
+                drop(print_err("find: unknown predicate `"));
+                drop(print_err(arg));
+                drop(print_err("'\n"));
+                pass 1i32;
+            }
+        }
+        i = i + 1i32;
+    }
+    
+    if (roots_len == 0i64) {
+        int64:cloned = raw str_clone_str(".");
+        drop(raw mem_write_64(roots_sl, roots_len * 8i64, cloned));
+        roots_len = roots_len + 1i64;
+    }
+    
+    int64:r_len = roots_len;
+    int64:r_idx = 0i64;
+    while (r_idx < r_len) {
+        int64:r_ptr = raw mem_read_64(roots_sl, r_idx * 8i64);
+        string:root = ptr_to_string(r_ptr) ? "";
+        drop(walk_dir_at(-100i64, root, root, flags));
+        free(@cast_unchecked<int8->>(r_ptr));
+        r_idx = r_idx + 1i64;
+    }
+    drop(nitpick_libc_mem_free(roots_sl));
+    drop(0i32);
+    
+    int32:has_name2 = flags->has_name;
+    if (has_name2 == 1i32) {
+        free(@cast_unchecked<int8->>(flags->name_ptr)); }
+    
+    
+    pass 0i32;
+};

@@ -57,14 +57,15 @@ func:ptr_to_string = string(int64:ptr) {
 
 
 
-func:rm_recursive = int32(string:path, int32:recursive) {
+func:rm_recursive = int32(string:path, int32:recursive, int32:force) {
     int64:statbuf = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
     int64:res = sys!!(6i64, path, statbuf) ? -1i64; // LSTAT first
     if (res < 0i64) {
+        drop(sys!!(SYS_MUNMAP, statbuf, 4096i64));
+        if (force == 1i32) { pass 0i32; }
         drop(print_err("rm: cannot remove '"));
         drop(print_err(path));
         drop(print_err("': No such file or directory\n"));
-        drop(sys!!(SYS_MUNMAP, statbuf, 4096i64));
         pass 1i32;
     }
     
@@ -145,7 +146,7 @@ func:rm_recursive = int32(string:path, int32:recursive) {
             string:child_name = raw ptr_to_string(child_ptr);
             string:child_path = string_concat(path, string_concat("/", child_name));
             
-            int32:res_rec = raw rm_recursive(child_path, recursive);
+            int32:res_rec = raw rm_recursive(child_path, recursive, force);
             if (res_rec != 0i32) { exit_status = 1i32; }
             
             drop(nitpick_libc_mem_free(child_ptr));
@@ -166,10 +167,12 @@ func:rm_recursive = int32(string:path, int32:recursive) {
     } else {
         int64:unres = sys(UNLINK, path) ? -1i64;
         if (unres < 0i64) {
-            drop(print_err("rm: cannot remove '"));
-            drop(print_err(path));
-            drop(print_err("'\n"));
-            pass 1i32;
+            if (force == 0i32) {
+                drop(print_err("rm: cannot remove '"));
+                drop(print_err(path));
+                drop(print_err("'\n"));
+                pass 1i32;
+            }
         }
         pass 0i32;
     }
@@ -180,9 +183,13 @@ pub func:rm_main = int32(int32:argc, wild int8->:argv) {
     int32:arg_count = raw args_count(args);
     
     int32:recursive = 0i32;
+    int32:force = 0i32;
     if (raw args_has(args, "-R")) { recursive = 1i32; }
     if (raw args_has(args, "-r")) { recursive = 1i32; }
     if (raw args_has(args, "--recursive")) { recursive = 1i32; }
+    
+    if (raw args_has(args, "-f")) { force = 1i32; }
+    if (raw args_has(args, "--force")) { force = 1i32; }
     
     int32:exit_status = 0i32;
     int32:non_flags = 0i32;
@@ -191,7 +198,7 @@ pub func:rm_main = int32(int32:argc, wild int8->:argv) {
     while (i <= arg_count) {
         string:arg = raw args_at(args, i);
         if (string_starts_with(arg, "-") == false) {
-            int32:res = raw rm_recursive(arg, recursive);
+            int32:res = raw rm_recursive(arg, recursive, force);
             if (res != 0i32) {
                 exit_status = 1i32;
             }
@@ -201,8 +208,11 @@ pub func:rm_main = int32(int32:argc, wild int8->:argv) {
     }
 
     if (non_flags == 0i32) {
-        drop(print_err("usage: rm <file>\n"));
-        pass 1;
+        if (force == 0i32) {
+            drop(print_err("usage: rm <file>
+"));
+            pass 1;
+        }
     }
     
     pass exit_status;

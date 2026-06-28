@@ -1,0 +1,138 @@
+extern func:npk_mem_read_string = string(int64:ptr, int64:len);
+// src/vendor/pwd_utils.npk
+use "io_utils.npk".*;
+use "mem_utils.npk".*;
+
+extern func:npk_string_byte_at = int64(string:s, int64:idx);
+extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
+
+use "sys_constants.npk".*;
+use "stdlib/string.npk".*;
+use "stdlib/string_convert.npk".*;
+
+pub func:is_numeric_str = int64(string:s) {
+    int64:len = string_length(s);
+    if (len == 0i64) { pass 0i64; }
+    int64:i = 0i64;
+    while (i < len) {
+        int64:c = npk_string_byte_at(s, i);
+        if (c < 48i64) { pass 0i64; }
+        if (c > 57i64) { pass 0i64; }
+        i = i + 1i64;
+    }
+    pass 1i64;
+};
+
+pub func:resolve_uid = int64(string:name) {
+    if ((is_numeric_str(name) ? 0i64) == 1i64) {
+        pass string_to_int(name);
+    }
+    
+    int64:fd = sys(OPEN, "/etc/passwd", 0i64, 0i64) ? -1i64;
+    defer { if (fd >= 0i64) { drop(sys(CLOSE, fd)); } }
+    
+    wild int8->:buf_alloc_alloc_ptr = alloc(65536i64);
+    int64:buf_alloc = @cast_unchecked<int64>(buf_alloc_alloc_ptr);
+    defer { dalloc(buf_alloc_alloc_ptr); }
+    int64:buf = @cast_unchecked<int64>(buf_alloc);
+    int64:nread = sys(READ, fd, buf, 65536i64) ? -1i64;
+    
+    
+    int64:i = 0i64;
+    int64:target_uid = -1i64;
+    
+    while (i < nread) {
+        int64:line_start = i;
+        while (i < nread) {
+            int64:c = npk_mem_read_byte(buf, i);
+            if (c == 10i64) { break; }
+            i = i + 1i64;
+        }
+        int64:line_len = i - line_start;
+        if (line_len > 0i64) {
+            string:line = npk_mem_read_string(@cast_unchecked<int64>(@cast_unchecked<int64>(buf) + line_start), line_len);
+            
+            // format: name:pwd:uid:gid:...
+            int64:col = 0i64;
+            int64:j = 0i64;
+            string:u_name = "";
+            string:u_id = "";
+            
+            while (j < line_len) {
+                string:ch = string_substring(line, j, j + 1i64);
+                if (string_equals(ch, ":")) {
+                    col = col + 1i64;
+                } else {
+                    if (col == 0i64) { u_name = `&{u_name}&{ch}`; }
+                    if (col == 2i64) { u_id = `&{u_id}&{ch}`; }
+                }
+                j = j + 1i64;
+            }
+            
+            if (string_equals(u_name, name)) {
+                target_uid = string_to_int(u_id);
+                break;
+            }
+        }
+        i = i + 1i64;
+    }
+    
+    pass target_uid;
+};
+
+pub func:resolve_gid = int64(string:name) {
+    if ((is_numeric_str(name) ? 0i64) == 1i64) {
+        pass string_to_int(name);
+    }
+    
+    int64:fd = sys(OPEN, "/etc/group", 0i64, 0i64) ? -1i64;
+    defer { if (fd >= 0i64) { drop(sys(CLOSE, fd)); } }
+    
+    wild int8->:buf_alloc_alloc_ptr = alloc(65536i64);
+    int64:buf_alloc = @cast_unchecked<int64>(buf_alloc_alloc_ptr);
+    defer { dalloc(buf_alloc_alloc_ptr); }
+    int64:buf = @cast_unchecked<int64>(buf_alloc);
+    int64:nread = sys(READ, fd, buf, 65536i64) ? -1i64;
+    
+    
+    int64:i = 0i64;
+    int64:target_gid = -1i64;
+    
+    while (i < nread) {
+        int64:line_start = i;
+        while (i < nread) {
+            int64:c = npk_mem_read_byte(buf, i);
+            if (c == 10i64) { break; }
+            i = i + 1i64;
+        }
+        int64:line_len = i - line_start;
+        if (line_len > 0i64) {
+            string:line = npk_mem_read_string(@cast_unchecked<int64>(@cast_unchecked<int64>(buf) + line_start), line_len);
+            
+            // format: name:pwd:gid:...
+            int64:col = 0i64;
+            int64:j = 0i64;
+            string:g_name = "";
+            string:g_id = "";
+            
+            while (j < line_len) {
+                string:ch = string_substring(line, j, j + 1i64);
+                if (string_equals(ch, ":")) {
+                    col = col + 1i64;
+                } else {
+                    if (col == 0i64) { g_name = `&{g_name}&{ch}`; }
+                    if (col == 2i64) { g_id = `&{g_id}&{ch}`; }
+                }
+                j = j + 1i64;
+            }
+            
+            if (string_equals(g_name, name)) {
+                target_gid = string_to_int(g_id);
+                break;
+            }
+        }
+        i = i + 1i64;
+    }
+    
+    pass target_gid;
+};

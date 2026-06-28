@@ -1,0 +1,32 @@
+// vendor/buf_reader.npk
+use "stdlib/string.npk".*;
+
+pub Type:BufReader = {
+    func:create = int64(int64:fd) {
+        wild int8->:ptr_alloc_ptr = alloc(65568i64);
+    int64:ptr = @cast_unchecked<int64>(ptr_alloc_ptr);
+    defer { free(ptr_alloc_ptr); } // 64KB + metadata
+        <- (@cast_unchecked<int64->>(ptr + 65536i64)) = fd;      // fd
+        <- (@cast_unchecked<int64->>(ptr + 65544i64)) = 0i64;    // buf_pos
+        <- (@cast_unchecked<int64->>(ptr + 65552i64)) = 0i64;    // buf_len
+        pass ptr;
+    };
+    func:free = int32(int64:ptr) {
+        
+        pass 0i32;
+    };
+    func:getc = int32(int64:ptr) {
+        int64:pos = <- (@cast_unchecked<int64->>(ptr + 65544i64));
+        int64:len = <- (@cast_unchecked<int64->>(ptr + 65552i64));
+        if (pos >= len) {
+            int64:fd = <- (@cast_unchecked<int64->>(ptr + 65536i64));
+            int64:nread = sys(READ, fd, ptr, 65536i64) ? -1i64;
+            <- (@cast_unchecked<int64->>(ptr + 65544i64)) = 0i64;
+            <- (@cast_unchecked<int64->>(ptr + 65552i64)) = nread;
+            pos = 0i64;
+        }
+        int32:c = @cast_unchecked<int32>(<- (@cast_unchecked<uint8->>(ptr + pos)));
+        <- (@cast_unchecked<int64->>(ptr + 65544i64)) = pos + 1i64;
+        pass c;
+    };
+};

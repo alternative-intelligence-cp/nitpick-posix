@@ -1,0 +1,290 @@
+// xargs.npk
+use "vendor/libc_ffi.npk".*;
+
+use "vendor/io_utils.npk".*;
+use "vendor/mem_utils.npk".*;
+use "vendor/sys_constants.npk".*;
+use "stdlib/string.npk".*;
+
+use "vendor/nitpick_args.npk".*;
+use "vendor/exec_helper.npk".*;
+use "vendor/proc_exit_shim.npk".*;
+
+pub func:xargs_exec_batch = int32(int64:cmd_ptr, int64:argv_ptr, int64:argv_idx) {
+    int64:offset2 = argv_idx * 8i64;
+    drop(npk_mem_write_byte(argv_ptr, offset2, 0i64)); // NULL terminate
+
+    int64:pid = sys!!(SYS_FORK) ? -1i64;
+    if (pid == -1i64) {
+        drop(print_err("xargs: fork failed\n"));
+        pass 1i32;
+    }
+
+    if (pid == 0i64) {
+        int64:env_buf = sys!!(SYS_MMAP, 0i64, 131072i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+        defer { if (env_buf > 0i64) { drop(sys!!(SYS_MUNMAP, env_buf, 131072i64)); } }
+        int64:env_fd = sys(OPEN, "/proc/self/environ", 0i64, 0i64) ? -1i64;
+        int64:env_bytes = 0i64;
+        if (env_fd >= 0i64) {
+            env_bytes = sys(READ, env_fd, env_buf, 131072i64) ? -1i64;
+        }
+        int64:envc_count = 0i64;
+        int64:i_env = 0i64;
+        while (i_env < env_bytes) {
+            if (npk_mem_read_byte(env_buf, i_env) == 0i64) { envc_count = envc_count + 1i64; }
+            i_env = i_env + 1i64;
+        }
+        int64:envp = sys!!(SYS_MMAP, 0i64, (envc_count + 2i64) * 8i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+        defer { if (envp > 0i64) { drop(sys!!(SYS_MUNMAP, envp, (envc_count + 2i64) * 8i64)); } }
+        int64:envp_idx = 0i64;
+        i_env = 0i64;
+        int64:current_str = env_buf;
+        while (i_env < env_bytes) {
+            if (npk_mem_read_byte(env_buf, i_env) == 0i64) {
+                drop(npk_mem_write_byte(envp, envp_idx * 8i64, current_str));
+                envp_idx = envp_idx + 1i64;
+                current_str = env_buf + i_env + 1i64;
+            }
+            i_env = i_env + 1i64;
+        }
+        drop(npk_mem_write_byte(envp, envp_idx * 8i64, 0i64)); // NULL terminate
+        if (env_fd >= 0i64) { drop(sys(CLOSE, env_fd)); }
+
+        drop(sys!!(SYS_EXECVE, cmd_ptr, @cast_unchecked<int64>(argv_ptr), @cast_unchecked<int64>(envp)) ? -1i64);
+
+        int64:fb_cmd = malloc(1024i64);
+        defer { drop(nitpick_libc_mem_free(fb_cmd)); }
+        drop(npk_mem_write_byte(fb_cmd, 0i64, (47i64)));
+        drop(npk_mem_write_byte(fb_cmd, 1i64, (117i64)));
+        drop(npk_mem_write_byte(fb_cmd, 2i64, (115i64)));
+        drop(npk_mem_write_byte(fb_cmd, 3i64, (114i64)));
+        drop(npk_mem_write_byte(fb_cmd, 4i64, (47i64)));
+        drop(npk_mem_write_byte(fb_cmd, 5i64, (98i64)));
+        drop(npk_mem_write_byte(fb_cmd, 6i64, (105i64)));
+        drop(npk_mem_write_byte(fb_cmd, 7i64, (110i64)));
+        drop(npk_mem_write_byte(fb_cmd, 8i64, (47i64)));
+
+        int64:cmd_idx = 0i64;
+        while (1i32 == 1i32) {
+            if (cmd_idx >= 1000i64) {
+                drop(print_err("xargs: command too long\n"));
+                pass 1i32;
+            }
+            int64:c = @cast_unchecked<int64>(npk_mem_read_byte(cmd_ptr, cmd_idx));
+            drop(npk_mem_write_byte(fb_cmd, 9i64 + cmd_idx, (c)));
+            if (c == 0i64) { break; }
+            cmd_idx = cmd_idx + 1i64;
+        }
+
+        drop(sys!!(SYS_EXECVE, @cast_unchecked<int64>(fb_cmd), @cast_unchecked<int64>(argv_ptr), @cast_unchecked<int64>(envp)) ? -1i64);
+
+        drop(npk_mem_write_byte(fb_cmd, 0i64, (47i64)));
+        drop(npk_mem_write_byte(fb_cmd, 1i64, (98i64)));
+        drop(npk_mem_write_byte(fb_cmd, 2i64, (105i64)));
+        drop(npk_mem_write_byte(fb_cmd, 3i64, (110i64)));
+        drop(npk_mem_write_byte(fb_cmd, 4i64, (47i64)));
+        cmd_idx = 0i64;
+        while (1i32 == 1i32) {
+            if (cmd_idx >= 1000i64) {
+                drop(print_err("xargs: command too long\n"));
+                pass 1i32;
+            }
+            int64:c = @cast_unchecked<int64>(npk_mem_read_byte(cmd_ptr, cmd_idx));
+            drop(npk_mem_write_byte(fb_cmd, 5i64 + cmd_idx, (c)));
+            if (c == 0i64) { break; }
+            cmd_idx = cmd_idx + 1i64;
+        }
+
+        drop(sys!!(SYS_EXECVE, @cast_unchecked<int64>(fb_cmd), @cast_unchecked<int64>(argv_ptr), @cast_unchecked<int64>(envp)) ? -1i64);
+
+        drop(print_err("xargs: execve failed\n"));
+        drop(sys!!!(SYS_EXIT_GROUP, 127i64, 0i64, 0i64, 0i64, 0i64, 0i64));
+    } else {
+        int64:status = 0i64;
+        drop(sys!!(SYS_WAIT4, pid, @cast_unchecked<int64>(0i64), 0i64, 0i64) ? -1i64);
+    }
+    pass 0i32;
+};
+
+pub func:xargs_main = int32(int32:argc, wild int8->:argv) {
+    string:args = raw args_load_native(argc, argv);
+    ArgParser:parser = raw Parser_create();
+    parser = raw Parser_add_flag(parser, "--help", "display this help and exit");
+    parser = raw Parser_add_flag(parser, "--version", "output version information and exit");
+    drop(raw Parser_parse(parser, args, 0i64));
+    argc = raw args_count(args);
+    string:cmd = "/bin/echo";
+
+    int64:max_args = 9999i64;
+    int64:argv_ptr = malloc(max_args * 8i64);
+    defer { drop(nitpick_libc_mem_free(argv_ptr)); }
+    int64:argv_idx = 0i64;
+
+    int32:use_null = 0i32;
+
+    int32:i = 0i32;
+    // Skip executable path and "xargs" string if present
+    while (i < argc) {
+        string:a = args_at(args, i) ? "";
+        if (string_equals(a, "-0") == false && string_equals(a, "xargs") == false && string_index_of(a, "xargs") < 0i64 && string_index_of(a, "npk_coreutils") < 0i64) {
+            break;
+        }
+        if (string_equals(a, "-0")) {
+            use_null = 1i32;
+        }
+        i = i + 1i32;
+    }
+
+    if (argc > 0i32) {
+        cmd = args_at(args, i) ? "/bin/echo";
+        while (i < argc) {
+            string:arg_s = args_at(args, i) ? "";
+
+
+            int64:len = string_length(arg_s);
+            int64:c_str = malloc(len + 1i64);
+            int64:j = 0i64;
+            while (j < len) {
+                drop(npk_mem_write_byte(c_str, j, npk_string_byte_at(arg_s, j)));
+                j = j + 1i64;
+            }
+            drop(npk_mem_write_byte(c_str, len, (0i64)));
+
+            int64:offset = argv_idx * 8i64;
+            drop(npk_mem_write_byte(argv_ptr, offset, c_str));
+            argv_idx = argv_idx + 1i64;
+            i = i + 1i32;
+        }
+    }
+
+    if (argv_idx == 0i64) {
+        int64:c_str = malloc(10i64);
+        drop(npk_mem_write_byte(c_str, 0i64, (47i64)));
+        drop(npk_mem_write_byte(c_str, 1i64, (98i64)));
+        drop(npk_mem_write_byte(c_str, 2i64, (105i64)));
+        drop(npk_mem_write_byte(c_str, 3i64, (110i64)));
+        drop(npk_mem_write_byte(c_str, 4i64, (47i64)));
+        drop(npk_mem_write_byte(c_str, 5i64, (101i64)));
+        drop(npk_mem_write_byte(c_str, 6i64, (99i64)));
+        drop(npk_mem_write_byte(c_str, 7i64, (104i64)));
+        drop(npk_mem_write_byte(c_str, 8i64, (111i64)));
+        drop(npk_mem_write_byte(c_str, 9i64, (0i64)));
+
+        int64:offset = argv_idx * 8i64;
+        drop(npk_mem_write_byte(argv_ptr, offset, c_str));
+        argv_idx = argv_idx + 1i64;
+    }
+    
+    int64:initial_argv_idx = argv_idx;
+    int64:cmd_ptr = nitpick_libc_mem_read_i64(argv_ptr, 0i64);
+
+    int64:buf = malloc(65536i64);
+    defer { drop(nitpick_libc_mem_free(buf)); }
+    int64:token_buf = malloc(65536i64);
+    defer { drop(nitpick_libc_mem_free(token_buf)); }
+    int64:token_len = 0i64;
+    int32:running = 1i32;
+
+    while (running == 1i32) {
+        int64:bytes = sys(READ, 0i64, @cast_unchecked<int64>(buf), 65536i64) ? -1i64;
+        if (bytes <= 0i64) {
+            running = 0i32;
+        } else {
+            int64:b_i = 0i64;
+            while (b_i < bytes) {
+                int64:c = npk_mem_read_byte(buf, b_i);
+                
+                int32:is_delim = 0i32;
+                if (use_null == 1i32) {
+                    if (c == 0i64) { is_delim = 1i32; }
+                } else {
+                    if (c == 32i64 || c == 10i64 || c == 9i64 || c == 13i64 || c == 0i64) { is_delim = 1i32; }
+                }
+
+                if (is_delim == 1i32) {
+                    if (token_len > 0i64) {
+                        drop(npk_mem_write_byte(token_buf, token_len, (0i64)));
+
+                        int64:c_str = malloc(token_len + 1i64);
+                        int64:k = 0i64;
+                        while (k <= token_len) {
+                            drop(npk_mem_write_byte(c_str, k, npk_mem_read_byte(token_buf, k)));
+                            k = k + 1i64;
+                        }
+
+                        if (argv_idx >= max_args - 1i64) {
+                            // Flush the batch
+                            drop(xargs_exec_batch(cmd_ptr, argv_ptr, argv_idx));
+                            
+                            int64:f_idx = initial_argv_idx;
+                            while (f_idx < argv_idx) {
+                                int64:c_s = nitpick_libc_mem_read_i64(argv_ptr, f_idx * 8i64);
+                                if (c_s != 0i64) {
+                                    drop(nitpick_libc_mem_free(c_s));
+                                }
+                                f_idx = f_idx + 1i64;
+                            }
+                            argv_idx = initial_argv_idx;
+                        }
+
+                        int64:offset = argv_idx * 8i64;
+                        drop(npk_mem_write_byte(argv_ptr, offset, c_str));
+
+                        argv_idx = argv_idx + 1i64;
+                        token_len = 0i64;
+                    }
+                } else {
+                    if (token_len >= 65535i64) {
+                        drop(print_err("xargs: token too long\n"));
+                        pass 1i32;
+                    }
+                    drop(npk_mem_write_byte(token_buf, token_len, (c)));
+                    token_len = token_len + 1i64;
+                }
+                b_i = b_i + 1i64;
+            }
+        }
+    }
+
+    if (token_len > 0i64) {
+        drop(npk_mem_write_byte(token_buf, token_len, (0i64)));
+        int64:c_str = malloc(token_len + 1i64);
+        int64:k = 0i64;
+        while (k <= token_len) {
+            drop(npk_mem_write_byte(c_str, k, npk_mem_read_byte(token_buf, k)));
+            k = k + 1i64;
+        }
+        
+        if (argv_idx >= max_args - 1i64) {
+            drop(xargs_exec_batch(cmd_ptr, argv_ptr, argv_idx));
+            int64:f_idx = initial_argv_idx;
+            while (f_idx < argv_idx) {
+                int64:c_s = nitpick_libc_mem_read_i64(argv_ptr, f_idx * 8i64);
+                if (c_s != 0i64) {
+                    drop(nitpick_libc_mem_free(c_s));
+                }
+                f_idx = f_idx + 1i64;
+            }
+            argv_idx = initial_argv_idx;
+        }
+        
+        int64:offset = argv_idx * 8i64;
+        drop(npk_mem_write_byte(argv_ptr, offset, c_str));
+        argv_idx = argv_idx + 1i64;
+    }
+
+    if (argv_idx > initial_argv_idx) {
+        drop(xargs_exec_batch(cmd_ptr, argv_ptr, argv_idx));
+    }
+
+    int64:f_idx = 0i64;
+    while (f_idx < argv_idx) {
+        int64:c_s = nitpick_libc_mem_read_i64(argv_ptr, f_idx * 8i64);
+        if (c_s != 0i64) {
+            drop(nitpick_libc_mem_free(c_s));
+        }
+        f_idx = f_idx + 1i64;
+    }
+
+    pass 0i32;
+};

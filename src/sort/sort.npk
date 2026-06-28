@@ -19,6 +19,10 @@ pub func:alist_pop_front = int64(int64:lst) {
     drop(raw alist_remove(lst, 0i64));
     pass ok(v);
 };
+extern "libc" {
+    pub func:nitpick_libc_mem_write_i64 = void(int64:ptr, int64:offset, int64:val);
+}
+
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
 
@@ -117,7 +121,7 @@ pub func:sort_main = int32(int32:argc, wild int8->:argv) {
         int32:running = 1i32;
         
         while (running == 1i32) {
-            int64:len = raw io_buf_readline(state, cast_unchecked<uint8->>(line_buf));
+            int64:len = raw io_buf_readline(state, cast_unchecked<uint8->>(line_buf), 4096i64);
             if (len == 0i64) {
                 running = 0i32;
             } else {
@@ -160,22 +164,22 @@ pub func:sort_main = int32(int32:argc, wild int8->:argv) {
             
             // Partition
             int64:pivot_val = nitpick_libc_mem_read_i64(arr, h * 8i64);
-            int64:i = l - 1i64;
+            idx = l - 1i64;
             int64:j = l;
             while (j <= h - 1i64) {
                 int64:p_j = nitpick_libc_mem_read_i64(arr, j * 8i64);
-                if (raw strcmp(p_j, pivot_val) <= 0i32) {
-                    i = i + 1i64;
-                    int64:temp = nitpick_libc_mem_read_i64(arr, i * 8i64);
-                    nitpick_libc_mem_write_i64(arr, i * 8i64, p_j);
+                if (strcmp(raw ptr_to_string(p_j), raw ptr_to_string(pivot_val)) <= 0i32) {
+                    idx = idx + 1i64;
+                    int64:temp = nitpick_libc_mem_read_i64(arr, idx * 8i64);
+                    nitpick_libc_mem_write_i64(arr, idx * 8i64, p_j);
                     nitpick_libc_mem_write_i64(arr, j * 8i64, temp);
                 }
                 j = j + 1i64;
             }
-            int64:temp2 = nitpick_libc_mem_read_i64(arr, (i + 1i64) * 8i64);
-            nitpick_libc_mem_write_i64(arr, (i + 1i64) * 8i64, pivot_val);
+            int64:temp2 = nitpick_libc_mem_read_i64(arr, (idx + 1i64) * 8i64);
+            nitpick_libc_mem_write_i64(arr, (idx + 1i64) * 8i64, nitpick_libc_mem_read_i64(arr, h * 8i64));
             nitpick_libc_mem_write_i64(arr, h * 8i64, temp2);
-            int64:p = i + 1i64;
+            int64:p = idx + 1i64;
             
             if (p - 1i64 > l) {
                 top = top + 1i64;

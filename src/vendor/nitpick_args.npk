@@ -6,33 +6,32 @@ use "unsafe.npk".*;
 
 extern "libc" {
     pub func:npk_mem_read_string = string(int64:ptr, int64:len);
+    pub func:nitpick_libc_mem_read_i64 = int64(int64:ptr, int64:offset);
+    pub func:nitpick_libc_mem_read_byte = int32(int64:ptr, int64:offset);
+    pub func:nitpick_libc_string_from_buf = string(int64:ptr, int64:start, int64:len);
 }
 
 pub func:args_load_native = string(int32:argc, wild int8->:argv) {
-    string:res = "|";
+    if (argc <= 0i32) { pass "|||"; }
+    string:out = "|";
     int32:i = 0i32;
-    wild int64->:argv_ptr = cast_unchecked<int64->>(argv);
+    int64:argv_addr = cast_unchecked<int64>(argv);
+
     while (i < argc) {
-        wild int64->:cur_ptr = nodrop(cast_unchecked<int64->>(@ptr_add<int64>(argv_ptr, cast_unchecked<int64>(i))));
-        int64:ptr_to_str = <- cur_ptr;
-        string:s = "";
-        int64:j = 0i64;
-        wild uint8->:s_ptr = nodrop(cast_unchecked<uint8->>(ptr_to_str));
+        int64:offset = cast_unchecked<int64>(i) * 8i64;
+        int64:ptr_to_str = nitpick_libc_mem_read_i64(argv_addr, offset);
         
-        wild uint8->:char_ptr = nodrop(cast_unchecked<uint8->>(@ptr_add<uint8>(s_ptr, j)));
-        while ((<- char_ptr) != 0u8) {
-            uint8:c = <- char_ptr;
-            s = `&{s}&{string_from_char(cast_unchecked<int8>(c))}`;
-            j = j + 1i64;
-            drop(fake_free(char_ptr));
-            char_ptr = nodrop(cast_unchecked<uint8->>(@ptr_add<uint8>(s_ptr, j)));
+        int64:len = 0i64;
+        while (nitpick_libc_mem_read_byte(ptr_to_str, len) != 0i32) {
+            len = len + 1i64;
         }
-        drop(fake_free(char_ptr));
-        drop(fake_free(s_ptr));
-        res = `&{res}&{s}|`;
+
+        string:s = nitpick_libc_string_from_buf(ptr_to_str, 0i64, len);
+        out = string_concat(out, string_concat(s, "|"));
         i = i + 1i32;
     }
-    pass res;
+
+    pass out;
 };
 
 func:_args_token = string(string:args, int32:n) {

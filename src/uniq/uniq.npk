@@ -83,7 +83,7 @@ pub func:uniq_main = int32(int32:argc, wild int8->:argv) {
                 }
             }
             
-            string:line = npk_mem_read_string(cast_unchecked<void->>(buf), len);
+            string:line = npk_mem_read_string(buf, len);
             if (first == 1i32) {
                 drop(print_str_safe(line));
                 drop(print_str_safe("\n"));

@@ -63,7 +63,7 @@ pub func:cat_main = int32(int32:argc, wild int8->:argv) {
     
     int32:num_files = 0i32;
     while (1i32 == 1i32) {
-        string:pos_key = string_concat("pos&", string_from_int(cast_unchecked<int64>(num_files)));
+        string:pos_key = string_concat("pos", string_from_int(cast_unchecked<int64>(num_files)));
         if (string_length(raw ahget_str(parsed, pos_key)) == 0i64) { break; }
         num_files = num_files + 1i32;
     }
@@ -97,8 +97,8 @@ pub func:cat_main = int32(int32:argc, wild int8->:argv) {
         int32:is_flag = 0i32;
 
         if (num_files > 0i32) {
-            string:pos_key = string_concat("pos&", string_from_int(cast_unchecked<int64>(i)));
-            string:filename = raw ahget_str(parsed, pos_key);
+            string:pos_key = string_concat("pos", string_from_int(cast_unchecked<int64>(i)));
+            filename = raw ahget_str(parsed, pos_key);
             int64:flen = string_length(filename);
             if (flen > 1i64) {
                 if (string_equals(string_substring(filename, 0i64, 1i64), "-")) {
@@ -114,8 +114,8 @@ pub func:cat_main = int32(int32:argc, wild int8->:argv) {
             files_processed = files_processed + 1i32;
             int64:fd = 0i64; // default to stdin
             if (num_files > 0i32) {
-                string:pos_key = string_concat("pos&", string_from_int(cast_unchecked<int64>(i)));
-                string:filename = raw ahget_str(parsed, pos_key);
+                string:pos_key = string_concat("pos", string_from_int(cast_unchecked<int64>(i)));
+                filename = raw ahget_str(parsed, pos_key);
                 if (string_equals(filename, "-") == false) {
                     fd = sys(OPEN, filename, 0i64, 0i64) ? -1i64;
                 }
@@ -125,7 +125,7 @@ pub func:cat_main = int32(int32:argc, wild int8->:argv) {
             if (fd < 0i64) {
                 drop(print_err("cat: "));
                 if (num_files > 0i32) {
-                    string:pos_key = string_concat("pos&", string_from_int(cast_unchecked<int64>(i)));
+                    string:pos_key = string_concat("pos", string_from_int(cast_unchecked<int64>(i)));
                     drop(print_err(raw ahget_str(parsed, pos_key)));
                 }
                 drop(print_err(": No such file or directory\n"));

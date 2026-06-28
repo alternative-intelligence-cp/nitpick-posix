@@ -1,0 +1,96 @@
+// vendor/time_helper.npk
+use "stdlib/string.npk".*;
+
+pub func:pad_zero = string(int64:n) {
+    if (n < 10i64) {
+        pass `0&{string_from_int(n)}`;
+    }
+    pass string_from_int(n);
+};
+
+// Extremely basic epoch to date formatter for 2026 (assuming year is >= 2024 for simplicity, or we can just implement the full math).
+pub func:format_time = string(int64:epoch) {
+    int64:sec_per_day = 86400i64;
+    int64:days = epoch / sec_per_day;
+    int64:rem = epoch - (days * sec_per_day);
+    
+    int64:h = rem / 3600i64;
+    rem = rem - (h * 3600i64);
+    int64:m = rem / 60i64;
+    int64:s = rem - (m * 60i64);
+    
+    // Adjust for basic timezone? Epoch is UTC. We will just output UTC.
+    // 1970-01-01 was Thursday.
+    
+    // Very simplified date math:
+    int64:year = 1970i64;
+    while (true) {
+        int64:days_in_year = 365i64;
+        int64:is_leap = 0i64;
+        if (year % 4i64 == 0i64) {
+            if (year % 100i64 != 0i64) { is_leap = 1i64; }
+        }
+        if (year % 400i64 == 0i64) { is_leap = 1i64; }
+        
+        if (is_leap == 1i64) {
+            days_in_year = 366i64;
+        }
+        if (days < days_in_year) {
+            // break manually
+            int64:brk = 1i64; // break not supported in Nitpick easily? oh wait, nitpick while condition is the only way to break sometimes unless we use pass.
+        }
+        if (days < days_in_year) { pass _format_date(year, days, h, m, s); }
+        days = days - days_in_year;
+        year = year + 1i64;
+    }
+    pass "";
+};
+
+func:_format_date = string(int64:year, int64:days, int64:h, int64:m, int64:s) {
+    int64:is_leap = 0i64;
+    if (year % 4i64 == 0i64) {
+        if (year % 100i64 != 0i64) { is_leap = 1i64; }
+    }
+    if (year % 400i64 == 0i64) { is_leap = 1i64; }
+    
+    int64:month = 1i64;
+    int64:d = days;
+    
+    // Jan
+    if (d < 31i64) { pass _build_str(year, 1i64, d + 1i64, h, m, s); } d = d - 31i64;
+    // Feb
+    int64:feb = 28i64 + is_leap;
+    if (d < feb) { pass _build_str(year, 2i64, d + 1i64, h, m, s); } d = d - feb;
+    // Mar
+    if (d < 31i64) { pass _build_str(year, 3i64, d + 1i64, h, m, s); } d = d - 31i64;
+    // Apr
+    if (d < 30i64) { pass _build_str(year, 4i64, d + 1i64, h, m, s); } d = d - 30i64;
+    // May
+    if (d < 31i64) { pass _build_str(year, 5i64, d + 1i64, h, m, s); } d = d - 31i64;
+    // Jun
+    if (d < 30i64) { pass _build_str(year, 6i64, d + 1i64, h, m, s); } d = d - 30i64;
+    // Jul
+    if (d < 31i64) { pass _build_str(year, 7i64, d + 1i64, h, m, s); } d = d - 31i64;
+    // Aug
+    if (d < 31i64) { pass _build_str(year, 8i64, d + 1i64, h, m, s); } d = d - 31i64;
+    // Sep
+    if (d < 30i64) { pass _build_str(year, 9i64, d + 1i64, h, m, s); } d = d - 30i64;
+    // Oct
+    if (d < 31i64) { pass _build_str(year, 10i64, d + 1i64, h, m, s); } d = d - 31i64;
+    // Nov
+    if (d < 30i64) { pass _build_str(year, 11i64, d + 1i64, h, m, s); } d = d - 30i64;
+    // Dec
+    pass _build_str(year, 12i64, d + 1i64, h, m, s);
+};
+
+func:_build_str = string(int64:y, int64:mo, int64:d, int64:h, int64:m, int64:s) {
+    string:res = `&{string_from_int(y)}-`;
+    res = `&{res}&{raw pad_zero(mo)}`;
+    res = `&{res}-`;
+    res = `&{res}&{raw pad_zero(d)}`;
+    res = `&{res} `;
+    res = `&{res}&{raw pad_zero(h)}`;
+    res = `&{res}:`;
+    res = `&{res}&{raw pad_zero(m)}`;
+    pass res;
+};

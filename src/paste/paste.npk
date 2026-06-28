@@ -36,7 +36,7 @@ pub func:paste_main = int32(int32:argc, wild int8->:argv) {
             drop(print_err("paste: "));
             drop(print_err(file));
             drop(print_err(": No such file or directory\n"));
-            drop(proc_exit(1i32));
+            pass 1i32;
         }
 
         int64:fp = raw io_buf_new(fd);
@@ -96,6 +96,6 @@ pub func:paste_main = int32(int32:argc, wild int8->:argv) {
         }
     }
     
-    drop(free(cast_unchecked<void->>(fp_array)));
+    drop(nitpick_libc_mem_free(fp_array));
     pass 0;
 };

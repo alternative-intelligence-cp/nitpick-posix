@@ -47,10 +47,10 @@ pub func:logname_main = int32(int32:argc, wild int8->:argv) {
         } else {
             if (c == 58i32) { // colon
                 if (field_index == 0i64) {
-                    username = npk_mem_read_string(cast_unchecked<void->>(buf), len);
+                    username = npk_mem_read_string(buf, len);
                 } else {
                     if (field_index == 2i64) {
-                        if (string_equals(npk_mem_read_string(cast_unchecked<void->>(buf), len), uid_str)) {
+                        if (string_equals(npk_mem_read_string(buf, len), uid_str)) {
                             // Match!
                             drop(print_str_safe(username));
                             drop(print_str_safe("\n"));

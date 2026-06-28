@@ -75,8 +75,8 @@ pub func:join_main = int32(int32:argc, wild int8->:argv) {
     int64:len2 = raw io_buf_readline(state2, cast_unchecked<uint8->>(buf2), 4096i64);
     
     while (len1 > 0i64 && len2 > 0i64) {
-        string:line1 = npk_mem_read_string(cast_unchecked<void->>(buf1), len1);
-        string:line2 = npk_mem_read_string(cast_unchecked<void->>(buf2), len2);
+        string:line1 = npk_mem_read_string(buf1, len1);
+        string:line2 = npk_mem_read_string(buf2, len2);
         
         string:key1 = raw split_field(line1, 1i32);
         string:key2 = raw split_field(line2, 1i32);

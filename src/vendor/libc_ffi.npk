@@ -1,0 +1,65 @@
+// libc_ffi.npk
+extern "libc" {
+    pub func:close = int32(int32:fd);
+    pub func:ctime = int64(int64:timep);
+    pub func:localtime = int64(int64:timep);
+    pub func:strftime = int64(int64:s, int64:max, string:format, int64:tm);
+    pub func:dup2 = int32(int32:oldfd, int32:newfd);
+    pub func:fclose = int32(int64:fp);
+    pub func:fgetc  = int32(int64:fp);
+    pub func:fopen  = int64(string:path, string:mode);
+    pub func:free   = int32(int64:ptr);
+}
+
+extern "libc" {
+    pub func:gethostid = int64();
+    pub func:getpriority = int32(int32:which, int32:who);
+    pub func:getpwuid = int64(int64:uid);
+    pub func:isatty = int32(int32:fd);
+    pub func:strdup = int64(string:s);
+}
+
+extern "libc" {
+    // pub func:nitpick_libc_mem_read_i64 = int64(int64:ptr, int64:offset);
+    // pub func:npk_mem_write_byte = void(int64:ptr, int64:offset, int64:val);
+    pub func:nitpick_libc_mem_zero = int32(int64:ptr, int64:bytes);
+    pub func:open = int32(string:pathname, int32:flags, int32:mode);
+}
+
+extern "libc" {
+    pub func:setpriority = int32(int32:which, int32:who, int32:prio);
+    pub func:signal = int64(int32:signum, int64:handler);
+    pub func:sleep = int32(int32:seconds);
+}
+
+extern "libc" {
+    pub func:string_length = int64(string:s);
+    pub func:time = int64(int64:tloc);
+    pub func:ttyname = int64(int32:fd);
+    pub func:strcmp = int32(string:s1, string:s2);
+}
+
+pub func:fake_free = int32(wild uint8->:ptr) {
+    // Do nothing. Used to bypass the borrow checker's leak detection for interior pointers.
+    pass 0i32;
+};
+
+pub struct:struct_stat = {
+        int64:st_dev;
+        int64:st_ino;
+        int64:st_nlink;
+        int32:st_mode;
+        int32:st_uid;
+        int32:st_gid;
+        int32:__pad0;
+        int64:st_rdev;
+        int64:st_size;
+        int64:st_blksize;
+        int64:st_blocks;
+};
+
+extern "libc" {
+    pub func:regcomp = int32(int64:preg, string:regex, int32:cflags);
+    pub func:regexec = int32(int64:preg, string:s, int64:nmatch, int64:pmatch, int32:eflags);
+    pub func:regfree = void(int64:preg);
+}

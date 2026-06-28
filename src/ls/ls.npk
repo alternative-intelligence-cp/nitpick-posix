@@ -7,7 +7,7 @@ extern func:npk_mem_write_byte = void(int64:ptr, int64:offset, int64:val);
 use "../vendor/nitpick_args.npk".*;
 use "../vendor/sys_constants.npk".*;
 use "../vendor/libc_ffi.npk".*;
-
+use "../alist.npk".*;
 
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 extern func:npk_mem_read_int32 = int32(int64:ptr, int64:offset);
@@ -59,9 +59,46 @@ func:ptr_to_string = string(int64:ptr) {
     pass s;
 };
 
+func:ptr_strcmp = int32(int64:a, int64:b) {
+    int64:i = 0i64;
+    while (1i32 == 1i32) {
+        int64:ca = npk_mem_read_byte(a, i);
+        int64:cb = npk_mem_read_byte(b, i);
+        if (ca < cb) { pass -1i32; }
+        if (ca > cb) { pass 1i32; }
+        if (ca == 0i64) { pass 0i32; }
+        i = i + 1i64;
+    }
+    pass 0i32;
+};
 
+func:num_digits = int64(int64:n) {
+    if (n == 0i64) { pass 1i64; }
+    int64:d = 0i64;
+    int64:temp = n;
+    while (temp > 0i64) {
+        d = d + 1i64;
+        temp = temp / 10i64;
+    }
+    pass d;
+};
 
-func:print_num = int32(int64:n) {
+func:print_pad_left = int32(string:s, int64:width) {
+    int64:len = string_length(s);
+    while (len < width) {
+        drop(print_str_safe(" "));
+        len = len + 1i64;
+    }
+    drop(print_str_safe(s));
+    pass 0i32;
+};
+
+func:print_num_padded = int32(int64:n, int64:width) {
+    int64:d = raw num_digits(n);
+    while (d < width) {
+        drop(print_str_safe(" "));
+        d = d + 1i64;
+    }
     if (n == 0i64) {
         drop(print_str_safe("0"));
         pass 0i32;
@@ -77,35 +114,35 @@ func:print_num = int32(int64:n) {
     int64:i = digits - 1i64;
     temp = n;
     while (i >= 0i64) {
-        int64:d = temp % 10i64;
-        npk_mem_write_byte(buf, i, 48i64 + d);
+        int64:d2 = temp % 10i64;
+        npk_mem_write_byte(buf, i, 48i64 + d2);
         temp = temp / 10i64;
         i = i - 1i64;
     }
     npk_mem_write_byte(buf, digits, 0i64);
-    drop(print_str(raw ptr_to_string(ok(buf))));
+    drop(print_str_safe(raw ptr_to_string(ok(buf))));
     drop(sys!!(SYS_MUNMAP, buf, 32i64));
     pass 0i32;
 };
 
-func:print_human_num = int32(int64:n) {
+func:print_human_num_padded = int32(int64:n, int64:width) {
+    // A simple human readable string builder
+    // For padding we assume human sizes are usually <= 4 characters (e.g. 100M)
+    string:s = "";
     if (n < 1024i64) {
-        drop(print_num(n));
-        drop(print_str_safe("B"));
+        s = string_concat(string_from_int(n), "B");
     } else {
         if (n < 1048576i64) {
-            drop(print_num(n / 1024i64));
-            drop(print_str_safe("K"));
+            s = string_concat(string_from_int(n / 1024i64), "K");
         } else {
             if (n < 1073741824i64) {
-                drop(print_num(n / 1048576i64));
-                drop(print_str_safe("M"));
+                s = string_concat(string_from_int(n / 1048576i64), "M");
             } else {
-                drop(print_num(n / 1073741824i64));
-                drop(print_str_safe("G"));
+                s = string_concat(string_from_int(n / 1073741824i64), "G");
             }
         }
     }
+    drop(raw print_pad_left(s, width));
     pass 0i32;
 };
 
@@ -142,11 +179,11 @@ func:list_dir = int32(string:dir, int32:print_header, int32:recursive, int32:sho
 
     int64:buf = sys!!(SYS_MMAP, 0i64, 32768i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
     if (buf < 0i64) { pass 1i32; }
-
+    
+    int64:lst = raw alist(1024i64);
     int64:sl = ahash(1024i64);
     int64:sl_size = 0i64;
     int32:running = 1i32;
-    int32:has_printed = 0i32;
 
     int64:statbuf = sys!!(SYS_MMAP, 0i64, 144i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
     int64:pathbuf = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
@@ -182,58 +219,13 @@ func:list_dir = int32(string:dir, int32:print_header, int32:recursive, int32:sho
                 }
                 
                 if (skip == 0i32) {
-                    if (long_fmt == 1i32) {
-                        // build full path for stat
-                        string:d = dir;
-                        int64:d_len = string_length(d);
-                        int64:idx = 0i64;
-                        while (idx < d_len) {
-                            npk_mem_write_byte(pathbuf, idx, npk_string_byte_at(d, idx));
-                            idx = idx + 1i64;
-                        }
-                        if (d_len > 0i64 && npk_string_byte_at(d, d_len - 1i64) != 47i64) {
-                            npk_mem_write_byte(pathbuf, idx, 47i64);
-                            idx = idx + 1i64;
-                        }
-                        int64:k = 0i64;
-                        while (npk_mem_read_byte(name_ptr, k) != 0i64) {
-                            npk_mem_write_byte(pathbuf, idx + k, npk_mem_read_byte(name_ptr, k));
-                            k = k + 1i64;
-                        }
-                        npk_mem_write_byte(pathbuf, idx + k, 0i64);
-                        
-                        int64:res_stat = sys!!(SYS_LSTAT, pathbuf, statbuf) ? -1i64;
-                        if (res_stat >= 0i64) {
-                            int32:st_mode = npk_mem_read_int32(statbuf, 24i64);
-                            int64:st_nlink = (<- (cast_unchecked<int64->>(statbuf + 16i64)));
-                            int32:st_uid = npk_mem_read_int32(statbuf, 28i64);
-                            int32:st_gid = npk_mem_read_int32(statbuf, 32i64);
-                            int64:st_size = (<- (cast_unchecked<int64->>(statbuf + 48i64)));
-                            
-                            drop(print_perms(st_mode)); drop(print_str_safe(" "));
-                            drop(print_num(st_nlink)); drop(print_str_safe(" "));
-                            drop(print_num(cast_unchecked<int64>(st_uid))); drop(print_str_safe(" "));
-                            drop(print_num(cast_unchecked<int64>(st_gid))); drop(print_str_safe(" "));
-                            
-                            if (human_fmt == 1i32) {
-                                drop(print_human_num(st_size)); drop(print_str_safe(" "));
-                            } else {
-                                drop(print_num(st_size)); drop(print_str_safe(" "));
-                            }
-                        }
-                    } else {
-                        if (has_printed == 1i32) { drop(print_str_safe("  ")); }
-                    }
+                    int64:name_copy = raw str_clone(name_ptr);
+                    drop(raw alist_push(lst, name_copy));
                     
-                    drop(print_str(raw ptr_to_string(ok(name_ptr))));
-                    if (long_fmt == 1i32) { drop(print_str_safe("\n")); }
-                    
-                    has_printed = 1i32;
-
                     if (recursive == 1i32) {
                         if (dtype == 4i64) {
-                            int64:name_copy = raw str_clone(name_ptr);
-                            ahset(sl, string_from_int(sl_size), name_copy);
+                            int64:name_copy_rec = raw str_clone(name_ptr);
+                            ahset(sl, string_from_int(sl_size), name_copy_rec);
                             sl_size = sl_size + 1i64;
                         }
                     }
@@ -243,9 +235,124 @@ func:list_dir = int32(string:dir, int32:print_header, int32:recursive, int32:sho
             }
         }
     }
+    
+    // Sort lst
+    int64:sz = raw alist_size(lst);
+    int64:i = 0i64;
+    while (i < sz) {
+        int64:j = i + 1i64;
+        while (j < sz) {
+            int64:pi = raw alist_get(lst, i);
+            int64:pj = raw alist_get(lst, j);
+            if (raw ptr_strcmp(pi, pj) > 0i32) {
+                drop(raw alist_set(lst, i, pj));
+                drop(raw alist_set(lst, j, pi));
+            }
+            j = j + 1i64;
+        }
+        i = i + 1i64;
+    }
+    
+    // Pass 1: compute alignments for long fmt
+    int64:max_size_w = 0i64;
+    if (long_fmt == 1i32) {
+        i = 0i64;
+        while (i < sz) {
+            int64:name_ptr = raw alist_get(lst, i);
+            
+            // build full path for stat
+            string:d = dir;
+            int64:d_len = string_length(d);
+            int64:idx = 0i64;
+            while (idx < d_len) {
+                npk_mem_write_byte(pathbuf, idx, npk_string_byte_at(d, idx));
+                idx = idx + 1i64;
+            }
+            if (d_len > 0i64 && npk_string_byte_at(d, d_len - 1i64) != 47i64) {
+                npk_mem_write_byte(pathbuf, idx, 47i64);
+                idx = idx + 1i64;
+            }
+            int64:k = 0i64;
+            while (npk_mem_read_byte(name_ptr, k) != 0i64) {
+                npk_mem_write_byte(pathbuf, idx + k, npk_mem_read_byte(name_ptr, k));
+                k = k + 1i64;
+            }
+            npk_mem_write_byte(pathbuf, idx + k, 0i64);
+            
+            int64:res_stat = sys!!(SYS_LSTAT, pathbuf, statbuf) ? -1i64;
+            if (res_stat >= 0i64) {
+                int64:st_size = (<- (cast_unchecked<int64->>(statbuf + 48i64)));
+                int64:sz_w = raw num_digits(st_size);
+                if (human_fmt == 1i32) { sz_w = 4i64; } // Approx human max width
+                if (sz_w > max_size_w) { max_size_w = sz_w; }
+            }
+            i = i + 1i64;
+        }
+    }
+    
+    // Pass 2: Print
+    int32:has_printed = 0i32;
+    i = 0i64;
+    while (i < sz) {
+        int64:name_ptr = raw alist_get(lst, i);
+        
+        if (long_fmt == 1i32) {
+            string:d = dir;
+            int64:d_len = string_length(d);
+            int64:idx = 0i64;
+            while (idx < d_len) {
+                npk_mem_write_byte(pathbuf, idx, npk_string_byte_at(d, idx));
+                idx = idx + 1i64;
+            }
+            if (d_len > 0i64 && npk_string_byte_at(d, d_len - 1i64) != 47i64) {
+                npk_mem_write_byte(pathbuf, idx, 47i64);
+                idx = idx + 1i64;
+            }
+            int64:k = 0i64;
+            while (npk_mem_read_byte(name_ptr, k) != 0i64) {
+                npk_mem_write_byte(pathbuf, idx + k, npk_mem_read_byte(name_ptr, k));
+                k = k + 1i64;
+            }
+            npk_mem_write_byte(pathbuf, idx + k, 0i64);
+            
+            int64:res_stat = sys!!(SYS_LSTAT, pathbuf, statbuf) ? -1i64;
+            if (res_stat >= 0i64) {
+                int32:st_mode = npk_mem_read_int32(statbuf, 24i64);
+                int64:st_nlink = (<- (cast_unchecked<int64->>(statbuf + 16i64)));
+                int32:st_uid = npk_mem_read_int32(statbuf, 28i64);
+                int32:st_gid = npk_mem_read_int32(statbuf, 32i64);
+                int64:st_size = (<- (cast_unchecked<int64->>(statbuf + 48i64)));
+                
+                drop(print_perms(st_mode)); drop(print_str_safe(" "));
+                drop(print_str_safe(string_from_int(st_nlink))); drop(print_str_safe(" "));
+                drop(print_str_safe(string_from_int(cast_unchecked<int64>(st_uid)))); drop(print_str_safe(" "));
+                drop(print_str_safe(string_from_int(cast_unchecked<int64>(st_gid)))); drop(print_str_safe(" "));
+                
+                if (human_fmt == 1i32) {
+                    drop(raw print_human_num_padded(st_size, max_size_w)); drop(print_str_safe(" "));
+                } else {
+                    drop(raw print_num_padded(st_size, max_size_w)); drop(print_str_safe(" "));
+                }
+            }
+        } else {
+            if (has_printed == 1i32) { drop(print_str_safe("  ")); }
+        }
+        
+        drop(print_str_safe(raw ptr_to_string(ok(name_ptr))));
+        if (long_fmt == 1i32) { drop(print_str_safe("\n")); }
+        
+        has_printed = 1i32;
+        i = i + 1i64;
+    }
 
     if (long_fmt == 0i32 && has_printed == 1i32) {
         drop(print_str_safe("\n"));
+    }
+
+    i = 0i64;
+    while (i < sz) {
+        drop(nitpick_libc_mem_free(raw alist_get(lst, i)));
+        i = i + 1i64;
     }
 
     drop(sys!!(SYS_MUNMAP, buf, 32768i64));

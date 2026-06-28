@@ -1,0 +1,36 @@
+extern func:npk_mem_read_string = string(int64:ptr, int64:len);
+// vendor/file_helper.npk
+use "sys_constants.npk".*;
+use "stdlib/string.npk".*;
+use "mem_utils.npk".*;
+
+pub func:read_file_to_string = string(string:path) {
+    int64:fd = sys(OPEN, path, 0i64, 0i64) ? -1i64;
+    defer { drop(sys!!(CLOSE, fd) ? -1i64); }
+    
+    int64:buf_capacity = 65536i64;
+    wild int8->:buf_alloc_ptr = alloc(buf_capacity);
+    int64:buf = @cast_unchecked<int64>(buf_alloc_ptr);
+    defer { free(buf_alloc_ptr); }
+    int64:total_read = 0i64;
+    int32:running = 1i32;
+    
+    while (running == 1i32) {
+        if (total_read >= buf_capacity) {
+            int64:new_cap = buf_capacity * 2i64;
+            buf = @cast_unchecked<int64>(ralloc(@cast_unchecked<int8->>(buf), new_cap));
+            buf_capacity = new_cap;
+        }
+        
+        int64:nread = sys(READ, fd, @cast_unchecked<int64>(buf) + total_read, buf_capacity - total_read) ? -1i64;
+        if (nread <= 0i64) {
+            running = 0i32;
+        } else {
+            total_read = total_read + nread;
+        }
+    }
+    
+    
+    string:s = npk_mem_read_string(@cast_unchecked<int64>(buf), total_read);
+    pass s;
+};

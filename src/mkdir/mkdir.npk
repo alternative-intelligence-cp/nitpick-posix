@@ -25,24 +25,72 @@ pub func:mkdir_main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     
-    if (arg_count < 1i32) {
-        drop(print_err("usage: mkdir <directory>\n"));
-        pass 1;
-    }
+    int32:p_flag = 0i32;
+    if (raw args_has(args, "-p")) { p_flag = 1i32; }
+    if (raw args_has(args, "--parents")) { p_flag = 1i32; }
     
+    int32:non_flags = 0i32;
     int32:i = 1i32;
     int32:exit_status = 0i32;
     while (i <= arg_count) {
         string:dir = raw args_at(args, i);
-        // MKDIR takes string path and int64 mode. 511 is 0777 octal.
-        int64:res = sys(MKDIR, dir, 511i64) ? -1i64;
-        if (res < 0i64) {
-            drop(print_err("mkdir: cannot create directory '"));
-            drop(print_err(dir));
-            drop(print_err("'\n"));
-            exit_status = 1i32;
+        if (string_starts_with(dir, "-") == false) {
+            non_flags = non_flags + 1i32;
+            
+            if (p_flag == 1i32) {
+                int64:len = string_length(dir);
+                int64:pos = 0i64;
+                while (pos <= len) {
+                    if (pos == len) {
+                        int64:res = sys(MKDIR, dir, 511i64) ? -1i64;
+                        // wait, actually we shouldn't fail if EEXIST. But if we use sys? it collapses to -1.
+                        // Let's use sys!! instead.
+                        // But wait! Nitpick sys!! is a macro. 
+                        // I will just use sys!!(MKDIR) and ignore it.
+                    } else {
+                        string:ch = string_substring(dir, pos, pos+1i64);
+                        if (string_equals(ch, "/")) {
+                            if (pos > 0i64) {
+                                string:sub = string_substring(dir, 0i64, pos);
+                                drop(sys!!(SYS_MKDIR, sub, 511i64)); // ignore errors
+                            }
+                        }
+                    }
+                    pos = pos + 1i64;
+                }
+                // Finally create the last one and ignore EEXIST by doing a stat check
+                int64:statbuf = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+                int64:stat_res = sys!!(4i64, dir, statbuf) ? -1i64;
+                drop(sys!!(SYS_MUNMAP, statbuf, 4096i64));
+                if (stat_res < 0i64) {
+                    // Try one last time to create and fail if it really fails
+                    int64:res = sys(MKDIR, dir, 511i64) ? -1i64;
+                    if (res < 0i64) {
+                        drop(print_err("mkdir: cannot create directory '"));
+                        drop(print_err(dir));
+                        drop(print_err("'
+"));
+                        exit_status = 1i32;
+                    }
+                }
+            } else {
+                int64:res = sys(MKDIR, dir, 511i64) ? -1i64;
+                if (res < 0i64) {
+                    drop(print_err("mkdir: cannot create directory '"));
+                    drop(print_err(dir));
+                    drop(print_err("'
+"));
+                    exit_status = 1i32;
+                }
+            }
         }
         i = i + 1i32;
+    }
+    
+    if (non_flags == 0i32) {
+        drop(print_err("usage: mkdir <directory>
+"));
+        pass 1;
     }
     
     pass exit_status;

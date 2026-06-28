@@ -12,7 +12,6 @@ use "../vendor/libc_ffi.npk".*;
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 
 extern "libc" {
-    func:strdup = int64(string:s);
 }
 
 

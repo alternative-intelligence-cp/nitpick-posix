@@ -1,22 +1,43 @@
+import os
 import re
 
-def fix_file(filename):
-    with open(filename, 'r') as f:
-        text = f.read()
-    
-    # Fix any-> to int8->
-    text = text.replace('any->:', 'int8->:')
-    text = text.replace('any->', 'int8->')
-    
-    # Fix int64:(var => int64)
-    text = re.sub(r'int64:\((\w+)\s*=>\s*int64\)', r'int64:\1', text)
-    
-    with open(filename, 'w') as f:
-        f.write(text)
+src_dir = '/home/randy/Workspace/REPOS/nitpick-posix/src'
 
-fix_file('src/xargs/xargs.npk')
-fix_file('src/pwd/pwd.npk')
-fix_file('src/find/find.npk')
-fix_file('src/vendor/buf_reader.npk')
-fix_file('src/grep/grep.npk')
+for root, _, files in os.walk(src_dir):
+    for file in files:
+        if file.endswith('.npk'):
+            filepath = os.path.join(root, file)
+            with open(filepath, 'r') as f:
+                content = f.read()
+            orig = content
 
+            # Fix uint8-> assignment from int64 cast
+            content = content.replace('@cast_unchecked<int64>(data_raw)', '@cast_unchecked<uint8->>(data_raw)')
+            content = content.replace('@cast_unchecked<int64>(buf_raw)', '@cast_unchecked<uint8->>(buf_raw)')
+            
+            # Fix sys(READLINK, path) -> sys(READLINK, path, 0) maybe? Or just use readlink_alloc if it exists?
+            # Wait, sys(READLINK) in tty_helper is: sys(READLINK, path). Let's change it to sys(READLINK, path, 0, 0, 0, 0, 0)
+            if 'sys!!(READLINK, path)' in content:
+                 content = content.replace('sys!!(READLINK, path)', 'sys!!(READLINK, path, 0i64, 0i64, 0i64, 0i64, 0i64)')
+
+            # Fix npk_mem_read_string -> there is no such function. 
+            # In pwd_utils, maybe it means sys!!(READLINK) -> wait, no.
+            if 'npk_mem_read_string(' in content:
+                print(f"File {filepath} has npk_mem_read_string")
+
+            # Fix missing alist import
+            if 'alist_push' in content or 'alist_size' in content or 'alist' in content:
+                if 'stdlib/alist.npk' not in content:
+                    content = content.replace('use "../vendor/libc_ffi.npk".*;\n', 'use "../vendor/libc_ffi.npk".*;\nuse "../stdlib/alist.npk".*;\n')
+                    content = content.replace('use "vendor/libc_ffi.npk".*;\n', 'use "vendor/libc_ffi.npk".*;\nuse "stdlib/alist.npk".*;\n')
+
+            # Fix alist function renames
+            content = re.sub(r'\balsize\b', 'alist_size', content)
+            content = re.sub(r'\balget\b', 'alist_get', content)
+            content = re.sub(r'\balremove\b', 'alist_remove', content)
+            content = re.sub(r'\balpush\b', 'alist_push', content)
+
+            if content != orig:
+                with open(filepath, 'w') as f:
+                    f.write(content)
+                print(f"Fixed {filepath}")

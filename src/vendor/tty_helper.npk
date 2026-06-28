@@ -1,0 +1,18 @@
+extern func:npk_mem_read_string = string(int64:ptr, int64:len);
+// vendor/tty_helper.npk
+use "sys_constants.npk".*;
+use "stdlib/string.npk".*;
+
+// Emulates ttyname by reading /proc/self/fd/0
+pub func:get_tty_name = string(int64:fd) {
+    string:fd_str = `/proc/self/fd/&{string_from_int(fd)}`;
+    string:s = sys(READLINK, fd_str) ? "";
+
+    // remove /dev/ prefix if it exists
+    if (string_length(s) >= 5i64) {
+        if (string_equals(string_substring(s, 0i64, 5i64), "/dev/")) {
+            s = string_substring(s, 5i64, string_length(s));
+        }
+    }
+    pass s;
+};
