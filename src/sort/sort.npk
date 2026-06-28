@@ -20,7 +20,6 @@ pub func:alist_pop_front = int64(int64:lst) {
     pass ok(v);
 };
 extern "libc" {
-    pub func:nitpick_libc_mem_write_i64 = void(int64:ptr, int64:offset, int64:val);
 }
 
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
@@ -52,7 +51,7 @@ func:str_clone = int64(int64:s) {
     while (@cast_unchecked<int64>(<-(@cast_unchecked<int8->>((s) + (len)))) != 0i64) {
         len = len + 1i64;
     }
-    int64:copy = malloc(len + 1i64);
+    int64:copy = @cast_unchecked<int64>(alloc(len + 1i64));
     int64:i = 0i64;
     while (i < len) {
         (<-(@cast_unchecked<int8->>((copy) + (i))) = @cast_unchecked<int8>(npk_mem_read_byte(s, i)));
@@ -117,7 +116,7 @@ pub func:sort_main = int32(int32:argc, wild int8->:argv) {
         int64:fd = raw alist_pop_front(files);
         
         int64:state = raw io_buf_new(fd);
-        int64:line_buf = malloc(65536i64);
+        int64:line_buf = @cast_unchecked<int64>(alloc(65536i64));
         int32:running = 1i32;
         
         while (running == 1i32) {
@@ -129,7 +128,7 @@ pub func:sort_main = int32(int32:argc, wild int8->:argv) {
             }
         }
         
-        drop(nitpick_libc_mem_free(line_buf));
+        drop(dalloc(@cast_unchecked<int8->>(line_buf)));
         drop(io_buf_free(state));
     }
     
@@ -138,7 +137,7 @@ pub func:sort_main = int32(int32:argc, wild int8->:argv) {
     // Sort the list
     int64:size = raw alist_size(sl);
     if (size > 1i64) {
-        int64:arr = malloc(size * 8i64);
+        int64:arr = @cast_unchecked<int64>(alloc(size * 8i64));
         int64:idx = 0i64;
         while (raw alist_size(sl) > 0i64) {
             int64:ptr = raw alist_pop_front(sl);
@@ -147,7 +146,7 @@ pub func:sort_main = int32(int32:argc, wild int8->:argv) {
         }
 
         // Iterative Quicksort
-        int64:stack = malloc(2048i64); // 256 * 8
+        int64:stack = @cast_unchecked<int64>(alloc(2048i64)); // 256 * 8
         int64:top = -1i64;
         
         // push 0 and size-1
@@ -201,8 +200,8 @@ pub func:sort_main = int32(int32:argc, wild int8->:argv) {
             drop(raw alist_push(sl, nitpick_libc_mem_read_i64(arr, k * 8i64)));
             k = k + 1i64;
         }
-        drop(nitpick_libc_mem_free(stack));
-        drop(nitpick_libc_mem_free(arr));
+        drop(dalloc(@cast_unchecked<int8->>(stack)));
+        drop(dalloc(@cast_unchecked<int8->>(arr)));
     }
 
     // Print sorted
@@ -210,7 +209,7 @@ pub func:sort_main = int32(int32:argc, wild int8->:argv) {
         int64:ptr = raw alist_pop_front(sl);
         string:s = raw ptr_to_string(ptr);
         drop(print_out(s));
-        drop(nitpick_libc_mem_free(ptr));
+        drop(dalloc(@cast_unchecked<int8->>(ptr)));
     }
 
     /* alist sl auto-destroyed */

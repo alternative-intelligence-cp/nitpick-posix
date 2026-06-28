@@ -8,7 +8,6 @@ extern "libc" {
     pub func:fclose = int32(int64:fp);
     pub func:fgetc  = int32(int64:fp);
     pub func:fopen  = int64(string:path, string:mode);
-    pub func:free   = int32(int64:ptr);
 }
 
 extern "libc" {
@@ -39,10 +38,6 @@ extern "libc" {
     pub func:strcmp = int32(string:s1, string:s2);
 }
 
-pub func:fake_free = int32(wild uint8->:ptr) {
-    // Do nothing. Used to bypass the borrow checker's leak detection for interior pointers.
-    pass 0i32;
-};
 
 pub struct:struct_stat = {
         int64:st_dev;

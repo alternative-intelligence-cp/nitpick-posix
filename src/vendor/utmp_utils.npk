@@ -12,17 +12,17 @@ use "../alist.npk".*;
 // ut_host at offset 76 (256 bytes)
 
 pub func:utmp_read_users = int64() {
-    int64:fd = sys(OPEN, "/var/run/utmp", 0i64, 0i64) ?! -1i64;
+    int64:fd = sys(OPEN, "/var/run/utmp", 0i64, 0i64) ? -1i64;
     if (fd < 0i64) { pass 0i64; }
     defer { if (fd >= 0i64) { drop(sys(CLOSE, fd)); } }
     
     int64:lst = raw alist(128i64);
-    int64:buf = malloc(384i64);
+    int64:buf = @cast_unchecked<int64>(alloc(384i64));
     wild int8->:buf_ptr = @cast_unchecked<int8->>(buf);
-    defer { free(buf_ptr); }
+    defer { dalloc(buf_ptr); }
     
     while (1i32 == 1i32) {
-        int64:bytes = sys(READ, fd, buf, 384i64) ?! -1i64;
+        int64:bytes = sys(READ, fd, buf, 384i64) ? -1i64;
         if (bytes < 384i64) { break; }
         
         int16:ut_type = @cast_unchecked<int16>(@cast_unchecked<int64>(<-(@cast_unchecked<int8->>((@cast_unchecked<int64>(buf)) + (0i64))))); // simplified, usually 2 bytes
@@ -31,8 +31,8 @@ pub func:utmp_read_users = int64() {
         
         if (type_val == 7i64) { // USER_PROCESS
             // Read ut_user
-            int64:user_str = malloc(33i64);
-            defer { if (user_str != 0i64) { drop(nitpick_libc_mem_free(user_str)); } }
+            int64:user_str = @cast_unchecked<int64>(alloc(33i64));
+            defer { if (user_str != 0i64) { drop(dalloc(@cast_unchecked<int8->>(user_str))); } }
             int64:i = 0i64;
             while (i < 32i64) {
                 int64:c = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((@cast_unchecked<int64>(buf)) + (44i64 + i))));
@@ -43,8 +43,8 @@ pub func:utmp_read_users = int64() {
             drop((<-(@cast_unchecked<int8->>((@cast_unchecked<int64>(user_str)) + (i))) = @cast_unchecked<int8>(0i64)));
             
             // Read ut_line
-            int64:line_str = malloc(33i64);
-            defer { if (line_str != 0i64) { drop(nitpick_libc_mem_free(line_str)); } }
+            int64:line_str = @cast_unchecked<int64>(alloc(33i64));
+            defer { if (line_str != 0i64) { drop(dalloc(@cast_unchecked<int8->>(line_str))); } }
             int64:j = 0i64;
             while (j < 32i64) {
                 int64:c = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((@cast_unchecked<int64>(buf)) + (8i64 + j))));

@@ -65,7 +65,7 @@ pub func:uniq_main = int32(int32:argc, wild int8->:argv) {
     int32:running = 1i32;
     
     while (running == 1i32) {
-        int64:buf = malloc(65536i64);
+        int64:buf = @cast_unchecked<int64>(alloc(65536i64));
         int64:len = 0i64;
         int32:c = raw io_buf_getc(fp);
         if (c < 0i32) {
@@ -99,7 +99,7 @@ pub func:uniq_main = int32(int32:argc, wild int8->:argv) {
                 }
             }
         }
-        drop(nitpick_libc_mem_free(buf));
+        drop(dalloc(@cast_unchecked<int8->>(buf)));
     }
     
     drop(raw io_buf_free(fp));

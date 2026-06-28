@@ -60,7 +60,7 @@ pub func:groups_main = int32(int32:argc, wild int8->:argv) {
     string:target_user = "";
     int64:target_gid = -1i64;
     
-    int64:cf_buf = malloc(4096i64);
+    int64:cf_buf = @cast_unchecked<int64>(alloc(4096i64));
     
     if (arg_count >= 1i32) {
         target_user = raw args_at(args, 1i32);
@@ -144,7 +144,7 @@ pub func:groups_main = int32(int32:argc, wild int8->:argv) {
     if (string_length(target_user) == 0i64) {
         drop(print_err("groups: cannot find user
 "));
-        drop(nitpick_libc_mem_free(cf_buf));
+        drop(dalloc(@cast_unchecked<int8->>(cf_buf)));
         pass 1;
     }
     
@@ -155,7 +155,7 @@ pub func:groups_main = int32(int32:argc, wild int8->:argv) {
     if (fd_g < 0i64) {
         drop(print_err("groups: cannot open /etc/group
 "));
-        drop(nitpick_libc_mem_free(cf_buf));
+        drop(dalloc(@cast_unchecked<int8->>(cf_buf)));
         pass 1;
     }
     defer { if (fd_g >= 0i64) { drop(sys(CLOSE, fd_g)); } }
@@ -202,6 +202,6 @@ pub func:groups_main = int32(int32:argc, wild int8->:argv) {
 "));
     int64:fd_fp = (<- (cast_unchecked<int64->>(fp + 0i64)));
     drop(raw io_buf_free(fp));
-    drop(nitpick_libc_mem_free(cf_buf));
+    drop(dalloc(@cast_unchecked<int8->>(cf_buf)));
     pass 0;
 };

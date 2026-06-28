@@ -128,7 +128,7 @@ func:process_file = int32(string:filename, int64:preg, GrepFlags:flags, int32:pr
                     line_num = line_num + 1i64;
                 } else {
                     if (line_len >= line_cap - 1i64) {
-                        int64:new_line_buf = sys(MREMAP, line_buf, line_cap, line_cap * 2i64, 1i64) ? 0i64; // SYS_MREMAP
+                        int64:new_line_buf = sys(MREMAP, line_buf, line_cap, line_cap * 2i64, 1i64) ? 0i64; // MREMAP
                         line_buf = new_line_buf;
                         line_cap = line_cap * 2i64;
                     }
@@ -186,7 +186,7 @@ func:process_file = int32(string:filename, int64:preg, GrepFlags:flags, int32:pr
                     line_num = line_num + 1i64;
                 } else {
                     if (line_len >= line_cap - 1i64) {
-                        int64:new_line_buf = sys(MREMAP, line_buf, line_cap, line_cap * 2i64, 1i64) ? 0i64; // SYS_MREMAP
+                        int64:new_line_buf = sys(MREMAP, line_buf, line_cap, line_cap * 2i64, 1i64) ? 0i64; // MREMAP
                         line_buf = new_line_buf;
                         line_cap = line_cap * 2i64;
                     }
@@ -266,8 +266,8 @@ pub func:grep_main = int32(int32:argc, wild int8->:argv) {
     int32:pattern_set = 0i32;
     if (string_length(pattern) > 0i64) { pattern_set = 1i32; }
     
-    int64:preg = malloc(64i64);
-    defer { drop(nitpick_libc_mem_free(preg)); }
+    int64:preg = @cast_unchecked<int64>(alloc(64i64));
+    defer { drop(dalloc(@cast_unchecked<int8->>(preg))); }
     
     int32:cflags = 1i32; // REG_EXTENDED
     if (flags_obj.i == 1i64) { cflags = cflags | 2i32; } // REG_ICASE

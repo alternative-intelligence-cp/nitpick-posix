@@ -24,7 +24,7 @@ pub func:paste_main = int32(int32:argc, wild int8->:argv) {
         // no files, just pass pass 0;
     }
     
-    int64:fp_array = malloc(cast_unchecked<int64>(arg_count) * 8i64);
+    int64:fp_array = @cast_unchecked<int64>(alloc(cast_unchecked<int64>(arg_count) * 8i64));
     
     int64:n_files = 0i64;
     int32:i = 1i32;
@@ -54,7 +54,7 @@ pub func:paste_main = int32(int32:argc, wild int8->:argv) {
             int64:fp = (<- (cast_unchecked<int64->>(fp_array + j * 8i64)));
             if (fp != 0i64) {
                 // read a line
-                int64:buf = malloc(65536i64);
+                int64:buf = @cast_unchecked<int64>(alloc(65536i64));
                 int64:len = 0i64;
                 int32:c = raw io_buf_getc(fp);
                 if (c < 0i32) {
@@ -81,7 +81,7 @@ pub func:paste_main = int32(int32:argc, wild int8->:argv) {
                         drop(sys(WRITE, 1i64, buf, len) ? -1i64);
                     }
                 }
-                drop(free(cast_unchecked<void->>(buf)));
+                drop(dalloc(cast_unchecked<void->>(buf)));
             }
             if (j < n_files - 1i64) {
                 drop(print_out("\t"));
@@ -96,6 +96,6 @@ pub func:paste_main = int32(int32:argc, wild int8->:argv) {
         }
     }
     
-    drop(nitpick_libc_mem_free(fp_array));
+    drop(dalloc(@cast_unchecked<int8->>(fp_array)));
     pass 0;
 };

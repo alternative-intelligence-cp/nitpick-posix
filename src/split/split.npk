@@ -71,7 +71,7 @@ pub func:split_main = int32(int32:argc, wild int8->:argv) {
     }
     
     int64:buf_size = 65536i64; // 1MB buffer
-    int64:buf = malloc(buf_size);
+    int64:buf = @cast_unchecked<int64>(alloc(buf_size));
     if (buf < 0i64) { pass 1; }
     
     int64:lines_in_current = 0i64;
@@ -144,7 +144,7 @@ pub func:split_main = int32(int32:argc, wild int8->:argv) {
 
     if (fd_out != -1i64) {
     }
-    drop(nitpick_libc_mem_free(buf));
+    drop(dalloc(@cast_unchecked<int8->>(buf)));
     
     pass 0;
 };

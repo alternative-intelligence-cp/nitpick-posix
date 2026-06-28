@@ -124,14 +124,14 @@ func:print_cal = int32(int64:year, int64:month) {
             drop(sys(WRITE, 1i64, " ", 1i64) ? -1i64);
             wild int8->:dbuf_alloc_ptr = alloc(1i64);
     int64:dbuf = @cast_unchecked<int64>(dbuf_alloc_ptr);
-    defer { free(dbuf_alloc_ptr); }
+    defer { dalloc(dbuf_alloc_ptr); }
             drop((<-(@cast_unchecked<int8->>((dbuf) + (0i64))) = @cast_unchecked<int8>(cast_unchecked<int32>(day + 48i64))));
             drop(sys(WRITE, 1i64, dbuf, 1i64));
             
         } else {
             wild int8->:dbuf_alloc_ptr = alloc(2i64);
     int64:dbuf = @cast_unchecked<int64>(dbuf_alloc_ptr);
-            defer { free(dbuf_alloc_ptr); }
+            defer { dalloc(dbuf_alloc_ptr); }
             drop((<-(@cast_unchecked<int8->>((dbuf) + (0i64))) = @cast_unchecked<int8>(cast_unchecked<int32>((day / 10i64) + 48i64))));
             drop((<-(@cast_unchecked<int8->>((dbuf) + (1i64))) = @cast_unchecked<int8>(cast_unchecked<int32>((day % 10i64) + 48i64))));
             drop(sys(WRITE, 1i64, dbuf, 2i64));
@@ -170,8 +170,8 @@ pub func:cal_main = int32(int32:argc, wild int8->:argv) {
     } else if (argc == 0i32) {
         wild int8->:tv_alloc_ptr = alloc(16i64);
     int64:tv = @cast_unchecked<int64>(tv_alloc_ptr);
-    defer { free(tv_alloc_ptr); }
-        drop(sys!!(SYS_GETTIMEOFDAY, @cast_unchecked<int64>(tv), 0i64));
+    defer { dalloc(tv_alloc_ptr); }
+        drop(sys!!(GETTIMEOFDAY, @cast_unchecked<int64>(tv), 0i64));
         int64:sec = raw read_int64(@cast_unchecked<int64>(tv));
         
         

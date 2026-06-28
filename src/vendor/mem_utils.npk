@@ -22,7 +22,7 @@ pub func:str_clone = int64(int64:s) {
     while (@cast_unchecked<int64>(<-(@cast_unchecked<int8->>((s) + (len)))) != 0i64) {
         len = len + 1i64;
     }
-    int64:copy = malloc(len + 1i64);
+    int64:copy = @cast_unchecked<int64>(alloc(len + 1i64));
     int64:i = 0i64;
     while (i < len) {
         drop((<-(@cast_unchecked<int8->>((copy) + (i))) = @cast_unchecked<int8>(npk_mem_read_byte(s, i))));
@@ -31,12 +31,7 @@ pub func:str_clone = int64(int64:s) {
     drop((<-(@cast_unchecked<int8->>((copy) + (len))) = @cast_unchecked<int8>(0i64)));
     pass copy;
 };
-extern func:malloc = int64(int64:bytes);
 
-pub func:nitpick_libc_mem_free = int32(int64:ptr) {
-    // GC handles all memory. Stub to satisfy legacy callers.
-    pass 0i32;
-};
 
 
 pub func:read_string_native = string(int64:ptr, int64:max_len) {

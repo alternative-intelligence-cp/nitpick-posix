@@ -43,7 +43,7 @@ pub func:realpath_main = int32(int32:argc, wild int8->:argv) {
         string:path = raw args_at(args, i);
         
         int64:buf = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
-        int64:res = sys!!(SYS_STAT, path, buf) ? -1i64; // SYS_STAT
+        int64:res = sys!!(STAT, path, buf) ? -1i64; // STAT
         int32:isdir = 0i32;
         
         if (res >= 0i64) {
@@ -65,7 +65,7 @@ pub func:realpath_main = int32(int32:argc, wild int8->:argv) {
         if (isdir == 1i32) {
             // Save original cwd
             string:orig_cwd = raw get_cwd();
-            drop(sys(CHDIR, path)); // SYS_CHDIR
+            drop(sys(CHDIR, path)); // CHDIR
             string:cwd = raw get_cwd();
             drop(print_str_safe(cwd));
             drop(print_str_safe("\n"));

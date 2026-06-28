@@ -11,7 +11,7 @@ pub func:read_file_to_string = string(string:path) {
     int64:buf_capacity = 65536i64;
     wild int8->:buf_alloc_ptr = alloc(buf_capacity);
     int64:buf = @cast_unchecked<int64>(buf_alloc_ptr);
-    defer { free(buf_alloc_ptr); }
+    defer { dalloc(buf_alloc_ptr); }
     int64:total_read = 0i64;
     int32:running = 1i32;
     

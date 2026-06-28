@@ -66,18 +66,18 @@ pub func:stdbuf_main = int32(int32:argc, wild int8->:argv) {
     
     if (cmd_idx > cast_unchecked<int64>(arg_count)) { pass 0; }
     
-    int64:buf = sys(MMAP, 0i64, 16384i64, 3i64, 34i64, -1i64, 0i64) ?! 0i64;
-    int64:fd = sys(OPEN, "/proc/self/cmdline", 0i64, 0i64) ?! -1i64;
+    int64:buf = sys(MMAP, 0i64, 16384i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    int64:fd = sys(OPEN, "/proc/self/cmdline", 0i64, 0i64) ? -1i64;
     defer { if (fd >= 0i64) { drop(sys(CLOSE, fd)); } }
-    int64:bytes = sys(READ, fd, buf, 16384i64) ?! -1i64;
+    int64:bytes = sys(READ, fd, buf, 16384i64) ? -1i64;
     
-    int64:env_buf = sys(MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ?! 0i64;
-    int64:env_fd = sys(OPEN, "/proc/self/environ", 0i64, 0i64) ?! -1i64;
+    int64:env_buf = sys(MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    int64:env_fd = sys(OPEN, "/proc/self/environ", 0i64, 0i64) ? -1i64;
     defer { if (env_fd >= 0i64) { drop(sys(CLOSE, env_fd)); } }
-    int64:env_bytes = sys(READ, env_fd, env_buf, 65536i64) ?! -1i64;
+    int64:env_bytes = sys(READ, env_fd, env_buf, 65536i64) ? -1i64;
     
-    int64:n_argv = sys(MMAP, 0i64, 1024i64, 3i64, 34i64, -1i64, 0i64) ?! 0i64;
-    int64:n_envp = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ?! 0i64;
+    int64:n_argv = sys(MMAP, 0i64, 1024i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    int64:n_envp = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
     
     int64:arg_idx = 0i64;
     int64:argv_idx = 0i64;
@@ -139,11 +139,11 @@ pub func:stdbuf_main = int32(int32:argc, wild int8->:argv) {
         cmd_ptr = (<- (cast_unchecked<int64->>(n_argv + 0i64)));
         int64:c0 = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((cmd_ptr) + (0i64))));
         if (c0 == 47i64 || c0 == 46i64 || path_ptr == 0i64) {
-            drop(sys!!(SYS_EXECVE, cmd_ptr, n_argv, n_envp));
+            drop(sys!!(EXECVE, cmd_ptr, n_argv, n_envp));
         }
         
-        int64:statbuf = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ?! 0i64;
-        int64:pathbuf = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ?! 0i64;
+        int64:statbuf = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+        int64:pathbuf = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
         
         int64:cmd_len = 0i64;
         while (@cast_unchecked<int64>(<-(@cast_unchecked<int8->>((cmd_ptr) + (cmd_len)))) != 0i64) { cmd_len = cmd_len + 1i64; }
@@ -177,9 +177,9 @@ pub func:stdbuf_main = int32(int32:argc, wild int8->:argv) {
             }
             <- (cast_unchecked<uint8->>(pathbuf + j)) = (cast_unchecked<uint8>(0i64));
             
-            int64:res_stat = sys!!(SYS_STAT, pathbuf, statbuf) ?! -1i64;
+            int64:res_stat = sys!!(STAT, pathbuf, statbuf) ? -1i64;
             if (res_stat == 0i64) {
-                drop(sys!!(SYS_EXECVE, pathbuf, n_argv, n_envp));
+                drop(sys!!(EXECVE, pathbuf, n_argv, n_envp));
             }
             
             if (pc == 0i64) { break; }

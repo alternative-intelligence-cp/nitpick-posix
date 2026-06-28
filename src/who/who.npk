@@ -16,7 +16,7 @@ func:print_str = int32(string:s) {
 
 pub func:who_main = int32(int32:argc, wild int8->:argv) {
     int64:t = time(0i64);
-    int64:t_buf = sys(MMAP, 0i64, 8i64, 3i64, 34i64, -1i64, 0i64) ?! 0i64;
+    int64:t_buf = sys(MMAP, 0i64, 8i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
     (<-(@cast_unchecked<int8->>((t_buf) + (0i64))) = @cast_unchecked<int8>(t & 255i64));
     (<-(@cast_unchecked<int8->>((t_buf) + (1i64))) = @cast_unchecked<int8>((t / 256i64) & 255i64));
     (<-(@cast_unchecked<int8->>((t_buf) + (2i64))) = @cast_unchecked<int8>((t / 65536i64) & 255i64));
@@ -88,8 +88,8 @@ pub func:who_main = int32(int32:argc, wild int8->:argv) {
         drop(print_str(fmt_date));
         drop(print_str("\n"));
         
-        drop(nitpick_libc_mem_free(ok(u_ptr)));
-        drop(nitpick_libc_mem_free(ok(l_ptr)));
+        drop(dalloc(@cast_unchecked<int8->>(ok(u_ptr))));
+        drop(dalloc(@cast_unchecked<int8->>(ok(l_ptr))));
         idx = idx + 2i64;
     }
     

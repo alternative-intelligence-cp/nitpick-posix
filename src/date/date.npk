@@ -72,14 +72,14 @@ pub func:date_main = int32(int32:argc, wild int8->:argv) {
     
     if (string_length(fmt) > 0i64) {
         int64:tm_ptr = localtime(t_buf);
-        int64:s_buf = malloc(4096i64);
+        int64:s_buf = @cast_unchecked<int64>(alloc(4096i64));
         int64:sz = strftime(s_buf, 4096i64, fmt, tm_ptr);
         if (sz > 0i64) {
             drop(print_str(raw ptr_to_string(ok(s_buf))));
             drop(print_str_safe("
 "));
         }
-        drop(nitpick_libc_mem_free(s_buf));
+        drop(dalloc(@cast_unchecked<int8->>(s_buf)));
     } else {
         int64:c_ptr = ctime(t_buf);
         string:ctime_str = "";

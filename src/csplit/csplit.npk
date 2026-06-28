@@ -102,12 +102,12 @@ pub func:csplit_main = int32(int32:argc, wild int8->:argv) {
     int32:arg_count = raw args_count(args);
     if (arg_count < 2i32) { drop(print_err("csplit: missing operand\n")); pass 1; }
     
-    int64:fd = sys(OPEN, raw args_at(args, 1i32), 0i64, 0i64) ?! -1i64;
+    int64:fd = sys(OPEN, raw args_at(args, 1i32), 0i64, 0i64) ? -1i64;
     defer { if (fd >= 0i64) { drop(sys(CLOSE, fd)); } }
     if (fd < 0i64) { drop(print_err("csplit: cannot open file\n")); pass 1; }
     
     int64:file_idx = 0i64;
-    int64:out_fd = sys(OPEN, raw make_filename(file_idx), 577i64, 438i64) ?! -1i64; // O_WRONLY | O_CREAT | O_TRUNC
+    int64:out_fd = sys(OPEN, raw make_filename(file_idx), 577i64, 438i64) ? -1i64; // O_WRONLY | O_CREAT | O_TRUNC
     if (out_fd < 0i64) { drop(print_err("csplit: cannot create output\n")); pass 1; }
     
     int64:state = raw io_buf_new(fd);
@@ -196,7 +196,7 @@ pub func:csplit_main = int32(int32:argc, wild int8->:argv) {
                         if (current_line == next_split_line) {
                             drop(sys(CLOSE, out_fd));
                             file_idx = file_idx + 1i64;
-                            out_fd = sys(OPEN, raw make_filename(file_idx), 577i64, 438i64) ?! -1i64;
+                            out_fd = sys(OPEN, raw make_filename(file_idx), 577i64, 438i64) ? -1i64;
                             rule_satisfied = 1i32;
                             if (rule_repeat > 0i64) { rule_repeat = rule_repeat - 1i64; next_split_line = next_split_line + rule_line; rule_satisfied = 0i32; }
                             else { if (rule_repeat == -1i64) { next_split_line = next_split_line + rule_line; rule_satisfied = 0i32; } }
@@ -226,7 +226,7 @@ pub func:csplit_main = int32(int32:argc, wild int8->:argv) {
                         if (do_split == 1i32) {
                             drop(sys(CLOSE, out_fd));
                             file_idx = file_idx + 1i64;
-                            out_fd = sys(OPEN, raw make_filename(file_idx), 577i64, 438i64) ?! -1i64;
+                            out_fd = sys(OPEN, raw make_filename(file_idx), 577i64, 438i64) ? -1i64;
                             rule_satisfied = 1i32;
                             if (rule_repeat > 0i64) { rule_repeat = rule_repeat - 1i64; rule_satisfied = 0i32; }
                             else { if (rule_repeat == -1i64) { rule_satisfied = 0i32; } }

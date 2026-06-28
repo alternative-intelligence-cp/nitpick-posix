@@ -11,6 +11,6 @@ use "../vendor/libc_ffi.npk".*;
 
 
 pub func:sync_main = int32(int32:argc, wild int8->:argv) {
-    drop(sys!!(162i64)); // SYS_SYNC
+    drop(sys(SYNC)); // SYNC
     pass 0;
 };

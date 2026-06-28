@@ -33,7 +33,7 @@ pub func:resolve_uid = int64(string:name) {
     
     wild int8->:buf_alloc_alloc_ptr = alloc(65536i64);
     int64:buf_alloc = @cast_unchecked<int64>(buf_alloc_alloc_ptr);
-    defer { dalloc(buf_alloc_alloc_ptr); }
+    defer { dalloc(@cast_unchecked<int8->>(buf_alloc_alloc_ptr)); }
     int64:buf = @cast_unchecked<int64>(buf_alloc);
     int64:nread = sys(READ, fd, buf, 65536i64) ? -1i64;
     
@@ -90,7 +90,7 @@ pub func:resolve_gid = int64(string:name) {
     
     wild int8->:buf_alloc_alloc_ptr = alloc(65536i64);
     int64:buf_alloc = @cast_unchecked<int64>(buf_alloc_alloc_ptr);
-    defer { dalloc(buf_alloc_alloc_ptr); }
+    defer { dalloc(@cast_unchecked<int8->>(buf_alloc_alloc_ptr)); }
     int64:buf = @cast_unchecked<int64>(buf_alloc);
     int64:nread = sys(READ, fd, buf, 65536i64) ? -1i64;
     

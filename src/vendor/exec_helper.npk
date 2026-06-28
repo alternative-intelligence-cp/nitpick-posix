@@ -38,9 +38,9 @@ pub func:args_load = string() {
 
 pub func:sys_execvp_from = int64(int64:start_idx) {
     int64:buf = sys(MMAP, 0i64, 131072i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
-    int64:fd = sys(OPEN, "/proc/self/cmdline", 0i64, 0i64) ? -1i64; // SYS_OPEN
+    int64:fd = sys(OPEN, "/proc/self/cmdline", 0i64, 0i64) ? -1i64; // OPEN
     defer { if (fd >= 0i64) { drop(sys(CLOSE, fd)); } }
-    int64:bytes = sys(READ, fd, buf, 131072i64) ? -1i64; // SYS_READ
+    int64:bytes = sys(READ, fd, buf, 131072i64) ? -1i64; // READ
     
     int64:env_buf = sys(MMAP, 0i64, 131072i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
     int64:env_fd = sys(OPEN, "/proc/self/environ", 0i64, 0i64) ? -1i64;
@@ -112,7 +112,7 @@ pub func:sys_execvp_from = int64(int64:start_idx) {
         
         int64:c0 = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((cmd_ptr) + (0i64))));
         if (c0 == 47i64 || c0 == 46i64 || path_ptr == 0i64) {
-            pass sys!!(SYS_EXECVE, cmd_ptr, argv, envp) ? -1i64; // SYS_EXECVE
+            pass sys!!(EXECVE, cmd_ptr, argv, envp) ? -1i64; // EXECVE
         }
         
         int64:statbuf = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
@@ -154,9 +154,9 @@ pub func:sys_execvp_from = int64(int64:start_idx) {
             }
             <- (cast_unchecked<uint8->>(pathbuf + j)) = (cast_unchecked<uint8>(0i64));
             
-            int64:res_stat = sys!!(SYS_STAT, pathbuf, statbuf) ?! -1i64;
+            int64:res_stat = sys!!(STAT, pathbuf, statbuf) ? -1i64;
             if (res_stat == 0i64) {
-                drop(sys!!(SYS_EXECVE, pathbuf, argv, envp));
+                drop(sys!!(EXECVE, pathbuf, argv, envp));
             }
             
             if (pc == 0i64) { break; }

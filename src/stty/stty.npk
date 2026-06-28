@@ -28,7 +28,7 @@ pub func:stty_main = int32(int32:argc, wild int8->:argv) {
     if (buf < 0i64) { pass 1; }
     
     // TCGETS is 0x5401
-    int64:res = sys!!(16i64, 0i64, 0x5401i64, buf) ? -1i64; // SYS_IOCTL
+    int64:res = sys!!(IOCTL, 0i64, 0x5401i64, buf) ? -1i64; // IOCTL
     
     if (res < 0i64) {
         drop(print_err("stty: 'standard input': Inappropriate ioctl for device\n"));

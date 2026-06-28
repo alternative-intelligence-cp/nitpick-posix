@@ -70,12 +70,12 @@ pub func:fold_main = int32(int32:argc, wild int8->:argv) {
     defer { if (fd >= 0i64) { drop(sys(CLOSE, fd)); } }
     
     int64:buf_size = 65536i64; // 1MB buffer
-    int64:buf = malloc(buf_size);
+    int64:buf = @cast_unchecked<int64>(alloc(buf_size));
     
     int64:col = 0i64;
     int32:running = 1i32;
     
-    int64:out_buf = malloc(65536i64);
+    int64:out_buf = @cast_unchecked<int64>(alloc(65536i64));
     int64:out_len = 0i64;
     
     while (running == 1i32) {
@@ -111,11 +111,11 @@ pub func:fold_main = int32(int32:argc, wild int8->:argv) {
     if (out_len > 0i64) {
         drop(sys(WRITE, 1i64, out_buf, out_len));
     }
-    drop(nitpick_libc_mem_free(out_buf));
+    drop(dalloc(@cast_unchecked<int8->>(out_buf)));
     
     if (fd != 0i64) {
     }
-    drop(nitpick_libc_mem_free(buf));
+    drop(dalloc(@cast_unchecked<int8->>(buf)));
     
     pass 0;
 };

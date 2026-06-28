@@ -5,7 +5,7 @@ pub Type:BufReader = {
     func:create = int64(int64:fd) {
         wild int8->:ptr_alloc_ptr = alloc(65568i64);
     int64:ptr = @cast_unchecked<int64>(ptr_alloc_ptr);
-    defer { free(ptr_alloc_ptr); } // 64KB + metadata
+    defer { dalloc(ptr_alloc_ptr); } // 64KB + metadata
         <- (@cast_unchecked<int64->>(ptr + 65536i64)) = fd;      // fd
         <- (@cast_unchecked<int64->>(ptr + 65544i64)) = 0i64;    // buf_pos
         <- (@cast_unchecked<int64->>(ptr + 65552i64)) = 0i64;    // buf_len

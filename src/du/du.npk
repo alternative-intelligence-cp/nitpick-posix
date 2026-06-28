@@ -55,7 +55,7 @@ func:int_to_str = string(int64:val) {
 func:du_walk = int64(string:path, int64:statbuf) {
     int64:total_size = 0i64;
     
-    int64:res = sys(NEWFSTATAT, -100i64, path, statbuf, 256i64) ?! -1i64;
+    int64:res = sys(NEWFSTATAT, -100i64, path, statbuf, 256i64) ? -1i64;
     if (res < 0i64) { pass 0i64; }
     
     int64:st_blocks = (<- (cast_unchecked<int64->>(statbuf + 64i64)));
@@ -70,18 +70,18 @@ func:du_walk = int64(string:path, int64:statbuf) {
     }
     
     if ((mode & 61440i64) == 16384i64) { // Directory
-        int64:fd = sys(OPEN, path, 65536i64, 0i64) ?! -1i64; // O_DIRECTORY
+        int64:fd = sys(OPEN, path, 65536i64, 0i64) ? -1i64; // O_DIRECTORY
         if (fd >= 0i64) {
             wild int8->:buf_alloc_alloc_ptr = alloc(32768i64);
             int64:buf_alloc = cast_unchecked<int64>(buf_alloc_alloc_ptr);
-            defer { dalloc(buf_alloc_alloc_ptr); }
+            defer { dalloc(@cast_unchecked<int8->>(buf_alloc_alloc_ptr)); }
             int64:buf = cast_unchecked<int64>(buf_alloc);
             
             if (buf >= 0i64) {
                 int64:dirs_sl = raw alist(1024i64);
                 int32:running = 1i32;
                 while (running == 1i32) {
-                    int64:nread = sys(GETDENTS64, fd, buf, 32768i64) ?! -1i64;
+                    int64:nread = sys(GETDENTS64, fd, buf, 32768i64) ? -1i64;
                     if (nread <= 0i64) {
                         running = 0i32;
                     } else {
@@ -110,7 +110,7 @@ func:du_walk = int64(string:path, int64:statbuf) {
                     string:child_path = raw ptr_to_string(n_ptr);
                     int64:w_sz = raw du_walk(child_path, statbuf);
                     total_size = total_size + w_sz;
-                    free(cast_unchecked<int8->>(n_ptr));
+                    dalloc(cast_unchecked<int8->>(n_ptr));
                     s_idx = s_idx + 1i64;
                 }
                 drop(0i32);
@@ -131,7 +131,7 @@ pub func:du_main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     
-    int64:statbuf = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ?! -1i64;
+    int64:statbuf = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
     if (statbuf < 0i64) { pass 1; }
     
     int32:i = 1i32;

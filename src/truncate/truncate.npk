@@ -42,8 +42,8 @@ pub func:truncate_main = int32(int32:argc, wild int8->:argv) {
                 pass 1;
             }
             has_file = 1i32;
-            // SYS_TRUNCATE is 76
-            int64:res = sys!!(76i64, arg, size) ? -1i64;
+            // TRUNCATE is 76
+            int64:res = sys!!(TRUNCATE, arg, size) ? -1i64;
             if (res < 0i64) {
                 drop(print_err("truncate: cannot open '"));
                 drop(print_err(arg));

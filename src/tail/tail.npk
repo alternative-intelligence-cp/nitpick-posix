@@ -51,7 +51,7 @@ pub func:tail_main = int32(int32:argc, wild int8->:argv) {
     int64:file_size = sys(LSEEK, fd, 0i64, 2i64) ? -1i64; // SEEK_END
     if (file_size > 0i64) {
         int64:chunk_size = 65536i64;
-        int64:buf = malloc(chunk_size);
+        int64:buf = @cast_unchecked<int64>(alloc(chunk_size));
         wild uint8->:buf_ptr = cast_unchecked<uint8->>(buf);
         int64:pos = file_size;
         int64:lines_found = 0i64;
@@ -78,7 +78,7 @@ pub func:tail_main = int32(int32:argc, wild int8->:argv) {
                     if (j >= 0i64) {
                         wild uint8->:char_ptr2 = nodrop(cast_unchecked<uint8->>(@ptr_add<uint8>(buf_ptr, j)));
                         int64:c = cast_unchecked<int64>(<- char_ptr2);
-                        drop(fake_free(char_ptr2));
+                        drop(dalloc(char_ptr2));
                         if (c == 10i64) {
                             j = j - 1i64;
                         }
@@ -87,7 +87,7 @@ pub func:tail_main = int32(int32:argc, wild int8->:argv) {
                 while (j >= 0i64) {
                     wild uint8->:char_ptr_inner = nodrop(cast_unchecked<uint8->>(@ptr_add<uint8>(buf_ptr, j)));
                     int64:c = cast_unchecked<int64>(<- char_ptr_inner);
-                    drop(fake_free(char_ptr_inner));
+                    drop(dalloc(char_ptr_inner));
                     if (c == 10i64) {
                         lines_found = lines_found + 1i64;
                         if (lines_found == n_lines) {
@@ -117,12 +117,12 @@ pub func:tail_main = int32(int32:argc, wild int8->:argv) {
             }
         }
         
-        free(buf_ptr);
+        dalloc(buf_ptr);
     } else {
         // Unseekable fallback: read forward using circular buffer or just chunked
-        // The audit only asks for SYS_LSEEK with SEEK_END, we'll keep it simple for unseekable:
+        // The audit only asks for LSEEK with SEEK_END, we'll keep it simple for unseekable:
         int64:buf_size = 1048576i64; // keep 1MB limit for unseekable pipes only
-        int64:buf = malloc(buf_size);
+        int64:buf = @cast_unchecked<int64>(alloc(buf_size));
         wild uint8->:buf_ptr = cast_unchecked<uint8->>(buf);
         int64:total_read = 0i64;
         int32:running = 1i32;
@@ -144,14 +144,14 @@ pub func:tail_main = int32(int32:argc, wild int8->:argv) {
             int64:j = total_read - 1i64;
             wild uint8->:char_ptr3 = nodrop(cast_unchecked<uint8->>(@ptr_add<uint8>(buf_ptr, j)));
             uint8:c3 = <- char_ptr3;
-            drop(fake_free(char_ptr3));
+            drop(dalloc(char_ptr3));
             if (c3 == 10u8) {
                 j = j - 1i64;
             }
             while (j >= 0i64) {
                 wild uint8->:char_ptr = nodrop(cast_unchecked<uint8->>(@ptr_add<uint8>(buf_ptr, j)));
                 uint8:c = <- char_ptr;
-                drop(fake_free(char_ptr));
+                drop(dalloc(char_ptr));
                 if (c == 10u8) {
                     lines_found = lines_found + 1i64;
                     if (lines_found == n_lines) {
@@ -163,7 +163,7 @@ pub func:tail_main = int32(int32:argc, wild int8->:argv) {
             }
             drop(sys(WRITE, 1i64, buf + start_idx, total_read - start_idx));
         }
-        free(buf_ptr);
+        dalloc(buf_ptr);
     }
     
     if (fd != 0i64) {

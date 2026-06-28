@@ -59,9 +59,9 @@ pub func:join_main = int32(int32:argc, wild int8->:argv) {
     int32:arg_count = raw args_count(args);
     if (arg_count < 3i32) { drop(print_err("join: missing operand\n")); pass 1; }
     
-    int64:fd1 = sys(OPEN, raw args_at(args, 1i32), 0i64, 0i64) ?! -1i64;
+    int64:fd1 = sys(OPEN, raw args_at(args, 1i32), 0i64, 0i64) ? -1i64;
     defer { if (fd1 >= 0i64) { drop(sys(CLOSE, fd1)); } }
-    int64:fd2 = sys(OPEN, raw args_at(args, 2i32), 0i64, 0i64) ?! -1i64;
+    int64:fd2 = sys(OPEN, raw args_at(args, 2i32), 0i64, 0i64) ? -1i64;
     defer { if (fd2 >= 0i64) { drop(sys(CLOSE, fd2)); } }
     
     int64:state1 = raw io_buf_new(fd1);

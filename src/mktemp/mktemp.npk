@@ -84,14 +84,14 @@ pub func:mktemp_main = int32(int32:argc, wild int8->:argv) {
     int64:success = 0i64;
     string:final_path = "";
     
-    int64:buf = malloc(x_count * 2i64 + 16i64);
+    int64:buf = @cast_unchecked<int64>(alloc(x_count * 2i64 + 16i64));
     
     while (tries < 1000i32) {
         if (success == 0i64) {
             int64:nread = sys(READ, urandom_fd, buf, x_count * 2i64) ? -1i64;
             if (nread <= 0i64) {
                 drop(print_err("mktemp: error reading from /dev/urandom\n"));
-                drop(nitpick_libc_mem_free(buf));
+                drop(dalloc(@cast_unchecked<int8->>(buf)));
                 pass 1;
             }
             
@@ -104,7 +104,7 @@ pub func:mktemp_main = int32(int32:argc, wild int8->:argv) {
                     nread = sys(READ, urandom_fd, buf, x_count * 2i64) ? -1i64;
                     if (nread <= 0i64) {
                         drop(print_err("mktemp: error reading from /dev/urandom\n"));
-                        drop(nitpick_libc_mem_free(buf));
+                        drop(dalloc(@cast_unchecked<int8->>(buf)));
                         pass 1;
                     }
                 }
@@ -127,7 +127,7 @@ pub func:mktemp_main = int32(int32:argc, wild int8->:argv) {
         tries = tries + 1i32;
     }
     
-    drop(nitpick_libc_mem_free(buf));
+    drop(dalloc(@cast_unchecked<int8->>(buf)));
     
     if (success == 1i64) {
         drop(print_str_safe(final_path));

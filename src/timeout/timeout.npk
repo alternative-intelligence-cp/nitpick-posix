@@ -17,7 +17,7 @@ extern func:npk_mem_read_int32 = int32(int64:ptr, int64:offset);
 
 func:print_err = int32(string:s) {
     int64:len = string_length(s);
-    drop(sys(WRITE, 2i64, s, len)); // SYS_WRITE to stderr
+    drop(sys(WRITE, 2i64, s, len)); // WRITE to stderr
     pass 0i32;
 };
 
@@ -82,7 +82,7 @@ pub func:timeout_main = int32(int32:argc, wild int8->:argv) {
     
     string:cmd = raw args_at(args, 2i32);
     
-    int64:pid = sys!!(SYS_FORK) ? -1i64; // SYS_FORK
+    int64:pid = sys!!(FORK) ? -1i64; // FORK
     
     if (pid == 0i64) {
         // Child: execve
@@ -114,7 +114,7 @@ pub func:timeout_main = int32(int32:argc, wild int8->:argv) {
             
             int32:exit_status = 0i32;
             while (running == 1i32) {
-                int64:res = sys!!(SYS_WAIT4, pid, status_buf, 1i64, 0i64) ? -1i64; // wait4 with WNOHANG
+                int64:res = sys!!(WAIT4, pid, status_buf, 1i64, 0i64) ? -1i64; // wait4 with WNOHANG
                 if (res == pid) {
                     child_exited = 1i32;
                     running = 0i32;
@@ -129,14 +129,14 @@ pub func:timeout_main = int32(int32:argc, wild int8->:argv) {
                     } else {
                         polls = polls + 1i64;
                         if (polls > max_polls) {
-                            drop(sys!!(SYS_KILL, pid, 15i64)); // SYS_KILL SIGTERM
-                            drop(sys!!(SYS_WAIT4, pid, status_buf, 0i64, 0i64)); // wait4 blocking to reap
+                            drop(sys!!(KILL, pid, 15i64)); // KILL SIGTERM
+                            drop(sys!!(WAIT4, pid, status_buf, 0i64, 0i64)); // wait4 blocking to reap
                             running = 0i32;
                             drop(sys(MUNMAP, ts_buf, 16i64));
                             drop(sys(MUNMAP, status_buf, 8i64));
                             pass 124; // standard timeout pass code
                         } else {
-                            drop(sys!!(35i64, ts_buf, 0i64)); // nanosleep
+                            drop(sys!!(NANOSLEEP, ts_buf, 0i64)); // nanosleep
                         }
                     }
                 }

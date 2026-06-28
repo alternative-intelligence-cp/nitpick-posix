@@ -40,7 +40,7 @@ pub func:shred_main = int32(int32:argc, wild int8->:argv) {
     
     while (i <= arg_count) {
         string:file = raw args_at(args, i);
-        int64:res = sys!!(SYS_STAT, file, stat_buf) ? -1i64;
+        int64:res = sys!!(STAT, file, stat_buf) ? -1i64;
         if (res < 0i64) {
             drop(print_err("shred: cannot stat '"));
             drop(print_err(file));
@@ -57,7 +57,7 @@ pub func:shred_main = int32(int32:argc, wild int8->:argv) {
             } else {
                 int32:pass_idx = 0i32;
                 while (pass_idx < 3i32) { // 3 passes
-                    drop(sys!!(8i64, fd, 0i64, 0i64)); // SYS_LSEEK to 0
+                    drop(sys(LSEEK, fd, 0i64, 0i64)); // LSEEK to 0
                     int64:written = 0i64;
                     while (written < size) {
                         int64:to_write = size - written;
@@ -77,7 +77,7 @@ pub func:shred_main = int32(int32:argc, wild int8->:argv) {
                         }
                     }
                     pass_idx = pass_idx + 1i32;
-                    drop(sys!!(75i64, fd)); // SYS_FDATASYNC (75) instead of SYS_FSYNC (74)
+                    drop(sys(FDATASYNC, fd)); // FDATASYNC (75) instead of SYS_FSYNC (74)
                 }
             }
             defer { if (fd >= 0i64) { drop(sys(CLOSE, fd)); } }

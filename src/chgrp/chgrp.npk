@@ -38,8 +38,8 @@ pub func:chgrp_main = int32(int32:argc, wild int8->:argv) {
     
     while (i <= arg_count) {
         string:file = raw args_at(args, i);
-        // SYS_CHOWN is 92
-        int64:res = sys!!(SYS_CHOWN, file, -1i64, target_gid) ? -1i64;
+        // CHOWN is 92
+        int64:res = sys!!(CHOWN, file, -1i64, target_gid) ? -1i64;
         if (res < 0i64) {
             drop(print_err("chgrp: changing group of '"));
             drop(print_err(file));

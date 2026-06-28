@@ -48,7 +48,7 @@ func:str_clone = int64(int64:s) {
     while (@cast_unchecked<int64>(<-(@cast_unchecked<int8->>((s) + (len)))) != 0i64) {
         len = len + 1i64;
     }
-    int64:copy = malloc(len + 1i64);
+    int64:copy = @cast_unchecked<int64>(alloc(len + 1i64));
     int64:i = 0i64;
     while (i < len) {
         (<-(@cast_unchecked<int8->>((copy) + (i))) = @cast_unchecked<int8>(npk_mem_read_byte(s, i)));
@@ -89,7 +89,7 @@ func:read_lines = int64(string:filename, int64:sl) {
     if (buf <= 0i64) { pass 0i64; }
     
     int32:running = 1i32;
-    int64:line_buf = malloc(65536i64);
+    int64:line_buf = @cast_unchecked<int64>(alloc(65536i64));
     int64:line_len = 0i64;
 
     while (running == 1i32) {
@@ -117,7 +117,7 @@ func:read_lines = int64(string:filename, int64:sl) {
         drop(raw alist_push(sl, raw str_clone(line_buf)));
     }
 
-    drop(nitpick_libc_mem_free(line_buf));
+    drop(dalloc(@cast_unchecked<int8->>(line_buf)));
     drop(sys(MUNMAP, buf, 65536i64));
     pass sl;
 };
@@ -157,8 +157,8 @@ pub func:comm_main = int32(int32:argc, wild int8->:argv) {
     int64:state1 = raw io_buf_new(fd1);
     int64:state2 = raw io_buf_new(fd2);
     
-    int64:p1 = malloc(65536i64);
-    int64:p2 = malloc(65536i64);
+    int64:p1 = @cast_unchecked<int64>(alloc(65536i64));
+    int64:p2 = @cast_unchecked<int64>(alloc(65536i64));
     
     int64:len1 = raw io_buf_readline(state1, cast_unchecked<uint8->>(p1), 4096i64);
     int64:len2 = raw io_buf_readline(state2, cast_unchecked<uint8->>(p2), 4096i64);
@@ -207,8 +207,8 @@ pub func:comm_main = int32(int32:argc, wild int8->:argv) {
     
     drop(io_buf_free(state1));
     drop(io_buf_free(state2));
-    drop(nitpick_libc_mem_free(p1));
-    drop(nitpick_libc_mem_free(p2));
+    drop(dalloc(@cast_unchecked<int8->>(p1)));
+    drop(dalloc(@cast_unchecked<int8->>(p2)));
     
     pass 0;
 };

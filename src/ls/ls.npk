@@ -38,7 +38,7 @@ func:str_clone = int64(int64:s) {
     while (@cast_unchecked<int64>(<-(@cast_unchecked<int8->>((s) + (len)))) != 0i64) {
         len = len + 1i64;
     }
-    int64:copy = malloc(len + 1i64);
+    int64:copy = @cast_unchecked<int64>(alloc(len + 1i64));
     int64:i = 0i64;
     while (i < len) {
         (<-(@cast_unchecked<int8->>((copy) + (i))) = @cast_unchecked<int8>(npk_mem_read_byte(s, i)));
@@ -279,7 +279,7 @@ func:list_dir = int32(string:dir, int32:print_header, int32:recursive, int32:sho
             }
             (<-(@cast_unchecked<int8->>((pathbuf) + (idx + k))) = @cast_unchecked<int8>(0i64));
             
-            int64:res_stat = sys!!(SYS_LSTAT, pathbuf, statbuf) ? -1i64;
+            int64:res_stat = sys!!(LSTAT, pathbuf, statbuf) ? -1i64;
             if (res_stat >= 0i64) {
                 int64:st_size = (<- (cast_unchecked<int64->>(statbuf + 48i64)));
                 int64:sz_w = raw num_digits(st_size);
@@ -315,7 +315,7 @@ func:list_dir = int32(string:dir, int32:print_header, int32:recursive, int32:sho
             }
             (<-(@cast_unchecked<int8->>((pathbuf) + (idx + k))) = @cast_unchecked<int8>(0i64));
             
-            int64:res_stat = sys!!(SYS_LSTAT, pathbuf, statbuf) ? -1i64;
+            int64:res_stat = sys!!(LSTAT, pathbuf, statbuf) ? -1i64;
             if (res_stat >= 0i64) {
                 int32:st_mode = npk_mem_read_int32(statbuf, 24i64);
                 int64:st_nlink = (<- (cast_unchecked<int64->>(statbuf + 16i64)));
@@ -351,7 +351,7 @@ func:list_dir = int32(string:dir, int32:print_header, int32:recursive, int32:sho
 
     i = 0i64;
     while (i < sz) {
-        drop(nitpick_libc_mem_free(raw alist_get(lst, i)));
+        drop(dalloc(@cast_unchecked<int8->>(raw alist_get(lst, i))));
         i = i + 1i64;
     }
 
@@ -371,7 +371,7 @@ func:list_dir = int32(string:dir, int32:print_header, int32:recursive, int32:sho
                 child_path = string_concat(dir, string_concat("/", child_name));
             }
             drop(list_dir(child_path, 1i32, recursive, show_hidden, long_fmt, human_fmt, 0i32));
-            drop(nitpick_libc_mem_free(child_ptr));
+            drop(dalloc(@cast_unchecked<int8->>(child_ptr)));
         }
     }
 

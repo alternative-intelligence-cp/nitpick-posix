@@ -33,7 +33,7 @@ pub func:logname_main = int32(int32:argc, wild int8->:argv) {
     }
     
     string:username = "";
-    int64:buf = malloc(65536i64);
+    int64:buf = @cast_unchecked<int64>(alloc(65536i64));
     int64:len = 0i64;
     int64:field_index = 0i64;
     
@@ -54,7 +54,7 @@ pub func:logname_main = int32(int32:argc, wild int8->:argv) {
                             // Match!
                             drop(print_str_safe(username));
                             drop(print_str_safe("\n"));
-                            drop(nitpick_libc_mem_free(buf));
+                            drop(dalloc(@cast_unchecked<int8->>(buf)));
                             drop(fclose(fp));
                             pass 0;
                         }
@@ -72,7 +72,7 @@ pub func:logname_main = int32(int32:argc, wild int8->:argv) {
         c = fgetc(fp);
     }
     
-    drop(nitpick_libc_mem_free(buf));
+    drop(dalloc(@cast_unchecked<int8->>(buf)));
     drop(fclose(fp));
     
     // fallback if not found

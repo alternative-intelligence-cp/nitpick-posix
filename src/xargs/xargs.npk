@@ -14,7 +14,7 @@ pub func:xargs_exec_batch = int32(int64:cmd_ptr, int64:argv_ptr, int64:argv_idx)
     int64:offset2 = argv_idx * 8i64;
     drop((<-(@cast_unchecked<int8->>((argv_ptr) + (offset2))) = @cast_unchecked<int8>(0i64))); // NULL terminate
 
-    int64:pid = sys!!(SYS_FORK) ? -1i64;
+    int64:pid = sys!!(FORK) ? -1i64;
     if (pid == -1i64) {
         drop(print_err("xargs: fork failed\n"));
         pass 1i32;
@@ -50,10 +50,10 @@ pub func:xargs_exec_batch = int32(int64:cmd_ptr, int64:argv_ptr, int64:argv_idx)
         drop((<-(@cast_unchecked<int8->>((envp) + (envp_idx * 8i64))) = @cast_unchecked<int8>(0i64))); // NULL terminate
         if (env_fd >= 0i64) { drop(sys(CLOSE, env_fd)); }
 
-        drop(sys!!(SYS_EXECVE, cmd_ptr, @cast_unchecked<int64>(argv_ptr), @cast_unchecked<int64>(envp)) ? -1i64);
+        drop(sys!!(EXECVE, cmd_ptr, @cast_unchecked<int64>(argv_ptr), @cast_unchecked<int64>(envp)) ? -1i64);
 
-        int64:fb_cmd = malloc(1024i64);
-        defer { drop(nitpick_libc_mem_free(fb_cmd)); }
+        int64:fb_cmd = @cast_unchecked<int64>(alloc(1024i64));
+        defer { drop(dalloc(@cast_unchecked<int8->>(fb_cmd))); }
         drop((<-(@cast_unchecked<int8->>((fb_cmd) + (0i64))) = @cast_unchecked<int8>((47i64))));
         drop((<-(@cast_unchecked<int8->>((fb_cmd) + (1i64))) = @cast_unchecked<int8>((117i64))));
         drop((<-(@cast_unchecked<int8->>((fb_cmd) + (2i64))) = @cast_unchecked<int8>((115i64))));
@@ -76,7 +76,7 @@ pub func:xargs_exec_batch = int32(int64:cmd_ptr, int64:argv_ptr, int64:argv_idx)
             cmd_idx = cmd_idx + 1i64;
         }
 
-        drop(sys!!(SYS_EXECVE, @cast_unchecked<int64>(fb_cmd), @cast_unchecked<int64>(argv_ptr), @cast_unchecked<int64>(envp)) ? -1i64);
+        drop(sys!!(EXECVE, @cast_unchecked<int64>(fb_cmd), @cast_unchecked<int64>(argv_ptr), @cast_unchecked<int64>(envp)) ? -1i64);
 
         drop((<-(@cast_unchecked<int8->>((fb_cmd) + (0i64))) = @cast_unchecked<int8>((47i64))));
         drop((<-(@cast_unchecked<int8->>((fb_cmd) + (1i64))) = @cast_unchecked<int8>((98i64))));
@@ -95,13 +95,13 @@ pub func:xargs_exec_batch = int32(int64:cmd_ptr, int64:argv_ptr, int64:argv_idx)
             cmd_idx = cmd_idx + 1i64;
         }
 
-        drop(sys!!(SYS_EXECVE, @cast_unchecked<int64>(fb_cmd), @cast_unchecked<int64>(argv_ptr), @cast_unchecked<int64>(envp)) ? -1i64);
+        drop(sys!!(EXECVE, @cast_unchecked<int64>(fb_cmd), @cast_unchecked<int64>(argv_ptr), @cast_unchecked<int64>(envp)) ? -1i64);
 
         drop(print_err("xargs: execve failed\n"));
-        drop(sys!!!(SYS_EXIT_GROUP, 127i64, 0i64, 0i64, 0i64, 0i64, 0i64));
+        drop(sys!!!(EXIT_GROUP, 127i64, 0i64, 0i64, 0i64, 0i64, 0i64));
     } else {
         int64:status = 0i64;
-        drop(sys!!(SYS_WAIT4, pid, @cast_unchecked<int64>(0i64), 0i64, 0i64) ? -1i64);
+        drop(sys!!(WAIT4, pid, @cast_unchecked<int64>(0i64), 0i64, 0i64) ? -1i64);
     }
     pass 0i32;
 };
@@ -116,8 +116,8 @@ pub func:xargs_main = int32(int32:argc, wild int8->:argv) {
     string:cmd = "/bin/echo";
 
     int64:max_args = 9999i64;
-    int64:argv_ptr = malloc(max_args * 8i64);
-    defer { drop(nitpick_libc_mem_free(argv_ptr)); }
+    int64:argv_ptr = @cast_unchecked<int64>(alloc(max_args * 8i64));
+    defer { drop(dalloc(@cast_unchecked<int8->>(argv_ptr))); }
     int64:argv_idx = 0i64;
 
     int32:use_null = 0i32;
@@ -142,7 +142,7 @@ pub func:xargs_main = int32(int32:argc, wild int8->:argv) {
 
 
             int64:len = string_length(arg_s);
-            int64:c_str = malloc(len + 1i64);
+            int64:c_str = @cast_unchecked<int64>(alloc(len + 1i64));
             int64:j = 0i64;
             while (j < len) {
                 drop((<-(@cast_unchecked<int8->>((c_str) + (j))) = @cast_unchecked<int8>(npk_string_byte_at(arg_s, j))));
@@ -158,7 +158,7 @@ pub func:xargs_main = int32(int32:argc, wild int8->:argv) {
     }
 
     if (argv_idx == 0i64) {
-        int64:c_str = malloc(10i64);
+        int64:c_str = @cast_unchecked<int64>(alloc(10i64));
         drop((<-(@cast_unchecked<int8->>((c_str) + (0i64))) = @cast_unchecked<int8>((47i64))));
         drop((<-(@cast_unchecked<int8->>((c_str) + (1i64))) = @cast_unchecked<int8>((98i64))));
         drop((<-(@cast_unchecked<int8->>((c_str) + (2i64))) = @cast_unchecked<int8>((105i64))));
@@ -178,10 +178,10 @@ pub func:xargs_main = int32(int32:argc, wild int8->:argv) {
     int64:initial_argv_idx = argv_idx;
     int64:cmd_ptr = nitpick_libc_mem_read_i64(argv_ptr, 0i64);
 
-    int64:buf = malloc(65536i64);
-    defer { drop(nitpick_libc_mem_free(buf)); }
-    int64:token_buf = malloc(65536i64);
-    defer { drop(nitpick_libc_mem_free(token_buf)); }
+    int64:buf = @cast_unchecked<int64>(alloc(65536i64));
+    defer { drop(dalloc(@cast_unchecked<int8->>(buf))); }
+    int64:token_buf = @cast_unchecked<int64>(alloc(65536i64));
+    defer { drop(dalloc(@cast_unchecked<int8->>(token_buf))); }
     int64:token_len = 0i64;
     int32:running = 1i32;
 
@@ -205,7 +205,7 @@ pub func:xargs_main = int32(int32:argc, wild int8->:argv) {
                     if (token_len > 0i64) {
                         drop((<-(@cast_unchecked<int8->>((token_buf) + (token_len))) = @cast_unchecked<int8>((0i64))));
 
-                        int64:c_str = malloc(token_len + 1i64);
+                        int64:c_str = @cast_unchecked<int64>(alloc(token_len + 1i64));
                         int64:k = 0i64;
                         while (k <= token_len) {
                             drop((<-(@cast_unchecked<int8->>((c_str) + (k))) = @cast_unchecked<int8>(npk_mem_read_byte(token_buf, k))));
@@ -220,7 +220,7 @@ pub func:xargs_main = int32(int32:argc, wild int8->:argv) {
                             while (f_idx < argv_idx) {
                                 int64:c_s = nitpick_libc_mem_read_i64(argv_ptr, f_idx * 8i64);
                                 if (c_s != 0i64) {
-                                    drop(nitpick_libc_mem_free(c_s));
+                                    drop(dalloc(@cast_unchecked<int8->>(c_s)));
                                 }
                                 f_idx = f_idx + 1i64;
                             }
@@ -248,7 +248,7 @@ pub func:xargs_main = int32(int32:argc, wild int8->:argv) {
 
     if (token_len > 0i64) {
         drop((<-(@cast_unchecked<int8->>((token_buf) + (token_len))) = @cast_unchecked<int8>((0i64))));
-        int64:c_str = malloc(token_len + 1i64);
+        int64:c_str = @cast_unchecked<int64>(alloc(token_len + 1i64));
         int64:k = 0i64;
         while (k <= token_len) {
             drop((<-(@cast_unchecked<int8->>((c_str) + (k))) = @cast_unchecked<int8>(npk_mem_read_byte(token_buf, k))));
@@ -261,7 +261,7 @@ pub func:xargs_main = int32(int32:argc, wild int8->:argv) {
             while (f_idx < argv_idx) {
                 int64:c_s = nitpick_libc_mem_read_i64(argv_ptr, f_idx * 8i64);
                 if (c_s != 0i64) {
-                    drop(nitpick_libc_mem_free(c_s));
+                    drop(dalloc(@cast_unchecked<int8->>(c_s)));
                 }
                 f_idx = f_idx + 1i64;
             }
@@ -281,7 +281,7 @@ pub func:xargs_main = int32(int32:argc, wild int8->:argv) {
     while (f_idx < argv_idx) {
         int64:c_s = nitpick_libc_mem_read_i64(argv_ptr, f_idx * 8i64);
         if (c_s != 0i64) {
-            drop(nitpick_libc_mem_free(c_s));
+            drop(dalloc(@cast_unchecked<int8->>(c_s)));
         }
         f_idx = f_idx + 1i64;
     }

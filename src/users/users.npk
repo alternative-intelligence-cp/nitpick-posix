@@ -25,8 +25,8 @@ pub func:users_main = int32(int32:argc, wild int8->:argv) {
         drop(print_str(user));
         if (idx + 2i64 < count) { drop(print_str(" ")); }
         
-        drop(nitpick_libc_mem_free(ok(u_ptr)));
-        drop(nitpick_libc_mem_free(ok(l_ptr)));
+        drop(dalloc(@cast_unchecked<int8->>(ok(u_ptr))));
+        drop(dalloc(@cast_unchecked<int8->>(ok(l_ptr))));
         idx = idx + 2i64;
     }
     drop(print_str("\n"));

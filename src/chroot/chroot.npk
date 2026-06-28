@@ -37,7 +37,7 @@ pub func:chroot_main = int32(int32:argc, wild int8->:argv) {
     
     string:newroot = raw args_at(args, 1i32);
     
-    int64:res = sys!!(SYS_CHROOT, newroot) ? -1i64; // SYS_CHROOT
+    int64:res = sys!!(CHROOT, newroot) ? -1i64; // CHROOT
     if (res < 0i64) {
         drop(print_err("chroot: cannot change root directory to '"));
         drop(print_err(newroot));
@@ -45,7 +45,7 @@ pub func:chroot_main = int32(int32:argc, wild int8->:argv) {
         pass 1;
     }
     
-    drop(sys(CHDIR, "/")); // SYS_CHDIR
+    drop(sys(CHDIR, "/")); // CHDIR
     
     string:cmd = "/bin/sh";
     if (arg_count > 1i32) {
@@ -59,7 +59,7 @@ pub func:chroot_main = int32(int32:argc, wild int8->:argv) {
     int64:argv_arr = sys(MMAP, 0i64, 16i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
     drop(<- (cast_unchecked<int64->>(argv_arr + 0i64)) = cmd_cstr);
     drop(<- (cast_unchecked<int64->>(argv_arr + 8i64)) = 0i64);
-    int64:exec_res = sys!!(SYS_EXECVE, cmd_cstr, argv_arr, envp_arr) ? -1i64; // SYS_EXECVE
+    int64:exec_res = sys!!(EXECVE, cmd_cstr, argv_arr, envp_arr) ? -1i64; // EXECVE
     if (exec_res < 0i64) {
         drop(print_err("chroot: failed to run command '"));
         drop(print_err(cmd));

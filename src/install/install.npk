@@ -84,9 +84,9 @@ pub func:install_main = int32(int32:argc, wild int8->:argv) {
     drop(sys(MUNMAP, buf, 8192i64));
     
     if (exit_status == 0i32) {
-        // SYS_CHMOD = 90
+        // CHMOD = 90
         // Mode = 0755 = 493 decimal
-        int64:chmod_res = sys!!(SYS_CHMOD, dst_path, 493i64) ? -1i64;
+        int64:chmod_res = sys!!(CHMOD, dst_path, 493i64) ? -1i64;
         if (chmod_res < 0i64) {
             drop(print_err("install: failed to change permissions\n"));
             pass 1;

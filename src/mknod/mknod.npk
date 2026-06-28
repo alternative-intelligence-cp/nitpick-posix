@@ -69,7 +69,7 @@ pub func:mknod_main = int32(int32:argc, wild int8->:argv) {
             pass 1i32;
         }
     }
-    int64:res = sys!!(SYS_MKNOD, m_name, mode, dev) ? -1i64; // SYS_mknod = 133
+    int64:res = sys!!(MKNOD, m_name, mode, dev) ? -1i64; // SYS_mknod = 133
     
     pass 0i32;
 };

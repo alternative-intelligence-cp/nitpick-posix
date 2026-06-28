@@ -75,7 +75,7 @@ pub func:mv_main = int32(int32:argc, wild int8->:argv) {
     drop(raw alist_remove(src_list, last_idx));
     
     int64:statbuf = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
-    int64:res = sys!!(4i64, dst, statbuf) ? -1i64; // STAT
+    int64:res = sys!!(STAT, dst, statbuf) ? -1i64; // STAT
     int64:is_dir = 0i64;
     if (res >= 0i64) {
         int64:b0 = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((statbuf) + (24i64))));

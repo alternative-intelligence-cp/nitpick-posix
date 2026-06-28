@@ -4,7 +4,6 @@ use "../vendor/io_utils.npk".*;
 use "../vendor/mem_utils.npk".*;
 use "../vendor/nitpick_args.npk".*;
 use "../vendor/sys_constants.npk".*;
-extern func:failsafe = int32(tbb32:err);
 use "../vendor/libc_ffi.npk".*;
 
 extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
@@ -41,7 +40,7 @@ func:parse_value = int64() {
     string:tok = raw peek();
     if (string_equals(tok, "")) {
         drop(print_err("expr: syntax error\n"));
-        drop(failsafe(@cast_unchecked<tbb32>(2i32)));
+        pass 2i32;
         pass 0i64;
     }
     drop(consume());
@@ -51,7 +50,7 @@ func:parse_value = int64() {
             drop(consume());
         } else {
             drop(print_err("expr: syntax error (missing ')' )\n"));
-            drop(failsafe(@cast_unchecked<tbb32>(2i32)));
+            pass 2i32;
             pass 0i64;
         }
         pass val;
@@ -68,11 +67,11 @@ func:parse_mul = int64() {
             int64:right = raw parse_value();
             if (string_equals(tok, "*")) { left = left * right; }
             if (string_equals(tok, "/")) {
-                if (right == 0i64) { drop(print_err("expr: division by zero\n")); drop(failsafe(@cast_unchecked<tbb32>(2i32))); pass 0i64; }
+                if (right == 0i64) { drop(print_err("expr: division by zero\n")); pass 2i32; pass 0i64; }
                 left = left / right;
             }
             if (string_equals(tok, "%")) {
-                if (right == 0i64) { drop(print_err("expr: division by zero\n")); drop(failsafe(@cast_unchecked<tbb32>(2i32))); pass 0i64; }
+                if (right == 0i64) { drop(print_err("expr: division by zero\n")); pass 2i32; pass 0i64; }
                 left = left - (left / right) * right;
             }
         } else { break; }

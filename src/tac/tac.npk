@@ -96,7 +96,7 @@ pub func:tac_main = int32(int32:argc, wild int8->:argv) {
                         if (temp_n > 0i64) {
                             drop(sys(WRITE, 1i64, temp_buf, temp_n));
                         }
-                        free(temp_buf);
+                        dalloc(temp_buf);
                         
                         drop(sys(LSEEK, fd, save_pos, 0i64));
                         end_pos = start_print;
@@ -115,11 +115,11 @@ pub func:tac_main = int32(int32:argc, wild int8->:argv) {
                     if (temp_n > 0i64) {
                         drop(sys(WRITE, 1i64, temp_buf, temp_n));
                     }
-                    free(temp_buf);
+                    dalloc(temp_buf);
                 }
             }
         }
-        drop(nitpick_libc_mem_free(buf));
+        drop(dalloc(@cast_unchecked<int8->>(buf)));
     } else {
         // fallback
         int64:buf_size = 1048576i64;
@@ -156,7 +156,7 @@ pub func:tac_main = int32(int32:argc, wild int8->:argv) {
                 }
             }
         }
-        drop(nitpick_libc_mem_free(buf));
+        drop(dalloc(@cast_unchecked<int8->>(buf)));
     }
     
     if (fd != 0i64) {

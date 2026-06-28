@@ -60,7 +60,7 @@ pub func:mkdir_main = int32(int32:argc, wild int8->:argv) {
                 }
                 // Finally create the last one and ignore EEXIST by doing a stat check
                 int64:statbuf = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
-                int64:stat_res = sys!!(4i64, dir, statbuf) ? -1i64;
+                int64:stat_res = sys!!(STAT, dir, statbuf) ? -1i64;
                 drop(sys(MUNMAP, statbuf, 4096i64));
                 if (stat_res < 0i64) {
                     // Try one last time to create and fail if it really fails

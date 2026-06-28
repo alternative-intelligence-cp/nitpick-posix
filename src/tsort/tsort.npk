@@ -95,7 +95,7 @@ pub func:tsort_main = int32(int32:argc, wild int8->:argv) {
         if (string_equals(fname, "-")) {
             // keep fd = 0
         } else {
-            fd = sys(OPEN, fname, 0i64, 0i64) ?! -1i64;
+            fd = sys(OPEN, fname, 0i64, 0i64) ? -1i64;
         }
     }
     defer { if (fd > 0i64) { drop(sys(CLOSE, fd)); } }
@@ -123,7 +123,7 @@ pub func:tsort_main = int32(int32:argc, wild int8->:argv) {
     
     while (1 == 1) {
         if (in_pos >= in_len) {
-            in_len = sys(READ, fd, buf, 65536i64) ?! -1i64;
+            in_len = sys(READ, fd, buf, 65536i64) ? -1i64;
             if (in_len <= 0i64) { break; }
             in_pos = 0i64;
         }

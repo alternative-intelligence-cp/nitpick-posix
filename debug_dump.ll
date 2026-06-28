@@ -18,59 +18,59 @@ source_filename = "src/npk_coreutils.npk"
 @.str.2 = private constant %struct.NpkString { ptr @.str.data.1, i64 0 }
 @.str.data.3 = private constant [1 x i8] zeroinitializer
 @.str.4 = private constant %struct.NpkString { ptr @.str.data.3, i64 0 }
-@SYS_READ = global i64 0
-@SYS_WRITE = global i64 1
-@SYS_OPEN = global i64 2
-@SYS_STAT = global i64 4
-@SYS_FSTAT = global i64 5
-@SYS_LSTAT = global i64 6
-@SYS_LSEEK = global i64 8
-@SYS_MMAP = global i64 9
-@SYS_MPROTECT = global i64 10
-@SYS_MUNMAP = global i64 11
-@SYS_PIPE = global i64 22
-@SYS_DUP = global i64 32
-@SYS_DUP2 = global i64 33
-@SYS_GETPID = global i64 39
-@SYS_GETUID = global i64 102
-@SYS_FORK = global i64 57
-@SYS_EXECVE = global i64 59
-@SYS_EXIT = global i64 60
-@SYS_WAIT4 = global i64 61
-@SYS_KILL = global i64 62
-@SYS_FCNTL = global i64 72
-@SYS_GETCWD = global i64 79
-@SYS_CHDIR = global i64 80
-@SYS_MKDIR = global i64 83
-@SYS_RMDIR = global i64 84
-@SYS_LINK = global i64 86
-@SYS_UNLINK = global i64 87
-@SYS_SYMLINK = global i64 88
-@SYS_READLINK = global i64 89
-@SYS_CHMOD = global i64 90
-@SYS_CHOWN = global i64 92
-@SYS_GETTIMEOFDAY = global i64 96
-@SYS_MKNOD = global i64 133
-@SYS_STATFS = global i64 137
-@SYS_CHROOT = global i64 161
-@SYS_GETDENTS64 = global i64 217
-@SYS_CLOCK_GETTIME = global i64 228
-@SYS_EXIT_GROUP = global i64 231
-@SYS_OPENAT = global i64 257
-@SYS_MKDIRAT = global i64 258
-@SYS_NEWFSTATAT = global i64 262
-@SYS_UNLINKAT = global i64 263
-@SYS_FCHMODAT = global i64 268
-@SYS_GETRANDOM = global i64 318
-@SYS_MREMAP = global i64 163
-@SYS_FDATASYNC = global i64 75
-@SYS_TRUNCATE = global i64 76
-@SYS_LSETXATTR = global i64 189
-@SYS_SYNC = global i64 162
-@SYS_IOCTL = global i64 16
-@SYS_NANOSLEEP = global i64 35
-@SYS_SETUID = global i64 105
-@SYS_SETGID = global i64 106
+@READ = global i64 0
+@WRITE = global i64 1
+@OPEN = global i64 2
+@STAT = global i64 4
+@FSTAT = global i64 5
+@LSTAT = global i64 6
+@LSEEK = global i64 8
+@MMAP = global i64 9
+@MPROTECT = global i64 10
+@MUNMAP = global i64 11
+@PIPE = global i64 22
+@DUP = global i64 32
+@DUP2 = global i64 33
+@GETPID = global i64 39
+@GETUID = global i64 102
+@FORK = global i64 57
+@EXECVE = global i64 59
+@EXIT = global i64 60
+@WAIT4 = global i64 61
+@KILL = global i64 62
+@FCNTL = global i64 72
+@GETCWD = global i64 79
+@CHDIR = global i64 80
+@MKDIR = global i64 83
+@RMDIR = global i64 84
+@LINK = global i64 86
+@UNLINK = global i64 87
+@SYMLINK = global i64 88
+@READLINK = global i64 89
+@CHMOD = global i64 90
+@CHOWN = global i64 92
+@GETTIMEOFDAY = global i64 96
+@MKNOD = global i64 133
+@STATFS = global i64 137
+@CHROOT = global i64 161
+@GETDENTS64 = global i64 217
+@CLOCK_GETTIME = global i64 228
+@EXIT_GROUP = global i64 231
+@OPENAT = global i64 257
+@MKDIRAT = global i64 258
+@NEWFSTATAT = global i64 262
+@UNLINKAT = global i64 263
+@FCHMODAT = global i64 268
+@GETRANDOM = global i64 318
+@MREMAP = global i64 163
+@FDATASYNC = global i64 75
+@TRUNCATE = global i64 76
+@LSETXATTR = global i64 189
+@SYNC = global i64 162
+@IOCTL = global i64 16
+@NANOSLEEP = global i64 35
+@SETUID = global i64 105
+@SETGID = global i64 106
 @.str.data.5 = private constant [1 x i8] zeroinitializer
 @.str.6 = private constant %struct.NpkString { ptr @.str.data.5, i64 0 }
 @.str.data.7 = private constant [1 x i8] zeroinitializer
@@ -4938,21 +4938,15 @@ define linkonce_odr { %struct.NIL, ptr, i8 } @proc_exit_shim.proc_exit(i32 %code
 entry:
   %code.addr = alloca i32, align 4
   store i32 %code, ptr %code.addr, align 4
-  %SYS_EXIT_GROUP = load i64, ptr @SYS_EXIT_GROUP, align 4
   %code1 = load i32, ptr %code.addr, align 4
   %cast.sext = sext i32 %code1 to i64
-  %syscall_ret = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},{r10},{r8},{r9},~{rcx},~{r11},~{memory}"(i64 %SYS_EXIT_GROUP, i64 %cast.sext, i64 0, i64 0, i64 0, i64 0, i64 0)
+  %syscall_ret = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},{r10},{r8},{r9},~{rcx},~{r11},~{memory}"(i64 231, i64 %cast.sext, i64 0, i64 0, i64 0, i64 0, i64 0)
   ret { %struct.NIL, ptr, i8 } zeroinitializer
 }
 
 define linkonce_odr i32 @__proc_exit_shim_init() {
 entry:
   ret i32 0
-}
-
-define linkonce_odr { i32, ptr, i8 } @libc_ffi.fake_free(ptr %ptr) {
-entry:
-  ret { i32, ptr, i8 } zeroinitializer
 }
 
 declare i32 @close(i32) #0
@@ -4970,8 +4964,6 @@ declare i32 @fclose(i64) #0
 declare i32 @fgetc(i64) #0
 
 declare i64 @fopen(ptr, ptr) #0
-
-declare i32 @free(i64) #0
 
 declare i64 @gethostid() #0
 
@@ -5134,61 +5126,56 @@ afterwhile:                                       ; preds = %null.ok
   %copy = alloca i64, align 8
   %len9 = load i64, ptr %len, align 4
   %addtmp10 = add i64 %len9, 1
-  %calltmp = call i64 @malloc(i64 %addtmp10)
-  store i64 %calltmp, ptr %copy, align 4
+  %wild_ptr = call ptr @npk_alloc(i64 %addtmp10)
+  %len11 = load i64, ptr %len, align 4
+  %addtmp12 = add i64 %len11, 1
+  %wild_ptr13 = call ptr @npk_alloc(i64 %addtmp12)
+  %cast.ptrtoint = ptrtoint ptr %wild_ptr13 to i64
+  store i64 %cast.ptrtoint, ptr %copy, align 4
   %i = alloca i64, align 8
   store i64 0, ptr %i, align 4
-  br label %whilecond11
+  br label %whilecond14
 
-whilecond11:                                      ; preds = %whilebody15, %afterwhile
-  %i12 = load i64, ptr %i, align 4
-  %len13 = load i64, ptr %len, align 4
-  %lttmp = icmp slt i64 %i12, %len13
-  %whilecond14 = icmp ne i1 %lttmp, false
-  br i1 %whilecond14, label %whilebody15, label %afterwhile28
+whilecond14:                                      ; preds = %whilebody18, %afterwhile
+  %i15 = load i64, ptr %i, align 4
+  %len16 = load i64, ptr %len, align 4
+  %lttmp = icmp slt i64 %i15, %len16
+  %whilecond17 = icmp ne i1 %lttmp, false
+  br i1 %whilecond17, label %whilebody18, label %afterwhile30
 
-whilebody15:                                      ; preds = %whilecond11
-  %copy16 = load i64, ptr %copy, align 4
-  %i17 = load i64, ptr %i, align 4
-  %addtmp18 = add i64 %copy16, %i17
+whilebody18:                                      ; preds = %whilecond14
   %copy19 = load i64, ptr %copy, align 4
   %i20 = load i64, ptr %i, align 4
   %addtmp21 = add i64 %copy19, %i20
-  %cast.inttoptr22 = inttoptr i64 %addtmp21 to ptr
-  %s23 = load i64, ptr %s.addr, align 4
-  %i24 = load i64, ptr %i, align 4
-  %calltmp25 = call i64 @npk_mem_read_byte(i64 %s23, i64 %i24)
-  %cast.trunc = trunc i64 %calltmp25 to i8
-  store i8 %cast.trunc, ptr %cast.inttoptr22, align 1
-  %i26 = load i64, ptr %i, align 4
-  %addtmp27 = add i64 %i26, 1
-  store i64 %addtmp27, ptr %i, align 4
+  %copy22 = load i64, ptr %copy, align 4
+  %i23 = load i64, ptr %i, align 4
+  %addtmp24 = add i64 %copy22, %i23
+  %cast.inttoptr25 = inttoptr i64 %addtmp24 to ptr
+  %s26 = load i64, ptr %s.addr, align 4
+  %i27 = load i64, ptr %i, align 4
+  %calltmp = call i64 @npk_mem_read_byte(i64 %s26, i64 %i27)
+  %cast.trunc = trunc i64 %calltmp to i8
+  store i8 %cast.trunc, ptr %cast.inttoptr25, align 1
+  %i28 = load i64, ptr %i, align 4
+  %addtmp29 = add i64 %i28, 1
+  store i64 %addtmp29, ptr %i, align 4
   call void @npk_gc_safepoint()
-  br label %whilecond11
+  br label %whilecond14
 
-afterwhile28:                                     ; preds = %whilecond11
-  %copy29 = load i64, ptr %copy, align 4
-  %len30 = load i64, ptr %len, align 4
-  %addtmp31 = add i64 %copy29, %len30
-  %copy32 = load i64, ptr %copy, align 4
-  %len33 = load i64, ptr %len, align 4
-  %addtmp34 = add i64 %copy32, %len33
-  %cast.inttoptr35 = inttoptr i64 %addtmp34 to ptr
-  store i8 0, ptr %cast.inttoptr35, align 1
-  %copy36 = load i64, ptr %copy, align 4
-  %result.val = insertvalue { i64, ptr, i8 } undef, i64 %copy36, 0
+afterwhile30:                                     ; preds = %whilecond14
+  %copy31 = load i64, ptr %copy, align 4
+  %len32 = load i64, ptr %len, align 4
+  %addtmp33 = add i64 %copy31, %len32
+  %copy34 = load i64, ptr %copy, align 4
+  %len35 = load i64, ptr %len, align 4
+  %addtmp36 = add i64 %copy34, %len35
+  %cast.inttoptr37 = inttoptr i64 %addtmp36 to ptr
+  store i8 0, ptr %cast.inttoptr37, align 1
+  %copy38 = load i64, ptr %copy, align 4
+  %result.val = insertvalue { i64, ptr, i8 } undef, i64 %copy38, 0
   %result.err = insertvalue { i64, ptr, i8 } %result.val, ptr null, 1
   %result.is_error = insertvalue { i64, ptr, i8 } %result.err, i8 0, 2
   ret { i64, ptr, i8 } %result.is_error
-}
-
-declare i64 @malloc(i64) #0
-
-define linkonce_odr { i32, ptr, i8 } @mem_utils.nitpick_libc_mem_free(i64 %ptr) {
-entry:
-  %ptr.addr = alloca i64, align 8
-  store i64 %ptr, ptr %ptr.addr, align 4
-  ret { i32, ptr, i8 } zeroinitializer
 }
 
 define linkonce_odr { ptr, ptr, i8 } @mem_utils.read_string_native(i64 %ptr, i64 %max_len) {
@@ -5268,6 +5255,8 @@ declare void @exit(i32)
 declare ptr @npk_string_concat_simple(ptr, ptr)
 
 declare ptr @npk_string_from_char_simple(i8)
+
+declare ptr @npk_alloc(i64)
 
 define linkonce_odr i32 @__mem_utils_init() {
 entry:
@@ -5448,36 +5437,40 @@ entry:
   %fd.addr = alloca i64, align 8
   store i64 %fd, ptr %fd.addr, align 4
   %state_raw = alloca i64, align 8
-  %calltmp = call i64 @malloc(i64 4096)
-  store i64 %calltmp, ptr %state_raw, align 4
+  %wild_ptr = call ptr @npk_alloc(i64 4096)
+  %wild_ptr1 = call ptr @npk_alloc(i64 4096)
+  %cast.ptrtoint = ptrtoint ptr %wild_ptr1 to i64
+  store i64 %cast.ptrtoint, ptr %state_raw, align 4
   %data_raw = alloca i64, align 8
-  %calltmp1 = call i64 @malloc(i64 65536)
-  store i64 %calltmp1, ptr %data_raw, align 4
+  %wild_ptr2 = call ptr @npk_alloc(i64 65536)
+  %wild_ptr3 = call ptr @npk_alloc(i64 65536)
+  %cast.ptrtoint4 = ptrtoint ptr %wild_ptr3 to i64
+  store i64 %cast.ptrtoint4, ptr %data_raw, align 4
   %state64 = call ptr @npk_alloc(i64 8)
-  %state_raw2 = load i64, ptr %state_raw, align 4
-  %state_raw3 = load i64, ptr %state_raw, align 4
-  %cast.inttoptr = inttoptr i64 %state_raw3 to ptr
+  %state_raw5 = load i64, ptr %state_raw, align 4
+  %state_raw6 = load i64, ptr %state_raw, align 4
+  %cast.inttoptr = inttoptr i64 %state_raw6 to ptr
   store ptr %cast.inttoptr, ptr %state64, align 8
-  %state644 = load ptr, ptr %state64, align 8
-  %ptr.add = getelementptr i64, ptr %state644, i64 0
-  %fd5 = load i64, ptr %fd.addr, align 4
-  store i64 %fd5, ptr %ptr.add, align 4
-  %state646 = load ptr, ptr %state64, align 8
-  %ptr.add7 = getelementptr i64, ptr %state646, i64 1
-  store i64 0, ptr %ptr.add7, align 4
-  %state648 = load ptr, ptr %state64, align 8
-  %ptr.add9 = getelementptr i64, ptr %state648, i64 2
-  store i64 0, ptr %ptr.add9, align 4
-  %state6410 = load ptr, ptr %state64, align 8
-  %ptr.add11 = getelementptr i64, ptr %state6410, i64 3
-  %data_raw12 = load i64, ptr %data_raw, align 4
-  store i64 %data_raw12, ptr %ptr.add11, align 4
+  %state647 = load ptr, ptr %state64, align 8
+  %ptr.add = getelementptr i64, ptr %state647, i64 0
+  %fd8 = load i64, ptr %fd.addr, align 4
+  store i64 %fd8, ptr %ptr.add, align 4
+  %state649 = load ptr, ptr %state64, align 8
+  %ptr.add10 = getelementptr i64, ptr %state649, i64 1
+  store i64 0, ptr %ptr.add10, align 4
+  %state6411 = load ptr, ptr %state64, align 8
+  %ptr.add12 = getelementptr i64, ptr %state6411, i64 2
+  store i64 0, ptr %ptr.add12, align 4
   %state6413 = load ptr, ptr %state64, align 8
-  %ptr.add14 = getelementptr i64, ptr %state6413, i64 4
-  %state_raw15 = load i64, ptr %state_raw, align 4
-  store i64 %state_raw15, ptr %ptr.add14, align 4
-  %state_raw16 = load i64, ptr %state_raw, align 4
-  %result.val = insertvalue { i64, ptr, i8 } undef, i64 %state_raw16, 0
+  %ptr.add14 = getelementptr i64, ptr %state6413, i64 3
+  %data_raw15 = load i64, ptr %data_raw, align 4
+  store i64 %data_raw15, ptr %ptr.add14, align 4
+  %state6416 = load ptr, ptr %state64, align 8
+  %ptr.add17 = getelementptr i64, ptr %state6416, i64 4
+  %state_raw18 = load i64, ptr %state_raw, align 4
+  store i64 %state_raw18, ptr %ptr.add17, align 4
+  %state_raw19 = load i64, ptr %state_raw, align 4
+  %result.val = insertvalue { i64, ptr, i8 } undef, i64 %state_raw19, 0
   %result.err = insertvalue { i64, ptr, i8 } %result.val, ptr null, 1
   %result.is_error = insertvalue { i64, ptr, i8 } %result.err, i8 0, 2
   ret { i64, ptr, i8 } %result.is_error
@@ -6176,9 +6169,11 @@ null.ok8:                                         ; preds = %null.ok
   %init_sext10 = sext i32 %deref9 to i64
   store i64 %init_sext10, ptr %state_raw, align 4
   %data_raw11 = load i64, ptr %data_raw, align 4
-  %calltmp = call i32 @nitpick_libc_mem_free(i64 %data_raw11)
-  %state_raw12 = load i64, ptr %state_raw, align 4
-  %calltmp13 = call i32 @nitpick_libc_mem_free(i64 %state_raw12)
+  %cast.inttoptr12 = inttoptr i64 %data_raw11 to ptr
+  call void @npk_free(ptr %cast.inttoptr12)
+  %state_raw13 = load i64, ptr %state_raw, align 4
+  %cast.inttoptr14 = inttoptr i64 %state_raw13 to ptr
+  call void @npk_free(ptr %cast.inttoptr14)
   ret { i32, ptr, i8 } zeroinitializer
 }
 
@@ -6290,7 +6285,7 @@ entry:
   ret { %struct.NIL, ptr, i8 } zeroinitializer
 }
 
-declare ptr @npk_alloc(i64)
+declare void @npk_free(ptr)
 
 define linkonce_odr i32 @__io_utils_init() {
 entry:
@@ -10576,41 +10571,44 @@ ifcont21:                                         ; preds = %ifcont20, %entry
   store i64 65536, ptr %buf_size, align 4
   %buf = alloca i64, align 8
   %buf_size22 = load i64, ptr %buf_size, align 4
-  %calltmp23 = call i64 @malloc(i64 %buf_size22)
-  store i64 %calltmp23, ptr %buf, align 4
-  %buf24 = load i64, ptr %buf, align 4
-  %letmp = icmp sle i64 %buf24, 0
-  %ifcond25 = icmp ne i1 %letmp, false
-  br i1 %ifcond25, label %then26, label %ifcont42
+  %wild_ptr = call ptr @npk_alloc(i64 %buf_size22)
+  %buf_size23 = load i64, ptr %buf_size, align 4
+  %wild_ptr24 = call ptr @npk_alloc(i64 %buf_size23)
+  %cast.ptrtoint = ptrtoint ptr %wild_ptr24 to i64
+  store i64 %cast.ptrtoint, ptr %buf, align 4
+  %buf25 = load i64, ptr %buf, align 4
+  %letmp = icmp sle i64 %buf25, 0
+  %ifcond26 = icmp ne i1 %letmp, false
+  br i1 %ifcond26, label %then27, label %ifcont43
 
-then26:                                           ; preds = %ifcont21
-  %fd27 = load i64, ptr %fd, align 4
-  %gttmp = icmp sgt i64 %fd27, 0
-  %ifcond28 = icmp ne i1 %gttmp, false
-  br i1 %ifcond28, label %then29, label %ifcont41
+then27:                                           ; preds = %ifcont21
+  %fd28 = load i64, ptr %fd, align 4
+  %gttmp = icmp sgt i64 %fd28, 0
+  %ifcond29 = icmp ne i1 %gttmp, false
+  br i1 %ifcond29, label %then30, label %ifcont42
 
-then29:                                           ; preds = %then26
-  %fd30 = load i64, ptr %fd, align 4
-  %syscall_ret31 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %fd30)
-  %sys_is_err32 = icmp slt i64 %syscall_ret31, 0
-  %sys_neg_errno33 = sub i64 0, %syscall_ret31
-  %sys_err_ptr34 = inttoptr i64 %sys_neg_errno33 to ptr
-  %sys_val35 = select i1 %sys_is_err32, i64 0, i64 %syscall_ret31
-  %sys_err36 = select i1 %sys_is_err32, ptr %sys_err_ptr34, ptr null
-  %sys_flag37 = select i1 %sys_is_err32, i8 1, i8 0
-  %sys_result.val38 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val35, 0
-  %sys_result.err39 = insertvalue %struct.NpkResult_int64 %sys_result.val38, ptr %sys_err36, 1
-  %sys_result.is_error40 = insertvalue %struct.NpkResult_int64 %sys_result.err39, i8 %sys_flag37, 2
-  br label %ifcont41
+then30:                                           ; preds = %then27
+  %fd31 = load i64, ptr %fd, align 4
+  %syscall_ret32 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %fd31)
+  %sys_is_err33 = icmp slt i64 %syscall_ret32, 0
+  %sys_neg_errno34 = sub i64 0, %syscall_ret32
+  %sys_err_ptr35 = inttoptr i64 %sys_neg_errno34 to ptr
+  %sys_val36 = select i1 %sys_is_err33, i64 0, i64 %syscall_ret32
+  %sys_err37 = select i1 %sys_is_err33, ptr %sys_err_ptr35, ptr null
+  %sys_flag38 = select i1 %sys_is_err33, i8 1, i8 0
+  %sys_result.val39 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val36, 0
+  %sys_result.err40 = insertvalue %struct.NpkResult_int64 %sys_result.val39, ptr %sys_err37, 1
+  %sys_result.is_error41 = insertvalue %struct.NpkResult_int64 %sys_result.err40, i8 %sys_flag38, 2
+  br label %ifcont42
 
-ifcont41:                                         ; preds = %then29, %then26
+ifcont42:                                         ; preds = %then30, %then27
   ret { i32, ptr, i8 } { i32 1, ptr null, i8 0 }
 
-ifcont42:                                         ; preds = %ifcont21
+ifcont43:                                         ; preds = %ifcont21
   %out_state = alloca i64, align 8
-  %calltmp43 = call { i64, ptr, i8 } @io_utils.io_buf_new(i64 1)
-  %raw.value44 = extractvalue { i64, ptr, i8 } %calltmp43, 0
-  store i64 %raw.value44, ptr %out_state, align 4
+  %calltmp44 = call { i64, ptr, i8 } @io_utils.io_buf_new(i64 1)
+  %raw.value45 = extractvalue { i64, ptr, i8 } %calltmp44, 0
+  store i64 %raw.value45, ptr %out_state, align 4
   %running = alloca i32, align 4
   store i32 1, ptr %running, align 4
   %b0 = alloca i64, align 8
@@ -10625,364 +10623,365 @@ ifcont42:                                         ; preds = %ifcont21
   store i64 0, ptr %cols, align 4
   br label %whilecond
 
-whilecond:                                        ; preds = %ifcont164, %ifcont42
-  %running45 = load i32, ptr %running, align 4
-  %eqtmp = icmp eq i32 %running45, 1
-  %whilecond46 = icmp ne i1 %eqtmp, false
-  br i1 %whilecond46, label %whilebody, label %afterwhile165
+whilecond:                                        ; preds = %ifcont165, %ifcont43
+  %running46 = load i32, ptr %running, align 4
+  %eqtmp = icmp eq i32 %running46, 1
+  %whilecond47 = icmp ne i1 %eqtmp, false
+  br i1 %whilecond47, label %whilebody, label %afterwhile166
 
 whilebody:                                        ; preds = %whilecond
   %n = alloca i64, align 8
-  %fd47 = load i64, ptr %fd, align 4
-  %buf48 = load i64, ptr %buf, align 4
-  %buf_size49 = load i64, ptr %buf_size, align 4
-  %syscall_ret50 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 0, i64 %fd47, i64 %buf48, i64 %buf_size49)
-  %sys_is_err51 = icmp slt i64 %syscall_ret50, 0
-  %sys_neg_errno52 = sub i64 0, %syscall_ret50
-  %sys_err_ptr53 = inttoptr i64 %sys_neg_errno52 to ptr
-  %sys_val54 = select i1 %sys_is_err51, i64 0, i64 %syscall_ret50
-  %sys_err55 = select i1 %sys_is_err51, ptr %sys_err_ptr53, ptr null
-  %sys_flag56 = select i1 %sys_is_err51, i8 1, i8 0
-  %sys_result.val57 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val54, 0
-  %sys_result.err58 = insertvalue %struct.NpkResult_int64 %sys_result.val57, ptr %sys_err55, 1
-  %sys_result.is_error59 = insertvalue %struct.NpkResult_int64 %sys_result.err58, i8 %sys_flag56, 2
-  %is_error60 = extractvalue %struct.NpkResult_int64 %sys_result.is_error59, 2
-  %is_error_bool61 = icmp ne i8 %is_error60, 0
-  br i1 %is_error_bool61, label %error_block62, label %success_block63
+  %fd48 = load i64, ptr %fd, align 4
+  %buf49 = load i64, ptr %buf, align 4
+  %buf_size50 = load i64, ptr %buf_size, align 4
+  %syscall_ret51 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 0, i64 %fd48, i64 %buf49, i64 %buf_size50)
+  %sys_is_err52 = icmp slt i64 %syscall_ret51, 0
+  %sys_neg_errno53 = sub i64 0, %syscall_ret51
+  %sys_err_ptr54 = inttoptr i64 %sys_neg_errno53 to ptr
+  %sys_val55 = select i1 %sys_is_err52, i64 0, i64 %syscall_ret51
+  %sys_err56 = select i1 %sys_is_err52, ptr %sys_err_ptr54, ptr null
+  %sys_flag57 = select i1 %sys_is_err52, i8 1, i8 0
+  %sys_result.val58 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val55, 0
+  %sys_result.err59 = insertvalue %struct.NpkResult_int64 %sys_result.val58, ptr %sys_err56, 1
+  %sys_result.is_error60 = insertvalue %struct.NpkResult_int64 %sys_result.err59, i8 %sys_flag57, 2
+  %is_error61 = extractvalue %struct.NpkResult_int64 %sys_result.is_error60, 2
+  %is_error_bool62 = icmp ne i8 %is_error61, 0
+  br i1 %is_error_bool62, label %error_block63, label %success_block64
 
-error_block62:                                    ; preds = %whilebody
-  br label %merge_block64
+error_block63:                                    ; preds = %whilebody
+  br label %merge_block65
 
-success_block63:                                  ; preds = %whilebody
-  %value65 = extractvalue %struct.NpkResult_int64 %sys_result.is_error59, 0
-  br label %merge_block64
+success_block64:                                  ; preds = %whilebody
+  %value66 = extractvalue %struct.NpkResult_int64 %sys_result.is_error60, 0
+  br label %merge_block65
 
-merge_block64:                                    ; preds = %success_block63, %error_block62
-  %unwrap_result66 = phi i64 [ -1, %error_block62 ], [ %value65, %success_block63 ]
-  store i64 %unwrap_result66, ptr %n, align 4
-  %n67 = load i64, ptr %n, align 4
-  %letmp68 = icmp sle i64 %n67, 0
-  %ifcond69 = icmp ne i1 %letmp68, false
-  br i1 %ifcond69, label %then70, label %else71
+merge_block65:                                    ; preds = %success_block64, %error_block63
+  %unwrap_result67 = phi i64 [ -1, %error_block63 ], [ %value66, %success_block64 ]
+  store i64 %unwrap_result67, ptr %n, align 4
+  %n68 = load i64, ptr %n, align 4
+  %letmp69 = icmp sle i64 %n68, 0
+  %ifcond70 = icmp ne i1 %letmp69, false
+  br i1 %ifcond70, label %then71, label %else72
 
-then70:                                           ; preds = %merge_block64
+then71:                                           ; preds = %merge_block65
   store i32 0, ptr %running, align 4
-  br label %ifcont164
+  br label %ifcont165
 
-else71:                                           ; preds = %merge_block64
+else72:                                           ; preds = %merge_block65
   %j = alloca i64, align 8
   store i64 0, ptr %j, align 4
-  br label %whilecond72
+  br label %whilecond73
 
-whilecond72:                                      ; preds = %ifcont161, %else71
-  %j73 = load i64, ptr %j, align 4
-  %n74 = load i64, ptr %n, align 4
-  %lttmp75 = icmp slt i64 %j73, %n74
-  %whilecond76 = icmp ne i1 %lttmp75, false
-  br i1 %whilecond76, label %whilebody77, label %afterwhile
+whilecond73:                                      ; preds = %ifcont162, %else72
+  %j74 = load i64, ptr %j, align 4
+  %n75 = load i64, ptr %n, align 4
+  %lttmp76 = icmp slt i64 %j74, %n75
+  %whilecond77 = icmp ne i1 %lttmp76, false
+  br i1 %whilecond77, label %whilebody78, label %afterwhile
 
-whilebody77:                                      ; preds = %whilecond72
+whilebody78:                                      ; preds = %whilecond73
   %c = alloca i64, align 8
-  %buf78 = load i64, ptr %buf, align 4
-  %j79 = load i64, ptr %j, align 4
-  %addtmp = add i64 %buf78, %j79
-  %buf80 = load i64, ptr %buf, align 4
-  %j81 = load i64, ptr %j, align 4
-  %addtmp82 = add i64 %buf80, %j81
-  %cast.inttoptr = inttoptr i64 %addtmp82 to ptr
+  %buf79 = load i64, ptr %buf, align 4
+  %j80 = load i64, ptr %j, align 4
+  %addtmp = add i64 %buf79, %j80
+  %buf81 = load i64, ptr %buf, align 4
+  %j82 = load i64, ptr %j, align 4
+  %addtmp83 = add i64 %buf81, %j82
+  %cast.inttoptr = inttoptr i64 %addtmp83 to ptr
   %null.deref = icmp eq ptr %cast.inttoptr, null
   br i1 %null.deref, label %null.fail, label %null.ok
 
-null.fail:                                        ; preds = %whilebody77
+null.fail:                                        ; preds = %whilebody78
   call void @exit(i32 46)
   unreachable
 
-null.ok:                                          ; preds = %whilebody77
+null.ok:                                          ; preds = %whilebody78
   %deref = load i32, ptr %cast.inttoptr, align 4
   %cast.sext = sext i32 %deref to i64
   store i64 %cast.sext, ptr %c, align 4
-  %state83 = load i64, ptr %state, align 4
-  %eqtmp84 = icmp eq i64 %state83, 0
-  %ifcond85 = icmp ne i1 %eqtmp84, false
-  br i1 %ifcond85, label %then86, label %else88
+  %state84 = load i64, ptr %state, align 4
+  %eqtmp85 = icmp eq i64 %state84, 0
+  %ifcond86 = icmp ne i1 %eqtmp85, false
+  br i1 %ifcond86, label %then87, label %else89
 
-then86:                                           ; preds = %null.ok
-  %c87 = load i64, ptr %c, align 4
-  store i64 %c87, ptr %b0, align 4
+then87:                                           ; preds = %null.ok
+  %c88 = load i64, ptr %c, align 4
+  store i64 %c88, ptr %b0, align 4
   store i64 1, ptr %state, align 4
+  br label %ifcont162
+
+else89:                                           ; preds = %null.ok
+  %state90 = load i64, ptr %state, align 4
+  %eqtmp91 = icmp eq i64 %state90, 1
+  %ifcond92 = icmp ne i1 %eqtmp91, false
+  br i1 %ifcond92, label %then93, label %else95
+
+then93:                                           ; preds = %else89
+  %c94 = load i64, ptr %c, align 4
+  store i64 %c94, ptr %b1, align 4
+  store i64 2, ptr %state, align 4
   br label %ifcont161
 
-else88:                                           ; preds = %null.ok
-  %state89 = load i64, ptr %state, align 4
-  %eqtmp90 = icmp eq i64 %state89, 1
-  %ifcond91 = icmp ne i1 %eqtmp90, false
-  br i1 %ifcond91, label %then92, label %else94
+else95:                                           ; preds = %else89
+  %state96 = load i64, ptr %state, align 4
+  %eqtmp97 = icmp eq i64 %state96, 2
+  %ifcond98 = icmp ne i1 %eqtmp97, false
+  br i1 %ifcond98, label %then99, label %ifcont160
 
-then92:                                           ; preds = %else88
-  %c93 = load i64, ptr %c, align 4
-  store i64 %c93, ptr %b1, align 4
-  store i64 2, ptr %state, align 4
-  br label %ifcont160
-
-else94:                                           ; preds = %else88
-  %state95 = load i64, ptr %state, align 4
-  %eqtmp96 = icmp eq i64 %state95, 2
-  %ifcond97 = icmp ne i1 %eqtmp96, false
-  br i1 %ifcond97, label %then98, label %ifcont159
-
-then98:                                           ; preds = %else94
-  %c99 = load i64, ptr %c, align 4
-  store i64 %c99, ptr %b2, align 4
+then99:                                           ; preds = %else95
+  %c100 = load i64, ptr %c, align 4
+  store i64 %c100, ptr %b2, align 4
   store i64 0, ptr %state, align 4
   %b0_and_3 = alloca i64, align 8
-  %b0100 = load i64, ptr %b0, align 4
   %b0101 = load i64, ptr %b0, align 4
-  %divtmp = sdiv i64 %b0101, 4
+  %b0102 = load i64, ptr %b0, align 4
+  %divtmp = sdiv i64 %b0102, 4
   %safe.divtmp = select i1 false, i64 9223372036854775807, i64 %divtmp
   %multmp = mul i64 %safe.divtmp, 4
-  %subtmp = sub i64 %b0100, %multmp
+  %subtmp = sub i64 %b0101, %multmp
   store i64 %subtmp, ptr %b0_and_3, align 4
   %b1_and_15 = alloca i64, align 8
-  %b1102 = load i64, ptr %b1, align 4
   %b1103 = load i64, ptr %b1, align 4
-  %divtmp104 = sdiv i64 %b1103, 16
-  %safe.divtmp105 = select i1 false, i64 9223372036854775807, i64 %divtmp104
-  %multmp106 = mul i64 %safe.divtmp105, 16
-  %subtmp107 = sub i64 %b1102, %multmp106
-  store i64 %subtmp107, ptr %b1_and_15, align 4
+  %b1104 = load i64, ptr %b1, align 4
+  %divtmp105 = sdiv i64 %b1104, 16
+  %safe.divtmp106 = select i1 false, i64 9223372036854775807, i64 %divtmp105
+  %multmp107 = mul i64 %safe.divtmp106, 16
+  %subtmp108 = sub i64 %b1103, %multmp107
+  store i64 %subtmp108, ptr %b1_and_15, align 4
   %b2_and_63 = alloca i64, align 8
-  %b2108 = load i64, ptr %b2, align 4
   %b2109 = load i64, ptr %b2, align 4
-  %divtmp110 = sdiv i64 %b2109, 64
-  %safe.divtmp111 = select i1 false, i64 9223372036854775807, i64 %divtmp110
-  %multmp112 = mul i64 %safe.divtmp111, 64
-  %subtmp113 = sub i64 %b2108, %multmp112
-  store i64 %subtmp113, ptr %b2_and_63, align 4
+  %b2110 = load i64, ptr %b2, align 4
+  %divtmp111 = sdiv i64 %b2110, 64
+  %safe.divtmp112 = select i1 false, i64 9223372036854775807, i64 %divtmp111
+  %multmp113 = mul i64 %safe.divtmp112, 64
+  %subtmp114 = sub i64 %b2109, %multmp113
+  store i64 %subtmp114, ptr %b2_and_63, align 4
   %c0 = alloca i64, align 8
-  %b0114 = load i64, ptr %b0, align 4
-  %divtmp115 = sdiv i64 %b0114, 4
-  %safe.divtmp116 = select i1 false, i64 9223372036854775807, i64 %divtmp115
-  store i64 %safe.divtmp116, ptr %c0, align 4
+  %b0115 = load i64, ptr %b0, align 4
+  %divtmp116 = sdiv i64 %b0115, 4
+  %safe.divtmp117 = select i1 false, i64 9223372036854775807, i64 %divtmp116
+  store i64 %safe.divtmp117, ptr %c0, align 4
   %c1 = alloca i64, align 8
-  %b0_and_3117 = load i64, ptr %b0_and_3, align 4
-  %multmp118 = mul i64 %b0_and_3117, 16
-  %b1119 = load i64, ptr %b1, align 4
-  %divtmp120 = sdiv i64 %b1119, 16
-  %safe.divtmp121 = select i1 false, i64 9223372036854775807, i64 %divtmp120
-  %addtmp122 = add i64 %multmp118, %safe.divtmp121
-  store i64 %addtmp122, ptr %c1, align 4
+  %b0_and_3118 = load i64, ptr %b0_and_3, align 4
+  %multmp119 = mul i64 %b0_and_3118, 16
+  %b1120 = load i64, ptr %b1, align 4
+  %divtmp121 = sdiv i64 %b1120, 16
+  %safe.divtmp122 = select i1 false, i64 9223372036854775807, i64 %divtmp121
+  %addtmp123 = add i64 %multmp119, %safe.divtmp122
+  store i64 %addtmp123, ptr %c1, align 4
   %c2 = alloca i64, align 8
-  %b1_and_15123 = load i64, ptr %b1_and_15, align 4
-  %multmp124 = mul i64 %b1_and_15123, 4
-  %b2125 = load i64, ptr %b2, align 4
-  %divtmp126 = sdiv i64 %b2125, 64
-  %safe.divtmp127 = select i1 false, i64 9223372036854775807, i64 %divtmp126
-  %addtmp128 = add i64 %multmp124, %safe.divtmp127
-  store i64 %addtmp128, ptr %c2, align 4
+  %b1_and_15124 = load i64, ptr %b1_and_15, align 4
+  %multmp125 = mul i64 %b1_and_15124, 4
+  %b2126 = load i64, ptr %b2, align 4
+  %divtmp127 = sdiv i64 %b2126, 64
+  %safe.divtmp128 = select i1 false, i64 9223372036854775807, i64 %divtmp127
+  %addtmp129 = add i64 %multmp125, %safe.divtmp128
+  store i64 %addtmp129, ptr %c2, align 4
   %c3 = alloca i64, align 8
-  %b2_and_63129 = load i64, ptr %b2_and_63, align 4
-  store i64 %b2_and_63129, ptr %c3, align 4
-  %out_state130 = load i64, ptr %out_state, align 4
-  %c0131 = load i64, ptr %c0, align 4
-  %calltmp132 = call { i32, ptr, i8 } @base64.b64_char(i64 %c0131)
-  %raw.value133 = extractvalue { i32, ptr, i8 } %calltmp132, 0
-  %calltmp134 = call { i32, ptr, i8 } @io_utils.io_buf_putc(i64 %out_state130, i32 %raw.value133)
-  %out_state135 = load i64, ptr %out_state, align 4
-  %c1136 = load i64, ptr %c1, align 4
-  %calltmp137 = call { i32, ptr, i8 } @base64.b64_char(i64 %c1136)
-  %raw.value138 = extractvalue { i32, ptr, i8 } %calltmp137, 0
-  %calltmp139 = call { i32, ptr, i8 } @io_utils.io_buf_putc(i64 %out_state135, i32 %raw.value138)
-  %out_state140 = load i64, ptr %out_state, align 4
-  %c2141 = load i64, ptr %c2, align 4
-  %calltmp142 = call { i32, ptr, i8 } @base64.b64_char(i64 %c2141)
-  %raw.value143 = extractvalue { i32, ptr, i8 } %calltmp142, 0
-  %calltmp144 = call { i32, ptr, i8 } @io_utils.io_buf_putc(i64 %out_state140, i32 %raw.value143)
-  %out_state145 = load i64, ptr %out_state, align 4
-  %c3146 = load i64, ptr %c3, align 4
-  %calltmp147 = call { i32, ptr, i8 } @base64.b64_char(i64 %c3146)
-  %raw.value148 = extractvalue { i32, ptr, i8 } %calltmp147, 0
-  %calltmp149 = call { i32, ptr, i8 } @io_utils.io_buf_putc(i64 %out_state145, i32 %raw.value148)
-  %cols150 = load i64, ptr %cols, align 4
-  %addtmp151 = add i64 %cols150, 4
-  store i64 %addtmp151, ptr %cols, align 4
-  %cols152 = load i64, ptr %cols, align 4
-  %eqtmp153 = icmp eq i64 %cols152, 76
-  %ifcond154 = icmp ne i1 %eqtmp153, false
-  br i1 %ifcond154, label %then155, label %ifcont158
+  %b2_and_63130 = load i64, ptr %b2_and_63, align 4
+  store i64 %b2_and_63130, ptr %c3, align 4
+  %out_state131 = load i64, ptr %out_state, align 4
+  %c0132 = load i64, ptr %c0, align 4
+  %calltmp133 = call { i32, ptr, i8 } @base64.b64_char(i64 %c0132)
+  %raw.value134 = extractvalue { i32, ptr, i8 } %calltmp133, 0
+  %calltmp135 = call { i32, ptr, i8 } @io_utils.io_buf_putc(i64 %out_state131, i32 %raw.value134)
+  %out_state136 = load i64, ptr %out_state, align 4
+  %c1137 = load i64, ptr %c1, align 4
+  %calltmp138 = call { i32, ptr, i8 } @base64.b64_char(i64 %c1137)
+  %raw.value139 = extractvalue { i32, ptr, i8 } %calltmp138, 0
+  %calltmp140 = call { i32, ptr, i8 } @io_utils.io_buf_putc(i64 %out_state136, i32 %raw.value139)
+  %out_state141 = load i64, ptr %out_state, align 4
+  %c2142 = load i64, ptr %c2, align 4
+  %calltmp143 = call { i32, ptr, i8 } @base64.b64_char(i64 %c2142)
+  %raw.value144 = extractvalue { i32, ptr, i8 } %calltmp143, 0
+  %calltmp145 = call { i32, ptr, i8 } @io_utils.io_buf_putc(i64 %out_state141, i32 %raw.value144)
+  %out_state146 = load i64, ptr %out_state, align 4
+  %c3147 = load i64, ptr %c3, align 4
+  %calltmp148 = call { i32, ptr, i8 } @base64.b64_char(i64 %c3147)
+  %raw.value149 = extractvalue { i32, ptr, i8 } %calltmp148, 0
+  %calltmp150 = call { i32, ptr, i8 } @io_utils.io_buf_putc(i64 %out_state146, i32 %raw.value149)
+  %cols151 = load i64, ptr %cols, align 4
+  %addtmp152 = add i64 %cols151, 4
+  store i64 %addtmp152, ptr %cols, align 4
+  %cols153 = load i64, ptr %cols, align 4
+  %eqtmp154 = icmp eq i64 %cols153, 76
+  %ifcond155 = icmp ne i1 %eqtmp154, false
+  br i1 %ifcond155, label %then156, label %ifcont159
 
-then155:                                          ; preds = %then98
-  %out_state156 = load i64, ptr %out_state, align 4
-  %calltmp157 = call { i32, ptr, i8 } @io_utils.io_buf_puts(i64 %out_state156, ptr @.str.1016)
+then156:                                          ; preds = %then99
+  %out_state157 = load i64, ptr %out_state, align 4
+  %calltmp158 = call { i32, ptr, i8 } @io_utils.io_buf_puts(i64 %out_state157, ptr @.str.1016)
   store i64 0, ptr %cols, align 4
-  br label %ifcont158
-
-ifcont158:                                        ; preds = %then155, %then98
   br label %ifcont159
 
-ifcont159:                                        ; preds = %ifcont158, %else94
+ifcont159:                                        ; preds = %then156, %then99
   br label %ifcont160
 
-ifcont160:                                        ; preds = %ifcont159, %then92
+ifcont160:                                        ; preds = %ifcont159, %else95
   br label %ifcont161
 
-ifcont161:                                        ; preds = %ifcont160, %then86
-  %j162 = load i64, ptr %j, align 4
-  %addtmp163 = add i64 %j162, 1
-  store i64 %addtmp163, ptr %j, align 4
+ifcont161:                                        ; preds = %ifcont160, %then93
+  br label %ifcont162
+
+ifcont162:                                        ; preds = %ifcont161, %then87
+  %j163 = load i64, ptr %j, align 4
+  %addtmp164 = add i64 %j163, 1
+  store i64 %addtmp164, ptr %j, align 4
   call void @npk_gc_safepoint()
-  br label %whilecond72
+  br label %whilecond73
 
-afterwhile:                                       ; preds = %whilecond72
-  br label %ifcont164
+afterwhile:                                       ; preds = %whilecond73
+  br label %ifcont165
 
-ifcont164:                                        ; preds = %afterwhile, %then70
+ifcont165:                                        ; preds = %afterwhile, %then71
   call void @npk_gc_safepoint()
   br label %whilecond
 
-afterwhile165:                                    ; preds = %whilecond
-  %state166 = load i64, ptr %state, align 4
-  %eqtmp167 = icmp eq i64 %state166, 1
-  %ifcond168 = icmp ne i1 %eqtmp167, false
-  br i1 %ifcond168, label %then169, label %else198
+afterwhile166:                                    ; preds = %whilecond
+  %state167 = load i64, ptr %state, align 4
+  %eqtmp168 = icmp eq i64 %state167, 1
+  %ifcond169 = icmp ne i1 %eqtmp168, false
+  br i1 %ifcond169, label %then170, label %else199
 
-then169:                                          ; preds = %afterwhile165
-  %b0_and_3170 = alloca i64, align 8
-  %b0171 = load i64, ptr %b0, align 4
+then170:                                          ; preds = %afterwhile166
+  %b0_and_3171 = alloca i64, align 8
   %b0172 = load i64, ptr %b0, align 4
-  %divtmp173 = sdiv i64 %b0172, 4
-  %safe.divtmp174 = select i1 false, i64 9223372036854775807, i64 %divtmp173
-  %multmp175 = mul i64 %safe.divtmp174, 4
-  %subtmp176 = sub i64 %b0171, %multmp175
-  store i64 %subtmp176, ptr %b0_and_3170, align 4
-  %c0177 = alloca i64, align 8
-  %b0178 = load i64, ptr %b0, align 4
-  %divtmp179 = sdiv i64 %b0178, 4
-  %safe.divtmp180 = select i1 false, i64 9223372036854775807, i64 %divtmp179
-  store i64 %safe.divtmp180, ptr %c0177, align 4
-  %c1181 = alloca i64, align 8
-  %b0_and_3182 = load i64, ptr %b0_and_3170, align 4
-  %multmp183 = mul i64 %b0_and_3182, 16
-  store i64 %multmp183, ptr %c1181, align 4
-  %out_state184 = load i64, ptr %out_state, align 4
-  %c0185 = load i64, ptr %c0177, align 4
-  %calltmp186 = call { i32, ptr, i8 } @base64.b64_char(i64 %c0185)
-  %raw.value187 = extractvalue { i32, ptr, i8 } %calltmp186, 0
-  %calltmp188 = call { i32, ptr, i8 } @io_utils.io_buf_putc(i64 %out_state184, i32 %raw.value187)
-  %out_state189 = load i64, ptr %out_state, align 4
-  %c1190 = load i64, ptr %c1181, align 4
-  %calltmp191 = call { i32, ptr, i8 } @base64.b64_char(i64 %c1190)
-  %raw.value192 = extractvalue { i32, ptr, i8 } %calltmp191, 0
-  %calltmp193 = call { i32, ptr, i8 } @io_utils.io_buf_putc(i64 %out_state189, i32 %raw.value192)
-  %out_state194 = load i64, ptr %out_state, align 4
-  %calltmp195 = call { i32, ptr, i8 } @io_utils.io_buf_puts(i64 %out_state194, ptr @.str.1018)
-  %cols196 = load i64, ptr %cols, align 4
-  %addtmp197 = add i64 %cols196, 4
-  store i64 %addtmp197, ptr %cols, align 4
-  br label %ifcont251
+  %b0173 = load i64, ptr %b0, align 4
+  %divtmp174 = sdiv i64 %b0173, 4
+  %safe.divtmp175 = select i1 false, i64 9223372036854775807, i64 %divtmp174
+  %multmp176 = mul i64 %safe.divtmp175, 4
+  %subtmp177 = sub i64 %b0172, %multmp176
+  store i64 %subtmp177, ptr %b0_and_3171, align 4
+  %c0178 = alloca i64, align 8
+  %b0179 = load i64, ptr %b0, align 4
+  %divtmp180 = sdiv i64 %b0179, 4
+  %safe.divtmp181 = select i1 false, i64 9223372036854775807, i64 %divtmp180
+  store i64 %safe.divtmp181, ptr %c0178, align 4
+  %c1182 = alloca i64, align 8
+  %b0_and_3183 = load i64, ptr %b0_and_3171, align 4
+  %multmp184 = mul i64 %b0_and_3183, 16
+  store i64 %multmp184, ptr %c1182, align 4
+  %out_state185 = load i64, ptr %out_state, align 4
+  %c0186 = load i64, ptr %c0178, align 4
+  %calltmp187 = call { i32, ptr, i8 } @base64.b64_char(i64 %c0186)
+  %raw.value188 = extractvalue { i32, ptr, i8 } %calltmp187, 0
+  %calltmp189 = call { i32, ptr, i8 } @io_utils.io_buf_putc(i64 %out_state185, i32 %raw.value188)
+  %out_state190 = load i64, ptr %out_state, align 4
+  %c1191 = load i64, ptr %c1182, align 4
+  %calltmp192 = call { i32, ptr, i8 } @base64.b64_char(i64 %c1191)
+  %raw.value193 = extractvalue { i32, ptr, i8 } %calltmp192, 0
+  %calltmp194 = call { i32, ptr, i8 } @io_utils.io_buf_putc(i64 %out_state190, i32 %raw.value193)
+  %out_state195 = load i64, ptr %out_state, align 4
+  %calltmp196 = call { i32, ptr, i8 } @io_utils.io_buf_puts(i64 %out_state195, ptr @.str.1018)
+  %cols197 = load i64, ptr %cols, align 4
+  %addtmp198 = add i64 %cols197, 4
+  store i64 %addtmp198, ptr %cols, align 4
+  br label %ifcont252
 
-else198:                                          ; preds = %afterwhile165
-  %state199 = load i64, ptr %state, align 4
-  %eqtmp200 = icmp eq i64 %state199, 2
-  %ifcond201 = icmp ne i1 %eqtmp200, false
-  br i1 %ifcond201, label %then202, label %ifcont250
+else199:                                          ; preds = %afterwhile166
+  %state200 = load i64, ptr %state, align 4
+  %eqtmp201 = icmp eq i64 %state200, 2
+  %ifcond202 = icmp ne i1 %eqtmp201, false
+  br i1 %ifcond202, label %then203, label %ifcont251
 
-then202:                                          ; preds = %else198
-  %b0_and_3203 = alloca i64, align 8
-  %b0204 = load i64, ptr %b0, align 4
+then203:                                          ; preds = %else199
+  %b0_and_3204 = alloca i64, align 8
   %b0205 = load i64, ptr %b0, align 4
-  %divtmp206 = sdiv i64 %b0205, 4
-  %safe.divtmp207 = select i1 false, i64 9223372036854775807, i64 %divtmp206
-  %multmp208 = mul i64 %safe.divtmp207, 4
-  %subtmp209 = sub i64 %b0204, %multmp208
-  store i64 %subtmp209, ptr %b0_and_3203, align 4
-  %b1_and_15210 = alloca i64, align 8
-  %b1211 = load i64, ptr %b1, align 4
+  %b0206 = load i64, ptr %b0, align 4
+  %divtmp207 = sdiv i64 %b0206, 4
+  %safe.divtmp208 = select i1 false, i64 9223372036854775807, i64 %divtmp207
+  %multmp209 = mul i64 %safe.divtmp208, 4
+  %subtmp210 = sub i64 %b0205, %multmp209
+  store i64 %subtmp210, ptr %b0_and_3204, align 4
+  %b1_and_15211 = alloca i64, align 8
   %b1212 = load i64, ptr %b1, align 4
-  %divtmp213 = sdiv i64 %b1212, 16
-  %safe.divtmp214 = select i1 false, i64 9223372036854775807, i64 %divtmp213
-  %multmp215 = mul i64 %safe.divtmp214, 16
-  %subtmp216 = sub i64 %b1211, %multmp215
-  store i64 %subtmp216, ptr %b1_and_15210, align 4
-  %c0217 = alloca i64, align 8
-  %b0218 = load i64, ptr %b0, align 4
-  %divtmp219 = sdiv i64 %b0218, 4
-  %safe.divtmp220 = select i1 false, i64 9223372036854775807, i64 %divtmp219
-  store i64 %safe.divtmp220, ptr %c0217, align 4
-  %c1221 = alloca i64, align 8
-  %b0_and_3222 = load i64, ptr %b0_and_3203, align 4
-  %multmp223 = mul i64 %b0_and_3222, 16
-  %b1224 = load i64, ptr %b1, align 4
-  %divtmp225 = sdiv i64 %b1224, 16
-  %safe.divtmp226 = select i1 false, i64 9223372036854775807, i64 %divtmp225
-  %addtmp227 = add i64 %multmp223, %safe.divtmp226
-  store i64 %addtmp227, ptr %c1221, align 4
-  %c2228 = alloca i64, align 8
-  %b1_and_15229 = load i64, ptr %b1_and_15210, align 4
-  %multmp230 = mul i64 %b1_and_15229, 4
-  store i64 %multmp230, ptr %c2228, align 4
-  %out_state231 = load i64, ptr %out_state, align 4
-  %c0232 = load i64, ptr %c0217, align 4
-  %calltmp233 = call { i32, ptr, i8 } @base64.b64_char(i64 %c0232)
-  %raw.value234 = extractvalue { i32, ptr, i8 } %calltmp233, 0
-  %calltmp235 = call { i32, ptr, i8 } @io_utils.io_buf_putc(i64 %out_state231, i32 %raw.value234)
-  %out_state236 = load i64, ptr %out_state, align 4
-  %c1237 = load i64, ptr %c1221, align 4
-  %calltmp238 = call { i32, ptr, i8 } @base64.b64_char(i64 %c1237)
-  %raw.value239 = extractvalue { i32, ptr, i8 } %calltmp238, 0
-  %calltmp240 = call { i32, ptr, i8 } @io_utils.io_buf_putc(i64 %out_state236, i32 %raw.value239)
-  %out_state241 = load i64, ptr %out_state, align 4
-  %c2242 = load i64, ptr %c2228, align 4
-  %calltmp243 = call { i32, ptr, i8 } @base64.b64_char(i64 %c2242)
-  %raw.value244 = extractvalue { i32, ptr, i8 } %calltmp243, 0
-  %calltmp245 = call { i32, ptr, i8 } @io_utils.io_buf_putc(i64 %out_state241, i32 %raw.value244)
-  %out_state246 = load i64, ptr %out_state, align 4
-  %calltmp247 = call { i32, ptr, i8 } @io_utils.io_buf_puts(i64 %out_state246, ptr @.str.1020)
-  %cols248 = load i64, ptr %cols, align 4
-  %addtmp249 = add i64 %cols248, 4
-  store i64 %addtmp249, ptr %cols, align 4
-  br label %ifcont250
-
-ifcont250:                                        ; preds = %then202, %else198
+  %b1213 = load i64, ptr %b1, align 4
+  %divtmp214 = sdiv i64 %b1213, 16
+  %safe.divtmp215 = select i1 false, i64 9223372036854775807, i64 %divtmp214
+  %multmp216 = mul i64 %safe.divtmp215, 16
+  %subtmp217 = sub i64 %b1212, %multmp216
+  store i64 %subtmp217, ptr %b1_and_15211, align 4
+  %c0218 = alloca i64, align 8
+  %b0219 = load i64, ptr %b0, align 4
+  %divtmp220 = sdiv i64 %b0219, 4
+  %safe.divtmp221 = select i1 false, i64 9223372036854775807, i64 %divtmp220
+  store i64 %safe.divtmp221, ptr %c0218, align 4
+  %c1222 = alloca i64, align 8
+  %b0_and_3223 = load i64, ptr %b0_and_3204, align 4
+  %multmp224 = mul i64 %b0_and_3223, 16
+  %b1225 = load i64, ptr %b1, align 4
+  %divtmp226 = sdiv i64 %b1225, 16
+  %safe.divtmp227 = select i1 false, i64 9223372036854775807, i64 %divtmp226
+  %addtmp228 = add i64 %multmp224, %safe.divtmp227
+  store i64 %addtmp228, ptr %c1222, align 4
+  %c2229 = alloca i64, align 8
+  %b1_and_15230 = load i64, ptr %b1_and_15211, align 4
+  %multmp231 = mul i64 %b1_and_15230, 4
+  store i64 %multmp231, ptr %c2229, align 4
+  %out_state232 = load i64, ptr %out_state, align 4
+  %c0233 = load i64, ptr %c0218, align 4
+  %calltmp234 = call { i32, ptr, i8 } @base64.b64_char(i64 %c0233)
+  %raw.value235 = extractvalue { i32, ptr, i8 } %calltmp234, 0
+  %calltmp236 = call { i32, ptr, i8 } @io_utils.io_buf_putc(i64 %out_state232, i32 %raw.value235)
+  %out_state237 = load i64, ptr %out_state, align 4
+  %c1238 = load i64, ptr %c1222, align 4
+  %calltmp239 = call { i32, ptr, i8 } @base64.b64_char(i64 %c1238)
+  %raw.value240 = extractvalue { i32, ptr, i8 } %calltmp239, 0
+  %calltmp241 = call { i32, ptr, i8 } @io_utils.io_buf_putc(i64 %out_state237, i32 %raw.value240)
+  %out_state242 = load i64, ptr %out_state, align 4
+  %c2243 = load i64, ptr %c2229, align 4
+  %calltmp244 = call { i32, ptr, i8 } @base64.b64_char(i64 %c2243)
+  %raw.value245 = extractvalue { i32, ptr, i8 } %calltmp244, 0
+  %calltmp246 = call { i32, ptr, i8 } @io_utils.io_buf_putc(i64 %out_state242, i32 %raw.value245)
+  %out_state247 = load i64, ptr %out_state, align 4
+  %calltmp248 = call { i32, ptr, i8 } @io_utils.io_buf_puts(i64 %out_state247, ptr @.str.1020)
+  %cols249 = load i64, ptr %cols, align 4
+  %addtmp250 = add i64 %cols249, 4
+  store i64 %addtmp250, ptr %cols, align 4
   br label %ifcont251
 
-ifcont251:                                        ; preds = %ifcont250, %then169
-  %cols252 = load i64, ptr %cols, align 4
-  %gttmp253 = icmp sgt i64 %cols252, 0
-  %ifcond254 = icmp ne i1 %gttmp253, false
-  br i1 %ifcond254, label %then255, label %ifcont258
+ifcont251:                                        ; preds = %then203, %else199
+  br label %ifcont252
 
-then255:                                          ; preds = %ifcont251
-  %out_state256 = load i64, ptr %out_state, align 4
-  %calltmp257 = call { i32, ptr, i8 } @io_utils.io_buf_puts(i64 %out_state256, ptr @.str.1022)
-  br label %ifcont258
+ifcont252:                                        ; preds = %ifcont251, %then170
+  %cols253 = load i64, ptr %cols, align 4
+  %gttmp254 = icmp sgt i64 %cols253, 0
+  %ifcond255 = icmp ne i1 %gttmp254, false
+  br i1 %ifcond255, label %then256, label %ifcont259
 
-ifcont258:                                        ; preds = %then255, %ifcont251
-  %out_state259 = load i64, ptr %out_state, align 4
-  %calltmp260 = call { i32, ptr, i8 } @io_utils.io_buf_flush(i64 %out_state259)
-  %out_state261 = load i64, ptr %out_state, align 4
-  %calltmp262 = call { i32, ptr, i8 } @io_utils.io_buf_free(i64 %out_state261)
-  %buf263 = load i64, ptr %buf, align 4
-  %calltmp264 = call i32 @nitpick_libc_mem_free(i64 %buf263)
-  %fd265 = load i64, ptr %fd, align 4
-  %gttmp266 = icmp sgt i64 %fd265, 0
-  %ifcond267 = icmp ne i1 %gttmp266, false
-  br i1 %ifcond267, label %then268, label %ifcont280
+then256:                                          ; preds = %ifcont252
+  %out_state257 = load i64, ptr %out_state, align 4
+  %calltmp258 = call { i32, ptr, i8 } @io_utils.io_buf_puts(i64 %out_state257, ptr @.str.1022)
+  br label %ifcont259
 
-then268:                                          ; preds = %ifcont258
-  %fd269 = load i64, ptr %fd, align 4
-  %syscall_ret270 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %fd269)
-  %sys_is_err271 = icmp slt i64 %syscall_ret270, 0
-  %sys_neg_errno272 = sub i64 0, %syscall_ret270
-  %sys_err_ptr273 = inttoptr i64 %sys_neg_errno272 to ptr
-  %sys_val274 = select i1 %sys_is_err271, i64 0, i64 %syscall_ret270
-  %sys_err275 = select i1 %sys_is_err271, ptr %sys_err_ptr273, ptr null
-  %sys_flag276 = select i1 %sys_is_err271, i8 1, i8 0
-  %sys_result.val277 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val274, 0
-  %sys_result.err278 = insertvalue %struct.NpkResult_int64 %sys_result.val277, ptr %sys_err275, 1
-  %sys_result.is_error279 = insertvalue %struct.NpkResult_int64 %sys_result.err278, i8 %sys_flag276, 2
-  br label %ifcont280
+ifcont259:                                        ; preds = %then256, %ifcont252
+  %out_state260 = load i64, ptr %out_state, align 4
+  %calltmp261 = call { i32, ptr, i8 } @io_utils.io_buf_flush(i64 %out_state260)
+  %out_state262 = load i64, ptr %out_state, align 4
+  %calltmp263 = call { i32, ptr, i8 } @io_utils.io_buf_free(i64 %out_state262)
+  %buf264 = load i64, ptr %buf, align 4
+  %cast.inttoptr265 = inttoptr i64 %buf264 to ptr
+  call void @npk_free(ptr %cast.inttoptr265)
+  %fd266 = load i64, ptr %fd, align 4
+  %gttmp267 = icmp sgt i64 %fd266, 0
+  %ifcond268 = icmp ne i1 %gttmp267, false
+  br i1 %ifcond268, label %then269, label %ifcont281
 
-ifcont280:                                        ; preds = %then268, %ifcont258
+then269:                                          ; preds = %ifcont259
+  %fd270 = load i64, ptr %fd, align 4
+  %syscall_ret271 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %fd270)
+  %sys_is_err272 = icmp slt i64 %syscall_ret271, 0
+  %sys_neg_errno273 = sub i64 0, %syscall_ret271
+  %sys_err_ptr274 = inttoptr i64 %sys_neg_errno273 to ptr
+  %sys_val275 = select i1 %sys_is_err272, i64 0, i64 %syscall_ret271
+  %sys_err276 = select i1 %sys_is_err272, ptr %sys_err_ptr274, ptr null
+  %sys_flag277 = select i1 %sys_is_err272, i8 1, i8 0
+  %sys_result.val278 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val275, 0
+  %sys_result.err279 = insertvalue %struct.NpkResult_int64 %sys_result.val278, ptr %sys_err276, 1
+  %sys_result.is_error280 = insertvalue %struct.NpkResult_int64 %sys_result.err279, i8 %sys_flag277, 2
+  br label %ifcont281
+
+ifcont281:                                        ; preds = %then269, %ifcont259
   ret { i32, ptr, i8 } zeroinitializer
 }
 
@@ -11319,10 +11318,12 @@ entry:
   %initial_cap.addr = alloca i64, align 8
   store i64 %initial_cap, ptr %initial_cap.addr, align 4
   %ptr = alloca i64, align 8
-  %calltmp = call i64 @malloc(i64 24)
-  store i64 %calltmp, ptr %ptr, align 4
-  %ptr1 = load i64, ptr %ptr, align 4
-  %eqtmp = icmp eq i64 %ptr1, 0
+  %wild_ptr = call ptr @npk_alloc(i64 24)
+  %wild_ptr1 = call ptr @npk_alloc(i64 24)
+  %cast.ptrtoint = ptrtoint ptr %wild_ptr1 to i64
+  store i64 %cast.ptrtoint, ptr %ptr, align 4
+  %ptr2 = load i64, ptr %ptr, align 4
+  %eqtmp = icmp eq i64 %ptr2, 0
   %ifcond = icmp ne i1 %eqtmp, false
   br i1 %ifcond, label %then, label %ifcont
 
@@ -11331,39 +11332,43 @@ then:                                             ; preds = %entry
 
 ifcont:                                           ; preds = %entry
   %data = alloca i64, align 8
-  %initial_cap2 = load i64, ptr %initial_cap.addr, align 4
-  %multmp = mul i64 %initial_cap2, 8
-  %calltmp3 = call i64 @malloc(i64 %multmp)
-  store i64 %calltmp3, ptr %data, align 4
-  %data4 = load i64, ptr %data, align 4
-  %eqtmp5 = icmp eq i64 %data4, 0
-  %ifcond6 = icmp ne i1 %eqtmp5, false
-  br i1 %ifcond6, label %then7, label %ifcont9
+  %initial_cap3 = load i64, ptr %initial_cap.addr, align 4
+  %multmp = mul i64 %initial_cap3, 8
+  %wild_ptr4 = call ptr @npk_alloc(i64 %multmp)
+  %initial_cap5 = load i64, ptr %initial_cap.addr, align 4
+  %multmp6 = mul i64 %initial_cap5, 8
+  %wild_ptr7 = call ptr @npk_alloc(i64 %multmp6)
+  %cast.ptrtoint8 = ptrtoint ptr %wild_ptr7 to i64
+  store i64 %cast.ptrtoint8, ptr %data, align 4
+  %data9 = load i64, ptr %data, align 4
+  %eqtmp10 = icmp eq i64 %data9, 0
+  %ifcond11 = icmp ne i1 %eqtmp10, false
+  br i1 %ifcond11, label %then12, label %ifcont14
 
-then7:                                            ; preds = %ifcont
-  %ptr8 = load i64, ptr %ptr, align 4
-  %cast.inttoptr = inttoptr i64 %ptr8 to ptr
+then12:                                           ; preds = %ifcont
+  %ptr13 = load i64, ptr %ptr, align 4
+  %cast.inttoptr = inttoptr i64 %ptr13 to ptr
   call void @npk_free(ptr %cast.inttoptr)
   ret { i64, ptr, i8 } zeroinitializer
 
-ifcont9:                                          ; preds = %ifcont
+ifcont14:                                         ; preds = %ifcont
   %p64 = call ptr @npk_alloc(i64 8)
-  %ptr10 = load i64, ptr %ptr, align 4
-  %ptr11 = load i64, ptr %ptr, align 4
-  %cast.inttoptr12 = inttoptr i64 %ptr11 to ptr
-  store ptr %cast.inttoptr12, ptr %p64, align 8
-  %p6413 = load ptr, ptr %p64, align 8
-  %initial_cap14 = load i64, ptr %initial_cap.addr, align 4
-  store i64 %initial_cap14, ptr %p6413, align 4
-  %p6415 = load ptr, ptr %p64, align 8
-  %ptr.add = getelementptr i64, ptr %p6415, i64 1
+  %ptr15 = load i64, ptr %ptr, align 4
+  %ptr16 = load i64, ptr %ptr, align 4
+  %cast.inttoptr17 = inttoptr i64 %ptr16 to ptr
+  store ptr %cast.inttoptr17, ptr %p64, align 8
+  %p6418 = load ptr, ptr %p64, align 8
+  %initial_cap19 = load i64, ptr %initial_cap.addr, align 4
+  store i64 %initial_cap19, ptr %p6418, align 4
+  %p6420 = load ptr, ptr %p64, align 8
+  %ptr.add = getelementptr i64, ptr %p6420, i64 1
   store i64 0, ptr %ptr.add, align 4
-  %p6416 = load ptr, ptr %p64, align 8
-  %ptr.add17 = getelementptr i64, ptr %p6416, i64 2
-  %data18 = load i64, ptr %data, align 4
-  store i64 %data18, ptr %ptr.add17, align 4
-  %ptr19 = load i64, ptr %ptr, align 4
-  %result.val = insertvalue { i64, ptr, i8 } undef, i64 %ptr19, 0
+  %p6421 = load ptr, ptr %p64, align 8
+  %ptr.add22 = getelementptr i64, ptr %p6421, i64 2
+  %data23 = load i64, ptr %data, align 4
+  store i64 %data23, ptr %ptr.add22, align 4
+  %ptr24 = load i64, ptr %ptr, align 4
+  %result.val = insertvalue { i64, ptr, i8 } undef, i64 %ptr24, 0
   %result.err = insertvalue { i64, ptr, i8 } %result.val, ptr null, 1
   %result.is_error = insertvalue { i64, ptr, i8 } %result.err, i8 0, 2
   ret { i64, ptr, i8 } %result.is_error
@@ -11538,7 +11543,7 @@ null.ok8:                                         ; preds = %null.ok
   %cap12 = load i64, ptr %cap, align 4
   %getmp = icmp sge i64 %size11, %cap12
   %ifcond13 = icmp ne i1 %getmp, false
-  br i1 %ifcond13, label %then14, label %ifcont52
+  br i1 %ifcond13, label %then14, label %ifcont55
 
 then14:                                           ; preds = %null.ok8
   %new_cap = alloca i64, align 8
@@ -11548,109 +11553,113 @@ then14:                                           ; preds = %null.ok8
   %new_data = alloca i64, align 8
   %new_cap16 = load i64, ptr %new_cap, align 4
   %multmp17 = mul i64 %new_cap16, 8
-  %calltmp = call i64 @malloc(i64 %multmp17)
-  store i64 %calltmp, ptr %new_data, align 4
+  %wild_ptr = call ptr @npk_alloc(i64 %multmp17)
+  %new_cap18 = load i64, ptr %new_cap, align 4
+  %multmp19 = mul i64 %new_cap18, 8
+  %wild_ptr20 = call ptr @npk_alloc(i64 %multmp19)
+  %cast.ptrtoint = ptrtoint ptr %wild_ptr20 to i64
+  store i64 %cast.ptrtoint, ptr %new_data, align 4
   %old_data = alloca i64, align 8
-  %p6418 = load ptr, ptr %p64, align 8
-  %ptr.add19 = getelementptr i64, ptr %p6418, i64 2
-  %null.deref20 = icmp eq ptr %ptr.add19, null
-  br i1 %null.deref20, label %null.fail21, label %null.ok22
+  %p6421 = load ptr, ptr %p64, align 8
+  %ptr.add22 = getelementptr i64, ptr %p6421, i64 2
+  %null.deref23 = icmp eq ptr %ptr.add22, null
+  br i1 %null.deref23, label %null.fail24, label %null.ok25
 
-null.fail21:                                      ; preds = %then14
+null.fail24:                                      ; preds = %then14
   call void @exit(i32 46)
   unreachable
 
-null.ok22:                                        ; preds = %then14
-  %deref23 = load i32, ptr %ptr.add19, align 4
-  %init_sext24 = sext i32 %deref23 to i64
-  store i64 %init_sext24, ptr %old_data, align 4
+null.ok25:                                        ; preds = %then14
+  %deref26 = load i32, ptr %ptr.add22, align 4
+  %init_sext27 = sext i32 %deref26 to i64
+  store i64 %init_sext27, ptr %old_data, align 4
   %old64 = call ptr @npk_alloc(i64 8)
-  %old_data25 = load i64, ptr %old_data, align 4
-  %old_data26 = load i64, ptr %old_data, align 4
-  %cast.inttoptr27 = inttoptr i64 %old_data26 to ptr
-  store ptr %cast.inttoptr27, ptr %old64, align 8
+  %old_data28 = load i64, ptr %old_data, align 4
+  %old_data29 = load i64, ptr %old_data, align 4
+  %cast.inttoptr30 = inttoptr i64 %old_data29 to ptr
+  store ptr %cast.inttoptr30, ptr %old64, align 8
   %new64 = call ptr @npk_alloc(i64 8)
-  %new_data28 = load i64, ptr %new_data, align 4
-  %new_data29 = load i64, ptr %new_data, align 4
-  %cast.inttoptr30 = inttoptr i64 %new_data29 to ptr
-  store ptr %cast.inttoptr30, ptr %new64, align 8
+  %new_data31 = load i64, ptr %new_data, align 4
+  %new_data32 = load i64, ptr %new_data, align 4
+  %cast.inttoptr33 = inttoptr i64 %new_data32 to ptr
+  store ptr %cast.inttoptr33, ptr %new64, align 8
   %i = alloca i64, align 8
   store i64 0, ptr %i, align 4
   br label %whilecond
 
-whilecond:                                        ; preds = %null.ok42, %null.ok22
-  %i31 = load i64, ptr %i, align 4
-  %size32 = load i64, ptr %size, align 4
-  %lttmp = icmp slt i64 %i31, %size32
-  %whilecond33 = icmp ne i1 %lttmp, false
-  br i1 %whilecond33, label %whilebody, label %afterwhile
+whilecond:                                        ; preds = %null.ok45, %null.ok25
+  %i34 = load i64, ptr %i, align 4
+  %size35 = load i64, ptr %size, align 4
+  %lttmp = icmp slt i64 %i34, %size35
+  %whilecond36 = icmp ne i1 %lttmp, false
+  br i1 %whilecond36, label %whilebody, label %afterwhile
 
 whilebody:                                        ; preds = %whilecond
-  %new6434 = load ptr, ptr %new64, align 8
-  %i35 = load i64, ptr %i, align 4
-  %ptr.add36 = getelementptr i64, ptr %new6434, i64 %i35
-  %old6437 = load ptr, ptr %old64, align 8
+  %new6437 = load ptr, ptr %new64, align 8
   %i38 = load i64, ptr %i, align 4
-  %ptr.add39 = getelementptr i64, ptr %old6437, i64 %i38
-  %null.deref40 = icmp eq ptr %ptr.add39, null
-  br i1 %null.deref40, label %null.fail41, label %null.ok42
+  %ptr.add39 = getelementptr i64, ptr %new6437, i64 %i38
+  %old6440 = load ptr, ptr %old64, align 8
+  %i41 = load i64, ptr %i, align 4
+  %ptr.add42 = getelementptr i64, ptr %old6440, i64 %i41
+  %null.deref43 = icmp eq ptr %ptr.add42, null
+  br i1 %null.deref43, label %null.fail44, label %null.ok45
 
-null.fail41:                                      ; preds = %whilebody
+null.fail44:                                      ; preds = %whilebody
   call void @exit(i32 46)
   unreachable
 
-null.ok42:                                        ; preds = %whilebody
-  %deref43 = load i32, ptr %ptr.add39, align 4
-  store i32 %deref43, ptr %ptr.add36, align 4
-  %i44 = load i64, ptr %i, align 4
-  %addtmp = add i64 %i44, 1
+null.ok45:                                        ; preds = %whilebody
+  %deref46 = load i32, ptr %ptr.add42, align 4
+  store i32 %deref46, ptr %ptr.add39, align 4
+  %i47 = load i64, ptr %i, align 4
+  %addtmp = add i64 %i47, 1
   store i64 %addtmp, ptr %i, align 4
   call void @npk_gc_safepoint()
   br label %whilecond
 
 afterwhile:                                       ; preds = %whilecond
-  %old_data45 = load i64, ptr %old_data, align 4
-  %cast.inttoptr46 = inttoptr i64 %old_data45 to ptr
-  call void @npk_free(ptr %cast.inttoptr46)
-  %p6447 = load ptr, ptr %p64, align 8
-  %new_cap48 = load i64, ptr %new_cap, align 4
-  store i64 %new_cap48, ptr %p6447, align 4
-  %p6449 = load ptr, ptr %p64, align 8
-  %ptr.add50 = getelementptr i64, ptr %p6449, i64 2
-  %new_data51 = load i64, ptr %new_data, align 4
-  store i64 %new_data51, ptr %ptr.add50, align 4
-  br label %ifcont52
+  %old_data48 = load i64, ptr %old_data, align 4
+  %cast.inttoptr49 = inttoptr i64 %old_data48 to ptr
+  call void @npk_free(ptr %cast.inttoptr49)
+  %p6450 = load ptr, ptr %p64, align 8
+  %new_cap51 = load i64, ptr %new_cap, align 4
+  store i64 %new_cap51, ptr %p6450, align 4
+  %p6452 = load ptr, ptr %p64, align 8
+  %ptr.add53 = getelementptr i64, ptr %p6452, i64 2
+  %new_data54 = load i64, ptr %new_data, align 4
+  store i64 %new_data54, ptr %ptr.add53, align 4
+  br label %ifcont55
 
-ifcont52:                                         ; preds = %afterwhile, %null.ok8
+ifcont55:                                         ; preds = %afterwhile, %null.ok8
   %data = alloca i64, align 8
-  %p6453 = load ptr, ptr %p64, align 8
-  %ptr.add54 = getelementptr i64, ptr %p6453, i64 2
-  %null.deref55 = icmp eq ptr %ptr.add54, null
-  br i1 %null.deref55, label %null.fail56, label %null.ok57
+  %p6456 = load ptr, ptr %p64, align 8
+  %ptr.add57 = getelementptr i64, ptr %p6456, i64 2
+  %null.deref58 = icmp eq ptr %ptr.add57, null
+  br i1 %null.deref58, label %null.fail59, label %null.ok60
 
-null.fail56:                                      ; preds = %ifcont52
+null.fail59:                                      ; preds = %ifcont55
   call void @exit(i32 46)
   unreachable
 
-null.ok57:                                        ; preds = %ifcont52
-  %deref58 = load i32, ptr %ptr.add54, align 4
-  %init_sext59 = sext i32 %deref58 to i64
-  store i64 %init_sext59, ptr %data, align 4
+null.ok60:                                        ; preds = %ifcont55
+  %deref61 = load i32, ptr %ptr.add57, align 4
+  %init_sext62 = sext i32 %deref61 to i64
+  store i64 %init_sext62, ptr %data, align 4
   %data64 = call ptr @npk_alloc(i64 8)
-  %data60 = load i64, ptr %data, align 4
-  %data61 = load i64, ptr %data, align 4
-  %cast.inttoptr62 = inttoptr i64 %data61 to ptr
-  store ptr %cast.inttoptr62, ptr %data64, align 8
-  %data6463 = load ptr, ptr %data64, align 8
-  %size64 = load i64, ptr %size, align 4
-  %ptr.add65 = getelementptr i64, ptr %data6463, i64 %size64
-  %val66 = load i64, ptr %val.addr, align 4
-  store i64 %val66, ptr %ptr.add65, align 4
-  %p6467 = load ptr, ptr %p64, align 8
-  %ptr.add68 = getelementptr i64, ptr %p6467, i64 1
-  %size69 = load i64, ptr %size, align 4
-  %addtmp70 = add i64 %size69, 1
-  store i64 %addtmp70, ptr %ptr.add68, align 4
+  %data63 = load i64, ptr %data, align 4
+  %data65 = load i64, ptr %data, align 4
+  %cast.inttoptr66 = inttoptr i64 %data65 to ptr
+  store ptr %cast.inttoptr66, ptr %data64, align 8
+  %data6467 = load ptr, ptr %data64, align 8
+  %size68 = load i64, ptr %size, align 4
+  %ptr.add69 = getelementptr i64, ptr %data6467, i64 %size68
+  %val70 = load i64, ptr %val.addr, align 4
+  store i64 %val70, ptr %ptr.add69, align 4
+  %p6471 = load ptr, ptr %p64, align 8
+  %ptr.add72 = getelementptr i64, ptr %p6471, i64 1
+  %size73 = load i64, ptr %size, align 4
+  %addtmp74 = add i64 %size73, 1
+  store i64 %addtmp74, ptr %ptr.add72, align 4
   ret { i64, ptr, i8 } zeroinitializer
 }
 
@@ -11835,8 +11844,6 @@ afterwhile:                                       ; preds = %whilecond
   store i64 %subtmp39, ptr %ptr.add37, align 4
   ret { i64, ptr, i8 } zeroinitializer
 }
-
-declare void @npk_free(ptr)
 
 define linkonce_odr i32 @__alist_init() {
 entry:
@@ -13082,9 +13089,9 @@ then37:                                           ; preds = %else33
   %tv_alloc_ptr39 = load ptr, ptr %tv_alloc_ptr, align 8
   %cast.ptrtoint = ptrtoint ptr %tv_alloc_ptr39 to i64
   store i64 %cast.ptrtoint, ptr %tv, align 4
-  %SYS_GETTIMEOFDAY = load i64, ptr @SYS_GETTIMEOFDAY, align 4
+  %GETTIMEOFDAY = load i64, ptr @GETTIMEOFDAY, align 4
   %tv40 = load i64, ptr %tv, align 4
-  %syscall_ret = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 %SYS_GETTIMEOFDAY, i64 %tv40, i64 0)
+  %syscall_ret = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 %GETTIMEOFDAY, i64 %tv40, i64 0)
   %sys_is_err = icmp slt i64 %syscall_ret, 0
   %sys_neg_errno = sub i64 0, %syscall_ret
   %sys_err_ptr = inttoptr i64 %sys_neg_errno to ptr
@@ -17401,13 +17408,12 @@ whilebody:                                        ; preds = %whilecond
   %raw.value27 = extractvalue { ptr, ptr, i8 } %calltmp26, 0
   store ptr %raw.value27, ptr %file, align 8
   %res = alloca i64, align 8
-  %SYS_CHOWN = load i64, ptr @SYS_CHOWN, align 4
   %file28 = load ptr, ptr %file, align 8
   %sys_str_struct = load %struct.NpkString, ptr %file28, align 8
   %sys_str_data = extractvalue %struct.NpkString %sys_str_struct, 0
   %sys_strvar_int = ptrtoint ptr %sys_str_data to i64
   %target_gid29 = load i64, ptr %target_gid, align 4
-  %syscall_ret = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 %SYS_CHOWN, i64 %sys_strvar_int, i64 -1, i64 %target_gid29)
+  %syscall_ret = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 92, i64 %sys_strvar_int, i64 -1, i64 %target_gid29)
   %sys_is_err = icmp slt i64 %syscall_ret, 0
   %sys_neg_errno = sub i64 0, %syscall_ret
   %sys_err_ptr = inttoptr i64 %sys_neg_errno to ptr
@@ -18013,12 +18019,12 @@ ifcont:                                           ; preds = %entry
   %raw.value9 = extractvalue { ptr, ptr, i8 } %calltmp8, 0
   store ptr %raw.value9, ptr %newroot, align 8
   %res = alloca i64, align 8
-  %SYS_CHROOT = load i64, ptr @SYS_CHROOT, align 4
+  %CHROOT = load i64, ptr @CHROOT, align 4
   %newroot10 = load ptr, ptr %newroot, align 8
   %sys_str_struct = load %struct.NpkString, ptr %newroot10, align 8
   %sys_str_data = extractvalue %struct.NpkString %sys_str_struct, 0
   %sys_strvar_int = ptrtoint ptr %sys_str_data to i64
-  %syscall_ret = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 %SYS_CHROOT, i64 %sys_strvar_int)
+  %syscall_ret = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 %CHROOT, i64 %sys_strvar_int)
   %sys_is_err = icmp slt i64 %syscall_ret, 0
   %sys_neg_errno = sub i64 0, %syscall_ret
   %sys_err_ptr = inttoptr i64 %sys_neg_errno to ptr
@@ -18159,11 +18165,10 @@ merge_block75:                                    ; preds = %success_block74, %e
   %cast.inttoptr88 = inttoptr i64 %addtmp87 to ptr
   store i64 0, ptr %cast.inttoptr88, align 4
   %exec_res = alloca i64, align 8
-  %SYS_EXECVE = load i64, ptr @SYS_EXECVE, align 4
   %cmd_cstr89 = load i64, ptr %cmd_cstr, align 4
   %argv_arr90 = load i64, ptr %argv_arr, align 4
   %envp_arr91 = load i64, ptr %envp_arr, align 4
-  %syscall_ret92 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 %SYS_EXECVE, i64 %cmd_cstr89, i64 %argv_arr90, i64 %envp_arr91)
+  %syscall_ret92 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 59, i64 %cmd_cstr89, i64 %argv_arr90, i64 %envp_arr91)
   %sys_is_err93 = icmp slt i64 %syscall_ret92, 0
   %sys_neg_errno94 = sub i64 0, %syscall_ret92
   %sys_err_ptr95 = inttoptr i64 %sys_neg_errno94 to ptr
@@ -19274,49 +19279,53 @@ afterwhile:                                       ; preds = %null.ok
   %copy = alloca i64, align 8
   %len9 = load i64, ptr %len, align 4
   %addtmp10 = add i64 %len9, 1
-  %calltmp = call i64 @malloc(i64 %addtmp10)
-  store i64 %calltmp, ptr %copy, align 4
+  %wild_ptr = call ptr @npk_alloc(i64 %addtmp10)
+  %len11 = load i64, ptr %len, align 4
+  %addtmp12 = add i64 %len11, 1
+  %wild_ptr13 = call ptr @npk_alloc(i64 %addtmp12)
+  %cast.ptrtoint = ptrtoint ptr %wild_ptr13 to i64
+  store i64 %cast.ptrtoint, ptr %copy, align 4
   %i = alloca i64, align 8
   store i64 0, ptr %i, align 4
-  br label %whilecond11
+  br label %whilecond14
 
-whilecond11:                                      ; preds = %whilebody15, %afterwhile
-  %i12 = load i64, ptr %i, align 4
-  %len13 = load i64, ptr %len, align 4
-  %lttmp = icmp slt i64 %i12, %len13
-  %whilecond14 = icmp ne i1 %lttmp, false
-  br i1 %whilecond14, label %whilebody15, label %afterwhile28
+whilecond14:                                      ; preds = %whilebody18, %afterwhile
+  %i15 = load i64, ptr %i, align 4
+  %len16 = load i64, ptr %len, align 4
+  %lttmp = icmp slt i64 %i15, %len16
+  %whilecond17 = icmp ne i1 %lttmp, false
+  br i1 %whilecond17, label %whilebody18, label %afterwhile30
 
-whilebody15:                                      ; preds = %whilecond11
-  %copy16 = load i64, ptr %copy, align 4
-  %i17 = load i64, ptr %i, align 4
-  %addtmp18 = add i64 %copy16, %i17
+whilebody18:                                      ; preds = %whilecond14
   %copy19 = load i64, ptr %copy, align 4
   %i20 = load i64, ptr %i, align 4
   %addtmp21 = add i64 %copy19, %i20
-  %cast.inttoptr22 = inttoptr i64 %addtmp21 to ptr
-  %s23 = load i64, ptr %s.addr, align 4
-  %i24 = load i64, ptr %i, align 4
-  %calltmp25 = call i64 @npk_mem_read_byte(i64 %s23, i64 %i24)
-  %cast.trunc = trunc i64 %calltmp25 to i8
-  store i8 %cast.trunc, ptr %cast.inttoptr22, align 1
-  %i26 = load i64, ptr %i, align 4
-  %addtmp27 = add i64 %i26, 1
-  store i64 %addtmp27, ptr %i, align 4
+  %copy22 = load i64, ptr %copy, align 4
+  %i23 = load i64, ptr %i, align 4
+  %addtmp24 = add i64 %copy22, %i23
+  %cast.inttoptr25 = inttoptr i64 %addtmp24 to ptr
+  %s26 = load i64, ptr %s.addr, align 4
+  %i27 = load i64, ptr %i, align 4
+  %calltmp = call i64 @npk_mem_read_byte(i64 %s26, i64 %i27)
+  %cast.trunc = trunc i64 %calltmp to i8
+  store i8 %cast.trunc, ptr %cast.inttoptr25, align 1
+  %i28 = load i64, ptr %i, align 4
+  %addtmp29 = add i64 %i28, 1
+  store i64 %addtmp29, ptr %i, align 4
   call void @npk_gc_safepoint()
-  br label %whilecond11
+  br label %whilecond14
 
-afterwhile28:                                     ; preds = %whilecond11
-  %copy29 = load i64, ptr %copy, align 4
-  %len30 = load i64, ptr %len, align 4
-  %addtmp31 = add i64 %copy29, %len30
-  %copy32 = load i64, ptr %copy, align 4
-  %len33 = load i64, ptr %len, align 4
-  %addtmp34 = add i64 %copy32, %len33
-  %cast.inttoptr35 = inttoptr i64 %addtmp34 to ptr
-  store i8 0, ptr %cast.inttoptr35, align 1
-  %copy36 = load i64, ptr %copy, align 4
-  %result.val = insertvalue { i64, ptr, i8 } undef, i64 %copy36, 0
+afterwhile30:                                     ; preds = %whilecond14
+  %copy31 = load i64, ptr %copy, align 4
+  %len32 = load i64, ptr %len, align 4
+  %addtmp33 = add i64 %copy31, %len32
+  %copy34 = load i64, ptr %copy, align 4
+  %len35 = load i64, ptr %len, align 4
+  %addtmp36 = add i64 %copy34, %len35
+  %cast.inttoptr37 = inttoptr i64 %addtmp36 to ptr
+  store i8 0, ptr %cast.inttoptr37, align 1
+  %copy38 = load i64, ptr %copy, align 4
+  %result.val = insertvalue { i64, ptr, i8 } undef, i64 %copy38, 0
   %result.err = insertvalue { i64, ptr, i8 } %result.val, ptr null, 1
   %result.is_error = insertvalue { i64, ptr, i8 } %result.err, i8 0, 2
   ret { i64, ptr, i8 } %result.is_error
@@ -19514,8 +19523,10 @@ ifcont39:                                         ; preds = %merge_block18
   %running = alloca i32, align 4
   store i32 1, ptr %running, align 4
   %line_buf = alloca i64, align 8
-  %calltmp40 = call i64 @malloc(i64 65536)
-  store i64 %calltmp40, ptr %line_buf, align 4
+  %wild_ptr = call ptr @npk_alloc(i64 65536)
+  %wild_ptr40 = call ptr @npk_alloc(i64 65536)
+  %cast.ptrtoint = ptrtoint ptr %wild_ptr40 to i64
+  store i64 %cast.ptrtoint, ptr %line_buf, align 4
   %line_len = alloca i64, align 8
   store i64 0, ptr %line_len, align 4
   br label %whilecond
@@ -19670,7 +19681,8 @@ then110:                                          ; preds = %afterwhile107
 
 ifcont124:                                        ; preds = %then110, %afterwhile107
   %line_buf125 = load i64, ptr %line_buf, align 4
-  %calltmp126 = call i32 @nitpick_libc_mem_free(i64 %line_buf125)
+  %cast.inttoptr126 = inttoptr i64 %line_buf125 to ptr
+  call void @npk_free(ptr %cast.inttoptr126)
   %buf127 = load i64, ptr %buf, align 4
   %syscall_ret128 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 11, i64 %buf127, i64 65536)
   %sys_is_err129 = icmp slt i64 %syscall_ret128, 0
@@ -19979,257 +19991,263 @@ ifcont135:                                        ; preds = %ifcont94
   %raw.value141 = extractvalue { i64, ptr, i8 } %calltmp140, 0
   store i64 %raw.value141, ptr %state2, align 4
   %p1 = alloca i64, align 8
-  %calltmp142 = call i64 @malloc(i64 65536)
-  store i64 %calltmp142, ptr %p1, align 4
+  %wild_ptr = call ptr @npk_alloc(i64 65536)
+  %wild_ptr142 = call ptr @npk_alloc(i64 65536)
+  %cast.ptrtoint = ptrtoint ptr %wild_ptr142 to i64
+  store i64 %cast.ptrtoint, ptr %p1, align 4
   %p2 = alloca i64, align 8
-  %calltmp143 = call i64 @malloc(i64 65536)
-  store i64 %calltmp143, ptr %p2, align 4
+  %wild_ptr143 = call ptr @npk_alloc(i64 65536)
+  %wild_ptr144 = call ptr @npk_alloc(i64 65536)
+  %cast.ptrtoint145 = ptrtoint ptr %wild_ptr144 to i64
+  store i64 %cast.ptrtoint145, ptr %p2, align 4
   %len1 = alloca i64, align 8
-  %state1144 = load i64, ptr %state1, align 4
-  %p1145 = load i64, ptr %p1, align 4
-  %cast.inttoptr = inttoptr i64 %p1145 to ptr
-  %calltmp146 = call { i64, ptr, i8 } @io_utils.io_buf_readline(i64 %state1144, ptr %cast.inttoptr, i64 4096)
-  %raw.value147 = extractvalue { i64, ptr, i8 } %calltmp146, 0
-  store i64 %raw.value147, ptr %len1, align 4
+  %state1146 = load i64, ptr %state1, align 4
+  %p1147 = load i64, ptr %p1, align 4
+  %cast.inttoptr = inttoptr i64 %p1147 to ptr
+  %calltmp148 = call { i64, ptr, i8 } @io_utils.io_buf_readline(i64 %state1146, ptr %cast.inttoptr, i64 4096)
+  %raw.value149 = extractvalue { i64, ptr, i8 } %calltmp148, 0
+  store i64 %raw.value149, ptr %len1, align 4
   %len2 = alloca i64, align 8
-  %state2148 = load i64, ptr %state2, align 4
-  %p2149 = load i64, ptr %p2, align 4
-  %cast.inttoptr150 = inttoptr i64 %p2149 to ptr
-  %calltmp151 = call { i64, ptr, i8 } @io_utils.io_buf_readline(i64 %state2148, ptr %cast.inttoptr150, i64 4096)
-  %raw.value152 = extractvalue { i64, ptr, i8 } %calltmp151, 0
-  store i64 %raw.value152, ptr %len2, align 4
-  br label %whilecond153
+  %state2150 = load i64, ptr %state2, align 4
+  %p2151 = load i64, ptr %p2, align 4
+  %cast.inttoptr152 = inttoptr i64 %p2151 to ptr
+  %calltmp153 = call { i64, ptr, i8 } @io_utils.io_buf_readline(i64 %state2150, ptr %cast.inttoptr152, i64 4096)
+  %raw.value154 = extractvalue { i64, ptr, i8 } %calltmp153, 0
+  store i64 %raw.value154, ptr %len2, align 4
+  br label %whilecond155
 
-whilecond153:                                     ; preds = %ifcont280, %ifcont135
-  br i1 true, label %whilebody154, label %afterwhile281
+whilecond155:                                     ; preds = %ifcont282, %ifcont135
+  br i1 true, label %whilebody156, label %afterwhile283
 
-whilebody154:                                     ; preds = %whilecond153
-  %len1155 = load i64, ptr %len1, align 4
-  %eqtmp156 = icmp eq i64 %len1155, 0
-  %ifcond157 = icmp ne i1 %eqtmp156, false
-  br i1 %ifcond157, label %then158, label %ifcont196
+whilebody156:                                     ; preds = %whilecond155
+  %len1157 = load i64, ptr %len1, align 4
+  %eqtmp158 = icmp eq i64 %len1157, 0
+  %ifcond159 = icmp ne i1 %eqtmp158, false
+  br i1 %ifcond159, label %then160, label %ifcont198
 
-then158:                                          ; preds = %whilebody154
-  %len2159 = load i64, ptr %len2, align 4
-  %eqtmp160 = icmp eq i64 %len2159, 0
-  %ifcond161 = icmp ne i1 %eqtmp160, false
-  br i1 %ifcond161, label %then162, label %ifcont195
+then160:                                          ; preds = %whilebody156
+  %len2161 = load i64, ptr %len2, align 4
+  %eqtmp162 = icmp eq i64 %len2161, 0
+  %ifcond163 = icmp ne i1 %eqtmp162, false
+  br i1 %ifcond163, label %then164, label %ifcont197
 
-then162:                                          ; preds = %then158
-  %fd2163 = load i64, ptr %fd2, align 4
-  %getmp164 = icmp sge i64 %fd2163, 0
-  %ifcond165 = icmp ne i1 %getmp164, false
-  br i1 %ifcond165, label %then166, label %ifcont178
+then164:                                          ; preds = %then160
+  %fd2165 = load i64, ptr %fd2, align 4
+  %getmp166 = icmp sge i64 %fd2165, 0
+  %ifcond167 = icmp ne i1 %getmp166, false
+  br i1 %ifcond167, label %then168, label %ifcont180
 
-then166:                                          ; preds = %then162
-  %fd2167 = load i64, ptr %fd2, align 4
-  %syscall_ret168 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %fd2167)
-  %sys_is_err169 = icmp slt i64 %syscall_ret168, 0
-  %sys_neg_errno170 = sub i64 0, %syscall_ret168
-  %sys_err_ptr171 = inttoptr i64 %sys_neg_errno170 to ptr
-  %sys_val172 = select i1 %sys_is_err169, i64 0, i64 %syscall_ret168
-  %sys_err173 = select i1 %sys_is_err169, ptr %sys_err_ptr171, ptr null
-  %sys_flag174 = select i1 %sys_is_err169, i8 1, i8 0
-  %sys_result.val175 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val172, 0
-  %sys_result.err176 = insertvalue %struct.NpkResult_int64 %sys_result.val175, ptr %sys_err173, 1
-  %sys_result.is_error177 = insertvalue %struct.NpkResult_int64 %sys_result.err176, i8 %sys_flag174, 2
-  br label %ifcont178
+then168:                                          ; preds = %then164
+  %fd2169 = load i64, ptr %fd2, align 4
+  %syscall_ret170 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %fd2169)
+  %sys_is_err171 = icmp slt i64 %syscall_ret170, 0
+  %sys_neg_errno172 = sub i64 0, %syscall_ret170
+  %sys_err_ptr173 = inttoptr i64 %sys_neg_errno172 to ptr
+  %sys_val174 = select i1 %sys_is_err171, i64 0, i64 %syscall_ret170
+  %sys_err175 = select i1 %sys_is_err171, ptr %sys_err_ptr173, ptr null
+  %sys_flag176 = select i1 %sys_is_err171, i8 1, i8 0
+  %sys_result.val177 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val174, 0
+  %sys_result.err178 = insertvalue %struct.NpkResult_int64 %sys_result.val177, ptr %sys_err175, 1
+  %sys_result.is_error179 = insertvalue %struct.NpkResult_int64 %sys_result.err178, i8 %sys_flag176, 2
+  br label %ifcont180
 
-ifcont178:                                        ; preds = %then166, %then162
-  %fd1179 = load i64, ptr %fd1, align 4
-  %getmp180 = icmp sge i64 %fd1179, 0
-  %ifcond181 = icmp ne i1 %getmp180, false
-  br i1 %ifcond181, label %then182, label %ifcont194
+ifcont180:                                        ; preds = %then168, %then164
+  %fd1181 = load i64, ptr %fd1, align 4
+  %getmp182 = icmp sge i64 %fd1181, 0
+  %ifcond183 = icmp ne i1 %getmp182, false
+  br i1 %ifcond183, label %then184, label %ifcont196
 
-then182:                                          ; preds = %ifcont178
-  %fd1183 = load i64, ptr %fd1, align 4
-  %syscall_ret184 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %fd1183)
-  %sys_is_err185 = icmp slt i64 %syscall_ret184, 0
-  %sys_neg_errno186 = sub i64 0, %syscall_ret184
-  %sys_err_ptr187 = inttoptr i64 %sys_neg_errno186 to ptr
-  %sys_val188 = select i1 %sys_is_err185, i64 0, i64 %syscall_ret184
-  %sys_err189 = select i1 %sys_is_err185, ptr %sys_err_ptr187, ptr null
-  %sys_flag190 = select i1 %sys_is_err185, i8 1, i8 0
-  %sys_result.val191 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val188, 0
-  %sys_result.err192 = insertvalue %struct.NpkResult_int64 %sys_result.val191, ptr %sys_err189, 1
-  %sys_result.is_error193 = insertvalue %struct.NpkResult_int64 %sys_result.err192, i8 %sys_flag190, 2
-  br label %ifcont194
-
-ifcont194:                                        ; preds = %then182, %ifcont178
-  ret { i32, ptr, i8 } zeroinitializer
-
-ifcont195:                                        ; preds = %then158
+then184:                                          ; preds = %ifcont180
+  %fd1185 = load i64, ptr %fd1, align 4
+  %syscall_ret186 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %fd1185)
+  %sys_is_err187 = icmp slt i64 %syscall_ret186, 0
+  %sys_neg_errno188 = sub i64 0, %syscall_ret186
+  %sys_err_ptr189 = inttoptr i64 %sys_neg_errno188 to ptr
+  %sys_val190 = select i1 %sys_is_err187, i64 0, i64 %syscall_ret186
+  %sys_err191 = select i1 %sys_is_err187, ptr %sys_err_ptr189, ptr null
+  %sys_flag192 = select i1 %sys_is_err187, i8 1, i8 0
+  %sys_result.val193 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val190, 0
+  %sys_result.err194 = insertvalue %struct.NpkResult_int64 %sys_result.val193, ptr %sys_err191, 1
+  %sys_result.is_error195 = insertvalue %struct.NpkResult_int64 %sys_result.err194, i8 %sys_flag192, 2
   br label %ifcont196
 
-ifcont196:                                        ; preds = %ifcont195, %whilebody154
-  %len1197 = load i64, ptr %len1, align 4
-  %eqtmp198 = icmp eq i64 %len1197, 0
-  %ifcond199 = icmp ne i1 %eqtmp198, false
-  br i1 %ifcond199, label %then200, label %else211
+ifcont196:                                        ; preds = %then184, %ifcont180
+  ret { i32, ptr, i8 } zeroinitializer
 
-then200:                                          ; preds = %ifcont196
-  %calltmp201 = call { i32, ptr, i8 } @comm.print_out(ptr @.str.1292)
-  %p2202 = load i64, ptr %p2, align 4
-  %calltmp203 = call { ptr, ptr, i8 } @mem_utils.ptr_to_string(i64 %p2202)
-  %raw.value204 = extractvalue { ptr, ptr, i8 } %calltmp203, 0
-  %calltmp205 = call { i32, ptr, i8 } @comm.print_out(ptr %raw.value204)
-  %state2206 = load i64, ptr %state2, align 4
-  %p2207 = load i64, ptr %p2, align 4
-  %cast.inttoptr208 = inttoptr i64 %p2207 to ptr
-  %calltmp209 = call { i64, ptr, i8 } @io_utils.io_buf_readline(i64 %state2206, ptr %cast.inttoptr208, i64 4096)
-  %raw.value210 = extractvalue { i64, ptr, i8 } %calltmp209, 0
-  store i64 %raw.value210, ptr %len2, align 4
-  br label %ifcont280
+ifcont197:                                        ; preds = %then160
+  br label %ifcont198
 
-else211:                                          ; preds = %ifcont196
-  %len2212 = load i64, ptr %len2, align 4
-  %eqtmp213 = icmp eq i64 %len2212, 0
-  %ifcond214 = icmp ne i1 %eqtmp213, false
-  br i1 %ifcond214, label %then215, label %else225
+ifcont198:                                        ; preds = %ifcont197, %whilebody156
+  %len1199 = load i64, ptr %len1, align 4
+  %eqtmp200 = icmp eq i64 %len1199, 0
+  %ifcond201 = icmp ne i1 %eqtmp200, false
+  br i1 %ifcond201, label %then202, label %else213
 
-then215:                                          ; preds = %else211
-  %p1216 = load i64, ptr %p1, align 4
-  %calltmp217 = call { ptr, ptr, i8 } @mem_utils.ptr_to_string(i64 %p1216)
-  %raw.value218 = extractvalue { ptr, ptr, i8 } %calltmp217, 0
-  %calltmp219 = call { i32, ptr, i8 } @comm.print_out(ptr %raw.value218)
-  %state1220 = load i64, ptr %state1, align 4
-  %p1221 = load i64, ptr %p1, align 4
-  %cast.inttoptr222 = inttoptr i64 %p1221 to ptr
-  %calltmp223 = call { i64, ptr, i8 } @io_utils.io_buf_readline(i64 %state1220, ptr %cast.inttoptr222, i64 4096)
-  %raw.value224 = extractvalue { i64, ptr, i8 } %calltmp223, 0
-  store i64 %raw.value224, ptr %len1, align 4
-  br label %ifcont279
+then202:                                          ; preds = %ifcont198
+  %calltmp203 = call { i32, ptr, i8 } @comm.print_out(ptr @.str.1292)
+  %p2204 = load i64, ptr %p2, align 4
+  %calltmp205 = call { ptr, ptr, i8 } @mem_utils.ptr_to_string(i64 %p2204)
+  %raw.value206 = extractvalue { ptr, ptr, i8 } %calltmp205, 0
+  %calltmp207 = call { i32, ptr, i8 } @comm.print_out(ptr %raw.value206)
+  %state2208 = load i64, ptr %state2, align 4
+  %p2209 = load i64, ptr %p2, align 4
+  %cast.inttoptr210 = inttoptr i64 %p2209 to ptr
+  %calltmp211 = call { i64, ptr, i8 } @io_utils.io_buf_readline(i64 %state2208, ptr %cast.inttoptr210, i64 4096)
+  %raw.value212 = extractvalue { i64, ptr, i8 } %calltmp211, 0
+  store i64 %raw.value212, ptr %len2, align 4
+  br label %ifcont282
 
-else225:                                          ; preds = %else211
+else213:                                          ; preds = %ifcont198
+  %len2214 = load i64, ptr %len2, align 4
+  %eqtmp215 = icmp eq i64 %len2214, 0
+  %ifcond216 = icmp ne i1 %eqtmp215, false
+  br i1 %ifcond216, label %then217, label %else227
+
+then217:                                          ; preds = %else213
+  %p1218 = load i64, ptr %p1, align 4
+  %calltmp219 = call { ptr, ptr, i8 } @mem_utils.ptr_to_string(i64 %p1218)
+  %raw.value220 = extractvalue { ptr, ptr, i8 } %calltmp219, 0
+  %calltmp221 = call { i32, ptr, i8 } @comm.print_out(ptr %raw.value220)
+  %state1222 = load i64, ptr %state1, align 4
+  %p1223 = load i64, ptr %p1, align 4
+  %cast.inttoptr224 = inttoptr i64 %p1223 to ptr
+  %calltmp225 = call { i64, ptr, i8 } @io_utils.io_buf_readline(i64 %state1222, ptr %cast.inttoptr224, i64 4096)
+  %raw.value226 = extractvalue { i64, ptr, i8 } %calltmp225, 0
+  store i64 %raw.value226, ptr %len1, align 4
+  br label %ifcont281
+
+else227:                                          ; preds = %else213
   %cmp = alloca i32, align 4
-  %p1226 = load i64, ptr %p1, align 4
-  %calltmp227 = call { ptr, ptr, i8 } @mem_utils.ptr_to_string(i64 %p1226)
-  %raw.value228 = extractvalue { ptr, ptr, i8 } %calltmp227, 0
-  %p2229 = load i64, ptr %p2, align 4
-  %calltmp230 = call { ptr, ptr, i8 } @mem_utils.ptr_to_string(i64 %p2229)
-  %raw.value231 = extractvalue { ptr, ptr, i8 } %calltmp230, 0
-  %calltmp232 = call i32 @strcmp(ptr %raw.value228, ptr %raw.value231)
-  store i32 %calltmp232, ptr %cmp, align 4
-  %cmp233 = load i32, ptr %cmp, align 4
-  %eqtmp234 = icmp eq i32 %cmp233, 0
-  %ifcond235 = icmp ne i1 %eqtmp234, false
-  br i1 %ifcond235, label %then236, label %else252
+  %p1228 = load i64, ptr %p1, align 4
+  %calltmp229 = call { ptr, ptr, i8 } @mem_utils.ptr_to_string(i64 %p1228)
+  %raw.value230 = extractvalue { ptr, ptr, i8 } %calltmp229, 0
+  %p2231 = load i64, ptr %p2, align 4
+  %calltmp232 = call { ptr, ptr, i8 } @mem_utils.ptr_to_string(i64 %p2231)
+  %raw.value233 = extractvalue { ptr, ptr, i8 } %calltmp232, 0
+  %calltmp234 = call i32 @strcmp(ptr %raw.value230, ptr %raw.value233)
+  store i32 %calltmp234, ptr %cmp, align 4
+  %cmp235 = load i32, ptr %cmp, align 4
+  %eqtmp236 = icmp eq i32 %cmp235, 0
+  %ifcond237 = icmp ne i1 %eqtmp236, false
+  br i1 %ifcond237, label %then238, label %else254
 
-then236:                                          ; preds = %else225
-  %calltmp237 = call { i32, ptr, i8 } @comm.print_out(ptr @.str.1294)
-  %p1238 = load i64, ptr %p1, align 4
-  %calltmp239 = call { ptr, ptr, i8 } @mem_utils.ptr_to_string(i64 %p1238)
-  %raw.value240 = extractvalue { ptr, ptr, i8 } %calltmp239, 0
-  %calltmp241 = call { i32, ptr, i8 } @comm.print_out(ptr %raw.value240)
-  %state1242 = load i64, ptr %state1, align 4
-  %p1243 = load i64, ptr %p1, align 4
-  %cast.inttoptr244 = inttoptr i64 %p1243 to ptr
-  %calltmp245 = call { i64, ptr, i8 } @io_utils.io_buf_readline(i64 %state1242, ptr %cast.inttoptr244, i64 4096)
-  %raw.value246 = extractvalue { i64, ptr, i8 } %calltmp245, 0
-  store i64 %raw.value246, ptr %len1, align 4
-  %state2247 = load i64, ptr %state2, align 4
-  %p2248 = load i64, ptr %p2, align 4
-  %cast.inttoptr249 = inttoptr i64 %p2248 to ptr
-  %calltmp250 = call { i64, ptr, i8 } @io_utils.io_buf_readline(i64 %state2247, ptr %cast.inttoptr249, i64 4096)
-  %raw.value251 = extractvalue { i64, ptr, i8 } %calltmp250, 0
-  store i64 %raw.value251, ptr %len2, align 4
-  br label %ifcont278
-
-else252:                                          ; preds = %else225
-  %cmp253 = load i32, ptr %cmp, align 4
-  %lttmp254 = icmp slt i32 %cmp253, 0
-  %ifcond255 = icmp ne i1 %lttmp254, false
-  br i1 %ifcond255, label %then256, label %else266
-
-then256:                                          ; preds = %else252
-  %p1257 = load i64, ptr %p1, align 4
-  %calltmp258 = call { ptr, ptr, i8 } @mem_utils.ptr_to_string(i64 %p1257)
-  %raw.value259 = extractvalue { ptr, ptr, i8 } %calltmp258, 0
-  %calltmp260 = call { i32, ptr, i8 } @comm.print_out(ptr %raw.value259)
-  %state1261 = load i64, ptr %state1, align 4
-  %p1262 = load i64, ptr %p1, align 4
-  %cast.inttoptr263 = inttoptr i64 %p1262 to ptr
-  %calltmp264 = call { i64, ptr, i8 } @io_utils.io_buf_readline(i64 %state1261, ptr %cast.inttoptr263, i64 4096)
-  %raw.value265 = extractvalue { i64, ptr, i8 } %calltmp264, 0
-  store i64 %raw.value265, ptr %len1, align 4
-  br label %ifcont277
-
-else266:                                          ; preds = %else252
-  %calltmp267 = call { i32, ptr, i8 } @comm.print_out(ptr @.str.1296)
-  %p2268 = load i64, ptr %p2, align 4
-  %calltmp269 = call { ptr, ptr, i8 } @mem_utils.ptr_to_string(i64 %p2268)
-  %raw.value270 = extractvalue { ptr, ptr, i8 } %calltmp269, 0
-  %calltmp271 = call { i32, ptr, i8 } @comm.print_out(ptr %raw.value270)
-  %state2272 = load i64, ptr %state2, align 4
-  %p2273 = load i64, ptr %p2, align 4
-  %cast.inttoptr274 = inttoptr i64 %p2273 to ptr
-  %calltmp275 = call { i64, ptr, i8 } @io_utils.io_buf_readline(i64 %state2272, ptr %cast.inttoptr274, i64 4096)
-  %raw.value276 = extractvalue { i64, ptr, i8 } %calltmp275, 0
-  store i64 %raw.value276, ptr %len2, align 4
-  br label %ifcont277
-
-ifcont277:                                        ; preds = %else266, %then256
-  br label %ifcont278
-
-ifcont278:                                        ; preds = %ifcont277, %then236
-  br label %ifcont279
-
-ifcont279:                                        ; preds = %ifcont278, %then215
+then238:                                          ; preds = %else227
+  %calltmp239 = call { i32, ptr, i8 } @comm.print_out(ptr @.str.1294)
+  %p1240 = load i64, ptr %p1, align 4
+  %calltmp241 = call { ptr, ptr, i8 } @mem_utils.ptr_to_string(i64 %p1240)
+  %raw.value242 = extractvalue { ptr, ptr, i8 } %calltmp241, 0
+  %calltmp243 = call { i32, ptr, i8 } @comm.print_out(ptr %raw.value242)
+  %state1244 = load i64, ptr %state1, align 4
+  %p1245 = load i64, ptr %p1, align 4
+  %cast.inttoptr246 = inttoptr i64 %p1245 to ptr
+  %calltmp247 = call { i64, ptr, i8 } @io_utils.io_buf_readline(i64 %state1244, ptr %cast.inttoptr246, i64 4096)
+  %raw.value248 = extractvalue { i64, ptr, i8 } %calltmp247, 0
+  store i64 %raw.value248, ptr %len1, align 4
+  %state2249 = load i64, ptr %state2, align 4
+  %p2250 = load i64, ptr %p2, align 4
+  %cast.inttoptr251 = inttoptr i64 %p2250 to ptr
+  %calltmp252 = call { i64, ptr, i8 } @io_utils.io_buf_readline(i64 %state2249, ptr %cast.inttoptr251, i64 4096)
+  %raw.value253 = extractvalue { i64, ptr, i8 } %calltmp252, 0
+  store i64 %raw.value253, ptr %len2, align 4
   br label %ifcont280
 
-ifcont280:                                        ; preds = %ifcont279, %then200
+else254:                                          ; preds = %else227
+  %cmp255 = load i32, ptr %cmp, align 4
+  %lttmp256 = icmp slt i32 %cmp255, 0
+  %ifcond257 = icmp ne i1 %lttmp256, false
+  br i1 %ifcond257, label %then258, label %else268
+
+then258:                                          ; preds = %else254
+  %p1259 = load i64, ptr %p1, align 4
+  %calltmp260 = call { ptr, ptr, i8 } @mem_utils.ptr_to_string(i64 %p1259)
+  %raw.value261 = extractvalue { ptr, ptr, i8 } %calltmp260, 0
+  %calltmp262 = call { i32, ptr, i8 } @comm.print_out(ptr %raw.value261)
+  %state1263 = load i64, ptr %state1, align 4
+  %p1264 = load i64, ptr %p1, align 4
+  %cast.inttoptr265 = inttoptr i64 %p1264 to ptr
+  %calltmp266 = call { i64, ptr, i8 } @io_utils.io_buf_readline(i64 %state1263, ptr %cast.inttoptr265, i64 4096)
+  %raw.value267 = extractvalue { i64, ptr, i8 } %calltmp266, 0
+  store i64 %raw.value267, ptr %len1, align 4
+  br label %ifcont279
+
+else268:                                          ; preds = %else254
+  %calltmp269 = call { i32, ptr, i8 } @comm.print_out(ptr @.str.1296)
+  %p2270 = load i64, ptr %p2, align 4
+  %calltmp271 = call { ptr, ptr, i8 } @mem_utils.ptr_to_string(i64 %p2270)
+  %raw.value272 = extractvalue { ptr, ptr, i8 } %calltmp271, 0
+  %calltmp273 = call { i32, ptr, i8 } @comm.print_out(ptr %raw.value272)
+  %state2274 = load i64, ptr %state2, align 4
+  %p2275 = load i64, ptr %p2, align 4
+  %cast.inttoptr276 = inttoptr i64 %p2275 to ptr
+  %calltmp277 = call { i64, ptr, i8 } @io_utils.io_buf_readline(i64 %state2274, ptr %cast.inttoptr276, i64 4096)
+  %raw.value278 = extractvalue { i64, ptr, i8 } %calltmp277, 0
+  store i64 %raw.value278, ptr %len2, align 4
+  br label %ifcont279
+
+ifcont279:                                        ; preds = %else268, %then258
+  br label %ifcont280
+
+ifcont280:                                        ; preds = %ifcont279, %then238
+  br label %ifcont281
+
+ifcont281:                                        ; preds = %ifcont280, %then217
+  br label %ifcont282
+
+ifcont282:                                        ; preds = %ifcont281, %then202
   call void @npk_gc_safepoint()
-  br label %whilecond153
+  br label %whilecond155
 
-afterwhile281:                                    ; preds = %whilecond153
-  %state1282 = load i64, ptr %state1, align 4
-  %calltmp283 = call { i32, ptr, i8 } @io_utils.io_buf_free(i64 %state1282)
-  %state2284 = load i64, ptr %state2, align 4
-  %calltmp285 = call { i32, ptr, i8 } @io_utils.io_buf_free(i64 %state2284)
-  %p1286 = load i64, ptr %p1, align 4
-  %calltmp287 = call i32 @nitpick_libc_mem_free(i64 %p1286)
-  %p2288 = load i64, ptr %p2, align 4
-  %calltmp289 = call i32 @nitpick_libc_mem_free(i64 %p2288)
-  %fd2290 = load i64, ptr %fd2, align 4
-  %getmp291 = icmp sge i64 %fd2290, 0
-  %ifcond292 = icmp ne i1 %getmp291, false
-  br i1 %ifcond292, label %then293, label %ifcont305
+afterwhile283:                                    ; preds = %whilecond155
+  %state1284 = load i64, ptr %state1, align 4
+  %calltmp285 = call { i32, ptr, i8 } @io_utils.io_buf_free(i64 %state1284)
+  %state2286 = load i64, ptr %state2, align 4
+  %calltmp287 = call { i32, ptr, i8 } @io_utils.io_buf_free(i64 %state2286)
+  %p1288 = load i64, ptr %p1, align 4
+  %cast.inttoptr289 = inttoptr i64 %p1288 to ptr
+  call void @npk_free(ptr %cast.inttoptr289)
+  %p2290 = load i64, ptr %p2, align 4
+  %cast.inttoptr291 = inttoptr i64 %p2290 to ptr
+  call void @npk_free(ptr %cast.inttoptr291)
+  %fd2292 = load i64, ptr %fd2, align 4
+  %getmp293 = icmp sge i64 %fd2292, 0
+  %ifcond294 = icmp ne i1 %getmp293, false
+  br i1 %ifcond294, label %then295, label %ifcont307
 
-then293:                                          ; preds = %afterwhile281
-  %fd2294 = load i64, ptr %fd2, align 4
-  %syscall_ret295 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %fd2294)
-  %sys_is_err296 = icmp slt i64 %syscall_ret295, 0
-  %sys_neg_errno297 = sub i64 0, %syscall_ret295
-  %sys_err_ptr298 = inttoptr i64 %sys_neg_errno297 to ptr
-  %sys_val299 = select i1 %sys_is_err296, i64 0, i64 %syscall_ret295
-  %sys_err300 = select i1 %sys_is_err296, ptr %sys_err_ptr298, ptr null
-  %sys_flag301 = select i1 %sys_is_err296, i8 1, i8 0
-  %sys_result.val302 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val299, 0
-  %sys_result.err303 = insertvalue %struct.NpkResult_int64 %sys_result.val302, ptr %sys_err300, 1
-  %sys_result.is_error304 = insertvalue %struct.NpkResult_int64 %sys_result.err303, i8 %sys_flag301, 2
-  br label %ifcont305
+then295:                                          ; preds = %afterwhile283
+  %fd2296 = load i64, ptr %fd2, align 4
+  %syscall_ret297 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %fd2296)
+  %sys_is_err298 = icmp slt i64 %syscall_ret297, 0
+  %sys_neg_errno299 = sub i64 0, %syscall_ret297
+  %sys_err_ptr300 = inttoptr i64 %sys_neg_errno299 to ptr
+  %sys_val301 = select i1 %sys_is_err298, i64 0, i64 %syscall_ret297
+  %sys_err302 = select i1 %sys_is_err298, ptr %sys_err_ptr300, ptr null
+  %sys_flag303 = select i1 %sys_is_err298, i8 1, i8 0
+  %sys_result.val304 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val301, 0
+  %sys_result.err305 = insertvalue %struct.NpkResult_int64 %sys_result.val304, ptr %sys_err302, 1
+  %sys_result.is_error306 = insertvalue %struct.NpkResult_int64 %sys_result.err305, i8 %sys_flag303, 2
+  br label %ifcont307
 
-ifcont305:                                        ; preds = %then293, %afterwhile281
-  %fd1306 = load i64, ptr %fd1, align 4
-  %getmp307 = icmp sge i64 %fd1306, 0
-  %ifcond308 = icmp ne i1 %getmp307, false
-  br i1 %ifcond308, label %then309, label %ifcont321
+ifcont307:                                        ; preds = %then295, %afterwhile283
+  %fd1308 = load i64, ptr %fd1, align 4
+  %getmp309 = icmp sge i64 %fd1308, 0
+  %ifcond310 = icmp ne i1 %getmp309, false
+  br i1 %ifcond310, label %then311, label %ifcont323
 
-then309:                                          ; preds = %ifcont305
-  %fd1310 = load i64, ptr %fd1, align 4
-  %syscall_ret311 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %fd1310)
-  %sys_is_err312 = icmp slt i64 %syscall_ret311, 0
-  %sys_neg_errno313 = sub i64 0, %syscall_ret311
-  %sys_err_ptr314 = inttoptr i64 %sys_neg_errno313 to ptr
-  %sys_val315 = select i1 %sys_is_err312, i64 0, i64 %syscall_ret311
-  %sys_err316 = select i1 %sys_is_err312, ptr %sys_err_ptr314, ptr null
-  %sys_flag317 = select i1 %sys_is_err312, i8 1, i8 0
-  %sys_result.val318 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val315, 0
-  %sys_result.err319 = insertvalue %struct.NpkResult_int64 %sys_result.val318, ptr %sys_err316, 1
-  %sys_result.is_error320 = insertvalue %struct.NpkResult_int64 %sys_result.err319, i8 %sys_flag317, 2
-  br label %ifcont321
+then311:                                          ; preds = %ifcont307
+  %fd1312 = load i64, ptr %fd1, align 4
+  %syscall_ret313 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %fd1312)
+  %sys_is_err314 = icmp slt i64 %syscall_ret313, 0
+  %sys_neg_errno315 = sub i64 0, %syscall_ret313
+  %sys_err_ptr316 = inttoptr i64 %sys_neg_errno315 to ptr
+  %sys_val317 = select i1 %sys_is_err314, i64 0, i64 %syscall_ret313
+  %sys_err318 = select i1 %sys_is_err314, ptr %sys_err_ptr316, ptr null
+  %sys_flag319 = select i1 %sys_is_err314, i8 1, i8 0
+  %sys_result.val320 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val317, 0
+  %sys_result.err321 = insertvalue %struct.NpkResult_int64 %sys_result.val320, ptr %sys_err318, 1
+  %sys_result.is_error322 = insertvalue %struct.NpkResult_int64 %sys_result.err321, i8 %sys_flag319, 2
+  br label %ifcont323
 
-ifcont321:                                        ; preds = %then309, %ifcont305
+ifcont323:                                        ; preds = %then311, %ifcont307
   ret { i32, ptr, i8 } zeroinitializer
 }
 
@@ -20350,49 +20368,53 @@ afterwhile:                                       ; preds = %null.ok
   %copy = alloca i64, align 8
   %len9 = load i64, ptr %len, align 4
   %addtmp10 = add i64 %len9, 1
-  %calltmp = call i64 @malloc(i64 %addtmp10)
-  store i64 %calltmp, ptr %copy, align 4
+  %wild_ptr = call ptr @npk_alloc(i64 %addtmp10)
+  %len11 = load i64, ptr %len, align 4
+  %addtmp12 = add i64 %len11, 1
+  %wild_ptr13 = call ptr @npk_alloc(i64 %addtmp12)
+  %cast.ptrtoint = ptrtoint ptr %wild_ptr13 to i64
+  store i64 %cast.ptrtoint, ptr %copy, align 4
   %i = alloca i64, align 8
   store i64 0, ptr %i, align 4
-  br label %whilecond11
+  br label %whilecond14
 
-whilecond11:                                      ; preds = %whilebody15, %afterwhile
-  %i12 = load i64, ptr %i, align 4
-  %len13 = load i64, ptr %len, align 4
-  %lttmp = icmp slt i64 %i12, %len13
-  %whilecond14 = icmp ne i1 %lttmp, false
-  br i1 %whilecond14, label %whilebody15, label %afterwhile28
+whilecond14:                                      ; preds = %whilebody18, %afterwhile
+  %i15 = load i64, ptr %i, align 4
+  %len16 = load i64, ptr %len, align 4
+  %lttmp = icmp slt i64 %i15, %len16
+  %whilecond17 = icmp ne i1 %lttmp, false
+  br i1 %whilecond17, label %whilebody18, label %afterwhile30
 
-whilebody15:                                      ; preds = %whilecond11
-  %copy16 = load i64, ptr %copy, align 4
-  %i17 = load i64, ptr %i, align 4
-  %addtmp18 = add i64 %copy16, %i17
+whilebody18:                                      ; preds = %whilecond14
   %copy19 = load i64, ptr %copy, align 4
   %i20 = load i64, ptr %i, align 4
   %addtmp21 = add i64 %copy19, %i20
-  %cast.inttoptr22 = inttoptr i64 %addtmp21 to ptr
-  %s23 = load i64, ptr %s.addr, align 4
-  %i24 = load i64, ptr %i, align 4
-  %calltmp25 = call i64 @npk_mem_read_byte(i64 %s23, i64 %i24)
-  %cast.trunc = trunc i64 %calltmp25 to i8
-  store i8 %cast.trunc, ptr %cast.inttoptr22, align 1
-  %i26 = load i64, ptr %i, align 4
-  %addtmp27 = add i64 %i26, 1
-  store i64 %addtmp27, ptr %i, align 4
+  %copy22 = load i64, ptr %copy, align 4
+  %i23 = load i64, ptr %i, align 4
+  %addtmp24 = add i64 %copy22, %i23
+  %cast.inttoptr25 = inttoptr i64 %addtmp24 to ptr
+  %s26 = load i64, ptr %s.addr, align 4
+  %i27 = load i64, ptr %i, align 4
+  %calltmp = call i64 @npk_mem_read_byte(i64 %s26, i64 %i27)
+  %cast.trunc = trunc i64 %calltmp to i8
+  store i8 %cast.trunc, ptr %cast.inttoptr25, align 1
+  %i28 = load i64, ptr %i, align 4
+  %addtmp29 = add i64 %i28, 1
+  store i64 %addtmp29, ptr %i, align 4
   call void @npk_gc_safepoint()
-  br label %whilecond11
+  br label %whilecond14
 
-afterwhile28:                                     ; preds = %whilecond11
-  %copy29 = load i64, ptr %copy, align 4
-  %len30 = load i64, ptr %len, align 4
-  %addtmp31 = add i64 %copy29, %len30
-  %copy32 = load i64, ptr %copy, align 4
-  %len33 = load i64, ptr %len, align 4
-  %addtmp34 = add i64 %copy32, %len33
-  %cast.inttoptr35 = inttoptr i64 %addtmp34 to ptr
-  store i8 0, ptr %cast.inttoptr35, align 1
-  %copy36 = load i64, ptr %copy, align 4
-  %result.val = insertvalue { i64, ptr, i8 } undef, i64 %copy36, 0
+afterwhile30:                                     ; preds = %whilecond14
+  %copy31 = load i64, ptr %copy, align 4
+  %len32 = load i64, ptr %len, align 4
+  %addtmp33 = add i64 %copy31, %len32
+  %copy34 = load i64, ptr %copy, align 4
+  %len35 = load i64, ptr %len, align 4
+  %addtmp36 = add i64 %copy34, %len35
+  %cast.inttoptr37 = inttoptr i64 %addtmp36 to ptr
+  store i8 0, ptr %cast.inttoptr37, align 1
+  %copy38 = load i64, ptr %copy, align 4
+  %result.val = insertvalue { i64, ptr, i8 } undef, i64 %copy38, 0
   %result.err = insertvalue { i64, ptr, i8 } %result.val, ptr null, 1
   %result.is_error = insertvalue { i64, ptr, i8 } %result.err, i8 0, 2
   ret { i64, ptr, i8 } %result.is_error
@@ -21417,7 +21439,8 @@ then339:                                          ; preds = %whilebody319
 
 ifcont340:                                        ; preds = %then339, %whilebody319
   %child_ptr341 = load i64, ptr %child_ptr, align 4
-  %calltmp342 = call i32 @nitpick_libc_mem_free(i64 %child_ptr341)
+  %cast.inttoptr342 = inttoptr i64 %child_ptr341 to ptr
+  call void @npk_free(ptr %cast.inttoptr342)
   call void @npk_gc_safepoint()
   br label %whilecond314
 
@@ -23616,299 +23639,306 @@ ifcont118:                                        ; preds = %ifcont117, %ifcont1
   store i64 65536, ptr %buf_size, align 4
   %buf = alloca i64, align 8
   %buf_size119 = load i64, ptr %buf_size, align 4
-  %calltmp120 = call i64 @malloc(i64 %buf_size119)
-  store i64 %calltmp120, ptr %buf, align 4
-  %buf121 = load i64, ptr %buf, align 4
-  %lttmp122 = icmp slt i64 %buf121, 0
-  %ifcond123 = icmp ne i1 %lttmp122, false
-  br i1 %ifcond123, label %then124, label %ifcont140
+  %wild_ptr = call ptr @npk_alloc(i64 %buf_size119)
+  %buf_size120 = load i64, ptr %buf_size, align 4
+  %wild_ptr121 = call ptr @npk_alloc(i64 %buf_size120)
+  %cast.ptrtoint = ptrtoint ptr %wild_ptr121 to i64
+  store i64 %cast.ptrtoint, ptr %buf, align 4
+  %buf122 = load i64, ptr %buf, align 4
+  %lttmp123 = icmp slt i64 %buf122, 0
+  %ifcond124 = icmp ne i1 %lttmp123, false
+  br i1 %ifcond124, label %then125, label %ifcont141
 
-then124:                                          ; preds = %ifcont118
-  %fd125 = load i64, ptr %fd, align 4
-  %getmp = icmp sge i64 %fd125, 0
-  %ifcond126 = icmp ne i1 %getmp, false
-  br i1 %ifcond126, label %then127, label %ifcont139
+then125:                                          ; preds = %ifcont118
+  %fd126 = load i64, ptr %fd, align 4
+  %getmp = icmp sge i64 %fd126, 0
+  %ifcond127 = icmp ne i1 %getmp, false
+  br i1 %ifcond127, label %then128, label %ifcont140
 
-then127:                                          ; preds = %then124
-  %fd128 = load i64, ptr %fd, align 4
-  %syscall_ret129 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %fd128)
-  %sys_is_err130 = icmp slt i64 %syscall_ret129, 0
-  %sys_neg_errno131 = sub i64 0, %syscall_ret129
-  %sys_err_ptr132 = inttoptr i64 %sys_neg_errno131 to ptr
-  %sys_val133 = select i1 %sys_is_err130, i64 0, i64 %syscall_ret129
-  %sys_err134 = select i1 %sys_is_err130, ptr %sys_err_ptr132, ptr null
-  %sys_flag135 = select i1 %sys_is_err130, i8 1, i8 0
-  %sys_result.val136 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val133, 0
-  %sys_result.err137 = insertvalue %struct.NpkResult_int64 %sys_result.val136, ptr %sys_err134, 1
-  %sys_result.is_error138 = insertvalue %struct.NpkResult_int64 %sys_result.err137, i8 %sys_flag135, 2
-  br label %ifcont139
+then128:                                          ; preds = %then125
+  %fd129 = load i64, ptr %fd, align 4
+  %syscall_ret130 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %fd129)
+  %sys_is_err131 = icmp slt i64 %syscall_ret130, 0
+  %sys_neg_errno132 = sub i64 0, %syscall_ret130
+  %sys_err_ptr133 = inttoptr i64 %sys_neg_errno132 to ptr
+  %sys_val134 = select i1 %sys_is_err131, i64 0, i64 %syscall_ret130
+  %sys_err135 = select i1 %sys_is_err131, ptr %sys_err_ptr133, ptr null
+  %sys_flag136 = select i1 %sys_is_err131, i8 1, i8 0
+  %sys_result.val137 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val134, 0
+  %sys_result.err138 = insertvalue %struct.NpkResult_int64 %sys_result.val137, ptr %sys_err135, 1
+  %sys_result.is_error139 = insertvalue %struct.NpkResult_int64 %sys_result.err138, i8 %sys_flag136, 2
+  br label %ifcont140
 
-ifcont139:                                        ; preds = %then127, %then124
+ifcont140:                                        ; preds = %then128, %then125
   ret { i32, ptr, i8 } { i32 1, ptr null, i8 0 }
 
-ifcont140:                                        ; preds = %ifcont118
+ifcont141:                                        ; preds = %ifcont118
   %current_field = alloca i64, align 8
   store i64 1, ptr %current_field, align 4
   %running = alloca i32, align 4
   store i32 1, ptr %running, align 4
   %out_buf = alloca i64, align 8
-  %calltmp141 = call i64 @malloc(i64 65536)
-  store i64 %calltmp141, ptr %out_buf, align 4
+  %wild_ptr142 = call ptr @npk_alloc(i64 65536)
+  %wild_ptr143 = call ptr @npk_alloc(i64 65536)
+  %cast.ptrtoint144 = ptrtoint ptr %wild_ptr143 to i64
+  store i64 %cast.ptrtoint144, ptr %out_buf, align 4
   %out_len = alloca i64, align 8
   store i64 0, ptr %out_len, align 4
-  br label %whilecond142
+  br label %whilecond145
 
-whilecond142:                                     ; preds = %ifcont261, %ifcont140
-  %running143 = load i32, ptr %running, align 4
-  %eqtmp144 = icmp eq i32 %running143, 1
-  %whilecond145 = icmp ne i1 %eqtmp144, false
-  br i1 %whilecond145, label %whilebody146, label %afterwhile262
+whilecond145:                                     ; preds = %ifcont264, %ifcont141
+  %running146 = load i32, ptr %running, align 4
+  %eqtmp147 = icmp eq i32 %running146, 1
+  %whilecond148 = icmp ne i1 %eqtmp147, false
+  br i1 %whilecond148, label %whilebody149, label %afterwhile265
 
-whilebody146:                                     ; preds = %whilecond142
+whilebody149:                                     ; preds = %whilecond145
   %n = alloca i64, align 8
-  %fd147 = load i64, ptr %fd, align 4
-  %buf148 = load i64, ptr %buf, align 4
-  %buf_size149 = load i64, ptr %buf_size, align 4
-  %syscall_ret150 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 0, i64 %fd147, i64 %buf148, i64 %buf_size149)
-  %sys_is_err151 = icmp slt i64 %syscall_ret150, 0
-  %sys_neg_errno152 = sub i64 0, %syscall_ret150
-  %sys_err_ptr153 = inttoptr i64 %sys_neg_errno152 to ptr
-  %sys_val154 = select i1 %sys_is_err151, i64 0, i64 %syscall_ret150
-  %sys_err155 = select i1 %sys_is_err151, ptr %sys_err_ptr153, ptr null
-  %sys_flag156 = select i1 %sys_is_err151, i8 1, i8 0
-  %sys_result.val157 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val154, 0
-  %sys_result.err158 = insertvalue %struct.NpkResult_int64 %sys_result.val157, ptr %sys_err155, 1
-  %sys_result.is_error159 = insertvalue %struct.NpkResult_int64 %sys_result.err158, i8 %sys_flag156, 2
-  %is_error160 = extractvalue %struct.NpkResult_int64 %sys_result.is_error159, 2
-  %is_error_bool161 = icmp ne i8 %is_error160, 0
-  br i1 %is_error_bool161, label %error_block162, label %success_block163
+  %fd150 = load i64, ptr %fd, align 4
+  %buf151 = load i64, ptr %buf, align 4
+  %buf_size152 = load i64, ptr %buf_size, align 4
+  %syscall_ret153 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 0, i64 %fd150, i64 %buf151, i64 %buf_size152)
+  %sys_is_err154 = icmp slt i64 %syscall_ret153, 0
+  %sys_neg_errno155 = sub i64 0, %syscall_ret153
+  %sys_err_ptr156 = inttoptr i64 %sys_neg_errno155 to ptr
+  %sys_val157 = select i1 %sys_is_err154, i64 0, i64 %syscall_ret153
+  %sys_err158 = select i1 %sys_is_err154, ptr %sys_err_ptr156, ptr null
+  %sys_flag159 = select i1 %sys_is_err154, i8 1, i8 0
+  %sys_result.val160 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val157, 0
+  %sys_result.err161 = insertvalue %struct.NpkResult_int64 %sys_result.val160, ptr %sys_err158, 1
+  %sys_result.is_error162 = insertvalue %struct.NpkResult_int64 %sys_result.err161, i8 %sys_flag159, 2
+  %is_error163 = extractvalue %struct.NpkResult_int64 %sys_result.is_error162, 2
+  %is_error_bool164 = icmp ne i8 %is_error163, 0
+  br i1 %is_error_bool164, label %error_block165, label %success_block166
 
-error_block162:                                   ; preds = %whilebody146
-  br label %merge_block164
+error_block165:                                   ; preds = %whilebody149
+  br label %merge_block167
 
-success_block163:                                 ; preds = %whilebody146
-  %value165 = extractvalue %struct.NpkResult_int64 %sys_result.is_error159, 0
-  br label %merge_block164
+success_block166:                                 ; preds = %whilebody149
+  %value168 = extractvalue %struct.NpkResult_int64 %sys_result.is_error162, 0
+  br label %merge_block167
 
-merge_block164:                                   ; preds = %success_block163, %error_block162
-  %unwrap_result166 = phi i64 [ -1, %error_block162 ], [ %value165, %success_block163 ]
-  store i64 %unwrap_result166, ptr %n, align 4
-  %n167 = load i64, ptr %n, align 4
-  %letmp168 = icmp sle i64 %n167, 0
-  %ifcond169 = icmp ne i1 %letmp168, false
-  br i1 %ifcond169, label %then170, label %else171
+merge_block167:                                   ; preds = %success_block166, %error_block165
+  %unwrap_result169 = phi i64 [ -1, %error_block165 ], [ %value168, %success_block166 ]
+  store i64 %unwrap_result169, ptr %n, align 4
+  %n170 = load i64, ptr %n, align 4
+  %letmp171 = icmp sle i64 %n170, 0
+  %ifcond172 = icmp ne i1 %letmp171, false
+  br i1 %ifcond172, label %then173, label %else174
 
-then170:                                          ; preds = %merge_block164
+then173:                                          ; preds = %merge_block167
   store i32 0, ptr %running, align 4
-  br label %ifcont261
+  br label %ifcont264
 
-else171:                                          ; preds = %merge_block164
+else174:                                          ; preds = %merge_block167
   %j = alloca i64, align 8
   store i64 0, ptr %j, align 4
-  br label %whilecond172
+  br label %whilecond175
 
-whilecond172:                                     ; preds = %ifcont257, %else171
-  %j173 = load i64, ptr %j, align 4
-  %n174 = load i64, ptr %n, align 4
-  %lttmp175 = icmp slt i64 %j173, %n174
-  %whilecond176 = icmp ne i1 %lttmp175, false
-  br i1 %whilecond176, label %whilebody177, label %afterwhile260
+whilecond175:                                     ; preds = %ifcont260, %else174
+  %j176 = load i64, ptr %j, align 4
+  %n177 = load i64, ptr %n, align 4
+  %lttmp178 = icmp slt i64 %j176, %n177
+  %whilecond179 = icmp ne i1 %lttmp178, false
+  br i1 %whilecond179, label %whilebody180, label %afterwhile263
 
-whilebody177:                                     ; preds = %whilecond172
+whilebody180:                                     ; preds = %whilecond175
   %c = alloca i64, align 8
-  %buf178 = load i64, ptr %buf, align 4
-  %j179 = load i64, ptr %j, align 4
-  %addtmp180 = add i64 %buf178, %j179
   %buf181 = load i64, ptr %buf, align 4
   %j182 = load i64, ptr %j, align 4
   %addtmp183 = add i64 %buf181, %j182
-  %cast.inttoptr = inttoptr i64 %addtmp183 to ptr
+  %buf184 = load i64, ptr %buf, align 4
+  %j185 = load i64, ptr %j, align 4
+  %addtmp186 = add i64 %buf184, %j185
+  %cast.inttoptr = inttoptr i64 %addtmp186 to ptr
   %null.deref = icmp eq ptr %cast.inttoptr, null
   br i1 %null.deref, label %null.fail, label %null.ok
 
-null.fail:                                        ; preds = %whilebody177
+null.fail:                                        ; preds = %whilebody180
   call void @exit(i32 46)
   unreachable
 
-null.ok:                                          ; preds = %whilebody177
+null.ok:                                          ; preds = %whilebody180
   %deref = load i32, ptr %cast.inttoptr, align 4
   %cast.sext = sext i32 %deref to i64
   store i64 %cast.sext, ptr %c, align 4
-  %c184 = load i64, ptr %c, align 4
-  %eqtmp185 = icmp eq i64 %c184, 10
-  %ifcond186 = icmp ne i1 %eqtmp185, false
-  br i1 %ifcond186, label %then187, label %else214
+  %c187 = load i64, ptr %c, align 4
+  %eqtmp188 = icmp eq i64 %c187, 10
+  %ifcond189 = icmp ne i1 %eqtmp188, false
+  br i1 %ifcond189, label %then190, label %else217
 
-then187:                                          ; preds = %null.ok
-  %out_buf188 = load i64, ptr %out_buf, align 4
-  %out_len189 = load i64, ptr %out_len, align 4
-  %addtmp190 = add i64 %out_buf188, %out_len189
+then190:                                          ; preds = %null.ok
   %out_buf191 = load i64, ptr %out_buf, align 4
   %out_len192 = load i64, ptr %out_len, align 4
   %addtmp193 = add i64 %out_buf191, %out_len192
-  %cast.inttoptr194 = inttoptr i64 %addtmp193 to ptr
-  store i8 10, ptr %cast.inttoptr194, align 1
+  %out_buf194 = load i64, ptr %out_buf, align 4
   %out_len195 = load i64, ptr %out_len, align 4
-  %addtmp196 = add i64 %out_len195, 1
-  store i64 %addtmp196, ptr %out_len, align 4
-  %out_len197 = load i64, ptr %out_len, align 4
-  %getmp198 = icmp sge i64 %out_len197, 65536
-  %ifcond199 = icmp ne i1 %getmp198, false
-  br i1 %ifcond199, label %then200, label %ifcont213
+  %addtmp196 = add i64 %out_buf194, %out_len195
+  %cast.inttoptr197 = inttoptr i64 %addtmp196 to ptr
+  store i8 10, ptr %cast.inttoptr197, align 1
+  %out_len198 = load i64, ptr %out_len, align 4
+  %addtmp199 = add i64 %out_len198, 1
+  store i64 %addtmp199, ptr %out_len, align 4
+  %out_len200 = load i64, ptr %out_len, align 4
+  %getmp201 = icmp sge i64 %out_len200, 65536
+  %ifcond202 = icmp ne i1 %getmp201, false
+  br i1 %ifcond202, label %then203, label %ifcont216
 
-then200:                                          ; preds = %then187
-  %out_buf201 = load i64, ptr %out_buf, align 4
-  %out_len202 = load i64, ptr %out_len, align 4
-  %syscall_ret203 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 1, i64 1, i64 %out_buf201, i64 %out_len202)
-  %sys_is_err204 = icmp slt i64 %syscall_ret203, 0
-  %sys_neg_errno205 = sub i64 0, %syscall_ret203
-  %sys_err_ptr206 = inttoptr i64 %sys_neg_errno205 to ptr
-  %sys_val207 = select i1 %sys_is_err204, i64 0, i64 %syscall_ret203
-  %sys_err208 = select i1 %sys_is_err204, ptr %sys_err_ptr206, ptr null
-  %sys_flag209 = select i1 %sys_is_err204, i8 1, i8 0
-  %sys_result.val210 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val207, 0
-  %sys_result.err211 = insertvalue %struct.NpkResult_int64 %sys_result.val210, ptr %sys_err208, 1
-  %sys_result.is_error212 = insertvalue %struct.NpkResult_int64 %sys_result.err211, i8 %sys_flag209, 2
+then203:                                          ; preds = %then190
+  %out_buf204 = load i64, ptr %out_buf, align 4
+  %out_len205 = load i64, ptr %out_len, align 4
+  %syscall_ret206 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 1, i64 1, i64 %out_buf204, i64 %out_len205)
+  %sys_is_err207 = icmp slt i64 %syscall_ret206, 0
+  %sys_neg_errno208 = sub i64 0, %syscall_ret206
+  %sys_err_ptr209 = inttoptr i64 %sys_neg_errno208 to ptr
+  %sys_val210 = select i1 %sys_is_err207, i64 0, i64 %syscall_ret206
+  %sys_err211 = select i1 %sys_is_err207, ptr %sys_err_ptr209, ptr null
+  %sys_flag212 = select i1 %sys_is_err207, i8 1, i8 0
+  %sys_result.val213 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val210, 0
+  %sys_result.err214 = insertvalue %struct.NpkResult_int64 %sys_result.val213, ptr %sys_err211, 1
+  %sys_result.is_error215 = insertvalue %struct.NpkResult_int64 %sys_result.err214, i8 %sys_flag212, 2
   store i64 0, ptr %out_len, align 4
-  br label %ifcont213
+  br label %ifcont216
 
-ifcont213:                                        ; preds = %then200, %then187
+ifcont216:                                        ; preds = %then203, %then190
   store i64 1, ptr %current_field, align 4
-  br label %ifcont257
+  br label %ifcont260
 
-else214:                                          ; preds = %null.ok
-  %c215 = load i64, ptr %c, align 4
-  %delim216 = load i64, ptr %delim, align 4
-  %eqtmp217 = icmp eq i64 %c215, %delim216
-  %ifcond218 = icmp ne i1 %eqtmp217, false
-  br i1 %ifcond218, label %then219, label %else222
+else217:                                          ; preds = %null.ok
+  %c218 = load i64, ptr %c, align 4
+  %delim219 = load i64, ptr %delim, align 4
+  %eqtmp220 = icmp eq i64 %c218, %delim219
+  %ifcond221 = icmp ne i1 %eqtmp220, false
+  br i1 %ifcond221, label %then222, label %else225
 
-then219:                                          ; preds = %else214
-  %current_field220 = load i64, ptr %current_field, align 4
-  %addtmp221 = add i64 %current_field220, 1
-  store i64 %addtmp221, ptr %current_field, align 4
-  br label %ifcont256
-
-else222:                                          ; preds = %else214
+then222:                                          ; preds = %else217
   %current_field223 = load i64, ptr %current_field, align 4
-  %target_field224 = load i64, ptr %target_field, align 4
-  %eqtmp225 = icmp eq i64 %current_field223, %target_field224
-  %ifcond226 = icmp ne i1 %eqtmp225, false
-  br i1 %ifcond226, label %then227, label %ifcont255
+  %addtmp224 = add i64 %current_field223, 1
+  store i64 %addtmp224, ptr %current_field, align 4
+  br label %ifcont259
 
-then227:                                          ; preds = %else222
-  %out_buf228 = load i64, ptr %out_buf, align 4
-  %out_len229 = load i64, ptr %out_len, align 4
-  %addtmp230 = add i64 %out_buf228, %out_len229
+else225:                                          ; preds = %else217
+  %current_field226 = load i64, ptr %current_field, align 4
+  %target_field227 = load i64, ptr %target_field, align 4
+  %eqtmp228 = icmp eq i64 %current_field226, %target_field227
+  %ifcond229 = icmp ne i1 %eqtmp228, false
+  br i1 %ifcond229, label %then230, label %ifcont258
+
+then230:                                          ; preds = %else225
   %out_buf231 = load i64, ptr %out_buf, align 4
   %out_len232 = load i64, ptr %out_len, align 4
   %addtmp233 = add i64 %out_buf231, %out_len232
-  %cast.inttoptr234 = inttoptr i64 %addtmp233 to ptr
-  %c235 = load i64, ptr %c, align 4
-  %cast.trunc = trunc i64 %c235 to i8
-  store i8 %cast.trunc, ptr %cast.inttoptr234, align 1
-  %out_len236 = load i64, ptr %out_len, align 4
-  %addtmp237 = add i64 %out_len236, 1
-  store i64 %addtmp237, ptr %out_len, align 4
-  %out_len238 = load i64, ptr %out_len, align 4
-  %getmp239 = icmp sge i64 %out_len238, 65536
-  %ifcond240 = icmp ne i1 %getmp239, false
-  br i1 %ifcond240, label %then241, label %ifcont254
+  %out_buf234 = load i64, ptr %out_buf, align 4
+  %out_len235 = load i64, ptr %out_len, align 4
+  %addtmp236 = add i64 %out_buf234, %out_len235
+  %cast.inttoptr237 = inttoptr i64 %addtmp236 to ptr
+  %c238 = load i64, ptr %c, align 4
+  %cast.trunc = trunc i64 %c238 to i8
+  store i8 %cast.trunc, ptr %cast.inttoptr237, align 1
+  %out_len239 = load i64, ptr %out_len, align 4
+  %addtmp240 = add i64 %out_len239, 1
+  store i64 %addtmp240, ptr %out_len, align 4
+  %out_len241 = load i64, ptr %out_len, align 4
+  %getmp242 = icmp sge i64 %out_len241, 65536
+  %ifcond243 = icmp ne i1 %getmp242, false
+  br i1 %ifcond243, label %then244, label %ifcont257
 
-then241:                                          ; preds = %then227
-  %out_buf242 = load i64, ptr %out_buf, align 4
-  %out_len243 = load i64, ptr %out_len, align 4
-  %syscall_ret244 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 1, i64 1, i64 %out_buf242, i64 %out_len243)
-  %sys_is_err245 = icmp slt i64 %syscall_ret244, 0
-  %sys_neg_errno246 = sub i64 0, %syscall_ret244
-  %sys_err_ptr247 = inttoptr i64 %sys_neg_errno246 to ptr
-  %sys_val248 = select i1 %sys_is_err245, i64 0, i64 %syscall_ret244
-  %sys_err249 = select i1 %sys_is_err245, ptr %sys_err_ptr247, ptr null
-  %sys_flag250 = select i1 %sys_is_err245, i8 1, i8 0
-  %sys_result.val251 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val248, 0
-  %sys_result.err252 = insertvalue %struct.NpkResult_int64 %sys_result.val251, ptr %sys_err249, 1
-  %sys_result.is_error253 = insertvalue %struct.NpkResult_int64 %sys_result.err252, i8 %sys_flag250, 2
+then244:                                          ; preds = %then230
+  %out_buf245 = load i64, ptr %out_buf, align 4
+  %out_len246 = load i64, ptr %out_len, align 4
+  %syscall_ret247 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 1, i64 1, i64 %out_buf245, i64 %out_len246)
+  %sys_is_err248 = icmp slt i64 %syscall_ret247, 0
+  %sys_neg_errno249 = sub i64 0, %syscall_ret247
+  %sys_err_ptr250 = inttoptr i64 %sys_neg_errno249 to ptr
+  %sys_val251 = select i1 %sys_is_err248, i64 0, i64 %syscall_ret247
+  %sys_err252 = select i1 %sys_is_err248, ptr %sys_err_ptr250, ptr null
+  %sys_flag253 = select i1 %sys_is_err248, i8 1, i8 0
+  %sys_result.val254 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val251, 0
+  %sys_result.err255 = insertvalue %struct.NpkResult_int64 %sys_result.val254, ptr %sys_err252, 1
+  %sys_result.is_error256 = insertvalue %struct.NpkResult_int64 %sys_result.err255, i8 %sys_flag253, 2
   store i64 0, ptr %out_len, align 4
-  br label %ifcont254
-
-ifcont254:                                        ; preds = %then241, %then227
-  br label %ifcont255
-
-ifcont255:                                        ; preds = %ifcont254, %else222
-  br label %ifcont256
-
-ifcont256:                                        ; preds = %ifcont255, %then219
   br label %ifcont257
 
-ifcont257:                                        ; preds = %ifcont256, %ifcont213
-  %j258 = load i64, ptr %j, align 4
-  %addtmp259 = add i64 %j258, 1
-  store i64 %addtmp259, ptr %j, align 4
+ifcont257:                                        ; preds = %then244, %then230
+  br label %ifcont258
+
+ifcont258:                                        ; preds = %ifcont257, %else225
+  br label %ifcont259
+
+ifcont259:                                        ; preds = %ifcont258, %then222
+  br label %ifcont260
+
+ifcont260:                                        ; preds = %ifcont259, %ifcont216
+  %j261 = load i64, ptr %j, align 4
+  %addtmp262 = add i64 %j261, 1
+  store i64 %addtmp262, ptr %j, align 4
   call void @npk_gc_safepoint()
-  br label %whilecond172
+  br label %whilecond175
 
-afterwhile260:                                    ; preds = %whilecond172
-  br label %ifcont261
+afterwhile263:                                    ; preds = %whilecond175
+  br label %ifcont264
 
-ifcont261:                                        ; preds = %afterwhile260, %then170
+ifcont264:                                        ; preds = %afterwhile263, %then173
   call void @npk_gc_safepoint()
-  br label %whilecond142
+  br label %whilecond145
 
-afterwhile262:                                    ; preds = %whilecond142
-  %out_len263 = load i64, ptr %out_len, align 4
-  %gttmp264 = icmp sgt i64 %out_len263, 0
-  %ifcond265 = icmp ne i1 %gttmp264, false
-  br i1 %ifcond265, label %then266, label %ifcont279
+afterwhile265:                                    ; preds = %whilecond145
+  %out_len266 = load i64, ptr %out_len, align 4
+  %gttmp267 = icmp sgt i64 %out_len266, 0
+  %ifcond268 = icmp ne i1 %gttmp267, false
+  br i1 %ifcond268, label %then269, label %ifcont282
 
-then266:                                          ; preds = %afterwhile262
-  %out_buf267 = load i64, ptr %out_buf, align 4
-  %out_len268 = load i64, ptr %out_len, align 4
-  %syscall_ret269 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 1, i64 1, i64 %out_buf267, i64 %out_len268)
-  %sys_is_err270 = icmp slt i64 %syscall_ret269, 0
-  %sys_neg_errno271 = sub i64 0, %syscall_ret269
-  %sys_err_ptr272 = inttoptr i64 %sys_neg_errno271 to ptr
-  %sys_val273 = select i1 %sys_is_err270, i64 0, i64 %syscall_ret269
-  %sys_err274 = select i1 %sys_is_err270, ptr %sys_err_ptr272, ptr null
-  %sys_flag275 = select i1 %sys_is_err270, i8 1, i8 0
-  %sys_result.val276 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val273, 0
-  %sys_result.err277 = insertvalue %struct.NpkResult_int64 %sys_result.val276, ptr %sys_err274, 1
-  %sys_result.is_error278 = insertvalue %struct.NpkResult_int64 %sys_result.err277, i8 %sys_flag275, 2
-  br label %ifcont279
+then269:                                          ; preds = %afterwhile265
+  %out_buf270 = load i64, ptr %out_buf, align 4
+  %out_len271 = load i64, ptr %out_len, align 4
+  %syscall_ret272 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 1, i64 1, i64 %out_buf270, i64 %out_len271)
+  %sys_is_err273 = icmp slt i64 %syscall_ret272, 0
+  %sys_neg_errno274 = sub i64 0, %syscall_ret272
+  %sys_err_ptr275 = inttoptr i64 %sys_neg_errno274 to ptr
+  %sys_val276 = select i1 %sys_is_err273, i64 0, i64 %syscall_ret272
+  %sys_err277 = select i1 %sys_is_err273, ptr %sys_err_ptr275, ptr null
+  %sys_flag278 = select i1 %sys_is_err273, i8 1, i8 0
+  %sys_result.val279 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val276, 0
+  %sys_result.err280 = insertvalue %struct.NpkResult_int64 %sys_result.val279, ptr %sys_err277, 1
+  %sys_result.is_error281 = insertvalue %struct.NpkResult_int64 %sys_result.err280, i8 %sys_flag278, 2
+  br label %ifcont282
 
-ifcont279:                                        ; preds = %then266, %afterwhile262
-  %out_buf280 = load i64, ptr %out_buf, align 4
-  %calltmp281 = call i32 @nitpick_libc_mem_free(i64 %out_buf280)
-  %fd282 = load i64, ptr %fd, align 4
-  %netmp283 = icmp ne i64 %fd282, 0
-  %ifcond284 = icmp ne i1 %netmp283, false
-  br i1 %ifcond284, label %then285, label %ifcont286
+ifcont282:                                        ; preds = %then269, %afterwhile265
+  %out_buf283 = load i64, ptr %out_buf, align 4
+  %cast.inttoptr284 = inttoptr i64 %out_buf283 to ptr
+  call void @npk_free(ptr %cast.inttoptr284)
+  %fd285 = load i64, ptr %fd, align 4
+  %netmp286 = icmp ne i64 %fd285, 0
+  %ifcond287 = icmp ne i1 %netmp286, false
+  br i1 %ifcond287, label %then288, label %ifcont289
 
-then285:                                          ; preds = %ifcont279
-  br label %ifcont286
+then288:                                          ; preds = %ifcont282
+  br label %ifcont289
 
-ifcont286:                                        ; preds = %then285, %ifcont279
-  %buf287 = load i64, ptr %buf, align 4
-  %calltmp288 = call i32 @nitpick_libc_mem_free(i64 %buf287)
-  %fd289 = load i64, ptr %fd, align 4
-  %getmp290 = icmp sge i64 %fd289, 0
-  %ifcond291 = icmp ne i1 %getmp290, false
-  br i1 %ifcond291, label %then292, label %ifcont304
+ifcont289:                                        ; preds = %then288, %ifcont282
+  %buf290 = load i64, ptr %buf, align 4
+  %cast.inttoptr291 = inttoptr i64 %buf290 to ptr
+  call void @npk_free(ptr %cast.inttoptr291)
+  %fd292 = load i64, ptr %fd, align 4
+  %getmp293 = icmp sge i64 %fd292, 0
+  %ifcond294 = icmp ne i1 %getmp293, false
+  br i1 %ifcond294, label %then295, label %ifcont307
 
-then292:                                          ; preds = %ifcont286
-  %fd293 = load i64, ptr %fd, align 4
-  %syscall_ret294 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %fd293)
-  %sys_is_err295 = icmp slt i64 %syscall_ret294, 0
-  %sys_neg_errno296 = sub i64 0, %syscall_ret294
-  %sys_err_ptr297 = inttoptr i64 %sys_neg_errno296 to ptr
-  %sys_val298 = select i1 %sys_is_err295, i64 0, i64 %syscall_ret294
-  %sys_err299 = select i1 %sys_is_err295, ptr %sys_err_ptr297, ptr null
-  %sys_flag300 = select i1 %sys_is_err295, i8 1, i8 0
-  %sys_result.val301 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val298, 0
-  %sys_result.err302 = insertvalue %struct.NpkResult_int64 %sys_result.val301, ptr %sys_err299, 1
-  %sys_result.is_error303 = insertvalue %struct.NpkResult_int64 %sys_result.err302, i8 %sys_flag300, 2
-  br label %ifcont304
+then295:                                          ; preds = %ifcont289
+  %fd296 = load i64, ptr %fd, align 4
+  %syscall_ret297 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %fd296)
+  %sys_is_err298 = icmp slt i64 %syscall_ret297, 0
+  %sys_neg_errno299 = sub i64 0, %syscall_ret297
+  %sys_err_ptr300 = inttoptr i64 %sys_neg_errno299 to ptr
+  %sys_val301 = select i1 %sys_is_err298, i64 0, i64 %syscall_ret297
+  %sys_err302 = select i1 %sys_is_err298, ptr %sys_err_ptr300, ptr null
+  %sys_flag303 = select i1 %sys_is_err298, i8 1, i8 0
+  %sys_result.val304 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val301, 0
+  %sys_result.err305 = insertvalue %struct.NpkResult_int64 %sys_result.val304, ptr %sys_err302, 1
+  %sys_result.is_error306 = insertvalue %struct.NpkResult_int64 %sys_result.err305, i8 %sys_flag303, 2
+  br label %ifcont307
 
-ifcont304:                                        ; preds = %then292, %ifcont286
+ifcont307:                                        ; preds = %then295, %ifcont289
   ret { i32, ptr, i8 } zeroinitializer
 }
 
@@ -24313,8 +24343,10 @@ then71:                                           ; preds = %merge_block60
   %calltmp73 = call i64 @localtime(i64 %t_buf72)
   store i64 %calltmp73, ptr %tm_ptr, align 4
   %s_buf = alloca i64, align 8
-  %calltmp74 = call i64 @malloc(i64 4096)
-  store i64 %calltmp74, ptr %s_buf, align 4
+  %wild_ptr = call ptr @npk_alloc(i64 4096)
+  %wild_ptr74 = call ptr @npk_alloc(i64 4096)
+  %cast.ptrtoint = ptrtoint ptr %wild_ptr74 to i64
+  store i64 %cast.ptrtoint, ptr %s_buf, align 4
   %sz = alloca i64, align 8
   %s_buf75 = load i64, ptr %s_buf, align 4
   %fmt76 = load ptr, ptr %fmt, align 8
@@ -24338,7 +24370,8 @@ then82:                                           ; preds = %then71
 
 ifcont88:                                         ; preds = %then82, %then71
   %s_buf89 = load i64, ptr %s_buf, align 4
-  %calltmp90 = call i32 @nitpick_libc_mem_free(i64 %s_buf89)
+  %cast.inttoptr90 = inttoptr i64 %s_buf89 to ptr
+  call void @npk_free(ptr %cast.inttoptr90)
   br label %ifcont127
 
 else:                                             ; preds = %merge_block60
@@ -25348,12 +25381,12 @@ ifcont10:                                         ; preds = %then9, %ifcont
 
 then13:                                           ; preds = %ifcont10
   %res = alloca i64, align 8
-  %SYS_STATFS = load i64, ptr @SYS_STATFS, align 4
+  %STATFS = load i64, ptr @STATFS, align 4
   %sys_str_struct = load %struct.NpkString, ptr @.str.1424, align 8
   %sys_str_data = extractvalue %struct.NpkString %sys_str_struct, 0
   %sys_str_int = ptrtoint ptr %sys_str_data to i64
   %buf14 = load i64, ptr %buf, align 4
-  %syscall_ret15 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 %SYS_STATFS, i64 %sys_str_int, i64 %buf14)
+  %syscall_ret15 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 %STATFS, i64 %sys_str_int, i64 %buf14)
   %sys_is_err16 = icmp slt i64 %syscall_ret15, 0
   %sys_neg_errno17 = sub i64 0, %syscall_ret15
   %sys_err_ptr18 = inttoptr i64 %sys_neg_errno17 to ptr
@@ -25683,13 +25716,13 @@ whilebody:                                        ; preds = %whilecond
   %raw.value189 = extractvalue { ptr, ptr, i8 } %calltmp188, 0
   store ptr %raw.value189, ptr %path, align 8
   %res190 = alloca i64, align 8
-  %SYS_STATFS191 = load i64, ptr @SYS_STATFS, align 4
+  %STATFS191 = load i64, ptr @STATFS, align 4
   %path192 = load ptr, ptr %path, align 8
   %sys_str_struct193 = load %struct.NpkString, ptr %path192, align 8
   %sys_str_data194 = extractvalue %struct.NpkString %sys_str_struct193, 0
   %sys_strvar_int = ptrtoint ptr %sys_str_data194 to i64
   %buf195 = load i64, ptr %buf, align 4
-  %syscall_ret196 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 %SYS_STATFS191, i64 %sys_strvar_int, i64 %buf195)
+  %syscall_ret196 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 %STATFS191, i64 %sys_strvar_int, i64 %buf195)
   %sys_is_err197 = icmp slt i64 %syscall_ret196, 0
   %sys_neg_errno198 = sub i64 0, %syscall_ret196
   %sys_err_ptr199 = inttoptr i64 %sys_neg_errno198 to ptr
@@ -27435,8 +27468,10 @@ ifcont:                                           ; preds = %merge_block
   %raw.value = extractvalue { i64, ptr, i8 } %calltmp3, 0
   store i64 %raw.value, ptr %my_fp, align 4
   %buf = alloca i64, align 8
-  %calltmp4 = call i64 @malloc(i64 65536)
-  store i64 %calltmp4, ptr %buf, align 4
+  %wild_ptr = call ptr @npk_alloc(i64 65536)
+  %wild_ptr4 = call ptr @npk_alloc(i64 65536)
+  %cast.ptrtoint = ptrtoint ptr %wild_ptr4 to i64
+  store i64 %cast.ptrtoint, ptr %buf, align 4
   %len = alloca i64, align 8
   store i64 0, ptr %len, align 4
   %c = alloca i32, align 4
@@ -27534,7 +27569,8 @@ then44:                                           ; preds = %afterwhile
 
 ifcont53:                                         ; preds = %then44, %afterwhile
   %buf54 = load i64, ptr %buf, align 4
-  %calltmp55 = call i32 @nitpick_libc_mem_free(i64 %buf54)
+  %cast.inttoptr55 = inttoptr i64 %buf54 to ptr
+  call void @npk_free(ptr %cast.inttoptr55)
   %fd = alloca i64, align 8
   %my_fp56 = load i64, ptr %my_fp, align 4
   %addtmp57 = add i64 %my_fp56, 0
@@ -27979,336 +28015,333 @@ ifcont23:                                         ; preds = %ifcont, %afterwhile
   store i64 65536, ptr %buf_size, align 4
   %buf = alloca i64, align 8
   %buf_size24 = load i64, ptr %buf_size, align 4
-  %calltmp25 = call i64 @malloc(i64 %buf_size24)
-  store i64 %calltmp25, ptr %buf, align 4
-  %buf26 = load i64, ptr %buf, align 4
-  %lttmp27 = icmp slt i64 %buf26, 0
-  %ifcond28 = icmp ne i1 %lttmp27, false
-  br i1 %ifcond28, label %then29, label %ifcont45
+  %wild_ptr = call ptr @npk_alloc(i64 %buf_size24)
+  %buf_size25 = load i64, ptr %buf_size, align 4
+  %wild_ptr26 = call ptr @npk_alloc(i64 %buf_size25)
+  %cast.ptrtoint = ptrtoint ptr %wild_ptr26 to i64
+  store i64 %cast.ptrtoint, ptr %buf, align 4
+  %buf27 = load i64, ptr %buf, align 4
+  %lttmp28 = icmp slt i64 %buf27, 0
+  %ifcond29 = icmp ne i1 %lttmp28, false
+  br i1 %ifcond29, label %then30, label %ifcont46
 
-then29:                                           ; preds = %ifcont23
-  %fd30 = load i64, ptr %fd, align 4
-  %getmp = icmp sge i64 %fd30, 0
-  %ifcond31 = icmp ne i1 %getmp, false
-  br i1 %ifcond31, label %then32, label %ifcont44
+then30:                                           ; preds = %ifcont23
+  %fd31 = load i64, ptr %fd, align 4
+  %getmp = icmp sge i64 %fd31, 0
+  %ifcond32 = icmp ne i1 %getmp, false
+  br i1 %ifcond32, label %then33, label %ifcont45
 
-then32:                                           ; preds = %then29
-  %fd33 = load i64, ptr %fd, align 4
-  %syscall_ret34 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %fd33)
-  %sys_is_err35 = icmp slt i64 %syscall_ret34, 0
-  %sys_neg_errno36 = sub i64 0, %syscall_ret34
-  %sys_err_ptr37 = inttoptr i64 %sys_neg_errno36 to ptr
-  %sys_val38 = select i1 %sys_is_err35, i64 0, i64 %syscall_ret34
-  %sys_err39 = select i1 %sys_is_err35, ptr %sys_err_ptr37, ptr null
-  %sys_flag40 = select i1 %sys_is_err35, i8 1, i8 0
-  %sys_result.val41 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val38, 0
-  %sys_result.err42 = insertvalue %struct.NpkResult_int64 %sys_result.val41, ptr %sys_err39, 1
-  %sys_result.is_error43 = insertvalue %struct.NpkResult_int64 %sys_result.err42, i8 %sys_flag40, 2
-  br label %ifcont44
+then33:                                           ; preds = %then30
+  %fd34 = load i64, ptr %fd, align 4
+  %syscall_ret35 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %fd34)
+  %sys_is_err36 = icmp slt i64 %syscall_ret35, 0
+  %sys_neg_errno37 = sub i64 0, %syscall_ret35
+  %sys_err_ptr38 = inttoptr i64 %sys_neg_errno37 to ptr
+  %sys_val39 = select i1 %sys_is_err36, i64 0, i64 %syscall_ret35
+  %sys_err40 = select i1 %sys_is_err36, ptr %sys_err_ptr38, ptr null
+  %sys_flag41 = select i1 %sys_is_err36, i8 1, i8 0
+  %sys_result.val42 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val39, 0
+  %sys_result.err43 = insertvalue %struct.NpkResult_int64 %sys_result.val42, ptr %sys_err40, 1
+  %sys_result.is_error44 = insertvalue %struct.NpkResult_int64 %sys_result.err43, i8 %sys_flag41, 2
+  br label %ifcont45
 
-ifcont44:                                         ; preds = %then32, %then29
+ifcont45:                                         ; preds = %then33, %then30
   ret { i32, ptr, i8 } { i32 1, ptr null, i8 0 }
 
-ifcont45:                                         ; preds = %ifcont23
+ifcont46:                                         ; preds = %ifcont23
   %col = alloca i64, align 8
   store i64 0, ptr %col, align 4
   %running = alloca i32, align 4
   store i32 1, ptr %running, align 4
   %out_buf = alloca i64, align 8
-  %calltmp46 = call i64 @malloc(i64 65536)
-  store i64 %calltmp46, ptr %out_buf, align 4
+  %wild_ptr47 = call ptr @npk_alloc(i64 65536)
+  %wild_ptr48 = call ptr @npk_alloc(i64 65536)
+  %cast.ptrtoint49 = ptrtoint ptr %wild_ptr48 to i64
+  store i64 %cast.ptrtoint49, ptr %out_buf, align 4
   %out_len = alloca i64, align 8
   store i64 0, ptr %out_len, align 4
-  br label %whilecond47
+  br label %whilecond50
 
-whilecond47:                                      ; preds = %ifcont172, %ifcont45
-  %running48 = load i32, ptr %running, align 4
-  %eqtmp = icmp eq i32 %running48, 1
-  %whilecond49 = icmp ne i1 %eqtmp, false
-  br i1 %whilecond49, label %whilebody50, label %afterwhile173
+whilecond50:                                      ; preds = %ifcont175, %ifcont46
+  %running51 = load i32, ptr %running, align 4
+  %eqtmp = icmp eq i32 %running51, 1
+  %whilecond52 = icmp ne i1 %eqtmp, false
+  br i1 %whilecond52, label %whilebody53, label %afterwhile176
 
-whilebody50:                                      ; preds = %whilecond47
+whilebody53:                                      ; preds = %whilecond50
   %n = alloca i64, align 8
-  %fd51 = load i64, ptr %fd, align 4
-  %buf52 = load i64, ptr %buf, align 4
-  %buf_size53 = load i64, ptr %buf_size, align 4
-  %syscall_ret54 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 0, i64 %fd51, i64 %buf52, i64 %buf_size53)
-  %sys_is_err55 = icmp slt i64 %syscall_ret54, 0
-  %sys_neg_errno56 = sub i64 0, %syscall_ret54
-  %sys_err_ptr57 = inttoptr i64 %sys_neg_errno56 to ptr
-  %sys_val58 = select i1 %sys_is_err55, i64 0, i64 %syscall_ret54
-  %sys_err59 = select i1 %sys_is_err55, ptr %sys_err_ptr57, ptr null
-  %sys_flag60 = select i1 %sys_is_err55, i8 1, i8 0
-  %sys_result.val61 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val58, 0
-  %sys_result.err62 = insertvalue %struct.NpkResult_int64 %sys_result.val61, ptr %sys_err59, 1
-  %sys_result.is_error63 = insertvalue %struct.NpkResult_int64 %sys_result.err62, i8 %sys_flag60, 2
-  %is_error64 = extractvalue %struct.NpkResult_int64 %sys_result.is_error63, 2
-  %is_error_bool65 = icmp ne i8 %is_error64, 0
-  br i1 %is_error_bool65, label %error_block66, label %success_block67
+  %fd54 = load i64, ptr %fd, align 4
+  %buf55 = load i64, ptr %buf, align 4
+  %buf_size56 = load i64, ptr %buf_size, align 4
+  %syscall_ret57 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 0, i64 %fd54, i64 %buf55, i64 %buf_size56)
+  %sys_is_err58 = icmp slt i64 %syscall_ret57, 0
+  %sys_neg_errno59 = sub i64 0, %syscall_ret57
+  %sys_err_ptr60 = inttoptr i64 %sys_neg_errno59 to ptr
+  %sys_val61 = select i1 %sys_is_err58, i64 0, i64 %syscall_ret57
+  %sys_err62 = select i1 %sys_is_err58, ptr %sys_err_ptr60, ptr null
+  %sys_flag63 = select i1 %sys_is_err58, i8 1, i8 0
+  %sys_result.val64 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val61, 0
+  %sys_result.err65 = insertvalue %struct.NpkResult_int64 %sys_result.val64, ptr %sys_err62, 1
+  %sys_result.is_error66 = insertvalue %struct.NpkResult_int64 %sys_result.err65, i8 %sys_flag63, 2
+  %is_error67 = extractvalue %struct.NpkResult_int64 %sys_result.is_error66, 2
+  %is_error_bool68 = icmp ne i8 %is_error67, 0
+  br i1 %is_error_bool68, label %error_block69, label %success_block70
 
-error_block66:                                    ; preds = %whilebody50
-  br label %merge_block68
+error_block69:                                    ; preds = %whilebody53
+  br label %merge_block71
 
-success_block67:                                  ; preds = %whilebody50
-  %value69 = extractvalue %struct.NpkResult_int64 %sys_result.is_error63, 0
-  br label %merge_block68
+success_block70:                                  ; preds = %whilebody53
+  %value72 = extractvalue %struct.NpkResult_int64 %sys_result.is_error66, 0
+  br label %merge_block71
 
-merge_block68:                                    ; preds = %success_block67, %error_block66
-  %unwrap_result70 = phi i64 [ -1, %error_block66 ], [ %value69, %success_block67 ]
-  store i64 %unwrap_result70, ptr %n, align 4
-  %n71 = load i64, ptr %n, align 4
-  %letmp72 = icmp sle i64 %n71, 0
-  %ifcond73 = icmp ne i1 %letmp72, false
-  br i1 %ifcond73, label %then74, label %else
+merge_block71:                                    ; preds = %success_block70, %error_block69
+  %unwrap_result73 = phi i64 [ -1, %error_block69 ], [ %value72, %success_block70 ]
+  store i64 %unwrap_result73, ptr %n, align 4
+  %n74 = load i64, ptr %n, align 4
+  %letmp75 = icmp sle i64 %n74, 0
+  %ifcond76 = icmp ne i1 %letmp75, false
+  br i1 %ifcond76, label %then77, label %else
 
-then74:                                           ; preds = %merge_block68
+then77:                                           ; preds = %merge_block71
   store i32 0, ptr %running, align 4
-  br label %ifcont172
+  br label %ifcont175
 
-else:                                             ; preds = %merge_block68
+else:                                             ; preds = %merge_block71
   %j = alloca i64, align 8
   store i64 0, ptr %j, align 4
-  br label %whilecond75
+  br label %whilecond78
 
-whilecond75:                                      ; preds = %ifcont168, %else
-  %j76 = load i64, ptr %j, align 4
-  %n77 = load i64, ptr %n, align 4
-  %lttmp78 = icmp slt i64 %j76, %n77
-  %whilecond79 = icmp ne i1 %lttmp78, false
-  br i1 %whilecond79, label %whilebody80, label %afterwhile171
+whilecond78:                                      ; preds = %ifcont171, %else
+  %j79 = load i64, ptr %j, align 4
+  %n80 = load i64, ptr %n, align 4
+  %lttmp81 = icmp slt i64 %j79, %n80
+  %whilecond82 = icmp ne i1 %lttmp81, false
+  br i1 %whilecond82, label %whilebody83, label %afterwhile174
 
-whilebody80:                                      ; preds = %whilecond75
+whilebody83:                                      ; preds = %whilecond78
   %c = alloca i64, align 8
-  %buf81 = load i64, ptr %buf, align 4
-  %j82 = load i64, ptr %j, align 4
-  %addtmp83 = add i64 %buf81, %j82
   %buf84 = load i64, ptr %buf, align 4
   %j85 = load i64, ptr %j, align 4
   %addtmp86 = add i64 %buf84, %j85
-  %cast.inttoptr = inttoptr i64 %addtmp86 to ptr
+  %buf87 = load i64, ptr %buf, align 4
+  %j88 = load i64, ptr %j, align 4
+  %addtmp89 = add i64 %buf87, %j88
+  %cast.inttoptr = inttoptr i64 %addtmp89 to ptr
   %null.deref = icmp eq ptr %cast.inttoptr, null
   br i1 %null.deref, label %null.fail, label %null.ok
 
-null.fail:                                        ; preds = %whilebody80
+null.fail:                                        ; preds = %whilebody83
   call void @exit(i32 46)
   unreachable
 
-null.ok:                                          ; preds = %whilebody80
+null.ok:                                          ; preds = %whilebody83
   %deref = load i32, ptr %cast.inttoptr, align 4
   %cast.sext = sext i32 %deref to i64
   store i64 %cast.sext, ptr %c, align 4
-  %c87 = load i64, ptr %c, align 4
-  %eqtmp88 = icmp eq i64 %c87, 9
-  %ifcond89 = icmp ne i1 %eqtmp88, false
-  br i1 %ifcond89, label %then90, label %else132
+  %c90 = load i64, ptr %c, align 4
+  %eqtmp91 = icmp eq i64 %c90, 9
+  %ifcond92 = icmp ne i1 %eqtmp91, false
+  br i1 %ifcond92, label %then93, label %else135
 
-then90:                                           ; preds = %null.ok
+then93:                                           ; preds = %null.ok
   %spaces = alloca i64, align 8
-  %col91 = load i64, ptr %col, align 4
-  %col92 = load i64, ptr %col, align 4
-  %divtmp = sdiv i64 %col92, 8
+  %col94 = load i64, ptr %col, align 4
+  %col95 = load i64, ptr %col, align 4
+  %divtmp = sdiv i64 %col95, 8
   %safe.divtmp = select i1 false, i64 9223372036854775807, i64 %divtmp
   %multmp = mul i64 %safe.divtmp, 8
-  %subtmp = sub i64 %col91, %multmp
-  %subtmp93 = sub i64 8, %subtmp
-  store i64 %subtmp93, ptr %spaces, align 4
+  %subtmp = sub i64 %col94, %multmp
+  %subtmp96 = sub i64 8, %subtmp
+  store i64 %subtmp96, ptr %spaces, align 4
   %k = alloca i64, align 8
   store i64 0, ptr %k, align 4
-  br label %whilecond94
+  br label %whilecond97
 
-whilecond94:                                      ; preds = %ifcont125, %then90
-  %k95 = load i64, ptr %k, align 4
-  %spaces96 = load i64, ptr %spaces, align 4
-  %lttmp97 = icmp slt i64 %k95, %spaces96
-  %whilecond98 = icmp ne i1 %lttmp97, false
-  br i1 %whilecond98, label %whilebody99, label %afterwhile128
+whilecond97:                                      ; preds = %ifcont128, %then93
+  %k98 = load i64, ptr %k, align 4
+  %spaces99 = load i64, ptr %spaces, align 4
+  %lttmp100 = icmp slt i64 %k98, %spaces99
+  %whilecond101 = icmp ne i1 %lttmp100, false
+  br i1 %whilecond101, label %whilebody102, label %afterwhile131
 
-whilebody99:                                      ; preds = %whilecond94
-  %out_buf100 = load i64, ptr %out_buf, align 4
-  %out_len101 = load i64, ptr %out_len, align 4
-  %addtmp102 = add i64 %out_buf100, %out_len101
+whilebody102:                                     ; preds = %whilecond97
   %out_buf103 = load i64, ptr %out_buf, align 4
   %out_len104 = load i64, ptr %out_len, align 4
   %addtmp105 = add i64 %out_buf103, %out_len104
-  %cast.inttoptr106 = inttoptr i64 %addtmp105 to ptr
-  store i8 32, ptr %cast.inttoptr106, align 1
+  %out_buf106 = load i64, ptr %out_buf, align 4
   %out_len107 = load i64, ptr %out_len, align 4
-  %addtmp108 = add i64 %out_len107, 1
-  store i64 %addtmp108, ptr %out_len, align 4
-  %out_len109 = load i64, ptr %out_len, align 4
-  %getmp110 = icmp sge i64 %out_len109, 65536
-  %ifcond111 = icmp ne i1 %getmp110, false
-  br i1 %ifcond111, label %then112, label %ifcont125
+  %addtmp108 = add i64 %out_buf106, %out_len107
+  %cast.inttoptr109 = inttoptr i64 %addtmp108 to ptr
+  store i8 32, ptr %cast.inttoptr109, align 1
+  %out_len110 = load i64, ptr %out_len, align 4
+  %addtmp111 = add i64 %out_len110, 1
+  store i64 %addtmp111, ptr %out_len, align 4
+  %out_len112 = load i64, ptr %out_len, align 4
+  %getmp113 = icmp sge i64 %out_len112, 65536
+  %ifcond114 = icmp ne i1 %getmp113, false
+  br i1 %ifcond114, label %then115, label %ifcont128
 
-then112:                                          ; preds = %whilebody99
-  %out_buf113 = load i64, ptr %out_buf, align 4
-  %out_len114 = load i64, ptr %out_len, align 4
-  %syscall_ret115 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 1, i64 1, i64 %out_buf113, i64 %out_len114)
-  %sys_is_err116 = icmp slt i64 %syscall_ret115, 0
-  %sys_neg_errno117 = sub i64 0, %syscall_ret115
-  %sys_err_ptr118 = inttoptr i64 %sys_neg_errno117 to ptr
-  %sys_val119 = select i1 %sys_is_err116, i64 0, i64 %syscall_ret115
-  %sys_err120 = select i1 %sys_is_err116, ptr %sys_err_ptr118, ptr null
-  %sys_flag121 = select i1 %sys_is_err116, i8 1, i8 0
-  %sys_result.val122 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val119, 0
-  %sys_result.err123 = insertvalue %struct.NpkResult_int64 %sys_result.val122, ptr %sys_err120, 1
-  %sys_result.is_error124 = insertvalue %struct.NpkResult_int64 %sys_result.err123, i8 %sys_flag121, 2
+then115:                                          ; preds = %whilebody102
+  %out_buf116 = load i64, ptr %out_buf, align 4
+  %out_len117 = load i64, ptr %out_len, align 4
+  %syscall_ret118 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 1, i64 1, i64 %out_buf116, i64 %out_len117)
+  %sys_is_err119 = icmp slt i64 %syscall_ret118, 0
+  %sys_neg_errno120 = sub i64 0, %syscall_ret118
+  %sys_err_ptr121 = inttoptr i64 %sys_neg_errno120 to ptr
+  %sys_val122 = select i1 %sys_is_err119, i64 0, i64 %syscall_ret118
+  %sys_err123 = select i1 %sys_is_err119, ptr %sys_err_ptr121, ptr null
+  %sys_flag124 = select i1 %sys_is_err119, i8 1, i8 0
+  %sys_result.val125 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val122, 0
+  %sys_result.err126 = insertvalue %struct.NpkResult_int64 %sys_result.val125, ptr %sys_err123, 1
+  %sys_result.is_error127 = insertvalue %struct.NpkResult_int64 %sys_result.err126, i8 %sys_flag124, 2
   store i64 0, ptr %out_len, align 4
-  br label %ifcont125
+  br label %ifcont128
 
-ifcont125:                                        ; preds = %then112, %whilebody99
-  %k126 = load i64, ptr %k, align 4
-  %addtmp127 = add i64 %k126, 1
-  store i64 %addtmp127, ptr %k, align 4
+ifcont128:                                        ; preds = %then115, %whilebody102
+  %k129 = load i64, ptr %k, align 4
+  %addtmp130 = add i64 %k129, 1
+  store i64 %addtmp130, ptr %k, align 4
   call void @npk_gc_safepoint()
-  br label %whilecond94
+  br label %whilecond97
 
-afterwhile128:                                    ; preds = %whilecond94
-  %col129 = load i64, ptr %col, align 4
-  %spaces130 = load i64, ptr %spaces, align 4
-  %addtmp131 = add i64 %col129, %spaces130
-  store i64 %addtmp131, ptr %col, align 4
-  br label %ifcont168
+afterwhile131:                                    ; preds = %whilecond97
+  %col132 = load i64, ptr %col, align 4
+  %spaces133 = load i64, ptr %spaces, align 4
+  %addtmp134 = add i64 %col132, %spaces133
+  store i64 %addtmp134, ptr %col, align 4
+  br label %ifcont171
 
-else132:                                          ; preds = %null.ok
-  %c133 = load i64, ptr %c, align 4
-  %eqtmp134 = icmp eq i64 %c133, 10
-  %ifcond135 = icmp ne i1 %eqtmp134, false
-  br i1 %ifcond135, label %then136, label %else137
+else135:                                          ; preds = %null.ok
+  %c136 = load i64, ptr %c, align 4
+  %eqtmp137 = icmp eq i64 %c136, 10
+  %ifcond138 = icmp ne i1 %eqtmp137, false
+  br i1 %ifcond138, label %then139, label %else140
 
-then136:                                          ; preds = %else132
+then139:                                          ; preds = %else135
   store i64 0, ptr %col, align 4
-  br label %ifcont140
+  br label %ifcont143
 
-else137:                                          ; preds = %else132
-  %col138 = load i64, ptr %col, align 4
-  %addtmp139 = add i64 %col138, 1
-  store i64 %addtmp139, ptr %col, align 4
-  br label %ifcont140
+else140:                                          ; preds = %else135
+  %col141 = load i64, ptr %col, align 4
+  %addtmp142 = add i64 %col141, 1
+  store i64 %addtmp142, ptr %col, align 4
+  br label %ifcont143
 
-ifcont140:                                        ; preds = %else137, %then136
-  %out_buf141 = load i64, ptr %out_buf, align 4
-  %out_len142 = load i64, ptr %out_len, align 4
-  %addtmp143 = add i64 %out_buf141, %out_len142
+ifcont143:                                        ; preds = %else140, %then139
   %out_buf144 = load i64, ptr %out_buf, align 4
   %out_len145 = load i64, ptr %out_len, align 4
   %addtmp146 = add i64 %out_buf144, %out_len145
-  %cast.inttoptr147 = inttoptr i64 %addtmp146 to ptr
-  %c148 = load i64, ptr %c, align 4
-  %cast.trunc = trunc i64 %c148 to i8
-  store i8 %cast.trunc, ptr %cast.inttoptr147, align 1
-  %out_len149 = load i64, ptr %out_len, align 4
-  %addtmp150 = add i64 %out_len149, 1
-  store i64 %addtmp150, ptr %out_len, align 4
-  %out_len151 = load i64, ptr %out_len, align 4
-  %getmp152 = icmp sge i64 %out_len151, 65536
-  %ifcond153 = icmp ne i1 %getmp152, false
-  br i1 %ifcond153, label %then154, label %ifcont167
+  %out_buf147 = load i64, ptr %out_buf, align 4
+  %out_len148 = load i64, ptr %out_len, align 4
+  %addtmp149 = add i64 %out_buf147, %out_len148
+  %cast.inttoptr150 = inttoptr i64 %addtmp149 to ptr
+  %c151 = load i64, ptr %c, align 4
+  %cast.trunc = trunc i64 %c151 to i8
+  store i8 %cast.trunc, ptr %cast.inttoptr150, align 1
+  %out_len152 = load i64, ptr %out_len, align 4
+  %addtmp153 = add i64 %out_len152, 1
+  store i64 %addtmp153, ptr %out_len, align 4
+  %out_len154 = load i64, ptr %out_len, align 4
+  %getmp155 = icmp sge i64 %out_len154, 65536
+  %ifcond156 = icmp ne i1 %getmp155, false
+  br i1 %ifcond156, label %then157, label %ifcont170
 
-then154:                                          ; preds = %ifcont140
-  %out_buf155 = load i64, ptr %out_buf, align 4
-  %out_len156 = load i64, ptr %out_len, align 4
-  %syscall_ret157 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 1, i64 1, i64 %out_buf155, i64 %out_len156)
-  %sys_is_err158 = icmp slt i64 %syscall_ret157, 0
-  %sys_neg_errno159 = sub i64 0, %syscall_ret157
-  %sys_err_ptr160 = inttoptr i64 %sys_neg_errno159 to ptr
-  %sys_val161 = select i1 %sys_is_err158, i64 0, i64 %syscall_ret157
-  %sys_err162 = select i1 %sys_is_err158, ptr %sys_err_ptr160, ptr null
-  %sys_flag163 = select i1 %sys_is_err158, i8 1, i8 0
-  %sys_result.val164 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val161, 0
-  %sys_result.err165 = insertvalue %struct.NpkResult_int64 %sys_result.val164, ptr %sys_err162, 1
-  %sys_result.is_error166 = insertvalue %struct.NpkResult_int64 %sys_result.err165, i8 %sys_flag163, 2
+then157:                                          ; preds = %ifcont143
+  %out_buf158 = load i64, ptr %out_buf, align 4
+  %out_len159 = load i64, ptr %out_len, align 4
+  %syscall_ret160 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 1, i64 1, i64 %out_buf158, i64 %out_len159)
+  %sys_is_err161 = icmp slt i64 %syscall_ret160, 0
+  %sys_neg_errno162 = sub i64 0, %syscall_ret160
+  %sys_err_ptr163 = inttoptr i64 %sys_neg_errno162 to ptr
+  %sys_val164 = select i1 %sys_is_err161, i64 0, i64 %syscall_ret160
+  %sys_err165 = select i1 %sys_is_err161, ptr %sys_err_ptr163, ptr null
+  %sys_flag166 = select i1 %sys_is_err161, i8 1, i8 0
+  %sys_result.val167 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val164, 0
+  %sys_result.err168 = insertvalue %struct.NpkResult_int64 %sys_result.val167, ptr %sys_err165, 1
+  %sys_result.is_error169 = insertvalue %struct.NpkResult_int64 %sys_result.err168, i8 %sys_flag166, 2
   store i64 0, ptr %out_len, align 4
-  br label %ifcont167
+  br label %ifcont170
 
-ifcont167:                                        ; preds = %then154, %ifcont140
-  br label %ifcont168
+ifcont170:                                        ; preds = %then157, %ifcont143
+  br label %ifcont171
 
-ifcont168:                                        ; preds = %ifcont167, %afterwhile128
-  %j169 = load i64, ptr %j, align 4
-  %addtmp170 = add i64 %j169, 1
-  store i64 %addtmp170, ptr %j, align 4
+ifcont171:                                        ; preds = %ifcont170, %afterwhile131
+  %j172 = load i64, ptr %j, align 4
+  %addtmp173 = add i64 %j172, 1
+  store i64 %addtmp173, ptr %j, align 4
   call void @npk_gc_safepoint()
-  br label %whilecond75
+  br label %whilecond78
 
-afterwhile171:                                    ; preds = %whilecond75
-  br label %ifcont172
+afterwhile174:                                    ; preds = %whilecond78
+  br label %ifcont175
 
-ifcont172:                                        ; preds = %afterwhile171, %then74
+ifcont175:                                        ; preds = %afterwhile174, %then77
   call void @npk_gc_safepoint()
-  br label %whilecond47
+  br label %whilecond50
 
-afterwhile173:                                    ; preds = %whilecond47
-  %out_len174 = load i64, ptr %out_len, align 4
-  %gttmp = icmp sgt i64 %out_len174, 0
-  %ifcond175 = icmp ne i1 %gttmp, false
-  br i1 %ifcond175, label %then176, label %ifcont189
+afterwhile176:                                    ; preds = %whilecond50
+  %out_len177 = load i64, ptr %out_len, align 4
+  %gttmp = icmp sgt i64 %out_len177, 0
+  %ifcond178 = icmp ne i1 %gttmp, false
+  br i1 %ifcond178, label %then179, label %ifcont192
 
-then176:                                          ; preds = %afterwhile173
-  %out_buf177 = load i64, ptr %out_buf, align 4
-  %out_len178 = load i64, ptr %out_len, align 4
-  %syscall_ret179 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 1, i64 1, i64 %out_buf177, i64 %out_len178)
-  %sys_is_err180 = icmp slt i64 %syscall_ret179, 0
-  %sys_neg_errno181 = sub i64 0, %syscall_ret179
-  %sys_err_ptr182 = inttoptr i64 %sys_neg_errno181 to ptr
-  %sys_val183 = select i1 %sys_is_err180, i64 0, i64 %syscall_ret179
-  %sys_err184 = select i1 %sys_is_err180, ptr %sys_err_ptr182, ptr null
-  %sys_flag185 = select i1 %sys_is_err180, i8 1, i8 0
-  %sys_result.val186 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val183, 0
-  %sys_result.err187 = insertvalue %struct.NpkResult_int64 %sys_result.val186, ptr %sys_err184, 1
-  %sys_result.is_error188 = insertvalue %struct.NpkResult_int64 %sys_result.err187, i8 %sys_flag185, 2
-  br label %ifcont189
+then179:                                          ; preds = %afterwhile176
+  %out_buf180 = load i64, ptr %out_buf, align 4
+  %out_len181 = load i64, ptr %out_len, align 4
+  %syscall_ret182 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 1, i64 1, i64 %out_buf180, i64 %out_len181)
+  %sys_is_err183 = icmp slt i64 %syscall_ret182, 0
+  %sys_neg_errno184 = sub i64 0, %syscall_ret182
+  %sys_err_ptr185 = inttoptr i64 %sys_neg_errno184 to ptr
+  %sys_val186 = select i1 %sys_is_err183, i64 0, i64 %syscall_ret182
+  %sys_err187 = select i1 %sys_is_err183, ptr %sys_err_ptr185, ptr null
+  %sys_flag188 = select i1 %sys_is_err183, i8 1, i8 0
+  %sys_result.val189 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val186, 0
+  %sys_result.err190 = insertvalue %struct.NpkResult_int64 %sys_result.val189, ptr %sys_err187, 1
+  %sys_result.is_error191 = insertvalue %struct.NpkResult_int64 %sys_result.err190, i8 %sys_flag188, 2
+  br label %ifcont192
 
-ifcont189:                                        ; preds = %then176, %afterwhile173
-  %out_buf190 = load i64, ptr %out_buf, align 4
-  %calltmp191 = call i32 @nitpick_libc_mem_free(i64 %out_buf190)
-  %fd192 = load i64, ptr %fd, align 4
-  %netmp193 = icmp ne i64 %fd192, 0
-  %ifcond194 = icmp ne i1 %netmp193, false
-  br i1 %ifcond194, label %then195, label %ifcont196
+ifcont192:                                        ; preds = %then179, %afterwhile176
+  %out_buf193 = load i64, ptr %out_buf, align 4
+  %cast.inttoptr194 = inttoptr i64 %out_buf193 to ptr
+  call void @npk_free(ptr %cast.inttoptr194)
+  %fd195 = load i64, ptr %fd, align 4
+  %netmp196 = icmp ne i64 %fd195, 0
+  %ifcond197 = icmp ne i1 %netmp196, false
+  br i1 %ifcond197, label %then198, label %ifcont199
 
-then195:                                          ; preds = %ifcont189
-  br label %ifcont196
+then198:                                          ; preds = %ifcont192
+  br label %ifcont199
 
-ifcont196:                                        ; preds = %then195, %ifcont189
-  %buf197 = load i64, ptr %buf, align 4
-  %calltmp198 = call i32 @nitpick_libc_mem_free(i64 %buf197)
-  %fd199 = load i64, ptr %fd, align 4
-  %getmp200 = icmp sge i64 %fd199, 0
-  %ifcond201 = icmp ne i1 %getmp200, false
-  br i1 %ifcond201, label %then202, label %ifcont214
+ifcont199:                                        ; preds = %then198, %ifcont192
+  %buf200 = load i64, ptr %buf, align 4
+  %cast.inttoptr201 = inttoptr i64 %buf200 to ptr
+  call void @npk_free(ptr %cast.inttoptr201)
+  %fd202 = load i64, ptr %fd, align 4
+  %getmp203 = icmp sge i64 %fd202, 0
+  %ifcond204 = icmp ne i1 %getmp203, false
+  br i1 %ifcond204, label %then205, label %ifcont217
 
-then202:                                          ; preds = %ifcont196
-  %fd203 = load i64, ptr %fd, align 4
-  %syscall_ret204 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %fd203)
-  %sys_is_err205 = icmp slt i64 %syscall_ret204, 0
-  %sys_neg_errno206 = sub i64 0, %syscall_ret204
-  %sys_err_ptr207 = inttoptr i64 %sys_neg_errno206 to ptr
-  %sys_val208 = select i1 %sys_is_err205, i64 0, i64 %syscall_ret204
-  %sys_err209 = select i1 %sys_is_err205, ptr %sys_err_ptr207, ptr null
-  %sys_flag210 = select i1 %sys_is_err205, i8 1, i8 0
-  %sys_result.val211 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val208, 0
-  %sys_result.err212 = insertvalue %struct.NpkResult_int64 %sys_result.val211, ptr %sys_err209, 1
-  %sys_result.is_error213 = insertvalue %struct.NpkResult_int64 %sys_result.err212, i8 %sys_flag210, 2
-  br label %ifcont214
+then205:                                          ; preds = %ifcont199
+  %fd206 = load i64, ptr %fd, align 4
+  %syscall_ret207 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %fd206)
+  %sys_is_err208 = icmp slt i64 %syscall_ret207, 0
+  %sys_neg_errno209 = sub i64 0, %syscall_ret207
+  %sys_err_ptr210 = inttoptr i64 %sys_neg_errno209 to ptr
+  %sys_val211 = select i1 %sys_is_err208, i64 0, i64 %syscall_ret207
+  %sys_err212 = select i1 %sys_is_err208, ptr %sys_err_ptr210, ptr null
+  %sys_flag213 = select i1 %sys_is_err208, i8 1, i8 0
+  %sys_result.val214 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val211, 0
+  %sys_result.err215 = insertvalue %struct.NpkResult_int64 %sys_result.val214, ptr %sys_err212, 1
+  %sys_result.is_error216 = insertvalue %struct.NpkResult_int64 %sys_result.err215, i8 %sys_flag213, 2
+  br label %ifcont217
 
-ifcont214:                                        ; preds = %then202, %ifcont196
+ifcont217:                                        ; preds = %then205, %ifcont199
   ret { i32, ptr, i8 } zeroinitializer
 }
 
 define linkonce_odr i32 @__expand_init() {
 entry:
   ret i32 0
-}
-
-define i32 @failsafe(i32 %err) #0 {
-entry:
-  %err.addr = alloca i32, align 4
-  store i32 %err, ptr %err.addr, align 4
-  %err1 = load i32, ptr %err.addr, align 4
-  %calltmp = call { %struct.NIL, ptr, i8 } @io_utils.standard_failsafe(i32 %err1)
-  call void @proc_exit(i32 1) #1
-  unreachable
 }
 
 define linkonce_odr { i32, ptr, i8 } @expr.print_err(ptr %s) {
@@ -28402,54 +28435,52 @@ entry:
 
 then:                                             ; preds = %entry
   %calltmp2 = call { i32, ptr, i8 } @cmp.print_err(ptr @.str.1550)
-  %calltmp3 = call i32 @failsafe(i32 2)
-  ret { i64, ptr, i8 } zeroinitializer
+  ret { i64, ptr, i8 } { i64 2, ptr null, i8 0 }
 
 ifcont:                                           ; preds = %entry
-  %calltmp4 = call { i32, ptr, i8 } @expr.consume()
-  %tok5 = load ptr, ptr %tok, align 8
-  %str16 = load %struct.NpkString, ptr %tok5, align 8
-  %str27 = load %struct.NpkString, ptr @.str.1552, align 8
-  %equals8 = call i1 @npk_string_equals(%struct.NpkString %str16, %struct.NpkString %str27)
-  %ifcond9 = icmp ne i1 %equals8, false
-  br i1 %ifcond9, label %then10, label %ifcont25
+  %calltmp3 = call { i32, ptr, i8 } @expr.consume()
+  %tok4 = load ptr, ptr %tok, align 8
+  %str15 = load %struct.NpkString, ptr %tok4, align 8
+  %str26 = load %struct.NpkString, ptr @.str.1552, align 8
+  %equals7 = call i1 @npk_string_equals(%struct.NpkString %str15, %struct.NpkString %str26)
+  %ifcond8 = icmp ne i1 %equals7, false
+  br i1 %ifcond8, label %then9, label %ifcont23
 
-then10:                                           ; preds = %ifcont
+then9:                                            ; preds = %ifcont
   %val = alloca i64, align 8
-  %calltmp11 = call { i64, ptr, i8 } @expr.parse_or()
-  %raw.value12 = extractvalue { i64, ptr, i8 } %calltmp11, 0
-  store i64 %raw.value12, ptr %val, align 4
-  %calltmp13 = call { ptr, ptr, i8 } @expr.peek()
-  %raw.value14 = extractvalue { ptr, ptr, i8 } %calltmp13, 0
-  %str115 = load %struct.NpkString, ptr %raw.value14, align 8
-  %str216 = load %struct.NpkString, ptr @.str.1554, align 8
-  %equals17 = call i1 @npk_string_equals(%struct.NpkString %str115, %struct.NpkString %str216)
-  %ifcond18 = icmp ne i1 %equals17, false
-  br i1 %ifcond18, label %then19, label %else
+  %calltmp10 = call { i64, ptr, i8 } @expr.parse_or()
+  %raw.value11 = extractvalue { i64, ptr, i8 } %calltmp10, 0
+  store i64 %raw.value11, ptr %val, align 4
+  %calltmp12 = call { ptr, ptr, i8 } @expr.peek()
+  %raw.value13 = extractvalue { ptr, ptr, i8 } %calltmp12, 0
+  %str114 = load %struct.NpkString, ptr %raw.value13, align 8
+  %str215 = load %struct.NpkString, ptr @.str.1554, align 8
+  %equals16 = call i1 @npk_string_equals(%struct.NpkString %str114, %struct.NpkString %str215)
+  %ifcond17 = icmp ne i1 %equals16, false
+  br i1 %ifcond17, label %then18, label %else
 
-then19:                                           ; preds = %then10
-  %calltmp20 = call { i32, ptr, i8 } @expr.consume()
-  br label %ifcont23
+then18:                                           ; preds = %then9
+  %calltmp19 = call { i32, ptr, i8 } @expr.consume()
+  br label %ifcont21
 
-else:                                             ; preds = %then10
-  %calltmp21 = call { i32, ptr, i8 } @cmp.print_err(ptr @.str.1556)
-  %calltmp22 = call i32 @failsafe(i32 2)
-  ret { i64, ptr, i8 } zeroinitializer
+else:                                             ; preds = %then9
+  %calltmp20 = call { i32, ptr, i8 } @cmp.print_err(ptr @.str.1556)
+  ret { i64, ptr, i8 } { i64 2, ptr null, i8 0 }
 
-ifcont23:                                         ; preds = %then19
-  %val24 = load i64, ptr %val, align 4
-  %result.val = insertvalue { i64, ptr, i8 } undef, i64 %val24, 0
+ifcont21:                                         ; preds = %then18
+  %val22 = load i64, ptr %val, align 4
+  %result.val = insertvalue { i64, ptr, i8 } undef, i64 %val22, 0
   %result.err = insertvalue { i64, ptr, i8 } %result.val, ptr null, 1
   %result.is_error = insertvalue { i64, ptr, i8 } %result.err, i8 0, 2
   ret { i64, ptr, i8 } %result.is_error
 
-ifcont25:                                         ; preds = %ifcont
-  %tok26 = load ptr, ptr %tok, align 8
-  %to_int_result = call i64 @npk_string_to_int_simple(ptr %tok26)
-  %result.val27 = insertvalue { i64, ptr, i8 } undef, i64 %to_int_result, 0
-  %result.err28 = insertvalue { i64, ptr, i8 } %result.val27, ptr null, 1
-  %result.is_error29 = insertvalue { i64, ptr, i8 } %result.err28, i8 0, 2
-  ret { i64, ptr, i8 } %result.is_error29
+ifcont23:                                         ; preds = %ifcont
+  %tok24 = load ptr, ptr %tok, align 8
+  %to_int_result = call i64 @npk_string_to_int_simple(ptr %tok24)
+  %result.val25 = insertvalue { i64, ptr, i8 } undef, i64 %to_int_result, 0
+  %result.err26 = insertvalue { i64, ptr, i8 } %result.val25, ptr null, 1
+  %result.is_error27 = insertvalue { i64, ptr, i8 } %result.err26, i8 0, 2
+  ret { i64, ptr, i8 } %result.is_error27
 }
 
 define linkonce_odr { i64, ptr, i8 } @expr.parse_mul() {
@@ -28460,7 +28491,7 @@ entry:
   store i64 %raw.value, ptr %left, align 4
   br label %whilecond
 
-whilecond:                                        ; preds = %ifcont66, %entry
+whilecond:                                        ; preds = %ifcont64, %entry
   br i1 true, label %whilebody, label %afterwhile
 
 whilebody:                                        ; preds = %whilecond
@@ -28527,76 +28558,74 @@ ifcont:                                           ; preds = %then26, %then
   %str231 = load %struct.NpkString, ptr @.str.1566, align 8
   %equals32 = call i1 @npk_string_equals(%struct.NpkString %str130, %struct.NpkString %str231)
   %ifcond33 = icmp ne i1 %equals32, false
-  br i1 %ifcond33, label %then34, label %ifcont43
+  br i1 %ifcond33, label %then34, label %ifcont42
 
 then34:                                           ; preds = %ifcont
   %right35 = load i64, ptr %right, align 4
   %eqtmp = icmp eq i64 %right35, 0
   %ifcond36 = icmp ne i1 %eqtmp, false
-  br i1 %ifcond36, label %then37, label %ifcont40
+  br i1 %ifcond36, label %then37, label %ifcont39
 
 then37:                                           ; preds = %then34
   %calltmp38 = call { i32, ptr, i8 } @cmp.print_err(ptr @.str.1568)
-  %calltmp39 = call i32 @failsafe(i32 2)
-  ret { i64, ptr, i8 } zeroinitializer
+  ret { i64, ptr, i8 } { i64 2, ptr null, i8 0 }
 
-ifcont40:                                         ; preds = %then34
-  %left41 = load i64, ptr %left, align 4
-  %right42 = load i64, ptr %right, align 4
-  %div.iszero = icmp eq i64 %right42, 0
-  %divtmp = sdiv i64 %left41, %right42
+ifcont39:                                         ; preds = %then34
+  %left40 = load i64, ptr %left, align 4
+  %right41 = load i64, ptr %right, align 4
+  %div.iszero = icmp eq i64 %right41, 0
+  %divtmp = sdiv i64 %left40, %right41
   %safe.divtmp = select i1 %div.iszero, i64 9223372036854775807, i64 %divtmp
   store i64 %safe.divtmp, ptr %left, align 4
-  br label %ifcont43
+  br label %ifcont42
 
-ifcont43:                                         ; preds = %ifcont40, %ifcont
-  %tok44 = load ptr, ptr %tok, align 8
-  %str145 = load %struct.NpkString, ptr %tok44, align 8
-  %str246 = load %struct.NpkString, ptr @.str.1570, align 8
-  %equals47 = call i1 @npk_string_equals(%struct.NpkString %str145, %struct.NpkString %str246)
-  %ifcond48 = icmp ne i1 %equals47, false
-  br i1 %ifcond48, label %then49, label %ifcont65
+ifcont42:                                         ; preds = %ifcont39, %ifcont
+  %tok43 = load ptr, ptr %tok, align 8
+  %str144 = load %struct.NpkString, ptr %tok43, align 8
+  %str245 = load %struct.NpkString, ptr @.str.1570, align 8
+  %equals46 = call i1 @npk_string_equals(%struct.NpkString %str144, %struct.NpkString %str245)
+  %ifcond47 = icmp ne i1 %equals46, false
+  br i1 %ifcond47, label %then48, label %ifcont63
 
-then49:                                           ; preds = %ifcont43
-  %right50 = load i64, ptr %right, align 4
-  %eqtmp51 = icmp eq i64 %right50, 0
-  %ifcond52 = icmp ne i1 %eqtmp51, false
-  br i1 %ifcond52, label %then53, label %ifcont56
+then48:                                           ; preds = %ifcont42
+  %right49 = load i64, ptr %right, align 4
+  %eqtmp50 = icmp eq i64 %right49, 0
+  %ifcond51 = icmp ne i1 %eqtmp50, false
+  br i1 %ifcond51, label %then52, label %ifcont54
 
-then53:                                           ; preds = %then49
-  %calltmp54 = call { i32, ptr, i8 } @cmp.print_err(ptr @.str.1572)
-  %calltmp55 = call i32 @failsafe(i32 2)
-  ret { i64, ptr, i8 } zeroinitializer
+then52:                                           ; preds = %then48
+  %calltmp53 = call { i32, ptr, i8 } @cmp.print_err(ptr @.str.1572)
+  ret { i64, ptr, i8 } { i64 2, ptr null, i8 0 }
 
-ifcont56:                                         ; preds = %then49
-  %left57 = load i64, ptr %left, align 4
-  %left58 = load i64, ptr %left, align 4
-  %right59 = load i64, ptr %right, align 4
-  %div.iszero60 = icmp eq i64 %right59, 0
-  %divtmp61 = sdiv i64 %left58, %right59
-  %safe.divtmp62 = select i1 %div.iszero60, i64 9223372036854775807, i64 %divtmp61
-  %right63 = load i64, ptr %right, align 4
-  %multmp64 = mul i64 %safe.divtmp62, %right63
-  %subtmp = sub i64 %left57, %multmp64
+ifcont54:                                         ; preds = %then48
+  %left55 = load i64, ptr %left, align 4
+  %left56 = load i64, ptr %left, align 4
+  %right57 = load i64, ptr %right, align 4
+  %div.iszero58 = icmp eq i64 %right57, 0
+  %divtmp59 = sdiv i64 %left56, %right57
+  %safe.divtmp60 = select i1 %div.iszero58, i64 9223372036854775807, i64 %divtmp59
+  %right61 = load i64, ptr %right, align 4
+  %multmp62 = mul i64 %safe.divtmp60, %right61
+  %subtmp = sub i64 %left55, %multmp62
   store i64 %subtmp, ptr %left, align 4
-  br label %ifcont65
+  br label %ifcont63
 
-ifcont65:                                         ; preds = %ifcont56, %ifcont43
-  br label %ifcont66
+ifcont63:                                         ; preds = %ifcont54, %ifcont42
+  br label %ifcont64
 
 else:                                             ; preds = %or.merge11
   br label %afterwhile
 
 afterbreak:                                       ; No predecessors!
-  br label %ifcont66
+  br label %ifcont64
 
-ifcont66:                                         ; preds = %afterbreak, %ifcont65
+ifcont64:                                         ; preds = %afterbreak, %ifcont63
   call void @npk_gc_safepoint()
   br label %whilecond
 
 afterwhile:                                       ; preds = %else, %whilecond
-  %left67 = load i64, ptr %left, align 4
-  %result.val = insertvalue { i64, ptr, i8 } undef, i64 %left67, 0
+  %left65 = load i64, ptr %left, align 4
+  %result.val = insertvalue { i64, ptr, i8 } undef, i64 %left65, 0
   %result.err = insertvalue { i64, ptr, i8 } %result.val, ptr null, 1
   %result.is_error = insertvalue { i64, ptr, i8 } %result.err, i8 0, 2
   ret { i64, ptr, i8 } %result.is_error
@@ -29431,7 +29460,6 @@ ifcont14:                                         ; preds = %ifcont
   br i1 %null.deref, label %null.fail, label %null.ok
 
 null.fail:                                        ; preds = %ifcont14
-  %0 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -29501,7 +29529,6 @@ ifcont46:                                         ; preds = %ifcont40
   br i1 %null.deref54, label %null.fail55, label %null.ok56
 
 null.fail55:                                      ; preds = %ifcont46
-  %1 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -29638,7 +29665,6 @@ whilebody:                                        ; preds = %whilecond
   br i1 %null.deref, label %null.fail, label %null.ok
 
 null.fail:                                        ; preds = %whilebody
-  %0 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -29702,7 +29728,6 @@ whilebody:                                        ; preds = %whilecond
   br i1 %null.deref, label %null.fail, label %null.ok
 
 null.fail:                                        ; preds = %whilebody
-  %0 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -29742,7 +29767,6 @@ entry:
   br i1 %null.deref, label %null.fail, label %null.ok
 
 null.fail:                                        ; preds = %entry
-  %0 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -29761,7 +29785,6 @@ then:                                             ; preds = %null.ok
   br i1 %null.deref2, label %null.fail3, label %null.ok4
 
 null.fail3:                                       ; preds = %then
-  %1 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -29790,7 +29813,6 @@ ifcont11:                                         ; preds = %ifcont, %null.ok
   br i1 %null.deref12, label %null.fail13, label %null.ok14
 
 null.fail13:                                      ; preds = %ifcont11
-  %2 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -29809,7 +29831,6 @@ then19:                                           ; preds = %null.ok14
   br i1 %null.deref20, label %null.fail21, label %null.ok22
 
 null.fail21:                                      ; preds = %then19
-  %3 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -29885,7 +29906,6 @@ ifcont54:                                         ; preds = %ifcont53, %null.ok1
   br i1 %null.deref55, label %null.fail56, label %null.ok57
 
 null.fail56:                                      ; preds = %ifcont54
-  %4 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -29908,7 +29928,6 @@ then62:                                           ; preds = %null.ok57
   br i1 %null.deref65, label %null.fail66, label %null.ok67
 
 null.fail66:                                      ; preds = %then62
-  %5 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -29921,7 +29940,6 @@ null.ok67:                                        ; preds = %then62
   br i1 %null.deref68, label %null.fail69, label %null.ok70
 
 null.fail69:                                      ; preds = %null.ok67
-  %6 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -30114,7 +30132,6 @@ and.merge:                                        ; preds = %null.ok, %whilecond
   br i1 %whilecond25, label %whilebody, label %afterwhile
 
 null.fail:                                        ; preds = %and.rhs
-  %0 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -30212,7 +30229,7 @@ merge_block74:                                    ; preds = %success_block73, %e
   %fd77 = load i64, ptr %fd, align 4
   %getmp78 = icmp sge i64 %fd77, 0
   %ifcond79 = icmp ne i1 %getmp78, false
-  br i1 %ifcond79, label %then80, label %ifcont371
+  br i1 %ifcond79, label %then80, label %ifcont375
 
 then80:                                           ; preds = %merge_block74
   %buf_alloc_alloc_ptr = call ptr @npk_alloc(i64 8)
@@ -30229,7 +30246,7 @@ then80:                                           ; preds = %merge_block74
   %buf86 = load i64, ptr %buf, align 4
   %getmp87 = icmp sge i64 %buf86, 0
   %ifcond88 = icmp ne i1 %getmp87, false
-  br i1 %ifcond88, label %then89, label %ifcont369
+  br i1 %ifcond88, label %then89, label %ifcont373
 
 then89:                                           ; preds = %then80
   %dirs_cap = alloca i64, align 8
@@ -30239,159 +30256,160 @@ then89:                                           ; preds = %then80
   %dirs_sl = alloca i64, align 8
   %dirs_cap90 = load i64, ptr %dirs_cap, align 4
   %multmp = mul i64 %dirs_cap90, 16
-  %calltmp91 = call i64 @malloc(i64 %multmp)
-  store i64 %calltmp91, ptr %dirs_sl, align 4
+  %wild_ptr91 = call ptr @npk_alloc(i64 %multmp)
+  %dirs_cap92 = load i64, ptr %dirs_cap, align 4
+  %multmp93 = mul i64 %dirs_cap92, 16
+  %wild_ptr94 = call ptr @npk_alloc(i64 %multmp93)
+  %cast.ptrtoint95 = ptrtoint ptr %wild_ptr94 to i64
+  store i64 %cast.ptrtoint95, ptr %dirs_sl, align 4
   %running = alloca i32, align 4
   store i32 1, ptr %running, align 4
-  br label %whilecond92
+  br label %whilecond96
 
-whilecond92:                                      ; preds = %ifcont312, %then89
-  %running93 = load i32, ptr %running, align 4
-  %eqtmp94 = icmp eq i32 %running93, 1
-  %whilecond95 = icmp ne i1 %eqtmp94, false
-  br i1 %whilecond95, label %whilebody96, label %afterwhile313
+whilecond96:                                      ; preds = %ifcont316, %then89
+  %running97 = load i32, ptr %running, align 4
+  %eqtmp98 = icmp eq i32 %running97, 1
+  %whilecond99 = icmp ne i1 %eqtmp98, false
+  br i1 %whilecond99, label %whilebody100, label %afterwhile317
 
-whilebody96:                                      ; preds = %whilecond92
+whilebody100:                                     ; preds = %whilecond96
   %nread = alloca i64, align 8
-  %fd97 = load i64, ptr %fd, align 4
-  %buf98 = load i64, ptr %buf, align 4
-  %syscall_ret99 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 217, i64 %fd97, i64 %buf98, i64 32768)
-  %sys_is_err100 = icmp slt i64 %syscall_ret99, 0
-  %sys_neg_errno101 = sub i64 0, %syscall_ret99
-  %sys_err_ptr102 = inttoptr i64 %sys_neg_errno101 to ptr
-  %sys_val103 = select i1 %sys_is_err100, i64 0, i64 %syscall_ret99
-  %sys_err104 = select i1 %sys_is_err100, ptr %sys_err_ptr102, ptr null
-  %sys_flag105 = select i1 %sys_is_err100, i8 1, i8 0
-  %sys_result.val106 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val103, 0
-  %sys_result.err107 = insertvalue %struct.NpkResult_int64 %sys_result.val106, ptr %sys_err104, 1
-  %sys_result.is_error108 = insertvalue %struct.NpkResult_int64 %sys_result.err107, i8 %sys_flag105, 2
-  %is_error109 = extractvalue %struct.NpkResult_int64 %sys_result.is_error108, 2
-  %is_error_bool110 = icmp ne i8 %is_error109, 0
-  br i1 %is_error_bool110, label %error_block111, label %success_block112
+  %fd101 = load i64, ptr %fd, align 4
+  %buf102 = load i64, ptr %buf, align 4
+  %syscall_ret103 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 217, i64 %fd101, i64 %buf102, i64 32768)
+  %sys_is_err104 = icmp slt i64 %syscall_ret103, 0
+  %sys_neg_errno105 = sub i64 0, %syscall_ret103
+  %sys_err_ptr106 = inttoptr i64 %sys_neg_errno105 to ptr
+  %sys_val107 = select i1 %sys_is_err104, i64 0, i64 %syscall_ret103
+  %sys_err108 = select i1 %sys_is_err104, ptr %sys_err_ptr106, ptr null
+  %sys_flag109 = select i1 %sys_is_err104, i8 1, i8 0
+  %sys_result.val110 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val107, 0
+  %sys_result.err111 = insertvalue %struct.NpkResult_int64 %sys_result.val110, ptr %sys_err108, 1
+  %sys_result.is_error112 = insertvalue %struct.NpkResult_int64 %sys_result.err111, i8 %sys_flag109, 2
+  %is_error113 = extractvalue %struct.NpkResult_int64 %sys_result.is_error112, 2
+  %is_error_bool114 = icmp ne i8 %is_error113, 0
+  br i1 %is_error_bool114, label %error_block115, label %success_block116
 
-error_block111:                                   ; preds = %whilebody96
-  br label %merge_block113
+error_block115:                                   ; preds = %whilebody100
+  br label %merge_block117
 
-success_block112:                                 ; preds = %whilebody96
-  %value114 = extractvalue %struct.NpkResult_int64 %sys_result.is_error108, 0
-  br label %merge_block113
+success_block116:                                 ; preds = %whilebody100
+  %value118 = extractvalue %struct.NpkResult_int64 %sys_result.is_error112, 0
+  br label %merge_block117
 
-merge_block113:                                   ; preds = %success_block112, %error_block111
-  %unwrap_result115 = phi i64 [ -1, %error_block111 ], [ %value114, %success_block112 ]
-  store i64 %unwrap_result115, ptr %nread, align 4
-  %nread116 = load i64, ptr %nread, align 4
-  %letmp = icmp sle i64 %nread116, 0
-  %ifcond117 = icmp ne i1 %letmp, false
-  br i1 %ifcond117, label %then118, label %else119
+merge_block117:                                   ; preds = %success_block116, %error_block115
+  %unwrap_result119 = phi i64 [ -1, %error_block115 ], [ %value118, %success_block116 ]
+  store i64 %unwrap_result119, ptr %nread, align 4
+  %nread120 = load i64, ptr %nread, align 4
+  %letmp = icmp sle i64 %nread120, 0
+  %ifcond121 = icmp ne i1 %letmp, false
+  br i1 %ifcond121, label %then122, label %else123
 
-then118:                                          ; preds = %merge_block113
+then122:                                          ; preds = %merge_block117
   store i32 0, ptr %running, align 4
-  br label %ifcont312
+  br label %ifcont316
 
-else119:                                          ; preds = %merge_block113
+else123:                                          ; preds = %merge_block117
   %bpos = alloca i64, align 8
   store i64 0, ptr %bpos, align 4
-  br label %whilecond120
+  br label %whilecond124
 
-whilecond120:                                     ; preds = %ifcont307, %else119
-  %bpos121 = load i64, ptr %bpos, align 4
-  %nread122 = load i64, ptr %nread, align 4
-  %lttmp123 = icmp slt i64 %bpos121, %nread122
-  %whilecond124 = icmp ne i1 %lttmp123, false
-  br i1 %whilecond124, label %whilebody125, label %afterwhile311
+whilecond124:                                     ; preds = %ifcont311, %else123
+  %bpos125 = load i64, ptr %bpos, align 4
+  %nread126 = load i64, ptr %nread, align 4
+  %lttmp127 = icmp slt i64 %bpos125, %nread126
+  %whilecond128 = icmp ne i1 %lttmp127, false
+  br i1 %whilecond128, label %whilebody129, label %afterwhile315
 
-whilebody125:                                     ; preds = %whilecond120
+whilebody129:                                     ; preds = %whilecond124
   %ent_ptr = alloca i64, align 8
-  %buf126 = load i64, ptr %buf, align 4
-  %bpos127 = load i64, ptr %bpos, align 4
-  %addtmp128 = add i64 %buf126, %bpos127
-  store i64 %addtmp128, ptr %ent_ptr, align 4
+  %buf130 = load i64, ptr %buf, align 4
+  %bpos131 = load i64, ptr %bpos, align 4
+  %addtmp132 = add i64 %buf130, %bpos131
+  store i64 %addtmp132, ptr %ent_ptr, align 4
   %reclen = alloca i64, align 8
-  %ent_ptr129 = load i64, ptr %ent_ptr, align 4
-  %addtmp130 = add i64 %ent_ptr129, 16
-  %ent_ptr131 = load i64, ptr %ent_ptr, align 4
-  %addtmp132 = add i64 %ent_ptr131, 16
-  %cast.inttoptr133 = inttoptr i64 %addtmp132 to ptr
-  %null.deref134 = icmp eq ptr %cast.inttoptr133, null
-  br i1 %null.deref134, label %null.fail135, label %null.ok136
+  %ent_ptr133 = load i64, ptr %ent_ptr, align 4
+  %addtmp134 = add i64 %ent_ptr133, 16
+  %ent_ptr135 = load i64, ptr %ent_ptr, align 4
+  %addtmp136 = add i64 %ent_ptr135, 16
+  %cast.inttoptr137 = inttoptr i64 %addtmp136 to ptr
+  %null.deref138 = icmp eq ptr %cast.inttoptr137, null
+  br i1 %null.deref138, label %null.fail139, label %null.ok140
 
-null.fail135:                                     ; preds = %whilebody125
-  %1 = call i32 @failsafe(i32 46)
+null.fail139:                                     ; preds = %whilebody129
   call void @exit(i32 46)
   unreachable
 
-null.ok136:                                       ; preds = %whilebody125
-  %deref137 = load i32, ptr %cast.inttoptr133, align 4
-  %cast.sext138 = sext i32 %deref137 to i64
-  %ent_ptr139 = load i64, ptr %ent_ptr, align 4
-  %addtmp140 = add i64 %ent_ptr139, 17
-  %ent_ptr141 = load i64, ptr %ent_ptr, align 4
-  %addtmp142 = add i64 %ent_ptr141, 17
-  %cast.inttoptr143 = inttoptr i64 %addtmp142 to ptr
-  %null.deref144 = icmp eq ptr %cast.inttoptr143, null
-  br i1 %null.deref144, label %null.fail145, label %null.ok146
+null.ok140:                                       ; preds = %whilebody129
+  %deref141 = load i32, ptr %cast.inttoptr137, align 4
+  %cast.sext142 = sext i32 %deref141 to i64
+  %ent_ptr143 = load i64, ptr %ent_ptr, align 4
+  %addtmp144 = add i64 %ent_ptr143, 17
+  %ent_ptr145 = load i64, ptr %ent_ptr, align 4
+  %addtmp146 = add i64 %ent_ptr145, 17
+  %cast.inttoptr147 = inttoptr i64 %addtmp146 to ptr
+  %null.deref148 = icmp eq ptr %cast.inttoptr147, null
+  br i1 %null.deref148, label %null.fail149, label %null.ok150
 
-null.fail145:                                     ; preds = %null.ok136
-  %2 = call i32 @failsafe(i32 46)
+null.fail149:                                     ; preds = %null.ok140
   call void @exit(i32 46)
   unreachable
 
-null.ok146:                                       ; preds = %null.ok136
-  %deref147 = load i32, ptr %cast.inttoptr143, align 4
-  %cast.sext148 = sext i32 %deref147 to i64
-  %shltmp = shl i64 %cast.sext148, 8
-  %ortmp = or i64 %cast.sext138, %shltmp
+null.ok150:                                       ; preds = %null.ok140
+  %deref151 = load i32, ptr %cast.inttoptr147, align 4
+  %cast.sext152 = sext i32 %deref151 to i64
+  %shltmp = shl i64 %cast.sext152, 8
+  %ortmp = or i64 %cast.sext142, %shltmp
   store i64 %ortmp, ptr %reclen, align 4
-  %dtype149 = alloca i64, align 8
-  %ent_ptr150 = load i64, ptr %ent_ptr, align 4
-  %addtmp151 = add i64 %ent_ptr150, 18
-  %ent_ptr152 = load i64, ptr %ent_ptr, align 4
-  %addtmp153 = add i64 %ent_ptr152, 18
-  %cast.inttoptr154 = inttoptr i64 %addtmp153 to ptr
-  %null.deref155 = icmp eq ptr %cast.inttoptr154, null
-  br i1 %null.deref155, label %null.fail156, label %null.ok157
+  %dtype153 = alloca i64, align 8
+  %ent_ptr154 = load i64, ptr %ent_ptr, align 4
+  %addtmp155 = add i64 %ent_ptr154, 18
+  %ent_ptr156 = load i64, ptr %ent_ptr, align 4
+  %addtmp157 = add i64 %ent_ptr156, 18
+  %cast.inttoptr158 = inttoptr i64 %addtmp157 to ptr
+  %null.deref159 = icmp eq ptr %cast.inttoptr158, null
+  br i1 %null.deref159, label %null.fail160, label %null.ok161
 
-null.fail156:                                     ; preds = %null.ok146
-  %3 = call i32 @failsafe(i32 46)
+null.fail160:                                     ; preds = %null.ok150
   call void @exit(i32 46)
   unreachable
 
-null.ok157:                                       ; preds = %null.ok146
-  %deref158 = load i32, ptr %cast.inttoptr154, align 4
-  %cast.sext159 = sext i32 %deref158 to i64
-  store i64 %cast.sext159, ptr %dtype149, align 4
+null.ok161:                                       ; preds = %null.ok150
+  %deref162 = load i32, ptr %cast.inttoptr158, align 4
+  %cast.sext163 = sext i32 %deref162 to i64
+  store i64 %cast.sext163, ptr %dtype153, align 4
   %name_ptr = alloca i64, align 8
-  %ent_ptr160 = load i64, ptr %ent_ptr, align 4
-  %addtmp161 = add i64 %ent_ptr160, 19
-  store i64 %addtmp161, ptr %name_ptr, align 4
+  %ent_ptr164 = load i64, ptr %ent_ptr, align 4
+  %addtmp165 = add i64 %ent_ptr164, 19
+  store i64 %addtmp165, ptr %name_ptr, align 4
   %cname = alloca ptr, align 8
-  %name_ptr162 = load i64, ptr %name_ptr, align 4
-  %calltmp163 = call { ptr, ptr, i8 } @mem_utils.ptr_to_string(i64 %name_ptr162)
-  %raw.value164 = extractvalue { ptr, ptr, i8 } %calltmp163, 0
-  store ptr %raw.value164, ptr %cname, align 8
-  %cname165 = load ptr, ptr %cname, align 8
-  %str1 = load %struct.NpkString, ptr %cname165, align 8
+  %name_ptr166 = load i64, ptr %name_ptr, align 4
+  %calltmp167 = call { ptr, ptr, i8 } @mem_utils.ptr_to_string(i64 %name_ptr166)
+  %raw.value168 = extractvalue { ptr, ptr, i8 } %calltmp167, 0
+  store ptr %raw.value168, ptr %cname, align 8
+  %cname169 = load ptr, ptr %cname, align 8
+  %str1 = load %struct.NpkString, ptr %cname169, align 8
   %str2 = load %struct.NpkString, ptr @.str.1624, align 8
   %equals = call i1 @npk_string_equals(%struct.NpkString %str1, %struct.NpkString %str2)
-  %eqtmp166 = icmp eq i1 %equals, false
-  %and.lhs167 = icmp ne i1 %eqtmp166, false
-  br i1 %and.lhs167, label %and.rhs168, label %and.merge169
+  %eqtmp170 = icmp eq i1 %equals, false
+  %and.lhs171 = icmp ne i1 %eqtmp170, false
+  br i1 %and.lhs171, label %and.rhs172, label %and.merge173
 
-and.rhs168:                                       ; preds = %null.ok157
-  %cname170 = load ptr, ptr %cname, align 8
-  %str1171 = load %struct.NpkString, ptr %cname170, align 8
-  %str2172 = load %struct.NpkString, ptr @.str.1626, align 8
-  %equals173 = call i1 @npk_string_equals(%struct.NpkString %str1171, %struct.NpkString %str2172)
-  %eqtmp174 = icmp eq i1 %equals173, false
-  %and.rhs175 = icmp ne i1 %eqtmp174, false
-  br label %and.merge169
+and.rhs172:                                       ; preds = %null.ok161
+  %cname174 = load ptr, ptr %cname, align 8
+  %str1175 = load %struct.NpkString, ptr %cname174, align 8
+  %str2176 = load %struct.NpkString, ptr @.str.1626, align 8
+  %equals177 = call i1 @npk_string_equals(%struct.NpkString %str1175, %struct.NpkString %str2176)
+  %eqtmp178 = icmp eq i1 %equals177, false
+  %and.rhs179 = icmp ne i1 %eqtmp178, false
+  br label %and.merge173
 
-and.merge169:                                     ; preds = %and.rhs168, %null.ok157
-  %and.result176 = phi i1 [ false, %null.ok157 ], [ %and.rhs175, %and.rhs168 ]
-  %ifcond177 = icmp ne i1 %and.result176, false
-  br i1 %ifcond177, label %then178, label %ifcont307
+and.merge173:                                     ; preds = %and.rhs172, %null.ok161
+  %and.result180 = phi i1 [ false, %null.ok161 ], [ %and.rhs179, %and.rhs172 ]
+  %ifcond181 = icmp ne i1 %and.result180, false
+  br i1 %ifcond181, label %then182, label %ifcont311
 
-then178:                                          ; preds = %and.merge169
+then182:                                          ; preds = %and.merge173
   %child_path = alloca ptr, align 8
   %template_strings = alloca [3 x { ptr, i64 }], align 8
   %npk_str = alloca { ptr, i64 }, align 8
@@ -30405,357 +30423,359 @@ then178:                                          ; preds = %and.merge169
   %str_interp = load { ptr, i64 }, ptr %dir, align 8
   %interp_slot = getelementptr [3 x { ptr, i64 }], ptr %template_strings, i64 0, i64 1
   store { ptr, i64 } %str_interp, ptr %interp_slot, align 8
-  %npk_str179 = alloca { ptr, i64 }, align 8
-  %data_ptr180 = getelementptr inbounds nuw { ptr, i64 }, ptr %npk_str179, i32 0, i32 0
-  store ptr @.str.1628, ptr %data_ptr180, align 8
-  %length_ptr181 = getelementptr inbounds nuw { ptr, i64 }, ptr %npk_str179, i32 0, i32 1
-  store i64 1, ptr %length_ptr181, align 4
-  %npk_str_val182 = load { ptr, i64 }, ptr %npk_str179, align 8
-  %part_slot183 = getelementptr [3 x { ptr, i64 }], ptr %template_strings, i64 0, i64 2
-  store { ptr, i64 } %npk_str_val182, ptr %part_slot183, align 8
+  %npk_str183 = alloca { ptr, i64 }, align 8
+  %data_ptr184 = getelementptr inbounds nuw { ptr, i64 }, ptr %npk_str183, i32 0, i32 0
+  store ptr @.str.1628, ptr %data_ptr184, align 8
+  %length_ptr185 = getelementptr inbounds nuw { ptr, i64 }, ptr %npk_str183, i32 0, i32 1
+  store i64 1, ptr %length_ptr185, align 4
+  %npk_str_val186 = load { ptr, i64 }, ptr %npk_str183, align 8
+  %part_slot187 = getelementptr [3 x { ptr, i64 }], ptr %template_strings, i64 0, i64 2
+  store { ptr, i64 } %npk_str_val186, ptr %part_slot187, align 8
   %array_start = getelementptr [3 x { ptr, i64 }], ptr %template_strings, i64 0, i64 0
   %concat_result = call ptr @npk_string_concat_n_simple(ptr %array_start, i64 3)
   %is_null = icmp eq ptr %concat_result, null
   br i1 %is_null, label %concat_null_check, label %concat_valid
 
-concat_null_check:                                ; preds = %then178
+concat_null_check:                                ; preds = %then182
   call void @npk_panic_oom(ptr @oom_msg.1629)
   unreachable
 
-concat_valid:                                     ; preds = %then178
+concat_valid:                                     ; preds = %then182
   store ptr %concat_result, ptr %child_path, align 8
-  %str1184 = load %struct.NpkString, ptr %dir, align 8
-  %str2185 = load %struct.NpkString, ptr @.str.1631, align 8
-  %equals186 = call i1 @npk_string_equals(%struct.NpkString %str1184, %struct.NpkString %str2185)
-  %ifcond187 = icmp ne i1 %equals186, false
-  br i1 %ifcond187, label %then188, label %ifcont189
+  %str1188 = load %struct.NpkString, ptr %dir, align 8
+  %str2189 = load %struct.NpkString, ptr @.str.1631, align 8
+  %equals190 = call i1 @npk_string_equals(%struct.NpkString %str1188, %struct.NpkString %str2189)
+  %ifcond191 = icmp ne i1 %equals190, false
+  br i1 %ifcond191, label %then192, label %ifcont193
 
-then188:                                          ; preds = %concat_valid
+then192:                                          ; preds = %concat_valid
   store ptr @.str.1633, ptr %child_path, align 8
-  br label %ifcont189
+  br label %ifcont193
 
-ifcont189:                                        ; preds = %then188, %concat_valid
-  %template_strings190 = alloca [5 x { ptr, i64 }], align 8
-  %npk_str191 = alloca { ptr, i64 }, align 8
-  %data_ptr192 = getelementptr inbounds nuw { ptr, i64 }, ptr %npk_str191, i32 0, i32 0
-  store ptr @.str.1634, ptr %data_ptr192, align 8
-  %length_ptr193 = getelementptr inbounds nuw { ptr, i64 }, ptr %npk_str191, i32 0, i32 1
-  store i64 0, ptr %length_ptr193, align 4
-  %npk_str_val194 = load { ptr, i64 }, ptr %npk_str191, align 8
-  %part_slot195 = getelementptr [5 x { ptr, i64 }], ptr %template_strings190, i64 0, i64 0
-  store { ptr, i64 } %npk_str_val194, ptr %part_slot195, align 8
-  %child_path196 = load ptr, ptr %child_path, align 8
-  %str_interp197 = load { ptr, i64 }, ptr %child_path196, align 8
-  %interp_slot198 = getelementptr [5 x { ptr, i64 }], ptr %template_strings190, i64 0, i64 1
-  store { ptr, i64 } %str_interp197, ptr %interp_slot198, align 8
-  %npk_str199 = alloca { ptr, i64 }, align 8
-  %data_ptr200 = getelementptr inbounds nuw { ptr, i64 }, ptr %npk_str199, i32 0, i32 0
-  store ptr @.str.1634, ptr %data_ptr200, align 8
-  %length_ptr201 = getelementptr inbounds nuw { ptr, i64 }, ptr %npk_str199, i32 0, i32 1
-  store i64 0, ptr %length_ptr201, align 4
-  %npk_str_val202 = load { ptr, i64 }, ptr %npk_str199, align 8
-  %part_slot203 = getelementptr [5 x { ptr, i64 }], ptr %template_strings190, i64 0, i64 2
-  store { ptr, i64 } %npk_str_val202, ptr %part_slot203, align 8
-  %cname204 = load ptr, ptr %cname, align 8
-  %str_interp205 = load { ptr, i64 }, ptr %cname204, align 8
-  %interp_slot206 = getelementptr [5 x { ptr, i64 }], ptr %template_strings190, i64 0, i64 3
-  store { ptr, i64 } %str_interp205, ptr %interp_slot206, align 8
-  %npk_str207 = alloca { ptr, i64 }, align 8
-  %data_ptr208 = getelementptr inbounds nuw { ptr, i64 }, ptr %npk_str207, i32 0, i32 0
-  store ptr @.str.1634, ptr %data_ptr208, align 8
-  %length_ptr209 = getelementptr inbounds nuw { ptr, i64 }, ptr %npk_str207, i32 0, i32 1
-  store i64 0, ptr %length_ptr209, align 4
-  %npk_str_val210 = load { ptr, i64 }, ptr %npk_str207, align 8
-  %part_slot211 = getelementptr [5 x { ptr, i64 }], ptr %template_strings190, i64 0, i64 4
-  store { ptr, i64 } %npk_str_val210, ptr %part_slot211, align 8
-  %array_start212 = getelementptr [5 x { ptr, i64 }], ptr %template_strings190, i64 0, i64 0
-  %concat_result213 = call ptr @npk_string_concat_n_simple(ptr %array_start212, i64 5)
-  %is_null216 = icmp eq ptr %concat_result213, null
-  br i1 %is_null216, label %concat_null_check214, label %concat_valid215
+ifcont193:                                        ; preds = %then192, %concat_valid
+  %template_strings194 = alloca [5 x { ptr, i64 }], align 8
+  %npk_str195 = alloca { ptr, i64 }, align 8
+  %data_ptr196 = getelementptr inbounds nuw { ptr, i64 }, ptr %npk_str195, i32 0, i32 0
+  store ptr @.str.1634, ptr %data_ptr196, align 8
+  %length_ptr197 = getelementptr inbounds nuw { ptr, i64 }, ptr %npk_str195, i32 0, i32 1
+  store i64 0, ptr %length_ptr197, align 4
+  %npk_str_val198 = load { ptr, i64 }, ptr %npk_str195, align 8
+  %part_slot199 = getelementptr [5 x { ptr, i64 }], ptr %template_strings194, i64 0, i64 0
+  store { ptr, i64 } %npk_str_val198, ptr %part_slot199, align 8
+  %child_path200 = load ptr, ptr %child_path, align 8
+  %str_interp201 = load { ptr, i64 }, ptr %child_path200, align 8
+  %interp_slot202 = getelementptr [5 x { ptr, i64 }], ptr %template_strings194, i64 0, i64 1
+  store { ptr, i64 } %str_interp201, ptr %interp_slot202, align 8
+  %npk_str203 = alloca { ptr, i64 }, align 8
+  %data_ptr204 = getelementptr inbounds nuw { ptr, i64 }, ptr %npk_str203, i32 0, i32 0
+  store ptr @.str.1634, ptr %data_ptr204, align 8
+  %length_ptr205 = getelementptr inbounds nuw { ptr, i64 }, ptr %npk_str203, i32 0, i32 1
+  store i64 0, ptr %length_ptr205, align 4
+  %npk_str_val206 = load { ptr, i64 }, ptr %npk_str203, align 8
+  %part_slot207 = getelementptr [5 x { ptr, i64 }], ptr %template_strings194, i64 0, i64 2
+  store { ptr, i64 } %npk_str_val206, ptr %part_slot207, align 8
+  %cname208 = load ptr, ptr %cname, align 8
+  %str_interp209 = load { ptr, i64 }, ptr %cname208, align 8
+  %interp_slot210 = getelementptr [5 x { ptr, i64 }], ptr %template_strings194, i64 0, i64 3
+  store { ptr, i64 } %str_interp209, ptr %interp_slot210, align 8
+  %npk_str211 = alloca { ptr, i64 }, align 8
+  %data_ptr212 = getelementptr inbounds nuw { ptr, i64 }, ptr %npk_str211, i32 0, i32 0
+  store ptr @.str.1634, ptr %data_ptr212, align 8
+  %length_ptr213 = getelementptr inbounds nuw { ptr, i64 }, ptr %npk_str211, i32 0, i32 1
+  store i64 0, ptr %length_ptr213, align 4
+  %npk_str_val214 = load { ptr, i64 }, ptr %npk_str211, align 8
+  %part_slot215 = getelementptr [5 x { ptr, i64 }], ptr %template_strings194, i64 0, i64 4
+  store { ptr, i64 } %npk_str_val214, ptr %part_slot215, align 8
+  %array_start216 = getelementptr [5 x { ptr, i64 }], ptr %template_strings194, i64 0, i64 0
+  %concat_result217 = call ptr @npk_string_concat_n_simple(ptr %array_start216, i64 5)
+  %is_null220 = icmp eq ptr %concat_result217, null
+  br i1 %is_null220, label %concat_null_check218, label %concat_valid219
 
-concat_null_check214:                             ; preds = %ifcont189
+concat_null_check218:                             ; preds = %ifcont193
   call void @npk_panic_oom(ptr @oom_msg.1635)
   unreachable
 
-concat_valid215:                                  ; preds = %ifcont189
-  store ptr %concat_result213, ptr %child_path, align 8
-  %dtype217 = load i64, ptr %dtype149, align 4
-  %eqtmp218 = icmp eq i64 %dtype217, 4
-  %or.lhs = icmp ne i1 %eqtmp218, false
+concat_valid219:                                  ; preds = %ifcont193
+  store ptr %concat_result217, ptr %child_path, align 8
+  %dtype221 = load i64, ptr %dtype153, align 4
+  %eqtmp222 = icmp eq i64 %dtype221, 4
+  %or.lhs = icmp ne i1 %eqtmp222, false
   br i1 %or.lhs, label %or.merge, label %or.rhs
 
-or.rhs:                                           ; preds = %concat_valid215
-  %dtype219 = load i64, ptr %dtype149, align 4
-  %eqtmp220 = icmp eq i64 %dtype219, 0
-  %or.rhs221 = icmp ne i1 %eqtmp220, false
+or.rhs:                                           ; preds = %concat_valid219
+  %dtype223 = load i64, ptr %dtype153, align 4
+  %eqtmp224 = icmp eq i64 %dtype223, 0
+  %or.rhs225 = icmp ne i1 %eqtmp224, false
   br label %or.merge
 
-or.merge:                                         ; preds = %or.rhs, %concat_valid215
-  %or.result = phi i1 [ true, %concat_valid215 ], [ %or.rhs221, %or.rhs ]
-  %ifcond222 = icmp ne i1 %or.result, false
-  br i1 %ifcond222, label %then223, label %else262
+or.merge:                                         ; preds = %or.rhs, %concat_valid219
+  %or.result = phi i1 [ true, %concat_valid219 ], [ %or.rhs225, %or.rhs ]
+  %ifcond226 = icmp ne i1 %or.result, false
+  br i1 %ifcond226, label %then227, label %else266
 
-then223:                                          ; preds = %or.merge
+then227:                                          ; preds = %or.merge
   %name_cloned = alloca i64, align 8
-  %cname224 = load ptr, ptr %cname, align 8
-  %calltmp225 = call { i64, ptr, i8 } @find.str_clone_str(ptr %cname224)
-  %raw.value226 = extractvalue { i64, ptr, i8 } %calltmp225, 0
-  store i64 %raw.value226, ptr %name_cloned, align 4
+  %cname228 = load ptr, ptr %cname, align 8
+  %calltmp229 = call { i64, ptr, i8 } @find.str_clone_str(ptr %cname228)
+  %raw.value230 = extractvalue { i64, ptr, i8 } %calltmp229, 0
+  store i64 %raw.value230, ptr %name_cloned, align 4
   %path_cloned = alloca i64, align 8
-  %child_path227 = load ptr, ptr %child_path, align 8
-  %calltmp228 = call { i64, ptr, i8 } @find.str_clone_str(ptr %child_path227)
-  %raw.value229 = extractvalue { i64, ptr, i8 } %calltmp228, 0
-  store i64 %raw.value229, ptr %path_cloned, align 4
-  %dirs_len230 = load i64, ptr %dirs_len, align 4
-  %dirs_cap231 = load i64, ptr %dirs_cap, align 4
-  %lttmp232 = icmp slt i64 %dirs_len230, %dirs_cap231
-  %ifcond233 = icmp ne i1 %lttmp232, false
-  br i1 %ifcond233, label %then234, label %else250
+  %child_path231 = load ptr, ptr %child_path, align 8
+  %calltmp232 = call { i64, ptr, i8 } @find.str_clone_str(ptr %child_path231)
+  %raw.value233 = extractvalue { i64, ptr, i8 } %calltmp232, 0
+  store i64 %raw.value233, ptr %path_cloned, align 4
+  %dirs_len234 = load i64, ptr %dirs_len, align 4
+  %dirs_cap235 = load i64, ptr %dirs_cap, align 4
+  %lttmp236 = icmp slt i64 %dirs_len234, %dirs_cap235
+  %ifcond237 = icmp ne i1 %lttmp236, false
+  br i1 %ifcond237, label %then238, label %else254
 
-then234:                                          ; preds = %then223
-  %dirs_sl235 = load i64, ptr %dirs_sl, align 4
-  %dirs_len236 = load i64, ptr %dirs_len, align 4
-  %multmp237 = mul i64 %dirs_len236, 16
-  %name_cloned238 = load i64, ptr %name_cloned, align 4
-  %calltmp239 = call { i32, ptr, i8 } @find.mem_write_64(i64 %dirs_sl235, i64 %multmp237, i64 %name_cloned238)
-  %raw.value240 = extractvalue { i32, ptr, i8 } %calltmp239, 0
-  %dirs_sl241 = load i64, ptr %dirs_sl, align 4
-  %dirs_len242 = load i64, ptr %dirs_len, align 4
-  %multmp243 = mul i64 %dirs_len242, 16
-  %addtmp244 = add i64 %multmp243, 8
-  %path_cloned245 = load i64, ptr %path_cloned, align 4
-  %calltmp246 = call { i32, ptr, i8 } @find.mem_write_64(i64 %dirs_sl241, i64 %addtmp244, i64 %path_cloned245)
-  %raw.value247 = extractvalue { i32, ptr, i8 } %calltmp246, 0
-  %dirs_len248 = load i64, ptr %dirs_len, align 4
-  %addtmp249 = add i64 %dirs_len248, 1
-  store i64 %addtmp249, ptr %dirs_len, align 4
-  br label %ifcont261
+then238:                                          ; preds = %then227
+  %dirs_sl239 = load i64, ptr %dirs_sl, align 4
+  %dirs_len240 = load i64, ptr %dirs_len, align 4
+  %multmp241 = mul i64 %dirs_len240, 16
+  %name_cloned242 = load i64, ptr %name_cloned, align 4
+  %calltmp243 = call { i32, ptr, i8 } @find.mem_write_64(i64 %dirs_sl239, i64 %multmp241, i64 %name_cloned242)
+  %raw.value244 = extractvalue { i32, ptr, i8 } %calltmp243, 0
+  %dirs_sl245 = load i64, ptr %dirs_sl, align 4
+  %dirs_len246 = load i64, ptr %dirs_len, align 4
+  %multmp247 = mul i64 %dirs_len246, 16
+  %addtmp248 = add i64 %multmp247, 8
+  %path_cloned249 = load i64, ptr %path_cloned, align 4
+  %calltmp250 = call { i32, ptr, i8 } @find.mem_write_64(i64 %dirs_sl245, i64 %addtmp248, i64 %path_cloned249)
+  %raw.value251 = extractvalue { i32, ptr, i8 } %calltmp250, 0
+  %dirs_len252 = load i64, ptr %dirs_len, align 4
+  %addtmp253 = add i64 %dirs_len252, 1
+  store i64 %addtmp253, ptr %dirs_len, align 4
+  br label %ifcont265
 
-else250:                                          ; preds = %then223
-  %calltmp251 = call { i32, ptr, i8 } @cmp.print_err(ptr @.str.1637)
-  %dirs_sl252 = load i64, ptr %dirs_sl, align 4
-  %netmp253 = icmp ne i64 %dirs_sl252, 0
-  %ifcond254 = icmp ne i1 %netmp253, false
-  br i1 %ifcond254, label %then255, label %ifcont258
-
-then255:                                          ; preds = %else250
+else254:                                          ; preds = %then227
+  %calltmp255 = call { i32, ptr, i8 } @cmp.print_err(ptr @.str.1637)
   %dirs_sl256 = load i64, ptr %dirs_sl, align 4
-  %calltmp257 = call i32 @nitpick_libc_mem_free(i64 %dirs_sl256)
-  br label %ifcont258
+  %netmp257 = icmp ne i64 %dirs_sl256, 0
+  %ifcond258 = icmp ne i1 %netmp257, false
+  br i1 %ifcond258, label %then259, label %ifcont262
 
-ifcont258:                                        ; preds = %then255, %else250
-  %buf_alloc_alloc_ptr259 = load ptr, ptr %buf_alloc_alloc_ptr, align 8
-  call void @npk_free(ptr %buf_alloc_alloc_ptr259)
-  %statbuf_alloc_alloc_ptr260 = load ptr, ptr %statbuf_alloc_alloc_ptr, align 8
-  call void @npk_free(ptr %statbuf_alloc_alloc_ptr260)
+then259:                                          ; preds = %else254
+  %dirs_sl260 = load i64, ptr %dirs_sl, align 4
+  %cast.inttoptr261 = inttoptr i64 %dirs_sl260 to ptr
+  call void @npk_free(ptr %cast.inttoptr261)
+  br label %ifcont262
+
+ifcont262:                                        ; preds = %then259, %else254
+  %buf_alloc_alloc_ptr263 = load ptr, ptr %buf_alloc_alloc_ptr, align 8
+  call void @npk_free(ptr %buf_alloc_alloc_ptr263)
+  %statbuf_alloc_alloc_ptr264 = load ptr, ptr %statbuf_alloc_alloc_ptr, align 8
+  call void @npk_free(ptr %statbuf_alloc_alloc_ptr264)
   ret { i32, ptr, i8 } zeroinitializer
 
-ifcont261:                                        ; preds = %then234
-  br label %ifcont306
+ifcont265:                                        ; preds = %then238
+  br label %ifcont310
 
-else262:                                          ; preds = %or.merge
+else266:                                          ; preds = %or.merge
   %cres = alloca i64, align 8
-  %sys_str_struct263 = load %struct.NpkString, ptr %dir, align 8
-  %sys_str_data264 = extractvalue %struct.NpkString %sys_str_struct263, 0
-  %sys_strvar_int265 = ptrtoint ptr %sys_str_data264 to i64
-  %cname266 = load ptr, ptr %cname, align 8
-  %sys_str_struct267 = load %struct.NpkString, ptr %cname266, align 8
+  %sys_str_struct267 = load %struct.NpkString, ptr %dir, align 8
   %sys_str_data268 = extractvalue %struct.NpkString %sys_str_struct267, 0
   %sys_strvar_int269 = ptrtoint ptr %sys_str_data268 to i64
-  %statbuf270 = load i64, ptr %statbuf, align 4
-  %syscall_ret271 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},{r10},~{rcx},~{r11},~{memory}"(i64 262, i64 %sys_strvar_int265, i64 %sys_strvar_int269, i64 %statbuf270, i64 256)
-  %sys_is_err272 = icmp slt i64 %syscall_ret271, 0
-  %sys_neg_errno273 = sub i64 0, %syscall_ret271
-  %sys_err_ptr274 = inttoptr i64 %sys_neg_errno273 to ptr
-  %sys_val275 = select i1 %sys_is_err272, i64 0, i64 %syscall_ret271
-  %sys_err276 = select i1 %sys_is_err272, ptr %sys_err_ptr274, ptr null
-  %sys_flag277 = select i1 %sys_is_err272, i8 1, i8 0
-  %sys_result.val278 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val275, 0
-  %sys_result.err279 = insertvalue %struct.NpkResult_int64 %sys_result.val278, ptr %sys_err276, 1
-  %sys_result.is_error280 = insertvalue %struct.NpkResult_int64 %sys_result.err279, i8 %sys_flag277, 2
-  %is_error281 = extractvalue %struct.NpkResult_int64 %sys_result.is_error280, 2
-  %is_error_bool282 = icmp ne i8 %is_error281, 0
-  br i1 %is_error_bool282, label %error_block283, label %success_block284
+  %cname270 = load ptr, ptr %cname, align 8
+  %sys_str_struct271 = load %struct.NpkString, ptr %cname270, align 8
+  %sys_str_data272 = extractvalue %struct.NpkString %sys_str_struct271, 0
+  %sys_strvar_int273 = ptrtoint ptr %sys_str_data272 to i64
+  %statbuf274 = load i64, ptr %statbuf, align 4
+  %syscall_ret275 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},{r10},~{rcx},~{r11},~{memory}"(i64 262, i64 %sys_strvar_int269, i64 %sys_strvar_int273, i64 %statbuf274, i64 256)
+  %sys_is_err276 = icmp slt i64 %syscall_ret275, 0
+  %sys_neg_errno277 = sub i64 0, %syscall_ret275
+  %sys_err_ptr278 = inttoptr i64 %sys_neg_errno277 to ptr
+  %sys_val279 = select i1 %sys_is_err276, i64 0, i64 %syscall_ret275
+  %sys_err280 = select i1 %sys_is_err276, ptr %sys_err_ptr278, ptr null
+  %sys_flag281 = select i1 %sys_is_err276, i8 1, i8 0
+  %sys_result.val282 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val279, 0
+  %sys_result.err283 = insertvalue %struct.NpkResult_int64 %sys_result.val282, ptr %sys_err280, 1
+  %sys_result.is_error284 = insertvalue %struct.NpkResult_int64 %sys_result.err283, i8 %sys_flag281, 2
+  %is_error285 = extractvalue %struct.NpkResult_int64 %sys_result.is_error284, 2
+  %is_error_bool286 = icmp ne i8 %is_error285, 0
+  br i1 %is_error_bool286, label %error_block287, label %success_block288
 
-error_block283:                                   ; preds = %else262
-  br label %merge_block285
+error_block287:                                   ; preds = %else266
+  br label %merge_block289
 
-success_block284:                                 ; preds = %else262
-  %value286 = extractvalue %struct.NpkResult_int64 %sys_result.is_error280, 0
-  br label %merge_block285
+success_block288:                                 ; preds = %else266
+  %value290 = extractvalue %struct.NpkResult_int64 %sys_result.is_error284, 0
+  br label %merge_block289
 
-merge_block285:                                   ; preds = %success_block284, %error_block283
-  %unwrap_result287 = phi i64 [ -1, %error_block283 ], [ %value286, %success_block284 ]
-  store i64 %unwrap_result287, ptr %cres, align 4
-  %cres288 = load i64, ptr %cres, align 4
-  %getmp289 = icmp sge i64 %cres288, 0
-  %ifcond290 = icmp ne i1 %getmp289, false
-  br i1 %ifcond290, label %then291, label %ifcont305
+merge_block289:                                   ; preds = %success_block288, %error_block287
+  %unwrap_result291 = phi i64 [ -1, %error_block287 ], [ %value290, %success_block288 ]
+  store i64 %unwrap_result291, ptr %cres, align 4
+  %cres292 = load i64, ptr %cres, align 4
+  %getmp293 = icmp sge i64 %cres292, 0
+  %ifcond294 = icmp ne i1 %getmp293, false
+  br i1 %ifcond294, label %then295, label %ifcont309
 
-then291:                                          ; preds = %merge_block285
-  %child_path292 = load ptr, ptr %child_path, align 8
-  %cname293 = load ptr, ptr %cname, align 8
-  %dtype294 = load i64, ptr %dtype149, align 4
-  %statbuf295 = load i64, ptr %statbuf, align 4
-  %calltmp296 = call { i32, ptr, i8 } @find.evaluate_file(ptr %child_path292, ptr %cname293, ptr %flags, i64 %dtype294, i64 %statbuf295)
-  %raw.value297 = extractvalue { i32, ptr, i8 } %calltmp296, 0
-  %eqtmp298 = icmp eq i32 %raw.value297, 1
-  %ifcond299 = icmp ne i1 %eqtmp298, false
-  br i1 %ifcond299, label %then300, label %ifcont304
+then295:                                          ; preds = %merge_block289
+  %child_path296 = load ptr, ptr %child_path, align 8
+  %cname297 = load ptr, ptr %cname, align 8
+  %dtype298 = load i64, ptr %dtype153, align 4
+  %statbuf299 = load i64, ptr %statbuf, align 4
+  %calltmp300 = call { i32, ptr, i8 } @find.evaluate_file(ptr %child_path296, ptr %cname297, ptr %flags, i64 %dtype298, i64 %statbuf299)
+  %raw.value301 = extractvalue { i32, ptr, i8 } %calltmp300, 0
+  %eqtmp302 = icmp eq i32 %raw.value301, 1
+  %ifcond303 = icmp ne i1 %eqtmp302, false
+  br i1 %ifcond303, label %then304, label %ifcont308
 
-then300:                                          ; preds = %then291
-  %child_path301 = load ptr, ptr %child_path, align 8
-  %calltmp302 = call { i32, ptr, i8 } @comm.print_out(ptr %child_path301)
-  %calltmp303 = call { i32, ptr, i8 } @comm.print_out(ptr @.str.1639)
-  br label %ifcont304
+then304:                                          ; preds = %then295
+  %child_path305 = load ptr, ptr %child_path, align 8
+  %calltmp306 = call { i32, ptr, i8 } @comm.print_out(ptr %child_path305)
+  %calltmp307 = call { i32, ptr, i8 } @comm.print_out(ptr @.str.1639)
+  br label %ifcont308
 
-ifcont304:                                        ; preds = %then300, %then291
-  br label %ifcont305
+ifcont308:                                        ; preds = %then304, %then295
+  br label %ifcont309
 
-ifcont305:                                        ; preds = %ifcont304, %merge_block285
-  br label %ifcont306
+ifcont309:                                        ; preds = %ifcont308, %merge_block289
+  br label %ifcont310
 
-ifcont306:                                        ; preds = %ifcont305, %ifcont261
-  br label %ifcont307
+ifcont310:                                        ; preds = %ifcont309, %ifcont265
+  br label %ifcont311
 
-ifcont307:                                        ; preds = %ifcont306, %and.merge169
-  %bpos308 = load i64, ptr %bpos, align 4
-  %reclen309 = load i64, ptr %reclen, align 4
-  %addtmp310 = add i64 %bpos308, %reclen309
-  store i64 %addtmp310, ptr %bpos, align 4
+ifcont311:                                        ; preds = %ifcont310, %and.merge173
+  %bpos312 = load i64, ptr %bpos, align 4
+  %reclen313 = load i64, ptr %reclen, align 4
+  %addtmp314 = add i64 %bpos312, %reclen313
+  store i64 %addtmp314, ptr %bpos, align 4
   call void @npk_gc_safepoint()
-  br label %whilecond120
+  br label %whilecond124
 
-afterwhile311:                                    ; preds = %whilecond120
-  br label %ifcont312
+afterwhile315:                                    ; preds = %whilecond124
+  br label %ifcont316
 
-ifcont312:                                        ; preds = %afterwhile311, %then118
+ifcont316:                                        ; preds = %afterwhile315, %then122
   call void @npk_gc_safepoint()
-  br label %whilecond92
+  br label %whilecond96
 
-afterwhile313:                                    ; preds = %whilecond92
+afterwhile317:                                    ; preds = %whilecond96
   %slen = alloca i64, align 8
-  %dirs_len314 = load i64, ptr %dirs_len, align 4
-  store i64 %dirs_len314, ptr %slen, align 4
+  %dirs_len318 = load i64, ptr %dirs_len, align 4
+  store i64 %dirs_len318, ptr %slen, align 4
   %s_idx = alloca i64, align 8
   store i64 0, ptr %s_idx, align 4
-  br label %whilecond315
+  br label %whilecond319
 
-whilecond315:                                     ; preds = %merge_block348, %afterwhile313
-  %s_idx316 = load i64, ptr %s_idx, align 4
-  %slen317 = load i64, ptr %slen, align 4
-  %lttmp318 = icmp slt i64 %s_idx316, %slen317
-  %whilecond319 = icmp ne i1 %lttmp318, false
-  br i1 %whilecond319, label %whilebody320, label %afterwhile361
+whilecond319:                                     ; preds = %merge_block352, %afterwhile317
+  %s_idx320 = load i64, ptr %s_idx, align 4
+  %slen321 = load i64, ptr %slen, align 4
+  %lttmp322 = icmp slt i64 %s_idx320, %slen321
+  %whilecond323 = icmp ne i1 %lttmp322, false
+  br i1 %whilecond323, label %whilebody324, label %afterwhile365
 
-whilebody320:                                     ; preds = %whilecond315
+whilebody324:                                     ; preds = %whilecond319
   %cname_ptr = alloca i64, align 8
-  %dirs_sl321 = load i64, ptr %dirs_sl, align 4
-  %s_idx322 = load i64, ptr %s_idx, align 4
-  %multmp323 = mul i64 %s_idx322, 16
-  %calltmp324 = call { i64, ptr, i8 } @find.mem_read_64(i64 %dirs_sl321, i64 %multmp323)
-  %raw.value325 = extractvalue { i64, ptr, i8 } %calltmp324, 0
-  store i64 %raw.value325, ptr %cname_ptr, align 4
+  %dirs_sl325 = load i64, ptr %dirs_sl, align 4
+  %s_idx326 = load i64, ptr %s_idx, align 4
+  %multmp327 = mul i64 %s_idx326, 16
+  %calltmp328 = call { i64, ptr, i8 } @find.mem_read_64(i64 %dirs_sl325, i64 %multmp327)
+  %raw.value329 = extractvalue { i64, ptr, i8 } %calltmp328, 0
+  store i64 %raw.value329, ptr %cname_ptr, align 4
   %cpath_ptr = alloca i64, align 8
-  %dirs_sl326 = load i64, ptr %dirs_sl, align 4
-  %s_idx327 = load i64, ptr %s_idx, align 4
-  %multmp328 = mul i64 %s_idx327, 16
-  %addtmp329 = add i64 %multmp328, 8
-  %calltmp330 = call { i64, ptr, i8 } @find.mem_read_64(i64 %dirs_sl326, i64 %addtmp329)
-  %raw.value331 = extractvalue { i64, ptr, i8 } %calltmp330, 0
-  store i64 %raw.value331, ptr %cpath_ptr, align 4
+  %dirs_sl330 = load i64, ptr %dirs_sl, align 4
+  %s_idx331 = load i64, ptr %s_idx, align 4
+  %multmp332 = mul i64 %s_idx331, 16
+  %addtmp333 = add i64 %multmp332, 8
+  %calltmp334 = call { i64, ptr, i8 } @find.mem_read_64(i64 %dirs_sl330, i64 %addtmp333)
+  %raw.value335 = extractvalue { i64, ptr, i8 } %calltmp334, 0
+  store i64 %raw.value335, ptr %cpath_ptr, align 4
   %child_name = alloca ptr, align 8
-  %cname_ptr332 = load i64, ptr %cname_ptr, align 4
-  %calltmp333 = call { ptr, ptr, i8 } @mem_utils.ptr_to_string(i64 %cname_ptr332)
-  %is_error334 = extractvalue { ptr, ptr, i8 } %calltmp333, 2
-  %is_error_bool335 = icmp ne i8 %is_error334, 0
-  br i1 %is_error_bool335, label %error_block336, label %success_block337
+  %cname_ptr336 = load i64, ptr %cname_ptr, align 4
+  %calltmp337 = call { ptr, ptr, i8 } @mem_utils.ptr_to_string(i64 %cname_ptr336)
+  %is_error338 = extractvalue { ptr, ptr, i8 } %calltmp337, 2
+  %is_error_bool339 = icmp ne i8 %is_error338, 0
+  br i1 %is_error_bool339, label %error_block340, label %success_block341
 
-error_block336:                                   ; preds = %whilebody320
-  br label %merge_block338
+error_block340:                                   ; preds = %whilebody324
+  br label %merge_block342
 
-success_block337:                                 ; preds = %whilebody320
-  %value339 = extractvalue { ptr, ptr, i8 } %calltmp333, 0
-  br label %merge_block338
+success_block341:                                 ; preds = %whilebody324
+  %value343 = extractvalue { ptr, ptr, i8 } %calltmp337, 0
+  br label %merge_block342
 
-merge_block338:                                   ; preds = %success_block337, %error_block336
-  %unwrap_result340 = phi ptr [ @.str.1641, %error_block336 ], [ %value339, %success_block337 ]
-  store ptr %unwrap_result340, ptr %child_name, align 8
-  %child_path341 = alloca ptr, align 8
-  %cpath_ptr342 = load i64, ptr %cpath_ptr, align 4
-  %calltmp343 = call { ptr, ptr, i8 } @mem_utils.ptr_to_string(i64 %cpath_ptr342)
-  %is_error344 = extractvalue { ptr, ptr, i8 } %calltmp343, 2
-  %is_error_bool345 = icmp ne i8 %is_error344, 0
-  br i1 %is_error_bool345, label %error_block346, label %success_block347
+merge_block342:                                   ; preds = %success_block341, %error_block340
+  %unwrap_result344 = phi ptr [ @.str.1641, %error_block340 ], [ %value343, %success_block341 ]
+  store ptr %unwrap_result344, ptr %child_name, align 8
+  %child_path345 = alloca ptr, align 8
+  %cpath_ptr346 = load i64, ptr %cpath_ptr, align 4
+  %calltmp347 = call { ptr, ptr, i8 } @mem_utils.ptr_to_string(i64 %cpath_ptr346)
+  %is_error348 = extractvalue { ptr, ptr, i8 } %calltmp347, 2
+  %is_error_bool349 = icmp ne i8 %is_error348, 0
+  br i1 %is_error_bool349, label %error_block350, label %success_block351
 
-error_block346:                                   ; preds = %merge_block338
-  br label %merge_block348
+error_block350:                                   ; preds = %merge_block342
+  br label %merge_block352
 
-success_block347:                                 ; preds = %merge_block338
-  %value349 = extractvalue { ptr, ptr, i8 } %calltmp343, 0
-  br label %merge_block348
+success_block351:                                 ; preds = %merge_block342
+  %value353 = extractvalue { ptr, ptr, i8 } %calltmp347, 0
+  br label %merge_block352
 
-merge_block348:                                   ; preds = %success_block347, %error_block346
-  %unwrap_result350 = phi ptr [ @.str.1643, %error_block346 ], [ %value349, %success_block347 ]
-  store ptr %unwrap_result350, ptr %child_path341, align 8
-  %fd351 = load i64, ptr %fd, align 4
-  %child_name352 = load ptr, ptr %child_name, align 8
-  %child_path353 = load ptr, ptr %child_path341, align 8
-  %calltmp354 = call { i32, ptr, i8 } @find.walk_dir_at(i64 %fd351, ptr %child_name352, ptr %child_path353, ptr %flags)
-  %cname_ptr355 = load i64, ptr %cname_ptr, align 4
-  %cast.inttoptr356 = inttoptr i64 %cname_ptr355 to ptr
-  call void @npk_free(ptr %cast.inttoptr356)
-  %cpath_ptr357 = load i64, ptr %cpath_ptr, align 4
-  %cast.inttoptr358 = inttoptr i64 %cpath_ptr357 to ptr
-  call void @npk_free(ptr %cast.inttoptr358)
-  %s_idx359 = load i64, ptr %s_idx, align 4
-  %addtmp360 = add i64 %s_idx359, 1
-  store i64 %addtmp360, ptr %s_idx, align 4
+merge_block352:                                   ; preds = %success_block351, %error_block350
+  %unwrap_result354 = phi ptr [ @.str.1643, %error_block350 ], [ %value353, %success_block351 ]
+  store ptr %unwrap_result354, ptr %child_path345, align 8
+  %fd355 = load i64, ptr %fd, align 4
+  %child_name356 = load ptr, ptr %child_name, align 8
+  %child_path357 = load ptr, ptr %child_path345, align 8
+  %calltmp358 = call { i32, ptr, i8 } @find.walk_dir_at(i64 %fd355, ptr %child_name356, ptr %child_path357, ptr %flags)
+  %cname_ptr359 = load i64, ptr %cname_ptr, align 4
+  %cast.inttoptr360 = inttoptr i64 %cname_ptr359 to ptr
+  call void @npk_free(ptr %cast.inttoptr360)
+  %cpath_ptr361 = load i64, ptr %cpath_ptr, align 4
+  %cast.inttoptr362 = inttoptr i64 %cpath_ptr361 to ptr
+  call void @npk_free(ptr %cast.inttoptr362)
+  %s_idx363 = load i64, ptr %s_idx, align 4
+  %addtmp364 = add i64 %s_idx363, 1
+  store i64 %addtmp364, ptr %s_idx, align 4
   call void @npk_gc_safepoint()
-  br label %whilecond315
+  br label %whilecond319
 
-afterwhile361:                                    ; preds = %whilecond315
-  %dirs_sl362 = load i64, ptr %dirs_sl, align 4
-  %netmp363 = icmp ne i64 %dirs_sl362, 0
-  %ifcond364 = icmp ne i1 %netmp363, false
-  br i1 %ifcond364, label %then365, label %ifcont368
-
-then365:                                          ; preds = %afterwhile361
+afterwhile365:                                    ; preds = %whilecond319
   %dirs_sl366 = load i64, ptr %dirs_sl, align 4
-  %calltmp367 = call i32 @nitpick_libc_mem_free(i64 %dirs_sl366)
-  br label %ifcont368
+  %netmp367 = icmp ne i64 %dirs_sl366, 0
+  %ifcond368 = icmp ne i1 %netmp367, false
+  br i1 %ifcond368, label %then369, label %ifcont372
 
-ifcont368:                                        ; preds = %then365, %afterwhile361
-  br label %ifcont369
+then369:                                          ; preds = %afterwhile365
+  %dirs_sl370 = load i64, ptr %dirs_sl, align 4
+  %cast.inttoptr371 = inttoptr i64 %dirs_sl370 to ptr
+  call void @npk_free(ptr %cast.inttoptr371)
+  br label %ifcont372
 
-ifcont369:                                        ; preds = %ifcont368, %then80
-  %buf_alloc_alloc_ptr370 = load ptr, ptr %buf_alloc_alloc_ptr, align 8
-  call void @npk_free(ptr %buf_alloc_alloc_ptr370)
-  br label %ifcont371
+ifcont372:                                        ; preds = %then369, %afterwhile365
+  br label %ifcont373
 
-ifcont371:                                        ; preds = %ifcont369, %merge_block74
-  %fd372 = load i64, ptr %fd, align 4
-  %getmp373 = icmp sge i64 %fd372, 0
-  %ifcond374 = icmp ne i1 %getmp373, false
-  br i1 %ifcond374, label %then375, label %ifcont387
+ifcont373:                                        ; preds = %ifcont372, %then80
+  %buf_alloc_alloc_ptr374 = load ptr, ptr %buf_alloc_alloc_ptr, align 8
+  call void @npk_free(ptr %buf_alloc_alloc_ptr374)
+  br label %ifcont375
 
-then375:                                          ; preds = %ifcont371
+ifcont375:                                        ; preds = %ifcont373, %merge_block74
   %fd376 = load i64, ptr %fd, align 4
-  %syscall_ret377 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %fd376)
-  %sys_is_err378 = icmp slt i64 %syscall_ret377, 0
-  %sys_neg_errno379 = sub i64 0, %syscall_ret377
-  %sys_err_ptr380 = inttoptr i64 %sys_neg_errno379 to ptr
-  %sys_val381 = select i1 %sys_is_err378, i64 0, i64 %syscall_ret377
-  %sys_err382 = select i1 %sys_is_err378, ptr %sys_err_ptr380, ptr null
-  %sys_flag383 = select i1 %sys_is_err378, i8 1, i8 0
-  %sys_result.val384 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val381, 0
-  %sys_result.err385 = insertvalue %struct.NpkResult_int64 %sys_result.val384, ptr %sys_err382, 1
-  %sys_result.is_error386 = insertvalue %struct.NpkResult_int64 %sys_result.err385, i8 %sys_flag383, 2
-  br label %ifcont387
+  %getmp377 = icmp sge i64 %fd376, 0
+  %ifcond378 = icmp ne i1 %getmp377, false
+  br i1 %ifcond378, label %then379, label %ifcont391
 
-ifcont387:                                        ; preds = %then375, %ifcont371
-  %statbuf_alloc_alloc_ptr388 = load ptr, ptr %statbuf_alloc_alloc_ptr, align 8
-  call void @npk_free(ptr %statbuf_alloc_alloc_ptr388)
+then379:                                          ; preds = %ifcont375
+  %fd380 = load i64, ptr %fd, align 4
+  %syscall_ret381 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %fd380)
+  %sys_is_err382 = icmp slt i64 %syscall_ret381, 0
+  %sys_neg_errno383 = sub i64 0, %syscall_ret381
+  %sys_err_ptr384 = inttoptr i64 %sys_neg_errno383 to ptr
+  %sys_val385 = select i1 %sys_is_err382, i64 0, i64 %syscall_ret381
+  %sys_err386 = select i1 %sys_is_err382, ptr %sys_err_ptr384, ptr null
+  %sys_flag387 = select i1 %sys_is_err382, i8 1, i8 0
+  %sys_result.val388 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val385, 0
+  %sys_result.err389 = insertvalue %struct.NpkResult_int64 %sys_result.val388, ptr %sys_err386, 1
+  %sys_result.is_error390 = insertvalue %struct.NpkResult_int64 %sys_result.err389, i8 %sys_flag387, 2
+  br label %ifcont391
+
+ifcont391:                                        ; preds = %then379, %ifcont375
+  %statbuf_alloc_alloc_ptr392 = load ptr, ptr %statbuf_alloc_alloc_ptr, align 8
+  call void @npk_free(ptr %statbuf_alloc_alloc_ptr392)
   ret { i32, ptr, i8 } zeroinitializer
 }
 
@@ -30817,30 +30837,34 @@ entry:
   %roots_sl = alloca i64, align 8
   %roots_cap17 = load i64, ptr %roots_cap, align 4
   %multmp = mul i64 %roots_cap17, 8
-  %calltmp18 = call i64 @malloc(i64 %multmp)
-  store i64 %calltmp18, ptr %roots_sl, align 4
+  %wild_ptr = call ptr @npk_alloc(i64 %multmp)
+  %roots_cap18 = load i64, ptr %roots_cap, align 4
+  %multmp19 = mul i64 %roots_cap18, 8
+  %wild_ptr20 = call ptr @npk_alloc(i64 %multmp19)
+  %cast.ptrtoint = ptrtoint ptr %wild_ptr20 to i64
+  store i64 %cast.ptrtoint, ptr %roots_sl, align 4
   %i = alloca i32, align 4
   store i32 0, ptr %i, align 4
   %parsing_args = alloca i32, align 4
   store i32 0, ptr %parsing_args, align 4
   br label %whilecond
 
-whilecond:                                        ; preds = %ifcont303, %entry
-  %i19 = load i32, ptr %i, align 4
-  %argc20 = load i32, ptr %argc.addr, align 4
-  %lttmp = icmp slt i32 %i19, %argc20
-  %whilecond21 = icmp ne i1 %lttmp, false
-  br i1 %whilecond21, label %whilebody, label %afterwhile306
+whilecond:                                        ; preds = %ifcont305, %entry
+  %i21 = load i32, ptr %i, align 4
+  %argc22 = load i32, ptr %argc.addr, align 4
+  %lttmp = icmp slt i32 %i21, %argc22
+  %whilecond23 = icmp ne i1 %lttmp, false
+  br i1 %whilecond23, label %whilebody, label %afterwhile308
 
 whilebody:                                        ; preds = %whilecond
   %arg = alloca ptr, align 8
-  %args22 = load ptr, ptr %args, align 8
-  %i23 = load i32, ptr %i, align 4
-  %calltmp24 = call { ptr, ptr, i8 } @nitpick_args.args_at(ptr %args22, i32 %i23)
-  %raw.value25 = extractvalue { ptr, ptr, i8 } %calltmp24, 0
-  store ptr %raw.value25, ptr %arg, align 8
-  %arg26 = load ptr, ptr %arg, align 8
-  %str1 = load %struct.NpkString, ptr %arg26, align 8
+  %args24 = load ptr, ptr %args, align 8
+  %i25 = load i32, ptr %i, align 4
+  %calltmp26 = call { ptr, ptr, i8 } @nitpick_args.args_at(ptr %args24, i32 %i25)
+  %raw.value27 = extractvalue { ptr, ptr, i8 } %calltmp26, 0
+  store ptr %raw.value27, ptr %arg, align 8
+  %arg28 = load ptr, ptr %arg, align 8
+  %str1 = load %struct.NpkString, ptr %arg28, align 8
   %str2 = load %struct.NpkString, ptr @.str.1653, align 8
   %equals = call i1 @npk_string_equals(%struct.NpkString %str1, %struct.NpkString %str2)
   %ifcond = icmp ne i1 %equals, false
@@ -30848,619 +30872,613 @@ whilebody:                                        ; preds = %whilecond
 
 then:                                             ; preds = %whilebody
   store i32 1, ptr %parsing_args, align 4
-  %i27 = load i32, ptr %i, align 4
-  %addtmp = add i32 %i27, 1
+  %i29 = load i32, ptr %i, align 4
+  %addtmp = add i32 %i29, 1
   store i32 %addtmp, ptr %i, align 4
-  %i28 = load i32, ptr %i, align 4
-  %argc29 = load i32, ptr %argc.addr, align 4
-  %lttmp30 = icmp slt i32 %i28, %argc29
-  %ifcond31 = icmp ne i1 %lttmp30, false
-  br i1 %ifcond31, label %then32, label %ifcont
+  %i30 = load i32, ptr %i, align 4
+  %argc31 = load i32, ptr %argc.addr, align 4
+  %lttmp32 = icmp slt i32 %i30, %argc31
+  %ifcond33 = icmp ne i1 %lttmp32, false
+  br i1 %ifcond33, label %then34, label %ifcont
 
-then32:                                           ; preds = %then
-  %flags33 = load ptr, ptr %flags, align 8
-  %has_name.ptr34 = getelementptr inbounds nuw %FindFlags, ptr %flags33, i32 0, i32 0
-  store i32 1, ptr %has_name.ptr34, align 4
+then34:                                           ; preds = %then
   %flags35 = load ptr, ptr %flags, align 8
-  %args36 = load ptr, ptr %args, align 8
-  %i37 = load i32, ptr %i, align 4
-  %calltmp38 = call { ptr, ptr, i8 } @nitpick_args.args_at(ptr %args36, i32 %i37)
-  %raw.value39 = extractvalue { ptr, ptr, i8 } %calltmp38, 0
-  %calltmp40 = call { i64, ptr, i8 } @find.str_clone_str(ptr %raw.value39)
-  %raw.value41 = extractvalue { i64, ptr, i8 } %calltmp40, 0
-  %name_ptr.ptr42 = getelementptr inbounds nuw %FindFlags, ptr %flags35, i32 0, i32 1
-  store i64 %raw.value41, ptr %name_ptr.ptr42, align 4
+  %has_name.ptr36 = getelementptr inbounds nuw %FindFlags, ptr %flags35, i32 0, i32 0
+  store i32 1, ptr %has_name.ptr36, align 4
+  %flags37 = load ptr, ptr %flags, align 8
+  %args38 = load ptr, ptr %args, align 8
+  %i39 = load i32, ptr %i, align 4
+  %calltmp40 = call { ptr, ptr, i8 } @nitpick_args.args_at(ptr %args38, i32 %i39)
+  %raw.value41 = extractvalue { ptr, ptr, i8 } %calltmp40, 0
+  %calltmp42 = call { i64, ptr, i8 } @find.str_clone_str(ptr %raw.value41)
+  %raw.value43 = extractvalue { i64, ptr, i8 } %calltmp42, 0
+  %name_ptr.ptr44 = getelementptr inbounds nuw %FindFlags, ptr %flags37, i32 0, i32 1
+  store i64 %raw.value43, ptr %name_ptr.ptr44, align 4
   br label %ifcont
 
-ifcont:                                           ; preds = %then32, %then
-  br label %ifcont303
+ifcont:                                           ; preds = %then34, %then
+  br label %ifcont305
 
 else:                                             ; preds = %whilebody
-  %arg43 = load ptr, ptr %arg, align 8
-  %str144 = load %struct.NpkString, ptr %arg43, align 8
-  %str245 = load %struct.NpkString, ptr @.str.1655, align 8
-  %equals46 = call i1 @npk_string_equals(%struct.NpkString %str144, %struct.NpkString %str245)
-  %ifcond47 = icmp ne i1 %equals46, false
-  br i1 %ifcond47, label %then48, label %else95
+  %arg45 = load ptr, ptr %arg, align 8
+  %str146 = load %struct.NpkString, ptr %arg45, align 8
+  %str247 = load %struct.NpkString, ptr @.str.1655, align 8
+  %equals48 = call i1 @npk_string_equals(%struct.NpkString %str146, %struct.NpkString %str247)
+  %ifcond49 = icmp ne i1 %equals48, false
+  br i1 %ifcond49, label %then50, label %else97
 
-then48:                                           ; preds = %else
+then50:                                           ; preds = %else
   store i32 1, ptr %parsing_args, align 4
-  %i49 = load i32, ptr %i, align 4
-  %addtmp50 = add i32 %i49, 1
-  store i32 %addtmp50, ptr %i, align 4
   %i51 = load i32, ptr %i, align 4
-  %argc52 = load i32, ptr %argc.addr, align 4
-  %lttmp53 = icmp slt i32 %i51, %argc52
-  %ifcond54 = icmp ne i1 %lttmp53, false
-  br i1 %ifcond54, label %then55, label %ifcont94
+  %addtmp52 = add i32 %i51, 1
+  store i32 %addtmp52, ptr %i, align 4
+  %i53 = load i32, ptr %i, align 4
+  %argc54 = load i32, ptr %argc.addr, align 4
+  %lttmp55 = icmp slt i32 %i53, %argc54
+  %ifcond56 = icmp ne i1 %lttmp55, false
+  br i1 %ifcond56, label %then57, label %ifcont96
 
-then55:                                           ; preds = %then48
+then57:                                           ; preds = %then50
   %t = alloca ptr, align 8
-  %args56 = load ptr, ptr %args, align 8
-  %i57 = load i32, ptr %i, align 4
-  %calltmp58 = call { ptr, ptr, i8 } @nitpick_args.args_at(ptr %args56, i32 %i57)
-  %raw.value59 = extractvalue { ptr, ptr, i8 } %calltmp58, 0
-  store ptr %raw.value59, ptr %t, align 8
-  %flags60 = load ptr, ptr %flags, align 8
-  %has_type.ptr61 = getelementptr inbounds nuw %FindFlags, ptr %flags60, i32 0, i32 2
-  store i32 1, ptr %has_type.ptr61, align 4
-  %t62 = load ptr, ptr %t, align 8
-  %str163 = load %struct.NpkString, ptr %t62, align 8
-  %str264 = load %struct.NpkString, ptr @.str.1657, align 8
-  %equals65 = call i1 @npk_string_equals(%struct.NpkString %str163, %struct.NpkString %str264)
-  %ifcond66 = icmp ne i1 %equals65, false
-  br i1 %ifcond66, label %then67, label %else70
+  %args58 = load ptr, ptr %args, align 8
+  %i59 = load i32, ptr %i, align 4
+  %calltmp60 = call { ptr, ptr, i8 } @nitpick_args.args_at(ptr %args58, i32 %i59)
+  %raw.value61 = extractvalue { ptr, ptr, i8 } %calltmp60, 0
+  store ptr %raw.value61, ptr %t, align 8
+  %flags62 = load ptr, ptr %flags, align 8
+  %has_type.ptr63 = getelementptr inbounds nuw %FindFlags, ptr %flags62, i32 0, i32 2
+  store i32 1, ptr %has_type.ptr63, align 4
+  %t64 = load ptr, ptr %t, align 8
+  %str165 = load %struct.NpkString, ptr %t64, align 8
+  %str266 = load %struct.NpkString, ptr @.str.1657, align 8
+  %equals67 = call i1 @npk_string_equals(%struct.NpkString %str165, %struct.NpkString %str266)
+  %ifcond68 = icmp ne i1 %equals67, false
+  br i1 %ifcond68, label %then69, label %else72
 
-then67:                                           ; preds = %then55
-  %flags68 = load ptr, ptr %flags, align 8
-  %type_val.ptr69 = getelementptr inbounds nuw %FindFlags, ptr %flags68, i32 0, i32 3
-  store i64 4, ptr %type_val.ptr69, align 4
-  br label %ifcont93
+then69:                                           ; preds = %then57
+  %flags70 = load ptr, ptr %flags, align 8
+  %type_val.ptr71 = getelementptr inbounds nuw %FindFlags, ptr %flags70, i32 0, i32 3
+  store i64 4, ptr %type_val.ptr71, align 4
+  br label %ifcont95
 
-else70:                                           ; preds = %then55
-  %t71 = load ptr, ptr %t, align 8
-  %str172 = load %struct.NpkString, ptr %t71, align 8
-  %str273 = load %struct.NpkString, ptr @.str.1659, align 8
-  %equals74 = call i1 @npk_string_equals(%struct.NpkString %str172, %struct.NpkString %str273)
-  %ifcond75 = icmp ne i1 %equals74, false
-  br i1 %ifcond75, label %then76, label %else79
+else72:                                           ; preds = %then57
+  %t73 = load ptr, ptr %t, align 8
+  %str174 = load %struct.NpkString, ptr %t73, align 8
+  %str275 = load %struct.NpkString, ptr @.str.1659, align 8
+  %equals76 = call i1 @npk_string_equals(%struct.NpkString %str174, %struct.NpkString %str275)
+  %ifcond77 = icmp ne i1 %equals76, false
+  br i1 %ifcond77, label %then78, label %else81
 
-then76:                                           ; preds = %else70
-  %flags77 = load ptr, ptr %flags, align 8
-  %type_val.ptr78 = getelementptr inbounds nuw %FindFlags, ptr %flags77, i32 0, i32 3
-  store i64 8, ptr %type_val.ptr78, align 4
-  br label %ifcont92
-
-else79:                                           ; preds = %else70
-  %t80 = load ptr, ptr %t, align 8
-  %str181 = load %struct.NpkString, ptr %t80, align 8
-  %str282 = load %struct.NpkString, ptr @.str.1661, align 8
-  %equals83 = call i1 @npk_string_equals(%struct.NpkString %str181, %struct.NpkString %str282)
-  %ifcond84 = icmp ne i1 %equals83, false
-  br i1 %ifcond84, label %then85, label %else88
-
-then85:                                           ; preds = %else79
-  %flags86 = load ptr, ptr %flags, align 8
-  %type_val.ptr87 = getelementptr inbounds nuw %FindFlags, ptr %flags86, i32 0, i32 3
-  store i64 10, ptr %type_val.ptr87, align 4
-  br label %ifcont91
-
-else88:                                           ; preds = %else79
-  %flags89 = load ptr, ptr %flags, align 8
-  %type_val.ptr90 = getelementptr inbounds nuw %FindFlags, ptr %flags89, i32 0, i32 3
-  store i64 0, ptr %type_val.ptr90, align 4
-  br label %ifcont91
-
-ifcont91:                                         ; preds = %else88, %then85
-  br label %ifcont92
-
-ifcont92:                                         ; preds = %ifcont91, %then76
-  br label %ifcont93
-
-ifcont93:                                         ; preds = %ifcont92, %then67
+then78:                                           ; preds = %else72
+  %flags79 = load ptr, ptr %flags, align 8
+  %type_val.ptr80 = getelementptr inbounds nuw %FindFlags, ptr %flags79, i32 0, i32 3
+  store i64 8, ptr %type_val.ptr80, align 4
   br label %ifcont94
 
-ifcont94:                                         ; preds = %ifcont93, %then48
-  br label %ifcont302
+else81:                                           ; preds = %else72
+  %t82 = load ptr, ptr %t, align 8
+  %str183 = load %struct.NpkString, ptr %t82, align 8
+  %str284 = load %struct.NpkString, ptr @.str.1661, align 8
+  %equals85 = call i1 @npk_string_equals(%struct.NpkString %str183, %struct.NpkString %str284)
+  %ifcond86 = icmp ne i1 %equals85, false
+  br i1 %ifcond86, label %then87, label %else90
 
-else95:                                           ; preds = %else
-  %arg96 = load ptr, ptr %arg, align 8
-  %str197 = load %struct.NpkString, ptr %arg96, align 8
-  %str298 = load %struct.NpkString, ptr @.str.1663, align 8
-  %equals99 = call i1 @npk_string_equals(%struct.NpkString %str197, %struct.NpkString %str298)
-  %ifcond100 = icmp ne i1 %equals99, false
-  br i1 %ifcond100, label %then101, label %else267
+then87:                                           ; preds = %else81
+  %flags88 = load ptr, ptr %flags, align 8
+  %type_val.ptr89 = getelementptr inbounds nuw %FindFlags, ptr %flags88, i32 0, i32 3
+  store i64 10, ptr %type_val.ptr89, align 4
+  br label %ifcont93
 
-then101:                                          ; preds = %else95
+else90:                                           ; preds = %else81
+  %flags91 = load ptr, ptr %flags, align 8
+  %type_val.ptr92 = getelementptr inbounds nuw %FindFlags, ptr %flags91, i32 0, i32 3
+  store i64 0, ptr %type_val.ptr92, align 4
+  br label %ifcont93
+
+ifcont93:                                         ; preds = %else90, %then87
+  br label %ifcont94
+
+ifcont94:                                         ; preds = %ifcont93, %then78
+  br label %ifcont95
+
+ifcont95:                                         ; preds = %ifcont94, %then69
+  br label %ifcont96
+
+ifcont96:                                         ; preds = %ifcont95, %then50
+  br label %ifcont304
+
+else97:                                           ; preds = %else
+  %arg98 = load ptr, ptr %arg, align 8
+  %str199 = load %struct.NpkString, ptr %arg98, align 8
+  %str2100 = load %struct.NpkString, ptr @.str.1663, align 8
+  %equals101 = call i1 @npk_string_equals(%struct.NpkString %str199, %struct.NpkString %str2100)
+  %ifcond102 = icmp ne i1 %equals101, false
+  br i1 %ifcond102, label %then103, label %else269
+
+then103:                                          ; preds = %else97
   store i32 1, ptr %parsing_args, align 4
-  %i102 = load i32, ptr %i, align 4
-  %addtmp103 = add i32 %i102, 1
-  store i32 %addtmp103, ptr %i, align 4
   %i104 = load i32, ptr %i, align 4
-  %argc105 = load i32, ptr %argc.addr, align 4
-  %lttmp106 = icmp slt i32 %i104, %argc105
-  %ifcond107 = icmp ne i1 %lttmp106, false
-  br i1 %ifcond107, label %then108, label %ifcont266
+  %addtmp105 = add i32 %i104, 1
+  store i32 %addtmp105, ptr %i, align 4
+  %i106 = load i32, ptr %i, align 4
+  %argc107 = load i32, ptr %argc.addr, align 4
+  %lttmp108 = icmp slt i32 %i106, %argc107
+  %ifcond109 = icmp ne i1 %lttmp108, false
+  br i1 %ifcond109, label %then110, label %ifcont268
 
-then108:                                          ; preds = %then101
+then110:                                          ; preds = %then103
   %s = alloca ptr, align 8
-  %args109 = load ptr, ptr %args, align 8
-  %i110 = load i32, ptr %i, align 4
-  %calltmp111 = call { ptr, ptr, i8 } @nitpick_args.args_at(ptr %args109, i32 %i110)
-  %raw.value112 = extractvalue { ptr, ptr, i8 } %calltmp111, 0
-  store ptr %raw.value112, ptr %s, align 8
-  %flags113 = load ptr, ptr %flags, align 8
-  %has_size.ptr114 = getelementptr inbounds nuw %FindFlags, ptr %flags113, i32 0, i32 4
-  store i32 1, ptr %has_size.ptr114, align 4
+  %args111 = load ptr, ptr %args, align 8
+  %i112 = load i32, ptr %i, align 4
+  %calltmp113 = call { ptr, ptr, i8 } @nitpick_args.args_at(ptr %args111, i32 %i112)
+  %raw.value114 = extractvalue { ptr, ptr, i8 } %calltmp113, 0
+  store ptr %raw.value114, ptr %s, align 8
+  %flags115 = load ptr, ptr %flags, align 8
+  %has_size.ptr116 = getelementptr inbounds nuw %FindFlags, ptr %flags115, i32 0, i32 4
+  store i32 1, ptr %has_size.ptr116, align 4
   %cmp = alloca i64, align 8
   store i64 0, ptr %cmp, align 4
   %start_idx = alloca i64, align 8
   store i64 0, ptr %start_idx, align 4
-  %s115 = load ptr, ptr %s, align 8
-  %to_cstr_result = call i64 @npk_string_to_cstr_simple(ptr %s115)
-  %addtmp116 = add i64 %to_cstr_result, 0
   %s117 = load ptr, ptr %s, align 8
-  %to_cstr_result118 = call i64 @npk_string_to_cstr_simple(ptr %s117)
-  %addtmp119 = add i64 %to_cstr_result118, 0
-  %cast.inttoptr = inttoptr i64 %addtmp119 to ptr
+  %to_cstr_result = call i64 @npk_string_to_cstr_simple(ptr %s117)
+  %addtmp118 = add i64 %to_cstr_result, 0
+  %s119 = load ptr, ptr %s, align 8
+  %to_cstr_result120 = call i64 @npk_string_to_cstr_simple(ptr %s119)
+  %addtmp121 = add i64 %to_cstr_result120, 0
+  %cast.inttoptr = inttoptr i64 %addtmp121 to ptr
   %null.deref = icmp eq ptr %cast.inttoptr, null
   br i1 %null.deref, label %null.fail, label %null.ok
 
-null.fail:                                        ; preds = %then108
-  %0 = call i32 @failsafe(i32 46)
+null.fail:                                        ; preds = %then110
   call void @exit(i32 46)
   unreachable
 
-null.ok:                                          ; preds = %then108
+null.ok:                                          ; preds = %then110
   %deref = load i32, ptr %cast.inttoptr, align 4
   %cast.sext = sext i32 %deref to i64
   %eqtmp = icmp eq i64 %cast.sext, 43
-  %ifcond120 = icmp ne i1 %eqtmp, false
-  br i1 %ifcond120, label %then121, label %else122
+  %ifcond122 = icmp ne i1 %eqtmp, false
+  br i1 %ifcond122, label %then123, label %else124
 
-then121:                                          ; preds = %null.ok
+then123:                                          ; preds = %null.ok
   store i64 1, ptr %cmp, align 4
   store i64 1, ptr %start_idx, align 4
-  br label %ifcont139
+  br label %ifcont141
 
-else122:                                          ; preds = %null.ok
-  %s123 = load ptr, ptr %s, align 8
-  %to_cstr_result124 = call i64 @npk_string_to_cstr_simple(ptr %s123)
-  %addtmp125 = add i64 %to_cstr_result124, 0
-  %s126 = load ptr, ptr %s, align 8
-  %to_cstr_result127 = call i64 @npk_string_to_cstr_simple(ptr %s126)
-  %addtmp128 = add i64 %to_cstr_result127, 0
-  %cast.inttoptr129 = inttoptr i64 %addtmp128 to ptr
-  %null.deref130 = icmp eq ptr %cast.inttoptr129, null
-  br i1 %null.deref130, label %null.fail131, label %null.ok132
+else124:                                          ; preds = %null.ok
+  %s125 = load ptr, ptr %s, align 8
+  %to_cstr_result126 = call i64 @npk_string_to_cstr_simple(ptr %s125)
+  %addtmp127 = add i64 %to_cstr_result126, 0
+  %s128 = load ptr, ptr %s, align 8
+  %to_cstr_result129 = call i64 @npk_string_to_cstr_simple(ptr %s128)
+  %addtmp130 = add i64 %to_cstr_result129, 0
+  %cast.inttoptr131 = inttoptr i64 %addtmp130 to ptr
+  %null.deref132 = icmp eq ptr %cast.inttoptr131, null
+  br i1 %null.deref132, label %null.fail133, label %null.ok134
 
-null.fail131:                                     ; preds = %else122
-  %1 = call i32 @failsafe(i32 46)
+null.fail133:                                     ; preds = %else124
   call void @exit(i32 46)
   unreachable
 
-null.ok132:                                       ; preds = %else122
-  %deref133 = load i32, ptr %cast.inttoptr129, align 4
-  %cast.sext134 = sext i32 %deref133 to i64
-  %eqtmp135 = icmp eq i64 %cast.sext134, 45
-  %ifcond136 = icmp ne i1 %eqtmp135, false
-  br i1 %ifcond136, label %then137, label %ifcont138
+null.ok134:                                       ; preds = %else124
+  %deref135 = load i32, ptr %cast.inttoptr131, align 4
+  %cast.sext136 = sext i32 %deref135 to i64
+  %eqtmp137 = icmp eq i64 %cast.sext136, 45
+  %ifcond138 = icmp ne i1 %eqtmp137, false
+  br i1 %ifcond138, label %then139, label %ifcont140
 
-then137:                                          ; preds = %null.ok132
+then139:                                          ; preds = %null.ok134
   store i64 -1, ptr %cmp, align 4
   store i64 1, ptr %start_idx, align 4
-  br label %ifcont138
+  br label %ifcont140
 
-ifcont138:                                        ; preds = %then137, %null.ok132
-  br label %ifcont139
+ifcont140:                                        ; preds = %then139, %null.ok134
+  br label %ifcont141
 
-ifcont139:                                        ; preds = %ifcont138, %then121
+ifcont141:                                        ; preds = %ifcont140, %then123
   %val = alloca i64, align 8
   store i64 0, ptr %val, align 4
   %len = alloca i64, align 8
-  %s140 = load ptr, ptr %s, align 8
-  %str = load %struct.NpkString, ptr %s140, align 8
+  %s142 = load ptr, ptr %s, align 8
+  %str = load %struct.NpkString, ptr %s142, align 8
   %length = extractvalue %struct.NpkString %str, 1
   store i64 %length, ptr %len, align 4
   %multiplier = alloca i64, align 8
   store i64 1, ptr %multiplier, align 4
-  %s141 = load ptr, ptr %s, align 8
-  %to_cstr_result142 = call i64 @npk_string_to_cstr_simple(ptr %s141)
-  %len143 = load i64, ptr %len, align 4
-  %subtmp = sub i64 %len143, 1
-  %addtmp144 = add i64 %to_cstr_result142, %subtmp
-  %s145 = load ptr, ptr %s, align 8
-  %to_cstr_result146 = call i64 @npk_string_to_cstr_simple(ptr %s145)
-  %len147 = load i64, ptr %len, align 4
-  %subtmp148 = sub i64 %len147, 1
-  %addtmp149 = add i64 %to_cstr_result146, %subtmp148
-  %cast.inttoptr150 = inttoptr i64 %addtmp149 to ptr
-  %null.deref151 = icmp eq ptr %cast.inttoptr150, null
-  br i1 %null.deref151, label %null.fail152, label %null.ok153
+  %s143 = load ptr, ptr %s, align 8
+  %to_cstr_result144 = call i64 @npk_string_to_cstr_simple(ptr %s143)
+  %len145 = load i64, ptr %len, align 4
+  %subtmp = sub i64 %len145, 1
+  %addtmp146 = add i64 %to_cstr_result144, %subtmp
+  %s147 = load ptr, ptr %s, align 8
+  %to_cstr_result148 = call i64 @npk_string_to_cstr_simple(ptr %s147)
+  %len149 = load i64, ptr %len, align 4
+  %subtmp150 = sub i64 %len149, 1
+  %addtmp151 = add i64 %to_cstr_result148, %subtmp150
+  %cast.inttoptr152 = inttoptr i64 %addtmp151 to ptr
+  %null.deref153 = icmp eq ptr %cast.inttoptr152, null
+  br i1 %null.deref153, label %null.fail154, label %null.ok155
 
-null.fail152:                                     ; preds = %ifcont139
-  %2 = call i32 @failsafe(i32 46)
+null.fail154:                                     ; preds = %ifcont141
   call void @exit(i32 46)
   unreachable
 
-null.ok153:                                       ; preds = %ifcont139
-  %deref154 = load i32, ptr %cast.inttoptr150, align 4
-  %cast.sext155 = sext i32 %deref154 to i64
-  %eqtmp156 = icmp eq i64 %cast.sext155, 99
-  %ifcond157 = icmp ne i1 %eqtmp156, false
-  br i1 %ifcond157, label %then158, label %else161
+null.ok155:                                       ; preds = %ifcont141
+  %deref156 = load i32, ptr %cast.inttoptr152, align 4
+  %cast.sext157 = sext i32 %deref156 to i64
+  %eqtmp158 = icmp eq i64 %cast.sext157, 99
+  %ifcond159 = icmp ne i1 %eqtmp158, false
+  br i1 %ifcond159, label %then160, label %else163
 
-then158:                                          ; preds = %null.ok153
-  %len159 = load i64, ptr %len, align 4
-  %subtmp160 = sub i64 %len159, 1
-  store i64 %subtmp160, ptr %len, align 4
-  br label %ifcont230
+then160:                                          ; preds = %null.ok155
+  %len161 = load i64, ptr %len, align 4
+  %subtmp162 = sub i64 %len161, 1
+  store i64 %subtmp162, ptr %len, align 4
+  br label %ifcont232
 
-else161:                                          ; preds = %null.ok153
-  %s162 = load ptr, ptr %s, align 8
-  %to_cstr_result163 = call i64 @npk_string_to_cstr_simple(ptr %s162)
-  %len164 = load i64, ptr %len, align 4
-  %subtmp165 = sub i64 %len164, 1
-  %addtmp166 = add i64 %to_cstr_result163, %subtmp165
-  %s167 = load ptr, ptr %s, align 8
-  %to_cstr_result168 = call i64 @npk_string_to_cstr_simple(ptr %s167)
-  %len169 = load i64, ptr %len, align 4
-  %subtmp170 = sub i64 %len169, 1
-  %addtmp171 = add i64 %to_cstr_result168, %subtmp170
-  %cast.inttoptr172 = inttoptr i64 %addtmp171 to ptr
-  %null.deref173 = icmp eq ptr %cast.inttoptr172, null
-  br i1 %null.deref173, label %null.fail174, label %null.ok175
+else163:                                          ; preds = %null.ok155
+  %s164 = load ptr, ptr %s, align 8
+  %to_cstr_result165 = call i64 @npk_string_to_cstr_simple(ptr %s164)
+  %len166 = load i64, ptr %len, align 4
+  %subtmp167 = sub i64 %len166, 1
+  %addtmp168 = add i64 %to_cstr_result165, %subtmp167
+  %s169 = load ptr, ptr %s, align 8
+  %to_cstr_result170 = call i64 @npk_string_to_cstr_simple(ptr %s169)
+  %len171 = load i64, ptr %len, align 4
+  %subtmp172 = sub i64 %len171, 1
+  %addtmp173 = add i64 %to_cstr_result170, %subtmp172
+  %cast.inttoptr174 = inttoptr i64 %addtmp173 to ptr
+  %null.deref175 = icmp eq ptr %cast.inttoptr174, null
+  br i1 %null.deref175, label %null.fail176, label %null.ok177
 
-null.fail174:                                     ; preds = %else161
-  %3 = call i32 @failsafe(i32 46)
+null.fail176:                                     ; preds = %else163
   call void @exit(i32 46)
   unreachable
 
-null.ok175:                                       ; preds = %else161
-  %deref176 = load i32, ptr %cast.inttoptr172, align 4
-  %cast.sext177 = sext i32 %deref176 to i64
-  %eqtmp178 = icmp eq i64 %cast.sext177, 107
-  %ifcond179 = icmp ne i1 %eqtmp178, false
-  br i1 %ifcond179, label %then180, label %else183
+null.ok177:                                       ; preds = %else163
+  %deref178 = load i32, ptr %cast.inttoptr174, align 4
+  %cast.sext179 = sext i32 %deref178 to i64
+  %eqtmp180 = icmp eq i64 %cast.sext179, 107
+  %ifcond181 = icmp ne i1 %eqtmp180, false
+  br i1 %ifcond181, label %then182, label %else185
 
-then180:                                          ; preds = %null.ok175
+then182:                                          ; preds = %null.ok177
   store i64 1024, ptr %multiplier, align 4
-  %len181 = load i64, ptr %len, align 4
-  %subtmp182 = sub i64 %len181, 1
-  store i64 %subtmp182, ptr %len, align 4
-  br label %ifcont229
+  %len183 = load i64, ptr %len, align 4
+  %subtmp184 = sub i64 %len183, 1
+  store i64 %subtmp184, ptr %len, align 4
+  br label %ifcont231
 
-else183:                                          ; preds = %null.ok175
-  %s184 = load ptr, ptr %s, align 8
-  %to_cstr_result185 = call i64 @npk_string_to_cstr_simple(ptr %s184)
-  %len186 = load i64, ptr %len, align 4
-  %subtmp187 = sub i64 %len186, 1
-  %addtmp188 = add i64 %to_cstr_result185, %subtmp187
-  %s189 = load ptr, ptr %s, align 8
-  %to_cstr_result190 = call i64 @npk_string_to_cstr_simple(ptr %s189)
-  %len191 = load i64, ptr %len, align 4
-  %subtmp192 = sub i64 %len191, 1
-  %addtmp193 = add i64 %to_cstr_result190, %subtmp192
-  %cast.inttoptr194 = inttoptr i64 %addtmp193 to ptr
-  %null.deref195 = icmp eq ptr %cast.inttoptr194, null
-  br i1 %null.deref195, label %null.fail196, label %null.ok197
+else185:                                          ; preds = %null.ok177
+  %s186 = load ptr, ptr %s, align 8
+  %to_cstr_result187 = call i64 @npk_string_to_cstr_simple(ptr %s186)
+  %len188 = load i64, ptr %len, align 4
+  %subtmp189 = sub i64 %len188, 1
+  %addtmp190 = add i64 %to_cstr_result187, %subtmp189
+  %s191 = load ptr, ptr %s, align 8
+  %to_cstr_result192 = call i64 @npk_string_to_cstr_simple(ptr %s191)
+  %len193 = load i64, ptr %len, align 4
+  %subtmp194 = sub i64 %len193, 1
+  %addtmp195 = add i64 %to_cstr_result192, %subtmp194
+  %cast.inttoptr196 = inttoptr i64 %addtmp195 to ptr
+  %null.deref197 = icmp eq ptr %cast.inttoptr196, null
+  br i1 %null.deref197, label %null.fail198, label %null.ok199
 
-null.fail196:                                     ; preds = %else183
-  %4 = call i32 @failsafe(i32 46)
+null.fail198:                                     ; preds = %else185
   call void @exit(i32 46)
   unreachable
 
-null.ok197:                                       ; preds = %else183
-  %deref198 = load i32, ptr %cast.inttoptr194, align 4
-  %cast.sext199 = sext i32 %deref198 to i64
-  %eqtmp200 = icmp eq i64 %cast.sext199, 77
-  %ifcond201 = icmp ne i1 %eqtmp200, false
-  br i1 %ifcond201, label %then202, label %else205
+null.ok199:                                       ; preds = %else185
+  %deref200 = load i32, ptr %cast.inttoptr196, align 4
+  %cast.sext201 = sext i32 %deref200 to i64
+  %eqtmp202 = icmp eq i64 %cast.sext201, 77
+  %ifcond203 = icmp ne i1 %eqtmp202, false
+  br i1 %ifcond203, label %then204, label %else207
 
-then202:                                          ; preds = %null.ok197
+then204:                                          ; preds = %null.ok199
   store i64 1048576, ptr %multiplier, align 4
-  %len203 = load i64, ptr %len, align 4
-  %subtmp204 = sub i64 %len203, 1
-  store i64 %subtmp204, ptr %len, align 4
-  br label %ifcont228
-
-else205:                                          ; preds = %null.ok197
-  %s206 = load ptr, ptr %s, align 8
-  %to_cstr_result207 = call i64 @npk_string_to_cstr_simple(ptr %s206)
-  %len208 = load i64, ptr %len, align 4
-  %subtmp209 = sub i64 %len208, 1
-  %addtmp210 = add i64 %to_cstr_result207, %subtmp209
-  %s211 = load ptr, ptr %s, align 8
-  %to_cstr_result212 = call i64 @npk_string_to_cstr_simple(ptr %s211)
-  %len213 = load i64, ptr %len, align 4
-  %subtmp214 = sub i64 %len213, 1
-  %addtmp215 = add i64 %to_cstr_result212, %subtmp214
-  %cast.inttoptr216 = inttoptr i64 %addtmp215 to ptr
-  %null.deref217 = icmp eq ptr %cast.inttoptr216, null
-  br i1 %null.deref217, label %null.fail218, label %null.ok219
-
-null.fail218:                                     ; preds = %else205
-  %5 = call i32 @failsafe(i32 46)
-  call void @exit(i32 46)
-  unreachable
-
-null.ok219:                                       ; preds = %else205
-  %deref220 = load i32, ptr %cast.inttoptr216, align 4
-  %cast.sext221 = sext i32 %deref220 to i64
-  %eqtmp222 = icmp eq i64 %cast.sext221, 71
-  %ifcond223 = icmp ne i1 %eqtmp222, false
-  br i1 %ifcond223, label %then224, label %ifcont227
-
-then224:                                          ; preds = %null.ok219
-  store i64 1073741824, ptr %multiplier, align 4
-  %len225 = load i64, ptr %len, align 4
-  %subtmp226 = sub i64 %len225, 1
-  store i64 %subtmp226, ptr %len, align 4
-  br label %ifcont227
-
-ifcont227:                                        ; preds = %then224, %null.ok219
-  br label %ifcont228
-
-ifcont228:                                        ; preds = %ifcont227, %then202
-  br label %ifcont229
-
-ifcont229:                                        ; preds = %ifcont228, %then180
+  %len205 = load i64, ptr %len, align 4
+  %subtmp206 = sub i64 %len205, 1
+  store i64 %subtmp206, ptr %len, align 4
   br label %ifcont230
 
-ifcont230:                                        ; preds = %ifcont229, %then158
-  %k = alloca i64, align 8
-  %start_idx231 = load i64, ptr %start_idx, align 4
-  store i64 %start_idx231, ptr %k, align 4
-  br label %whilecond232
+else207:                                          ; preds = %null.ok199
+  %s208 = load ptr, ptr %s, align 8
+  %to_cstr_result209 = call i64 @npk_string_to_cstr_simple(ptr %s208)
+  %len210 = load i64, ptr %len, align 4
+  %subtmp211 = sub i64 %len210, 1
+  %addtmp212 = add i64 %to_cstr_result209, %subtmp211
+  %s213 = load ptr, ptr %s, align 8
+  %to_cstr_result214 = call i64 @npk_string_to_cstr_simple(ptr %s213)
+  %len215 = load i64, ptr %len, align 4
+  %subtmp216 = sub i64 %len215, 1
+  %addtmp217 = add i64 %to_cstr_result214, %subtmp216
+  %cast.inttoptr218 = inttoptr i64 %addtmp217 to ptr
+  %null.deref219 = icmp eq ptr %cast.inttoptr218, null
+  br i1 %null.deref219, label %null.fail220, label %null.ok221
 
-whilecond232:                                     ; preds = %null.ok251, %ifcont230
-  %k233 = load i64, ptr %k, align 4
-  %len234 = load i64, ptr %len, align 4
-  %lttmp235 = icmp slt i64 %k233, %len234
-  %whilecond236 = icmp ne i1 %lttmp235, false
-  br i1 %whilecond236, label %whilebody237, label %afterwhile
-
-whilebody237:                                     ; preds = %whilecond232
-  %val238 = load i64, ptr %val, align 4
-  %multmp239 = mul i64 %val238, 10
-  %s240 = load ptr, ptr %s, align 8
-  %to_cstr_result241 = call i64 @npk_string_to_cstr_simple(ptr %s240)
-  %k242 = load i64, ptr %k, align 4
-  %addtmp243 = add i64 %to_cstr_result241, %k242
-  %s244 = load ptr, ptr %s, align 8
-  %to_cstr_result245 = call i64 @npk_string_to_cstr_simple(ptr %s244)
-  %k246 = load i64, ptr %k, align 4
-  %addtmp247 = add i64 %to_cstr_result245, %k246
-  %cast.inttoptr248 = inttoptr i64 %addtmp247 to ptr
-  %null.deref249 = icmp eq ptr %cast.inttoptr248, null
-  br i1 %null.deref249, label %null.fail250, label %null.ok251
-
-null.fail250:                                     ; preds = %whilebody237
-  %6 = call i32 @failsafe(i32 46)
+null.fail220:                                     ; preds = %else207
   call void @exit(i32 46)
   unreachable
 
-null.ok251:                                       ; preds = %whilebody237
-  %deref252 = load i32, ptr %cast.inttoptr248, align 4
-  %cast.sext253 = sext i32 %deref252 to i64
-  %subtmp254 = sub i64 %cast.sext253, 48
-  %addtmp255 = add i64 %multmp239, %subtmp254
-  store i64 %addtmp255, ptr %val, align 4
-  %k256 = load i64, ptr %k, align 4
-  %addtmp257 = add i64 %k256, 1
-  store i64 %addtmp257, ptr %k, align 4
+null.ok221:                                       ; preds = %else207
+  %deref222 = load i32, ptr %cast.inttoptr218, align 4
+  %cast.sext223 = sext i32 %deref222 to i64
+  %eqtmp224 = icmp eq i64 %cast.sext223, 71
+  %ifcond225 = icmp ne i1 %eqtmp224, false
+  br i1 %ifcond225, label %then226, label %ifcont229
+
+then226:                                          ; preds = %null.ok221
+  store i64 1073741824, ptr %multiplier, align 4
+  %len227 = load i64, ptr %len, align 4
+  %subtmp228 = sub i64 %len227, 1
+  store i64 %subtmp228, ptr %len, align 4
+  br label %ifcont229
+
+ifcont229:                                        ; preds = %then226, %null.ok221
+  br label %ifcont230
+
+ifcont230:                                        ; preds = %ifcont229, %then204
+  br label %ifcont231
+
+ifcont231:                                        ; preds = %ifcont230, %then182
+  br label %ifcont232
+
+ifcont232:                                        ; preds = %ifcont231, %then160
+  %k = alloca i64, align 8
+  %start_idx233 = load i64, ptr %start_idx, align 4
+  store i64 %start_idx233, ptr %k, align 4
+  br label %whilecond234
+
+whilecond234:                                     ; preds = %null.ok253, %ifcont232
+  %k235 = load i64, ptr %k, align 4
+  %len236 = load i64, ptr %len, align 4
+  %lttmp237 = icmp slt i64 %k235, %len236
+  %whilecond238 = icmp ne i1 %lttmp237, false
+  br i1 %whilecond238, label %whilebody239, label %afterwhile
+
+whilebody239:                                     ; preds = %whilecond234
+  %val240 = load i64, ptr %val, align 4
+  %multmp241 = mul i64 %val240, 10
+  %s242 = load ptr, ptr %s, align 8
+  %to_cstr_result243 = call i64 @npk_string_to_cstr_simple(ptr %s242)
+  %k244 = load i64, ptr %k, align 4
+  %addtmp245 = add i64 %to_cstr_result243, %k244
+  %s246 = load ptr, ptr %s, align 8
+  %to_cstr_result247 = call i64 @npk_string_to_cstr_simple(ptr %s246)
+  %k248 = load i64, ptr %k, align 4
+  %addtmp249 = add i64 %to_cstr_result247, %k248
+  %cast.inttoptr250 = inttoptr i64 %addtmp249 to ptr
+  %null.deref251 = icmp eq ptr %cast.inttoptr250, null
+  br i1 %null.deref251, label %null.fail252, label %null.ok253
+
+null.fail252:                                     ; preds = %whilebody239
+  call void @exit(i32 46)
+  unreachable
+
+null.ok253:                                       ; preds = %whilebody239
+  %deref254 = load i32, ptr %cast.inttoptr250, align 4
+  %cast.sext255 = sext i32 %deref254 to i64
+  %subtmp256 = sub i64 %cast.sext255, 48
+  %addtmp257 = add i64 %multmp241, %subtmp256
+  store i64 %addtmp257, ptr %val, align 4
+  %k258 = load i64, ptr %k, align 4
+  %addtmp259 = add i64 %k258, 1
+  store i64 %addtmp259, ptr %k, align 4
   call void @npk_gc_safepoint()
-  br label %whilecond232
+  br label %whilecond234
 
-afterwhile:                                       ; preds = %whilecond232
-  %flags258 = load ptr, ptr %flags, align 8
-  %cmp259 = load i64, ptr %cmp, align 4
-  %size_cmp.ptr260 = getelementptr inbounds nuw %FindFlags, ptr %flags258, i32 0, i32 6
-  store i64 %cmp259, ptr %size_cmp.ptr260, align 4
-  %flags261 = load ptr, ptr %flags, align 8
-  %val262 = load i64, ptr %val, align 4
-  %multiplier263 = load i64, ptr %multiplier, align 4
-  %multmp264 = mul i64 %val262, %multiplier263
-  %size_val.ptr265 = getelementptr inbounds nuw %FindFlags, ptr %flags261, i32 0, i32 5
-  store i64 %multmp264, ptr %size_val.ptr265, align 4
-  br label %ifcont266
+afterwhile:                                       ; preds = %whilecond234
+  %flags260 = load ptr, ptr %flags, align 8
+  %cmp261 = load i64, ptr %cmp, align 4
+  %size_cmp.ptr262 = getelementptr inbounds nuw %FindFlags, ptr %flags260, i32 0, i32 6
+  store i64 %cmp261, ptr %size_cmp.ptr262, align 4
+  %flags263 = load ptr, ptr %flags, align 8
+  %val264 = load i64, ptr %val, align 4
+  %multiplier265 = load i64, ptr %multiplier, align 4
+  %multmp266 = mul i64 %val264, %multiplier265
+  %size_val.ptr267 = getelementptr inbounds nuw %FindFlags, ptr %flags263, i32 0, i32 5
+  store i64 %multmp266, ptr %size_val.ptr267, align 4
+  br label %ifcont268
 
-ifcont266:                                        ; preds = %afterwhile, %then101
-  br label %ifcont301
-
-else267:                                          ; preds = %else95
-  %parsing_args268 = load i32, ptr %parsing_args, align 4
-  %eqtmp269 = icmp eq i32 %parsing_args268, 0
-  %ifcond270 = icmp ne i1 %eqtmp269, false
-  br i1 %ifcond270, label %then271, label %else289
-
-then271:                                          ; preds = %else267
-  %cloned = alloca i64, align 8
-  %arg272 = load ptr, ptr %arg, align 8
-  %calltmp273 = call { i64, ptr, i8 } @find.str_clone_str(ptr %arg272)
-  %raw.value274 = extractvalue { i64, ptr, i8 } %calltmp273, 0
-  store i64 %raw.value274, ptr %cloned, align 4
-  %roots_len275 = load i64, ptr %roots_len, align 4
-  %roots_cap276 = load i64, ptr %roots_cap, align 4
-  %lttmp277 = icmp slt i64 %roots_len275, %roots_cap276
-  %ifcond278 = icmp ne i1 %lttmp277, false
-  br i1 %ifcond278, label %then279, label %ifcont288
-
-then279:                                          ; preds = %then271
-  %roots_sl280 = load i64, ptr %roots_sl, align 4
-  %roots_len281 = load i64, ptr %roots_len, align 4
-  %multmp282 = mul i64 %roots_len281, 8
-  %cloned283 = load i64, ptr %cloned, align 4
-  %calltmp284 = call { i32, ptr, i8 } @find.mem_write_64(i64 %roots_sl280, i64 %multmp282, i64 %cloned283)
-  %raw.value285 = extractvalue { i32, ptr, i8 } %calltmp284, 0
-  %roots_len286 = load i64, ptr %roots_len, align 4
-  %addtmp287 = add i64 %roots_len286, 1
-  store i64 %addtmp287, ptr %roots_len, align 4
-  br label %ifcont288
-
-ifcont288:                                        ; preds = %then279, %then271
-  br label %ifcont300
-
-else289:                                          ; preds = %else267
-  %calltmp290 = call { i32, ptr, i8 } @cmp.print_err(ptr @.str.1665)
-  %arg291 = load ptr, ptr %arg, align 8
-  %calltmp292 = call { i32, ptr, i8 } @cmp.print_err(ptr %arg291)
-  %calltmp293 = call { i32, ptr, i8 } @cmp.print_err(ptr @.str.1667)
-  %roots_sl294 = load i64, ptr %roots_sl, align 4
-  %netmp = icmp ne i64 %roots_sl294, 0
-  %ifcond295 = icmp ne i1 %netmp, false
-  br i1 %ifcond295, label %then296, label %ifcont299
-
-then296:                                          ; preds = %else289
-  %roots_sl297 = load i64, ptr %roots_sl, align 4
-  %calltmp298 = call i32 @nitpick_libc_mem_free(i64 %roots_sl297)
-  br label %ifcont299
-
-ifcont299:                                        ; preds = %then296, %else289
-  ret { i32, ptr, i8 } { i32 1, ptr null, i8 0 }
-
-ifcont300:                                        ; preds = %ifcont288
-  br label %ifcont301
-
-ifcont301:                                        ; preds = %ifcont300, %ifcont266
-  br label %ifcont302
-
-ifcont302:                                        ; preds = %ifcont301, %ifcont94
+ifcont268:                                        ; preds = %afterwhile, %then103
   br label %ifcont303
 
-ifcont303:                                        ; preds = %ifcont302, %ifcont
-  %i304 = load i32, ptr %i, align 4
-  %addtmp305 = add i32 %i304, 1
-  store i32 %addtmp305, ptr %i, align 4
+else269:                                          ; preds = %else97
+  %parsing_args270 = load i32, ptr %parsing_args, align 4
+  %eqtmp271 = icmp eq i32 %parsing_args270, 0
+  %ifcond272 = icmp ne i1 %eqtmp271, false
+  br i1 %ifcond272, label %then273, label %else291
+
+then273:                                          ; preds = %else269
+  %cloned = alloca i64, align 8
+  %arg274 = load ptr, ptr %arg, align 8
+  %calltmp275 = call { i64, ptr, i8 } @find.str_clone_str(ptr %arg274)
+  %raw.value276 = extractvalue { i64, ptr, i8 } %calltmp275, 0
+  store i64 %raw.value276, ptr %cloned, align 4
+  %roots_len277 = load i64, ptr %roots_len, align 4
+  %roots_cap278 = load i64, ptr %roots_cap, align 4
+  %lttmp279 = icmp slt i64 %roots_len277, %roots_cap278
+  %ifcond280 = icmp ne i1 %lttmp279, false
+  br i1 %ifcond280, label %then281, label %ifcont290
+
+then281:                                          ; preds = %then273
+  %roots_sl282 = load i64, ptr %roots_sl, align 4
+  %roots_len283 = load i64, ptr %roots_len, align 4
+  %multmp284 = mul i64 %roots_len283, 8
+  %cloned285 = load i64, ptr %cloned, align 4
+  %calltmp286 = call { i32, ptr, i8 } @find.mem_write_64(i64 %roots_sl282, i64 %multmp284, i64 %cloned285)
+  %raw.value287 = extractvalue { i32, ptr, i8 } %calltmp286, 0
+  %roots_len288 = load i64, ptr %roots_len, align 4
+  %addtmp289 = add i64 %roots_len288, 1
+  store i64 %addtmp289, ptr %roots_len, align 4
+  br label %ifcont290
+
+ifcont290:                                        ; preds = %then281, %then273
+  br label %ifcont302
+
+else291:                                          ; preds = %else269
+  %calltmp292 = call { i32, ptr, i8 } @cmp.print_err(ptr @.str.1665)
+  %arg293 = load ptr, ptr %arg, align 8
+  %calltmp294 = call { i32, ptr, i8 } @cmp.print_err(ptr %arg293)
+  %calltmp295 = call { i32, ptr, i8 } @cmp.print_err(ptr @.str.1667)
+  %roots_sl296 = load i64, ptr %roots_sl, align 4
+  %netmp = icmp ne i64 %roots_sl296, 0
+  %ifcond297 = icmp ne i1 %netmp, false
+  br i1 %ifcond297, label %then298, label %ifcont301
+
+then298:                                          ; preds = %else291
+  %roots_sl299 = load i64, ptr %roots_sl, align 4
+  %cast.inttoptr300 = inttoptr i64 %roots_sl299 to ptr
+  call void @npk_free(ptr %cast.inttoptr300)
+  br label %ifcont301
+
+ifcont301:                                        ; preds = %then298, %else291
+  ret { i32, ptr, i8 } { i32 1, ptr null, i8 0 }
+
+ifcont302:                                        ; preds = %ifcont290
+  br label %ifcont303
+
+ifcont303:                                        ; preds = %ifcont302, %ifcont268
+  br label %ifcont304
+
+ifcont304:                                        ; preds = %ifcont303, %ifcont96
+  br label %ifcont305
+
+ifcont305:                                        ; preds = %ifcont304, %ifcont
+  %i306 = load i32, ptr %i, align 4
+  %addtmp307 = add i32 %i306, 1
+  store i32 %addtmp307, ptr %i, align 4
   call void @npk_gc_safepoint()
   br label %whilecond
 
-afterwhile306:                                    ; preds = %whilecond
-  %roots_len307 = load i64, ptr %roots_len, align 4
-  %eqtmp308 = icmp eq i64 %roots_len307, 0
-  %ifcond309 = icmp ne i1 %eqtmp308, false
-  br i1 %ifcond309, label %then310, label %ifcont322
+afterwhile308:                                    ; preds = %whilecond
+  %roots_len309 = load i64, ptr %roots_len, align 4
+  %eqtmp310 = icmp eq i64 %roots_len309, 0
+  %ifcond311 = icmp ne i1 %eqtmp310, false
+  br i1 %ifcond311, label %then312, label %ifcont324
 
-then310:                                          ; preds = %afterwhile306
-  %cloned311 = alloca i64, align 8
-  %calltmp312 = call { i64, ptr, i8 } @find.str_clone_str(ptr @.str.1669)
-  %raw.value313 = extractvalue { i64, ptr, i8 } %calltmp312, 0
-  store i64 %raw.value313, ptr %cloned311, align 4
-  %roots_sl314 = load i64, ptr %roots_sl, align 4
-  %roots_len315 = load i64, ptr %roots_len, align 4
-  %multmp316 = mul i64 %roots_len315, 8
-  %cloned317 = load i64, ptr %cloned311, align 4
-  %calltmp318 = call { i32, ptr, i8 } @find.mem_write_64(i64 %roots_sl314, i64 %multmp316, i64 %cloned317)
-  %raw.value319 = extractvalue { i32, ptr, i8 } %calltmp318, 0
-  %roots_len320 = load i64, ptr %roots_len, align 4
-  %addtmp321 = add i64 %roots_len320, 1
-  store i64 %addtmp321, ptr %roots_len, align 4
-  br label %ifcont322
+then312:                                          ; preds = %afterwhile308
+  %cloned313 = alloca i64, align 8
+  %calltmp314 = call { i64, ptr, i8 } @find.str_clone_str(ptr @.str.1669)
+  %raw.value315 = extractvalue { i64, ptr, i8 } %calltmp314, 0
+  store i64 %raw.value315, ptr %cloned313, align 4
+  %roots_sl316 = load i64, ptr %roots_sl, align 4
+  %roots_len317 = load i64, ptr %roots_len, align 4
+  %multmp318 = mul i64 %roots_len317, 8
+  %cloned319 = load i64, ptr %cloned313, align 4
+  %calltmp320 = call { i32, ptr, i8 } @find.mem_write_64(i64 %roots_sl316, i64 %multmp318, i64 %cloned319)
+  %raw.value321 = extractvalue { i32, ptr, i8 } %calltmp320, 0
+  %roots_len322 = load i64, ptr %roots_len, align 4
+  %addtmp323 = add i64 %roots_len322, 1
+  store i64 %addtmp323, ptr %roots_len, align 4
+  br label %ifcont324
 
-ifcont322:                                        ; preds = %then310, %afterwhile306
+ifcont324:                                        ; preds = %then312, %afterwhile308
   %r_len = alloca i64, align 8
-  %roots_len323 = load i64, ptr %roots_len, align 4
-  store i64 %roots_len323, ptr %r_len, align 4
+  %roots_len325 = load i64, ptr %roots_len, align 4
+  store i64 %roots_len325, ptr %r_len, align 4
   %r_idx = alloca i64, align 8
   store i64 0, ptr %r_idx, align 4
-  br label %whilecond324
+  br label %whilecond326
 
-whilecond324:                                     ; preds = %merge_block, %ifcont322
-  %r_idx325 = load i64, ptr %r_idx, align 4
-  %r_len326 = load i64, ptr %r_len, align 4
-  %lttmp327 = icmp slt i64 %r_idx325, %r_len326
-  %whilecond328 = icmp ne i1 %lttmp327, false
-  br i1 %whilecond328, label %whilebody329, label %afterwhile345
+whilecond326:                                     ; preds = %merge_block, %ifcont324
+  %r_idx327 = load i64, ptr %r_idx, align 4
+  %r_len328 = load i64, ptr %r_len, align 4
+  %lttmp329 = icmp slt i64 %r_idx327, %r_len328
+  %whilecond330 = icmp ne i1 %lttmp329, false
+  br i1 %whilecond330, label %whilebody331, label %afterwhile347
 
-whilebody329:                                     ; preds = %whilecond324
+whilebody331:                                     ; preds = %whilecond326
   %r_ptr = alloca i64, align 8
-  %roots_sl330 = load i64, ptr %roots_sl, align 4
-  %r_idx331 = load i64, ptr %r_idx, align 4
-  %multmp332 = mul i64 %r_idx331, 8
-  %calltmp333 = call { i64, ptr, i8 } @find.mem_read_64(i64 %roots_sl330, i64 %multmp332)
-  %raw.value334 = extractvalue { i64, ptr, i8 } %calltmp333, 0
-  store i64 %raw.value334, ptr %r_ptr, align 4
+  %roots_sl332 = load i64, ptr %roots_sl, align 4
+  %r_idx333 = load i64, ptr %r_idx, align 4
+  %multmp334 = mul i64 %r_idx333, 8
+  %calltmp335 = call { i64, ptr, i8 } @find.mem_read_64(i64 %roots_sl332, i64 %multmp334)
+  %raw.value336 = extractvalue { i64, ptr, i8 } %calltmp335, 0
+  store i64 %raw.value336, ptr %r_ptr, align 4
   %root = alloca ptr, align 8
-  %r_ptr335 = load i64, ptr %r_ptr, align 4
-  %calltmp336 = call { ptr, ptr, i8 } @mem_utils.ptr_to_string(i64 %r_ptr335)
-  %is_error = extractvalue { ptr, ptr, i8 } %calltmp336, 2
+  %r_ptr337 = load i64, ptr %r_ptr, align 4
+  %calltmp338 = call { ptr, ptr, i8 } @mem_utils.ptr_to_string(i64 %r_ptr337)
+  %is_error = extractvalue { ptr, ptr, i8 } %calltmp338, 2
   %is_error_bool = icmp ne i8 %is_error, 0
   br i1 %is_error_bool, label %error_block, label %success_block
 
-error_block:                                      ; preds = %whilebody329
+error_block:                                      ; preds = %whilebody331
   br label %merge_block
 
-success_block:                                    ; preds = %whilebody329
-  %value = extractvalue { ptr, ptr, i8 } %calltmp336, 0
+success_block:                                    ; preds = %whilebody331
+  %value = extractvalue { ptr, ptr, i8 } %calltmp338, 0
   br label %merge_block
 
 merge_block:                                      ; preds = %success_block, %error_block
   %unwrap_result = phi ptr [ @.str.1671, %error_block ], [ %value, %success_block ]
   store ptr %unwrap_result, ptr %root, align 8
-  %root337 = load ptr, ptr %root, align 8
-  %root338 = load ptr, ptr %root, align 8
-  %flags339 = load ptr, ptr %flags, align 8
-  %calltmp340 = call { i32, ptr, i8 } @find.walk_dir_at(i64 -100, ptr %root337, ptr %root338, ptr %flags339)
-  %r_ptr341 = load i64, ptr %r_ptr, align 4
-  %cast.inttoptr342 = inttoptr i64 %r_ptr341 to ptr
-  call void @npk_free(ptr %cast.inttoptr342)
-  %r_idx343 = load i64, ptr %r_idx, align 4
-  %addtmp344 = add i64 %r_idx343, 1
-  store i64 %addtmp344, ptr %r_idx, align 4
+  %root339 = load ptr, ptr %root, align 8
+  %root340 = load ptr, ptr %root, align 8
+  %flags341 = load ptr, ptr %flags, align 8
+  %calltmp342 = call { i32, ptr, i8 } @find.walk_dir_at(i64 -100, ptr %root339, ptr %root340, ptr %flags341)
+  %r_ptr343 = load i64, ptr %r_ptr, align 4
+  %cast.inttoptr344 = inttoptr i64 %r_ptr343 to ptr
+  call void @npk_free(ptr %cast.inttoptr344)
+  %r_idx345 = load i64, ptr %r_idx, align 4
+  %addtmp346 = add i64 %r_idx345, 1
+  store i64 %addtmp346, ptr %r_idx, align 4
   call void @npk_gc_safepoint()
-  br label %whilecond324
+  br label %whilecond326
 
-afterwhile345:                                    ; preds = %whilecond324
-  %roots_sl346 = load i64, ptr %roots_sl, align 4
-  %calltmp347 = call i32 @nitpick_libc_mem_free(i64 %roots_sl346)
+afterwhile347:                                    ; preds = %whilecond326
+  %roots_sl348 = load i64, ptr %roots_sl, align 4
+  %cast.inttoptr349 = inttoptr i64 %roots_sl348 to ptr
+  call void @npk_free(ptr %cast.inttoptr349)
   %has_name2 = alloca i32, align 4
-  %flags348 = load ptr, ptr %flags, align 8
-  %null.deref349 = icmp eq ptr %flags348, null
-  br i1 %null.deref349, label %null.fail350, label %null.ok351
+  %flags350 = load ptr, ptr %flags, align 8
+  %null.deref351 = icmp eq ptr %flags350, null
+  br i1 %null.deref351, label %null.fail352, label %null.ok353
 
-null.fail350:                                     ; preds = %afterwhile345
-  %7 = call i32 @failsafe(i32 46)
+null.fail352:                                     ; preds = %afterwhile347
   call void @exit(i32 46)
   unreachable
 
-null.ok351:                                       ; preds = %afterwhile345
-  %has_name.ptr352 = getelementptr inbounds nuw %FindFlags, ptr %flags348, i32 0, i32 0
-  %has_name = load i32, ptr %has_name.ptr352, align 4
+null.ok353:                                       ; preds = %afterwhile347
+  %has_name.ptr354 = getelementptr inbounds nuw %FindFlags, ptr %flags350, i32 0, i32 0
+  %has_name = load i32, ptr %has_name.ptr354, align 4
   store i32 %has_name, ptr %has_name2, align 4
-  %has_name2353 = load i32, ptr %has_name2, align 4
-  %eqtmp354 = icmp eq i32 %has_name2353, 1
-  %ifcond355 = icmp ne i1 %eqtmp354, false
-  br i1 %ifcond355, label %then356, label %ifcont363
+  %has_name2355 = load i32, ptr %has_name2, align 4
+  %eqtmp356 = icmp eq i32 %has_name2355, 1
+  %ifcond357 = icmp ne i1 %eqtmp356, false
+  br i1 %ifcond357, label %then358, label %ifcont365
 
-then356:                                          ; preds = %null.ok351
-  %flags357 = load ptr, ptr %flags, align 8
-  %null.deref358 = icmp eq ptr %flags357, null
-  br i1 %null.deref358, label %null.fail359, label %null.ok360
+then358:                                          ; preds = %null.ok353
+  %flags359 = load ptr, ptr %flags, align 8
+  %null.deref360 = icmp eq ptr %flags359, null
+  br i1 %null.deref360, label %null.fail361, label %null.ok362
 
-null.fail359:                                     ; preds = %then356
-  %8 = call i32 @failsafe(i32 46)
+null.fail361:                                     ; preds = %then358
   call void @exit(i32 46)
   unreachable
 
-null.ok360:                                       ; preds = %then356
-  %name_ptr.ptr361 = getelementptr inbounds nuw %FindFlags, ptr %flags357, i32 0, i32 1
-  %name_ptr.val = load i64, ptr %name_ptr.ptr361, align 4
-  %cast.inttoptr362 = inttoptr i64 %name_ptr.val to ptr
-  call void @npk_free(ptr %cast.inttoptr362)
-  br label %ifcont363
+null.ok362:                                       ; preds = %then358
+  %name_ptr.ptr363 = getelementptr inbounds nuw %FindFlags, ptr %flags359, i32 0, i32 1
+  %name_ptr.val = load i64, ptr %name_ptr.ptr363, align 4
+  %cast.inttoptr364 = inttoptr i64 %name_ptr.val to ptr
+  call void @npk_free(ptr %cast.inttoptr364)
+  br label %ifcont365
 
-ifcont363:                                        ; preds = %null.ok360, %null.ok351
-  %roots_sl364 = load i64, ptr %roots_sl, align 4
-  %netmp365 = icmp ne i64 %roots_sl364, 0
-  %ifcond366 = icmp ne i1 %netmp365, false
-  br i1 %ifcond366, label %then367, label %ifcont370
+ifcont365:                                        ; preds = %null.ok362, %null.ok353
+  %roots_sl366 = load i64, ptr %roots_sl, align 4
+  %netmp367 = icmp ne i64 %roots_sl366, 0
+  %ifcond368 = icmp ne i1 %netmp367, false
+  br i1 %ifcond368, label %then369, label %ifcont372
 
-then367:                                          ; preds = %ifcont363
-  %roots_sl368 = load i64, ptr %roots_sl, align 4
-  %calltmp369 = call i32 @nitpick_libc_mem_free(i64 %roots_sl368)
-  br label %ifcont370
+then369:                                          ; preds = %ifcont365
+  %roots_sl370 = load i64, ptr %roots_sl, align 4
+  %cast.inttoptr371 = inttoptr i64 %roots_sl370 to ptr
+  call void @npk_free(ptr %cast.inttoptr371)
+  br label %ifcont372
 
-ifcont370:                                        ; preds = %then367, %ifcont363
+ifcont372:                                        ; preds = %then369, %ifcont365
   ret { i32, ptr, i8 } zeroinitializer
 }
 
@@ -32118,292 +32136,298 @@ ifcont57:                                         ; preds = %ifcont56, %afterwhi
   store i64 65536, ptr %buf_size, align 4
   %buf = alloca i64, align 8
   %buf_size58 = load i64, ptr %buf_size, align 4
-  %calltmp59 = call i64 @malloc(i64 %buf_size58)
-  store i64 %calltmp59, ptr %buf, align 4
+  %wild_ptr = call ptr @npk_alloc(i64 %buf_size58)
+  %buf_size59 = load i64, ptr %buf_size, align 4
+  %wild_ptr60 = call ptr @npk_alloc(i64 %buf_size59)
+  %cast.ptrtoint = ptrtoint ptr %wild_ptr60 to i64
+  store i64 %cast.ptrtoint, ptr %buf, align 4
   %col = alloca i64, align 8
   store i64 0, ptr %col, align 4
   %running = alloca i32, align 4
   store i32 1, ptr %running, align 4
   %out_buf = alloca i64, align 8
-  %calltmp60 = call i64 @malloc(i64 65536)
-  store i64 %calltmp60, ptr %out_buf, align 4
+  %wild_ptr61 = call ptr @npk_alloc(i64 65536)
+  %wild_ptr62 = call ptr @npk_alloc(i64 65536)
+  %cast.ptrtoint63 = ptrtoint ptr %wild_ptr62 to i64
+  store i64 %cast.ptrtoint63, ptr %out_buf, align 4
   %out_len = alloca i64, align 8
   store i64 0, ptr %out_len, align 4
-  br label %whilecond61
+  br label %whilecond64
 
-whilecond61:                                      ; preds = %ifcont197, %ifcont57
-  %running62 = load i32, ptr %running, align 4
-  %eqtmp = icmp eq i32 %running62, 1
-  %whilecond63 = icmp ne i1 %eqtmp, false
-  br i1 %whilecond63, label %whilebody64, label %afterwhile198
+whilecond64:                                      ; preds = %ifcont200, %ifcont57
+  %running65 = load i32, ptr %running, align 4
+  %eqtmp = icmp eq i32 %running65, 1
+  %whilecond66 = icmp ne i1 %eqtmp, false
+  br i1 %whilecond66, label %whilebody67, label %afterwhile201
 
-whilebody64:                                      ; preds = %whilecond61
+whilebody67:                                      ; preds = %whilecond64
   %n = alloca i64, align 8
-  %fd65 = load i64, ptr %fd, align 4
-  %buf66 = load i64, ptr %buf, align 4
-  %buf_size67 = load i64, ptr %buf_size, align 4
-  %syscall_ret68 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 0, i64 %fd65, i64 %buf66, i64 %buf_size67)
-  %sys_is_err69 = icmp slt i64 %syscall_ret68, 0
-  %sys_neg_errno70 = sub i64 0, %syscall_ret68
-  %sys_err_ptr71 = inttoptr i64 %sys_neg_errno70 to ptr
-  %sys_val72 = select i1 %sys_is_err69, i64 0, i64 %syscall_ret68
-  %sys_err73 = select i1 %sys_is_err69, ptr %sys_err_ptr71, ptr null
-  %sys_flag74 = select i1 %sys_is_err69, i8 1, i8 0
-  %sys_result.val75 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val72, 0
-  %sys_result.err76 = insertvalue %struct.NpkResult_int64 %sys_result.val75, ptr %sys_err73, 1
-  %sys_result.is_error77 = insertvalue %struct.NpkResult_int64 %sys_result.err76, i8 %sys_flag74, 2
-  %is_error78 = extractvalue %struct.NpkResult_int64 %sys_result.is_error77, 2
-  %is_error_bool79 = icmp ne i8 %is_error78, 0
-  br i1 %is_error_bool79, label %error_block80, label %success_block81
+  %fd68 = load i64, ptr %fd, align 4
+  %buf69 = load i64, ptr %buf, align 4
+  %buf_size70 = load i64, ptr %buf_size, align 4
+  %syscall_ret71 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 0, i64 %fd68, i64 %buf69, i64 %buf_size70)
+  %sys_is_err72 = icmp slt i64 %syscall_ret71, 0
+  %sys_neg_errno73 = sub i64 0, %syscall_ret71
+  %sys_err_ptr74 = inttoptr i64 %sys_neg_errno73 to ptr
+  %sys_val75 = select i1 %sys_is_err72, i64 0, i64 %syscall_ret71
+  %sys_err76 = select i1 %sys_is_err72, ptr %sys_err_ptr74, ptr null
+  %sys_flag77 = select i1 %sys_is_err72, i8 1, i8 0
+  %sys_result.val78 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val75, 0
+  %sys_result.err79 = insertvalue %struct.NpkResult_int64 %sys_result.val78, ptr %sys_err76, 1
+  %sys_result.is_error80 = insertvalue %struct.NpkResult_int64 %sys_result.err79, i8 %sys_flag77, 2
+  %is_error81 = extractvalue %struct.NpkResult_int64 %sys_result.is_error80, 2
+  %is_error_bool82 = icmp ne i8 %is_error81, 0
+  br i1 %is_error_bool82, label %error_block83, label %success_block84
 
-error_block80:                                    ; preds = %whilebody64
-  br label %merge_block82
+error_block83:                                    ; preds = %whilebody67
+  br label %merge_block85
 
-success_block81:                                  ; preds = %whilebody64
-  %value83 = extractvalue %struct.NpkResult_int64 %sys_result.is_error77, 0
-  br label %merge_block82
+success_block84:                                  ; preds = %whilebody67
+  %value86 = extractvalue %struct.NpkResult_int64 %sys_result.is_error80, 0
+  br label %merge_block85
 
-merge_block82:                                    ; preds = %success_block81, %error_block80
-  %unwrap_result84 = phi i64 [ -1, %error_block80 ], [ %value83, %success_block81 ]
-  store i64 %unwrap_result84, ptr %n, align 4
-  %n85 = load i64, ptr %n, align 4
-  %letmp86 = icmp sle i64 %n85, 0
-  %ifcond87 = icmp ne i1 %letmp86, false
-  br i1 %ifcond87, label %then88, label %else89
+merge_block85:                                    ; preds = %success_block84, %error_block83
+  %unwrap_result87 = phi i64 [ -1, %error_block83 ], [ %value86, %success_block84 ]
+  store i64 %unwrap_result87, ptr %n, align 4
+  %n88 = load i64, ptr %n, align 4
+  %letmp89 = icmp sle i64 %n88, 0
+  %ifcond90 = icmp ne i1 %letmp89, false
+  br i1 %ifcond90, label %then91, label %else92
 
-then88:                                           ; preds = %merge_block82
+then91:                                           ; preds = %merge_block85
   store i32 0, ptr %running, align 4
-  br label %ifcont197
+  br label %ifcont200
 
-else89:                                           ; preds = %merge_block82
+else92:                                           ; preds = %merge_block85
   %j = alloca i64, align 8
   store i64 0, ptr %j, align 4
-  br label %whilecond90
+  br label %whilecond93
 
-whilecond90:                                      ; preds = %ifcont193, %else89
-  %j91 = load i64, ptr %j, align 4
-  %n92 = load i64, ptr %n, align 4
-  %lttmp93 = icmp slt i64 %j91, %n92
-  %whilecond94 = icmp ne i1 %lttmp93, false
-  br i1 %whilecond94, label %whilebody95, label %afterwhile196
+whilecond93:                                      ; preds = %ifcont196, %else92
+  %j94 = load i64, ptr %j, align 4
+  %n95 = load i64, ptr %n, align 4
+  %lttmp96 = icmp slt i64 %j94, %n95
+  %whilecond97 = icmp ne i1 %lttmp96, false
+  br i1 %whilecond97, label %whilebody98, label %afterwhile199
 
-whilebody95:                                      ; preds = %whilecond90
+whilebody98:                                      ; preds = %whilecond93
   %c = alloca i64, align 8
-  %buf96 = load i64, ptr %buf, align 4
-  %j97 = load i64, ptr %j, align 4
-  %addtmp98 = add i64 %buf96, %j97
   %buf99 = load i64, ptr %buf, align 4
   %j100 = load i64, ptr %j, align 4
   %addtmp101 = add i64 %buf99, %j100
-  %cast.inttoptr = inttoptr i64 %addtmp101 to ptr
+  %buf102 = load i64, ptr %buf, align 4
+  %j103 = load i64, ptr %j, align 4
+  %addtmp104 = add i64 %buf102, %j103
+  %cast.inttoptr = inttoptr i64 %addtmp104 to ptr
   %null.deref = icmp eq ptr %cast.inttoptr, null
   br i1 %null.deref, label %null.fail, label %null.ok
 
-null.fail:                                        ; preds = %whilebody95
-  %0 = call i32 @failsafe(i32 46)
+null.fail:                                        ; preds = %whilebody98
   call void @exit(i32 46)
   unreachable
 
-null.ok:                                          ; preds = %whilebody95
+null.ok:                                          ; preds = %whilebody98
   %deref = load i32, ptr %cast.inttoptr, align 4
   %cast.sext = sext i32 %deref to i64
   store i64 %cast.sext, ptr %c, align 4
-  %c102 = load i64, ptr %c, align 4
-  %eqtmp103 = icmp eq i64 %c102, 10
-  %ifcond104 = icmp ne i1 %eqtmp103, false
-  br i1 %ifcond104, label %then105, label %else131
+  %c105 = load i64, ptr %c, align 4
+  %eqtmp106 = icmp eq i64 %c105, 10
+  %ifcond107 = icmp ne i1 %eqtmp106, false
+  br i1 %ifcond107, label %then108, label %else134
 
-then105:                                          ; preds = %null.ok
-  %out_buf106 = load i64, ptr %out_buf, align 4
-  %out_len107 = load i64, ptr %out_len, align 4
-  %addtmp108 = add i64 %out_buf106, %out_len107
+then108:                                          ; preds = %null.ok
   %out_buf109 = load i64, ptr %out_buf, align 4
   %out_len110 = load i64, ptr %out_len, align 4
   %addtmp111 = add i64 %out_buf109, %out_len110
-  %cast.inttoptr112 = inttoptr i64 %addtmp111 to ptr
-  store i8 10, ptr %cast.inttoptr112, align 1
+  %out_buf112 = load i64, ptr %out_buf, align 4
   %out_len113 = load i64, ptr %out_len, align 4
-  %addtmp114 = add i64 %out_len113, 1
-  store i64 %addtmp114, ptr %out_len, align 4
-  %out_len115 = load i64, ptr %out_len, align 4
-  %getmp = icmp sge i64 %out_len115, 65536
-  %ifcond116 = icmp ne i1 %getmp, false
-  br i1 %ifcond116, label %then117, label %ifcont130
+  %addtmp114 = add i64 %out_buf112, %out_len113
+  %cast.inttoptr115 = inttoptr i64 %addtmp114 to ptr
+  store i8 10, ptr %cast.inttoptr115, align 1
+  %out_len116 = load i64, ptr %out_len, align 4
+  %addtmp117 = add i64 %out_len116, 1
+  store i64 %addtmp117, ptr %out_len, align 4
+  %out_len118 = load i64, ptr %out_len, align 4
+  %getmp = icmp sge i64 %out_len118, 65536
+  %ifcond119 = icmp ne i1 %getmp, false
+  br i1 %ifcond119, label %then120, label %ifcont133
 
-then117:                                          ; preds = %then105
-  %out_buf118 = load i64, ptr %out_buf, align 4
-  %out_len119 = load i64, ptr %out_len, align 4
-  %syscall_ret120 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 1, i64 1, i64 %out_buf118, i64 %out_len119)
-  %sys_is_err121 = icmp slt i64 %syscall_ret120, 0
-  %sys_neg_errno122 = sub i64 0, %syscall_ret120
-  %sys_err_ptr123 = inttoptr i64 %sys_neg_errno122 to ptr
-  %sys_val124 = select i1 %sys_is_err121, i64 0, i64 %syscall_ret120
-  %sys_err125 = select i1 %sys_is_err121, ptr %sys_err_ptr123, ptr null
-  %sys_flag126 = select i1 %sys_is_err121, i8 1, i8 0
-  %sys_result.val127 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val124, 0
-  %sys_result.err128 = insertvalue %struct.NpkResult_int64 %sys_result.val127, ptr %sys_err125, 1
-  %sys_result.is_error129 = insertvalue %struct.NpkResult_int64 %sys_result.err128, i8 %sys_flag126, 2
+then120:                                          ; preds = %then108
+  %out_buf121 = load i64, ptr %out_buf, align 4
+  %out_len122 = load i64, ptr %out_len, align 4
+  %syscall_ret123 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 1, i64 1, i64 %out_buf121, i64 %out_len122)
+  %sys_is_err124 = icmp slt i64 %syscall_ret123, 0
+  %sys_neg_errno125 = sub i64 0, %syscall_ret123
+  %sys_err_ptr126 = inttoptr i64 %sys_neg_errno125 to ptr
+  %sys_val127 = select i1 %sys_is_err124, i64 0, i64 %syscall_ret123
+  %sys_err128 = select i1 %sys_is_err124, ptr %sys_err_ptr126, ptr null
+  %sys_flag129 = select i1 %sys_is_err124, i8 1, i8 0
+  %sys_result.val130 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val127, 0
+  %sys_result.err131 = insertvalue %struct.NpkResult_int64 %sys_result.val130, ptr %sys_err128, 1
+  %sys_result.is_error132 = insertvalue %struct.NpkResult_int64 %sys_result.err131, i8 %sys_flag129, 2
   store i64 0, ptr %out_len, align 4
-  br label %ifcont130
+  br label %ifcont133
 
-ifcont130:                                        ; preds = %then117, %then105
+ifcont133:                                        ; preds = %then120, %then108
   store i64 0, ptr %col, align 4
-  br label %ifcont193
+  br label %ifcont196
 
-else131:                                          ; preds = %null.ok
-  %col132 = load i64, ptr %col, align 4
-  %width133 = load i64, ptr %width, align 4
-  %getmp134 = icmp sge i64 %col132, %width133
-  %ifcond135 = icmp ne i1 %getmp134, false
-  br i1 %ifcond135, label %then136, label %ifcont163
+else134:                                          ; preds = %null.ok
+  %col135 = load i64, ptr %col, align 4
+  %width136 = load i64, ptr %width, align 4
+  %getmp137 = icmp sge i64 %col135, %width136
+  %ifcond138 = icmp ne i1 %getmp137, false
+  br i1 %ifcond138, label %then139, label %ifcont166
 
-then136:                                          ; preds = %else131
-  %out_buf137 = load i64, ptr %out_buf, align 4
-  %out_len138 = load i64, ptr %out_len, align 4
-  %addtmp139 = add i64 %out_buf137, %out_len138
+then139:                                          ; preds = %else134
   %out_buf140 = load i64, ptr %out_buf, align 4
   %out_len141 = load i64, ptr %out_len, align 4
   %addtmp142 = add i64 %out_buf140, %out_len141
-  %cast.inttoptr143 = inttoptr i64 %addtmp142 to ptr
-  store i8 10, ptr %cast.inttoptr143, align 1
+  %out_buf143 = load i64, ptr %out_buf, align 4
   %out_len144 = load i64, ptr %out_len, align 4
-  %addtmp145 = add i64 %out_len144, 1
-  store i64 %addtmp145, ptr %out_len, align 4
-  %out_len146 = load i64, ptr %out_len, align 4
-  %getmp147 = icmp sge i64 %out_len146, 65536
-  %ifcond148 = icmp ne i1 %getmp147, false
-  br i1 %ifcond148, label %then149, label %ifcont162
+  %addtmp145 = add i64 %out_buf143, %out_len144
+  %cast.inttoptr146 = inttoptr i64 %addtmp145 to ptr
+  store i8 10, ptr %cast.inttoptr146, align 1
+  %out_len147 = load i64, ptr %out_len, align 4
+  %addtmp148 = add i64 %out_len147, 1
+  store i64 %addtmp148, ptr %out_len, align 4
+  %out_len149 = load i64, ptr %out_len, align 4
+  %getmp150 = icmp sge i64 %out_len149, 65536
+  %ifcond151 = icmp ne i1 %getmp150, false
+  br i1 %ifcond151, label %then152, label %ifcont165
 
-then149:                                          ; preds = %then136
-  %out_buf150 = load i64, ptr %out_buf, align 4
-  %out_len151 = load i64, ptr %out_len, align 4
-  %syscall_ret152 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 1, i64 1, i64 %out_buf150, i64 %out_len151)
-  %sys_is_err153 = icmp slt i64 %syscall_ret152, 0
-  %sys_neg_errno154 = sub i64 0, %syscall_ret152
-  %sys_err_ptr155 = inttoptr i64 %sys_neg_errno154 to ptr
-  %sys_val156 = select i1 %sys_is_err153, i64 0, i64 %syscall_ret152
-  %sys_err157 = select i1 %sys_is_err153, ptr %sys_err_ptr155, ptr null
-  %sys_flag158 = select i1 %sys_is_err153, i8 1, i8 0
-  %sys_result.val159 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val156, 0
-  %sys_result.err160 = insertvalue %struct.NpkResult_int64 %sys_result.val159, ptr %sys_err157, 1
-  %sys_result.is_error161 = insertvalue %struct.NpkResult_int64 %sys_result.err160, i8 %sys_flag158, 2
+then152:                                          ; preds = %then139
+  %out_buf153 = load i64, ptr %out_buf, align 4
+  %out_len154 = load i64, ptr %out_len, align 4
+  %syscall_ret155 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 1, i64 1, i64 %out_buf153, i64 %out_len154)
+  %sys_is_err156 = icmp slt i64 %syscall_ret155, 0
+  %sys_neg_errno157 = sub i64 0, %syscall_ret155
+  %sys_err_ptr158 = inttoptr i64 %sys_neg_errno157 to ptr
+  %sys_val159 = select i1 %sys_is_err156, i64 0, i64 %syscall_ret155
+  %sys_err160 = select i1 %sys_is_err156, ptr %sys_err_ptr158, ptr null
+  %sys_flag161 = select i1 %sys_is_err156, i8 1, i8 0
+  %sys_result.val162 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val159, 0
+  %sys_result.err163 = insertvalue %struct.NpkResult_int64 %sys_result.val162, ptr %sys_err160, 1
+  %sys_result.is_error164 = insertvalue %struct.NpkResult_int64 %sys_result.err163, i8 %sys_flag161, 2
   store i64 0, ptr %out_len, align 4
-  br label %ifcont162
+  br label %ifcont165
 
-ifcont162:                                        ; preds = %then149, %then136
+ifcont165:                                        ; preds = %then152, %then139
   store i64 0, ptr %col, align 4
-  br label %ifcont163
+  br label %ifcont166
 
-ifcont163:                                        ; preds = %ifcont162, %else131
-  %out_buf164 = load i64, ptr %out_buf, align 4
-  %out_len165 = load i64, ptr %out_len, align 4
-  %addtmp166 = add i64 %out_buf164, %out_len165
+ifcont166:                                        ; preds = %ifcont165, %else134
   %out_buf167 = load i64, ptr %out_buf, align 4
   %out_len168 = load i64, ptr %out_len, align 4
   %addtmp169 = add i64 %out_buf167, %out_len168
-  %cast.inttoptr170 = inttoptr i64 %addtmp169 to ptr
-  %c171 = load i64, ptr %c, align 4
-  %cast.trunc = trunc i64 %c171 to i8
-  store i8 %cast.trunc, ptr %cast.inttoptr170, align 1
-  %out_len172 = load i64, ptr %out_len, align 4
-  %addtmp173 = add i64 %out_len172, 1
-  store i64 %addtmp173, ptr %out_len, align 4
-  %out_len174 = load i64, ptr %out_len, align 4
-  %getmp175 = icmp sge i64 %out_len174, 65536
-  %ifcond176 = icmp ne i1 %getmp175, false
-  br i1 %ifcond176, label %then177, label %ifcont190
+  %out_buf170 = load i64, ptr %out_buf, align 4
+  %out_len171 = load i64, ptr %out_len, align 4
+  %addtmp172 = add i64 %out_buf170, %out_len171
+  %cast.inttoptr173 = inttoptr i64 %addtmp172 to ptr
+  %c174 = load i64, ptr %c, align 4
+  %cast.trunc = trunc i64 %c174 to i8
+  store i8 %cast.trunc, ptr %cast.inttoptr173, align 1
+  %out_len175 = load i64, ptr %out_len, align 4
+  %addtmp176 = add i64 %out_len175, 1
+  store i64 %addtmp176, ptr %out_len, align 4
+  %out_len177 = load i64, ptr %out_len, align 4
+  %getmp178 = icmp sge i64 %out_len177, 65536
+  %ifcond179 = icmp ne i1 %getmp178, false
+  br i1 %ifcond179, label %then180, label %ifcont193
 
-then177:                                          ; preds = %ifcont163
-  %out_buf178 = load i64, ptr %out_buf, align 4
-  %out_len179 = load i64, ptr %out_len, align 4
-  %syscall_ret180 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 1, i64 1, i64 %out_buf178, i64 %out_len179)
-  %sys_is_err181 = icmp slt i64 %syscall_ret180, 0
-  %sys_neg_errno182 = sub i64 0, %syscall_ret180
-  %sys_err_ptr183 = inttoptr i64 %sys_neg_errno182 to ptr
-  %sys_val184 = select i1 %sys_is_err181, i64 0, i64 %syscall_ret180
-  %sys_err185 = select i1 %sys_is_err181, ptr %sys_err_ptr183, ptr null
-  %sys_flag186 = select i1 %sys_is_err181, i8 1, i8 0
-  %sys_result.val187 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val184, 0
-  %sys_result.err188 = insertvalue %struct.NpkResult_int64 %sys_result.val187, ptr %sys_err185, 1
-  %sys_result.is_error189 = insertvalue %struct.NpkResult_int64 %sys_result.err188, i8 %sys_flag186, 2
+then180:                                          ; preds = %ifcont166
+  %out_buf181 = load i64, ptr %out_buf, align 4
+  %out_len182 = load i64, ptr %out_len, align 4
+  %syscall_ret183 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 1, i64 1, i64 %out_buf181, i64 %out_len182)
+  %sys_is_err184 = icmp slt i64 %syscall_ret183, 0
+  %sys_neg_errno185 = sub i64 0, %syscall_ret183
+  %sys_err_ptr186 = inttoptr i64 %sys_neg_errno185 to ptr
+  %sys_val187 = select i1 %sys_is_err184, i64 0, i64 %syscall_ret183
+  %sys_err188 = select i1 %sys_is_err184, ptr %sys_err_ptr186, ptr null
+  %sys_flag189 = select i1 %sys_is_err184, i8 1, i8 0
+  %sys_result.val190 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val187, 0
+  %sys_result.err191 = insertvalue %struct.NpkResult_int64 %sys_result.val190, ptr %sys_err188, 1
+  %sys_result.is_error192 = insertvalue %struct.NpkResult_int64 %sys_result.err191, i8 %sys_flag189, 2
   store i64 0, ptr %out_len, align 4
-  br label %ifcont190
-
-ifcont190:                                        ; preds = %then177, %ifcont163
-  %col191 = load i64, ptr %col, align 4
-  %addtmp192 = add i64 %col191, 1
-  store i64 %addtmp192, ptr %col, align 4
   br label %ifcont193
 
-ifcont193:                                        ; preds = %ifcont190, %ifcont130
-  %j194 = load i64, ptr %j, align 4
-  %addtmp195 = add i64 %j194, 1
-  store i64 %addtmp195, ptr %j, align 4
+ifcont193:                                        ; preds = %then180, %ifcont166
+  %col194 = load i64, ptr %col, align 4
+  %addtmp195 = add i64 %col194, 1
+  store i64 %addtmp195, ptr %col, align 4
+  br label %ifcont196
+
+ifcont196:                                        ; preds = %ifcont193, %ifcont133
+  %j197 = load i64, ptr %j, align 4
+  %addtmp198 = add i64 %j197, 1
+  store i64 %addtmp198, ptr %j, align 4
   call void @npk_gc_safepoint()
-  br label %whilecond90
+  br label %whilecond93
 
-afterwhile196:                                    ; preds = %whilecond90
-  br label %ifcont197
+afterwhile199:                                    ; preds = %whilecond93
+  br label %ifcont200
 
-ifcont197:                                        ; preds = %afterwhile196, %then88
+ifcont200:                                        ; preds = %afterwhile199, %then91
   call void @npk_gc_safepoint()
-  br label %whilecond61
+  br label %whilecond64
 
-afterwhile198:                                    ; preds = %whilecond61
-  %out_len199 = load i64, ptr %out_len, align 4
-  %gttmp = icmp sgt i64 %out_len199, 0
-  %ifcond200 = icmp ne i1 %gttmp, false
-  br i1 %ifcond200, label %then201, label %ifcont214
+afterwhile201:                                    ; preds = %whilecond64
+  %out_len202 = load i64, ptr %out_len, align 4
+  %gttmp = icmp sgt i64 %out_len202, 0
+  %ifcond203 = icmp ne i1 %gttmp, false
+  br i1 %ifcond203, label %then204, label %ifcont217
 
-then201:                                          ; preds = %afterwhile198
-  %out_buf202 = load i64, ptr %out_buf, align 4
-  %out_len203 = load i64, ptr %out_len, align 4
-  %syscall_ret204 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 1, i64 1, i64 %out_buf202, i64 %out_len203)
-  %sys_is_err205 = icmp slt i64 %syscall_ret204, 0
-  %sys_neg_errno206 = sub i64 0, %syscall_ret204
-  %sys_err_ptr207 = inttoptr i64 %sys_neg_errno206 to ptr
-  %sys_val208 = select i1 %sys_is_err205, i64 0, i64 %syscall_ret204
-  %sys_err209 = select i1 %sys_is_err205, ptr %sys_err_ptr207, ptr null
-  %sys_flag210 = select i1 %sys_is_err205, i8 1, i8 0
-  %sys_result.val211 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val208, 0
-  %sys_result.err212 = insertvalue %struct.NpkResult_int64 %sys_result.val211, ptr %sys_err209, 1
-  %sys_result.is_error213 = insertvalue %struct.NpkResult_int64 %sys_result.err212, i8 %sys_flag210, 2
-  br label %ifcont214
+then204:                                          ; preds = %afterwhile201
+  %out_buf205 = load i64, ptr %out_buf, align 4
+  %out_len206 = load i64, ptr %out_len, align 4
+  %syscall_ret207 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 1, i64 1, i64 %out_buf205, i64 %out_len206)
+  %sys_is_err208 = icmp slt i64 %syscall_ret207, 0
+  %sys_neg_errno209 = sub i64 0, %syscall_ret207
+  %sys_err_ptr210 = inttoptr i64 %sys_neg_errno209 to ptr
+  %sys_val211 = select i1 %sys_is_err208, i64 0, i64 %syscall_ret207
+  %sys_err212 = select i1 %sys_is_err208, ptr %sys_err_ptr210, ptr null
+  %sys_flag213 = select i1 %sys_is_err208, i8 1, i8 0
+  %sys_result.val214 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val211, 0
+  %sys_result.err215 = insertvalue %struct.NpkResult_int64 %sys_result.val214, ptr %sys_err212, 1
+  %sys_result.is_error216 = insertvalue %struct.NpkResult_int64 %sys_result.err215, i8 %sys_flag213, 2
+  br label %ifcont217
 
-ifcont214:                                        ; preds = %then201, %afterwhile198
-  %out_buf215 = load i64, ptr %out_buf, align 4
-  %calltmp216 = call i32 @nitpick_libc_mem_free(i64 %out_buf215)
-  %fd217 = load i64, ptr %fd, align 4
-  %netmp218 = icmp ne i64 %fd217, 0
-  %ifcond219 = icmp ne i1 %netmp218, false
-  br i1 %ifcond219, label %then220, label %ifcont221
+ifcont217:                                        ; preds = %then204, %afterwhile201
+  %out_buf218 = load i64, ptr %out_buf, align 4
+  %cast.inttoptr219 = inttoptr i64 %out_buf218 to ptr
+  call void @npk_free(ptr %cast.inttoptr219)
+  %fd220 = load i64, ptr %fd, align 4
+  %netmp221 = icmp ne i64 %fd220, 0
+  %ifcond222 = icmp ne i1 %netmp221, false
+  br i1 %ifcond222, label %then223, label %ifcont224
 
-then220:                                          ; preds = %ifcont214
-  br label %ifcont221
+then223:                                          ; preds = %ifcont217
+  br label %ifcont224
 
-ifcont221:                                        ; preds = %then220, %ifcont214
-  %buf222 = load i64, ptr %buf, align 4
-  %calltmp223 = call i32 @nitpick_libc_mem_free(i64 %buf222)
-  %fd224 = load i64, ptr %fd, align 4
-  %getmp225 = icmp sge i64 %fd224, 0
-  %ifcond226 = icmp ne i1 %getmp225, false
-  br i1 %ifcond226, label %then227, label %ifcont239
+ifcont224:                                        ; preds = %then223, %ifcont217
+  %buf225 = load i64, ptr %buf, align 4
+  %cast.inttoptr226 = inttoptr i64 %buf225 to ptr
+  call void @npk_free(ptr %cast.inttoptr226)
+  %fd227 = load i64, ptr %fd, align 4
+  %getmp228 = icmp sge i64 %fd227, 0
+  %ifcond229 = icmp ne i1 %getmp228, false
+  br i1 %ifcond229, label %then230, label %ifcont242
 
-then227:                                          ; preds = %ifcont221
-  %fd228 = load i64, ptr %fd, align 4
-  %syscall_ret229 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %fd228)
-  %sys_is_err230 = icmp slt i64 %syscall_ret229, 0
-  %sys_neg_errno231 = sub i64 0, %syscall_ret229
-  %sys_err_ptr232 = inttoptr i64 %sys_neg_errno231 to ptr
-  %sys_val233 = select i1 %sys_is_err230, i64 0, i64 %syscall_ret229
-  %sys_err234 = select i1 %sys_is_err230, ptr %sys_err_ptr232, ptr null
-  %sys_flag235 = select i1 %sys_is_err230, i8 1, i8 0
-  %sys_result.val236 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val233, 0
-  %sys_result.err237 = insertvalue %struct.NpkResult_int64 %sys_result.val236, ptr %sys_err234, 1
-  %sys_result.is_error238 = insertvalue %struct.NpkResult_int64 %sys_result.err237, i8 %sys_flag235, 2
-  br label %ifcont239
+then230:                                          ; preds = %ifcont224
+  %fd231 = load i64, ptr %fd, align 4
+  %syscall_ret232 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %fd231)
+  %sys_is_err233 = icmp slt i64 %syscall_ret232, 0
+  %sys_neg_errno234 = sub i64 0, %syscall_ret232
+  %sys_err_ptr235 = inttoptr i64 %sys_neg_errno234 to ptr
+  %sys_val236 = select i1 %sys_is_err233, i64 0, i64 %syscall_ret232
+  %sys_err237 = select i1 %sys_is_err233, ptr %sys_err_ptr235, ptr null
+  %sys_flag238 = select i1 %sys_is_err233, i8 1, i8 0
+  %sys_result.val239 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val236, 0
+  %sys_result.err240 = insertvalue %struct.NpkResult_int64 %sys_result.val239, ptr %sys_err237, 1
+  %sys_result.is_error241 = insertvalue %struct.NpkResult_int64 %sys_result.err240, i8 %sys_flag238, 2
+  br label %ifcont242
 
-ifcont239:                                        ; preds = %then227, %ifcont221
+ifcont242:                                        ; preds = %then230, %ifcont224
   ret { i32, ptr, i8 } zeroinitializer
 }
 
@@ -32517,7 +32541,6 @@ whilebody20:                                      ; preds = %whilecond16
   br i1 %null.deref, label %null.fail, label %null.ok
 
 null.fail:                                        ; preds = %whilebody20
-  %0 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -32946,7 +32969,6 @@ whilebody:                                        ; preds = %whilecond
   br i1 %null.deref, label %null.fail, label %null.ok
 
 null.fail:                                        ; preds = %whilebody
-  %0 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -33269,7 +33291,6 @@ whilebody360:                                     ; preds = %whilecond355
   br i1 %null.deref369, label %null.fail370, label %null.ok371
 
 null.fail370:                                     ; preds = %whilebody360
-  %1 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -33949,8 +33970,10 @@ then60:                                           ; preds = %ifcont54
 
 ifcont61:                                         ; preds = %then60, %ifcont54
   %preg = alloca i64, align 8
-  %calltmp62 = call i64 @malloc(i64 64)
-  store i64 %calltmp62, ptr %preg, align 4
+  %wild_ptr = call ptr @npk_alloc(i64 64)
+  %wild_ptr62 = call ptr @npk_alloc(i64 64)
+  %cast.ptrtoint = ptrtoint ptr %wild_ptr62 to i64
+  store i64 %cast.ptrtoint, ptr %preg, align 4
   %cflags = alloca i32, align 4
   store i32 1, ptr %cflags, align 4
   %i.ptr63 = getelementptr inbounds nuw %GrepFlags, ptr %flags_obj, i32 0, i32 3
@@ -33969,7 +33992,7 @@ ifcont67:                                         ; preds = %then65, %ifcont61
   %pattern_set68 = load i32, ptr %pattern_set, align 4
   %eqtmp69 = icmp eq i32 %pattern_set68, 1
   %ifcond70 = icmp ne i1 %eqtmp69, false
-  br i1 %ifcond70, label %then71, label %ifcont83
+  br i1 %ifcond70, label %then71, label %ifcont82
 
 then71:                                           ; preds = %ifcont67
   %rc = alloca i32, align 4
@@ -33983,57 +34006,58 @@ then71:                                           ; preds = %ifcont67
   %rc76 = load i32, ptr %rc, align 4
   %netmp = icmp ne i32 %rc76, 0
   %ifcond77 = icmp ne i1 %netmp, false
-  br i1 %ifcond77, label %then78, label %ifcont82
+  br i1 %ifcond77, label %then78, label %ifcont81
 
 then78:                                           ; preds = %then71
   %calltmp79 = call { i32, ptr, i8 } @cmp.print_err(ptr @.str.1755)
   %preg80 = load i64, ptr %preg, align 4
-  %calltmp81 = call i32 @nitpick_libc_mem_free(i64 %preg80)
+  %cast.inttoptr = inttoptr i64 %preg80 to ptr
+  call void @npk_free(ptr %cast.inttoptr)
   ret { i32, ptr, i8 } { i32 2, ptr null, i8 0 }
 
-ifcont82:                                         ; preds = %then71
-  br label %ifcont83
+ifcont81:                                         ; preds = %then71
+  br label %ifcont82
 
-ifcont83:                                         ; preds = %ifcont82, %ifcont67
+ifcont82:                                         ; preds = %ifcont81, %ifcont67
   %dir_count = alloca i32, align 4
   store i32 0, ptr %dir_count, align 4
   br label %whilecond
 
-whilecond:                                        ; preds = %ifcont94, %ifcont83
+whilecond:                                        ; preds = %ifcont93, %ifcont82
   br i1 true, label %whilebody, label %afterwhile
 
 whilebody:                                        ; preds = %whilecond
   %pos_key = alloca ptr, align 8
-  %dir_count84 = load i32, ptr %dir_count, align 4
-  %addtmp = add i32 %dir_count84, 1
+  %dir_count83 = load i32, ptr %dir_count, align 4
+  %addtmp = add i32 %dir_count83, 1
   %cast.sext = sext i32 %addtmp to i64
   %from_int_result = call ptr @npk_string_from_int_simple(i64 %cast.sext)
   %concat_str = call ptr @npk_string_concat_simple(ptr @.str.1757, ptr %from_int_result)
   store ptr %concat_str, ptr %pos_key, align 8
-  %parsed85 = load i64, ptr %parsed, align 4
-  %pos_key86 = load ptr, ptr %pos_key, align 8
-  %calltmp87 = call { ptr, ptr, i8 } @nitpick_args.ahget_str(i64 %parsed85, ptr %pos_key86)
-  %raw.value88 = extractvalue { ptr, ptr, i8 } %calltmp87, 0
-  %str89 = load %struct.NpkString, ptr %raw.value88, align 8
-  %length90 = extractvalue %struct.NpkString %str89, 1
-  %eqtmp91 = icmp eq i64 %length90, 0
-  %ifcond92 = icmp ne i1 %eqtmp91, false
-  br i1 %ifcond92, label %then93, label %ifcont94
+  %parsed84 = load i64, ptr %parsed, align 4
+  %pos_key85 = load ptr, ptr %pos_key, align 8
+  %calltmp86 = call { ptr, ptr, i8 } @nitpick_args.ahget_str(i64 %parsed84, ptr %pos_key85)
+  %raw.value87 = extractvalue { ptr, ptr, i8 } %calltmp86, 0
+  %str88 = load %struct.NpkString, ptr %raw.value87, align 8
+  %length89 = extractvalue %struct.NpkString %str88, 1
+  %eqtmp90 = icmp eq i64 %length89, 0
+  %ifcond91 = icmp ne i1 %eqtmp90, false
+  br i1 %ifcond91, label %then92, label %ifcont93
 
-then93:                                           ; preds = %whilebody
+then92:                                           ; preds = %whilebody
   br label %afterwhile
 
 afterbreak:                                       ; No predecessors!
-  br label %ifcont94
+  br label %ifcont93
 
-ifcont94:                                         ; preds = %afterbreak, %whilebody
-  %dir_count95 = load i32, ptr %dir_count, align 4
-  %addtmp96 = add i32 %dir_count95, 1
-  store i32 %addtmp96, ptr %dir_count, align 4
+ifcont93:                                         ; preds = %afterbreak, %whilebody
+  %dir_count94 = load i32, ptr %dir_count, align 4
+  %addtmp95 = add i32 %dir_count94, 1
+  store i32 %addtmp95, ptr %dir_count, align 4
   call void @npk_gc_safepoint()
   br label %whilecond
 
-afterwhile:                                       ; preds = %then93, %whilecond
+afterwhile:                                       ; preds = %then92, %whilecond
   %exit_status = alloca i32, align 4
   store i32 1, ptr %exit_status, align 4
   %res1 = alloca i32, align 4
@@ -34046,139 +34070,141 @@ afterwhile:                                       ; preds = %then93, %whilecond
   store i32 0, ptr %res2, align 4
   %tok = alloca ptr, align 8
   store ptr @.str.1759, ptr %tok, align 8
-  %pattern_set97 = load i32, ptr %pattern_set, align 4
-  %eqtmp98 = icmp eq i32 %pattern_set97, 0
-  %ifcond99 = icmp ne i1 %eqtmp98, false
-  br i1 %ifcond99, label %then100, label %ifcont111
+  %pattern_set96 = load i32, ptr %pattern_set, align 4
+  %eqtmp97 = icmp eq i32 %pattern_set96, 0
+  %ifcond98 = icmp ne i1 %eqtmp97, false
+  br i1 %ifcond98, label %then99, label %ifcont110
 
-then100:                                          ; preds = %afterwhile
-  %calltmp101 = call { i32, ptr, i8 } @cmp.print_err(ptr @.str.1761)
-  %pattern_set102 = load i32, ptr %pattern_set, align 4
-  %eqtmp103 = icmp eq i32 %pattern_set102, 1
-  %ifcond104 = icmp ne i1 %eqtmp103, false
-  br i1 %ifcond104, label %then105, label %ifcont108
+then99:                                           ; preds = %afterwhile
+  %calltmp100 = call { i32, ptr, i8 } @cmp.print_err(ptr @.str.1761)
+  %pattern_set101 = load i32, ptr %pattern_set, align 4
+  %eqtmp102 = icmp eq i32 %pattern_set101, 1
+  %ifcond103 = icmp ne i1 %eqtmp102, false
+  br i1 %ifcond103, label %then104, label %ifcont107
 
-then105:                                          ; preds = %then100
-  %preg106 = load i64, ptr %preg, align 4
-  %calltmp107 = call ptr @regfree(i64 %preg106)
-  br label %ifcont108
+then104:                                          ; preds = %then99
+  %preg105 = load i64, ptr %preg, align 4
+  %calltmp106 = call ptr @regfree(i64 %preg105)
+  br label %ifcont107
 
-ifcont108:                                        ; preds = %then105, %then100
-  %preg109 = load i64, ptr %preg, align 4
-  %calltmp110 = call i32 @nitpick_libc_mem_free(i64 %preg109)
+ifcont107:                                        ; preds = %then104, %then99
+  %preg108 = load i64, ptr %preg, align 4
+  %cast.inttoptr109 = inttoptr i64 %preg108 to ptr
+  call void @npk_free(ptr %cast.inttoptr109)
   ret { i32, ptr, i8 } { i32 2, ptr null, i8 0 }
 
-ifcont111:                                        ; preds = %afterwhile
-  %dir_count112 = load i32, ptr %dir_count, align 4
-  %eqtmp113 = icmp eq i32 %dir_count112, 0
-  %ifcond114 = icmp ne i1 %eqtmp113, false
-  br i1 %ifcond114, label %then115, label %else
+ifcont110:                                        ; preds = %afterwhile
+  %dir_count111 = load i32, ptr %dir_count, align 4
+  %eqtmp112 = icmp eq i32 %dir_count111, 0
+  %ifcond113 = icmp ne i1 %eqtmp112, false
+  br i1 %ifcond113, label %then114, label %else
 
-then115:                                          ; preds = %ifcont111
-  %preg116 = load i64, ptr %preg, align 4
-  %flags_obj117 = load %GrepFlags, ptr %flags_obj, align 4
-  %calltmp118 = call { i32, ptr, i8 } @grep.process_file(ptr @.str.1763, i64 %preg116, %GrepFlags %flags_obj117, i32 0)
-  %raw.value119 = extractvalue { i32, ptr, i8 } %calltmp118, 0
-  store i32 %raw.value119, ptr %res1, align 4
-  %res1120 = load i32, ptr %res1, align 4
-  %eqtmp121 = icmp eq i32 %res1120, 0
-  %ifcond122 = icmp ne i1 %eqtmp121, false
-  br i1 %ifcond122, label %then123, label %ifcont124
+then114:                                          ; preds = %ifcont110
+  %preg115 = load i64, ptr %preg, align 4
+  %flags_obj116 = load %GrepFlags, ptr %flags_obj, align 4
+  %calltmp117 = call { i32, ptr, i8 } @grep.process_file(ptr @.str.1763, i64 %preg115, %GrepFlags %flags_obj116, i32 0)
+  %raw.value118 = extractvalue { i32, ptr, i8 } %calltmp117, 0
+  store i32 %raw.value118, ptr %res1, align 4
+  %res1119 = load i32, ptr %res1, align 4
+  %eqtmp120 = icmp eq i32 %res1119, 0
+  %ifcond121 = icmp ne i1 %eqtmp120, false
+  br i1 %ifcond121, label %then122, label %ifcont123
 
-then123:                                          ; preds = %then115
+then122:                                          ; preds = %then114
   store i32 0, ptr %exit_status, align 4
-  br label %ifcont124
+  br label %ifcont123
 
-ifcont124:                                        ; preds = %then123, %then115
-  br label %ifcont166
+ifcont123:                                        ; preds = %then122, %then114
+  br label %ifcont165
 
-else:                                             ; preds = %ifcont111
-  %dir_count125 = load i32, ptr %dir_count, align 4
-  %gttmp126 = icmp sgt i32 %dir_count125, 1
-  %ifcond127 = icmp ne i1 %gttmp126, false
-  br i1 %ifcond127, label %then128, label %ifcont129
+else:                                             ; preds = %ifcont110
+  %dir_count124 = load i32, ptr %dir_count, align 4
+  %gttmp125 = icmp sgt i32 %dir_count124, 1
+  %ifcond126 = icmp ne i1 %gttmp125, false
+  br i1 %ifcond126, label %then127, label %ifcont128
 
-then128:                                          ; preds = %else
+then127:                                          ; preds = %else
   store i32 1, ptr %print_filename, align 4
-  br label %ifcont129
+  br label %ifcont128
 
-ifcont129:                                        ; preds = %then128, %else
+ifcont128:                                        ; preds = %then127, %else
   store i32 0, ptr %current_file_idx, align 4
-  br label %whilecond130
+  br label %whilecond129
 
-whilecond130:                                     ; preds = %ifcont162, %ifcont129
-  %current_file_idx131 = load i32, ptr %current_file_idx, align 4
-  %dir_count132 = load i32, ptr %dir_count, align 4
-  %lttmp = icmp slt i32 %current_file_idx131, %dir_count132
-  %whilecond133 = icmp ne i1 %lttmp, false
-  br i1 %whilecond133, label %whilebody134, label %afterwhile165
+whilecond129:                                     ; preds = %ifcont161, %ifcont128
+  %current_file_idx130 = load i32, ptr %current_file_idx, align 4
+  %dir_count131 = load i32, ptr %dir_count, align 4
+  %lttmp = icmp slt i32 %current_file_idx130, %dir_count131
+  %whilecond132 = icmp ne i1 %lttmp, false
+  br i1 %whilecond132, label %whilebody133, label %afterwhile164
 
-whilebody134:                                     ; preds = %whilecond130
-  %pos_key135 = alloca ptr, align 8
-  %current_file_idx136 = load i32, ptr %current_file_idx, align 4
-  %addtmp137 = add i32 %current_file_idx136, 1
-  %cast.sext138 = sext i32 %addtmp137 to i64
-  %from_int_result139 = call ptr @npk_string_from_int_simple(i64 %cast.sext138)
-  %concat_str140 = call ptr @npk_string_concat_simple(ptr @.str.1765, ptr %from_int_result139)
-  store ptr %concat_str140, ptr %pos_key135, align 8
-  %parsed141 = load i64, ptr %parsed, align 4
-  %pos_key142 = load ptr, ptr %pos_key135, align 8
-  %calltmp143 = call { ptr, ptr, i8 } @nitpick_args.ahget_str(i64 %parsed141, ptr %pos_key142)
-  %raw.value144 = extractvalue { ptr, ptr, i8 } %calltmp143, 0
-  store ptr %raw.value144, ptr %tok, align 8
-  %tok145 = load ptr, ptr %tok, align 8
-  %str146 = load %struct.NpkString, ptr %tok145, align 8
-  %length147 = extractvalue %struct.NpkString %str146, 1
-  %gttmp148 = icmp sgt i64 %length147, 0
-  %ifcond149 = icmp ne i1 %gttmp148, false
-  br i1 %ifcond149, label %then150, label %ifcont162
+whilebody133:                                     ; preds = %whilecond129
+  %pos_key134 = alloca ptr, align 8
+  %current_file_idx135 = load i32, ptr %current_file_idx, align 4
+  %addtmp136 = add i32 %current_file_idx135, 1
+  %cast.sext137 = sext i32 %addtmp136 to i64
+  %from_int_result138 = call ptr @npk_string_from_int_simple(i64 %cast.sext137)
+  %concat_str139 = call ptr @npk_string_concat_simple(ptr @.str.1765, ptr %from_int_result138)
+  store ptr %concat_str139, ptr %pos_key134, align 8
+  %parsed140 = load i64, ptr %parsed, align 4
+  %pos_key141 = load ptr, ptr %pos_key134, align 8
+  %calltmp142 = call { ptr, ptr, i8 } @nitpick_args.ahget_str(i64 %parsed140, ptr %pos_key141)
+  %raw.value143 = extractvalue { ptr, ptr, i8 } %calltmp142, 0
+  store ptr %raw.value143, ptr %tok, align 8
+  %tok144 = load ptr, ptr %tok, align 8
+  %str145 = load %struct.NpkString, ptr %tok144, align 8
+  %length146 = extractvalue %struct.NpkString %str145, 1
+  %gttmp147 = icmp sgt i64 %length146, 0
+  %ifcond148 = icmp ne i1 %gttmp147, false
+  br i1 %ifcond148, label %then149, label %ifcont161
 
-then150:                                          ; preds = %whilebody134
-  %tok151 = load ptr, ptr %tok, align 8
-  %preg152 = load i64, ptr %preg, align 4
-  %flags_obj153 = load %GrepFlags, ptr %flags_obj, align 4
-  %print_filename154 = load i32, ptr %print_filename, align 4
-  %calltmp155 = call { i32, ptr, i8 } @grep.process_file(ptr %tok151, i64 %preg152, %GrepFlags %flags_obj153, i32 %print_filename154)
-  %raw.value156 = extractvalue { i32, ptr, i8 } %calltmp155, 0
-  store i32 %raw.value156, ptr %res2, align 4
-  %res2157 = load i32, ptr %res2, align 4
-  %eqtmp158 = icmp eq i32 %res2157, 0
-  %ifcond159 = icmp ne i1 %eqtmp158, false
-  br i1 %ifcond159, label %then160, label %ifcont161
+then149:                                          ; preds = %whilebody133
+  %tok150 = load ptr, ptr %tok, align 8
+  %preg151 = load i64, ptr %preg, align 4
+  %flags_obj152 = load %GrepFlags, ptr %flags_obj, align 4
+  %print_filename153 = load i32, ptr %print_filename, align 4
+  %calltmp154 = call { i32, ptr, i8 } @grep.process_file(ptr %tok150, i64 %preg151, %GrepFlags %flags_obj152, i32 %print_filename153)
+  %raw.value155 = extractvalue { i32, ptr, i8 } %calltmp154, 0
+  store i32 %raw.value155, ptr %res2, align 4
+  %res2156 = load i32, ptr %res2, align 4
+  %eqtmp157 = icmp eq i32 %res2156, 0
+  %ifcond158 = icmp ne i1 %eqtmp157, false
+  br i1 %ifcond158, label %then159, label %ifcont160
 
-then160:                                          ; preds = %then150
+then159:                                          ; preds = %then149
   store i32 0, ptr %exit_status, align 4
+  br label %ifcont160
+
+ifcont160:                                        ; preds = %then159, %then149
   br label %ifcont161
 
-ifcont161:                                        ; preds = %then160, %then150
-  br label %ifcont162
-
-ifcont162:                                        ; preds = %ifcont161, %whilebody134
-  %current_file_idx163 = load i32, ptr %current_file_idx, align 4
-  %addtmp164 = add i32 %current_file_idx163, 1
-  store i32 %addtmp164, ptr %current_file_idx, align 4
+ifcont161:                                        ; preds = %ifcont160, %whilebody133
+  %current_file_idx162 = load i32, ptr %current_file_idx, align 4
+  %addtmp163 = add i32 %current_file_idx162, 1
+  store i32 %addtmp163, ptr %current_file_idx, align 4
   call void @npk_gc_safepoint()
-  br label %whilecond130
+  br label %whilecond129
 
-afterwhile165:                                    ; preds = %whilecond130
-  br label %ifcont166
+afterwhile164:                                    ; preds = %whilecond129
+  br label %ifcont165
 
-ifcont166:                                        ; preds = %afterwhile165, %ifcont124
-  %pattern_set167 = load i32, ptr %pattern_set, align 4
-  %eqtmp168 = icmp eq i32 %pattern_set167, 1
-  %ifcond169 = icmp ne i1 %eqtmp168, false
-  br i1 %ifcond169, label %then170, label %ifcont173
+ifcont165:                                        ; preds = %afterwhile164, %ifcont123
+  %pattern_set166 = load i32, ptr %pattern_set, align 4
+  %eqtmp167 = icmp eq i32 %pattern_set166, 1
+  %ifcond168 = icmp ne i1 %eqtmp167, false
+  br i1 %ifcond168, label %then169, label %ifcont172
 
-then170:                                          ; preds = %ifcont166
-  %preg171 = load i64, ptr %preg, align 4
-  %calltmp172 = call ptr @regfree(i64 %preg171)
-  br label %ifcont173
+then169:                                          ; preds = %ifcont165
+  %preg170 = load i64, ptr %preg, align 4
+  %calltmp171 = call ptr @regfree(i64 %preg170)
+  br label %ifcont172
 
-ifcont173:                                        ; preds = %then170, %ifcont166
-  %preg174 = load i64, ptr %preg, align 4
-  %calltmp175 = call i32 @nitpick_libc_mem_free(i64 %preg174)
-  %exit_status176 = load i32, ptr %exit_status, align 4
-  %result.val = insertvalue { i32, ptr, i8 } undef, i32 %exit_status176, 0
+ifcont172:                                        ; preds = %then169, %ifcont165
+  %preg173 = load i64, ptr %preg, align 4
+  %cast.inttoptr174 = inttoptr i64 %preg173 to ptr
+  call void @npk_free(ptr %cast.inttoptr174)
+  %exit_status175 = load i32, ptr %exit_status, align 4
+  %result.val = insertvalue { i32, ptr, i8 } undef, i32 %exit_status175, 0
   %result.err = insertvalue { i32, ptr, i8 } %result.val, ptr null, 1
   %result.is_error = insertvalue { i32, ptr, i8 } %result.err, i8 0, 2
   ret { i32, ptr, i8 } %result.is_error
@@ -34399,8 +34425,10 @@ entry:
   %target_gid = alloca i64, align 8
   store i64 -1, ptr %target_gid, align 4
   %cf_buf = alloca i64, align 8
-  %calltmp5 = call i64 @malloc(i64 4096)
-  store i64 %calltmp5, ptr %cf_buf, align 4
+  %wild_ptr = call ptr @npk_alloc(i64 4096)
+  %wild_ptr5 = call ptr @npk_alloc(i64 4096)
+  %cast.ptrtoint = ptrtoint ptr %wild_ptr5 to i64
+  store i64 %cast.ptrtoint, ptr %cf_buf, align 4
   %arg_count6 = load i32, ptr %arg_count, align 4
   %getmp = icmp sge i32 %arg_count6, 1
   %ifcond = icmp ne i1 %getmp, false
@@ -34608,7 +34636,6 @@ afterwhile:                                       ; preds = %whilecond
   br i1 %null.deref, label %null.fail, label %null.ok
 
 null.fail:                                        ; preds = %afterwhile
-  %0 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -34890,7 +34917,6 @@ afterwhile250:                                    ; preds = %whilecond168
   br i1 %null.deref257, label %null.fail258, label %null.ok259
 
 null.fail258:                                     ; preds = %afterwhile250
-  %1 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -34937,7 +34963,8 @@ ifcont282:                                        ; preds = %ifcont281, %ifcont1
 then286:                                          ; preds = %ifcont282
   %calltmp287 = call { i32, ptr, i8 } @cmp.print_err(ptr @.str.1797)
   %cf_buf288 = load i64, ptr %cf_buf, align 4
-  %calltmp289 = call i32 @nitpick_libc_mem_free(i64 %cf_buf288)
+  %cast.inttoptr289 = inttoptr i64 %cf_buf288 to ptr
+  call void @npk_free(ptr %cast.inttoptr289)
   ret { i32, ptr, i8 } { i32 1, ptr null, i8 0 }
 
 ifcont290:                                        ; preds = %ifcont282
@@ -34980,7 +35007,8 @@ merge_block311:                                   ; preds = %success_block310, %
 then317:                                          ; preds = %merge_block311
   %calltmp318 = call { i32, ptr, i8 } @cmp.print_err(ptr @.str.1803)
   %cf_buf319 = load i64, ptr %cf_buf, align 4
-  %calltmp320 = call i32 @nitpick_libc_mem_free(i64 %cf_buf319)
+  %cast.inttoptr320 = inttoptr i64 %cf_buf319 to ptr
+  call void @npk_free(ptr %cast.inttoptr320)
   ret { i32, ptr, i8 } { i32 1, ptr null, i8 0 }
 
 ifcont321:                                        ; preds = %merge_block311
@@ -35184,7 +35212,6 @@ afterwhile429:                                    ; preds = %whilecond331
   br i1 %null.deref436, label %null.fail437, label %null.ok438
 
 null.fail437:                                     ; preds = %afterwhile429
-  %2 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -35196,7 +35223,8 @@ null.ok438:                                       ; preds = %afterwhile429
   %calltmp442 = call { i32, ptr, i8 } @io_utils.io_buf_free(i64 %fp441)
   %raw.value443 = extractvalue { i32, ptr, i8 } %calltmp442, 0
   %cf_buf444 = load i64, ptr %cf_buf, align 4
-  %calltmp445 = call i32 @nitpick_libc_mem_free(i64 %cf_buf444)
+  %cast.inttoptr445 = inttoptr i64 %cf_buf444 to ptr
+  call void @npk_free(ptr %cast.inttoptr445)
   %fd_g446 = load i64, ptr %fd_g, align 4
   %getmp447 = icmp sge i64 %fd_g446, 0
   %ifcond448 = icmp ne i1 %getmp447, false
@@ -35851,7 +35879,6 @@ whilebody272:                                     ; preds = %whilecond267
   br i1 %null.deref, label %null.fail, label %null.ok
 
 null.fail:                                        ; preds = %whilebody272
-  %0 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -36233,7 +36260,6 @@ else:                                             ; preds = %whilebody
   br i1 %null.deref, label %null.fail, label %null.ok
 
 null.fail:                                        ; preds = %else
-  %0 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -36910,12 +36936,11 @@ afterwhile:                                       ; preds = %whilecond
 
 then194:                                          ; preds = %afterwhile
   %chmod_res = alloca i64, align 8
-  %SYS_CHMOD = load i64, ptr @SYS_CHMOD, align 4
   %dst_path195 = load ptr, ptr %dst_path, align 8
   %sys_str_struct196 = load %struct.NpkString, ptr %dst_path195, align 8
   %sys_str_data197 = extractvalue %struct.NpkString %sys_str_struct196, 0
   %sys_strvar_int198 = ptrtoint ptr %sys_str_data197 to i64
-  %syscall_ret199 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 %SYS_CHMOD, i64 %sys_strvar_int198, i64 493)
+  %syscall_ret199 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 90, i64 %sys_strvar_int198, i64 493)
   %sys_is_err200 = icmp slt i64 %syscall_ret199, 0
   %sys_neg_errno201 = sub i64 0, %syscall_ret199
   %sys_err_ptr202 = inttoptr i64 %sys_neg_errno201 to ptr
@@ -38204,10 +38229,9 @@ ifcont73:                                         ; preds = %else64
 
 ifcont74:                                         ; preds = %ifcont73, %ifcont63
   %res = alloca i64, align 8
-  %SYS_KILL = load i64, ptr @SYS_KILL, align 4
   %pid75 = load i64, ptr %pid, align 4
   %sig76 = load i64, ptr %sig, align 4
-  %syscall_ret = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 %SYS_KILL, i64 %pid75, i64 %sig76)
+  %syscall_ret = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 62, i64 %pid75, i64 %sig76)
   %sys_is_err = icmp slt i64 %syscall_ret, 0
   %sys_neg_errno = sub i64 0, %syscall_ret
   %sys_err_ptr = inttoptr i64 %sys_neg_errno to ptr
@@ -38310,7 +38334,6 @@ ifcont:                                           ; preds = %entry
   %raw.value12 = extractvalue { ptr, ptr, i8 } %calltmp11, 0
   store ptr %raw.value12, ptr %new_file, align 8
   %res = alloca i64, align 8
-  %SYS_LINK = load i64, ptr @SYS_LINK, align 4
   %old_file13 = load ptr, ptr %old_file, align 8
   %sys_str_struct = load %struct.NpkString, ptr %old_file13, align 8
   %sys_str_data = extractvalue %struct.NpkString %sys_str_struct, 0
@@ -38319,7 +38342,7 @@ ifcont:                                           ; preds = %entry
   %sys_str_struct15 = load %struct.NpkString, ptr %new_file14, align 8
   %sys_str_data16 = extractvalue %struct.NpkString %sys_str_struct15, 0
   %sys_strvar_int17 = ptrtoint ptr %sys_str_data16 to i64
-  %syscall_ret = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 %SYS_LINK, i64 %sys_strvar_int, i64 %sys_strvar_int17)
+  %syscall_ret = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 86, i64 %sys_strvar_int, i64 %sys_strvar_int17)
   %sys_is_err = icmp slt i64 %syscall_ret, 0
   %sys_neg_errno = sub i64 0, %syscall_ret
   %sys_err_ptr = inttoptr i64 %sys_neg_errno to ptr
@@ -38698,8 +38721,10 @@ ifcont:                                           ; preds = %merge_block
   %username = alloca ptr, align 8
   store ptr @.str.1963, ptr %username, align 8
   %buf = alloca i64, align 8
-  %calltmp8 = call i64 @malloc(i64 65536)
-  store i64 %calltmp8, ptr %buf, align 4
+  %wild_ptr = call ptr @npk_alloc(i64 65536)
+  %wild_ptr8 = call ptr @npk_alloc(i64 65536)
+  %cast.ptrtoint = ptrtoint ptr %wild_ptr8 to i64
+  store i64 %cast.ptrtoint, ptr %buf, align 4
   %len = alloca i64, align 8
   store i64 0, ptr %len, align 4
   %field_index = alloca i64, align 8
@@ -38732,7 +38757,7 @@ else:                                             ; preds = %whilebody
   %c17 = load i32, ptr %c, align 4
   %eqtmp18 = icmp eq i32 %c17, 58
   %ifcond19 = icmp ne i1 %eqtmp18, false
-  br i1 %ifcond19, label %then20, label %else51
+  br i1 %ifcond19, label %then20, label %else50
 
 then20:                                           ; preds = %else
   %field_index21 = load i64, ptr %field_index, align 4
@@ -38746,13 +38771,13 @@ then24:                                           ; preds = %then20
   %calltmp27 = call { ptr, ptr, i8 } @mem_utils.read_string_native(i64 %buf25, i64 %len26)
   %raw.value = extractvalue { ptr, ptr, i8 } %calltmp27, 0
   store ptr %raw.value, ptr %username, align 8
-  br label %ifcont49
+  br label %ifcont48
 
 else28:                                           ; preds = %then20
   %field_index29 = load i64, ptr %field_index, align 4
   %eqtmp30 = icmp eq i64 %field_index29, 2
   %ifcond31 = icmp ne i1 %eqtmp30, false
-  br i1 %ifcond31, label %then32, label %ifcont48
+  br i1 %ifcond31, label %then32, label %ifcont47
 
 then32:                                           ; preds = %else28
   %buf33 = load i64, ptr %buf, align 4
@@ -38764,58 +38789,59 @@ then32:                                           ; preds = %else28
   %str2 = load %struct.NpkString, ptr %uid_str37, align 8
   %equals = call i1 @npk_string_equals(%struct.NpkString %str1, %struct.NpkString %str2)
   %ifcond38 = icmp ne i1 %equals, false
-  br i1 %ifcond38, label %then39, label %ifcont47
+  br i1 %ifcond38, label %then39, label %ifcont46
 
 then39:                                           ; preds = %then32
   %username40 = load ptr, ptr %username, align 8
   %calltmp41 = call { i32, ptr, i8 } @logname.print_str_safe(ptr %username40)
   %calltmp42 = call { i32, ptr, i8 } @logname.print_str_safe(ptr @.str.1967)
   %buf43 = load i64, ptr %buf, align 4
-  %calltmp44 = call i32 @nitpick_libc_mem_free(i64 %buf43)
-  %fp45 = load i64, ptr %fp, align 4
-  %calltmp46 = call i32 @fclose(i64 %fp45)
+  %cast.inttoptr = inttoptr i64 %buf43 to ptr
+  call void @npk_free(ptr %cast.inttoptr)
+  %fp44 = load i64, ptr %fp, align 4
+  %calltmp45 = call i32 @fclose(i64 %fp44)
   ret { i32, ptr, i8 } zeroinitializer
 
-ifcont47:                                         ; preds = %then32
+ifcont46:                                         ; preds = %then32
+  br label %ifcont47
+
+ifcont47:                                         ; preds = %ifcont46, %else28
   br label %ifcont48
 
-ifcont48:                                         ; preds = %ifcont47, %else28
-  br label %ifcont49
-
-ifcont49:                                         ; preds = %ifcont48, %then24
+ifcont48:                                         ; preds = %ifcont47, %then24
   store i64 0, ptr %len, align 4
-  %field_index50 = load i64, ptr %field_index, align 4
-  %addtmp = add i64 %field_index50, 1
+  %field_index49 = load i64, ptr %field_index, align 4
+  %addtmp = add i64 %field_index49, 1
   store i64 %addtmp, ptr %field_index, align 4
   br label %ifcont65
 
-else51:                                           ; preds = %else
-  %len52 = load i64, ptr %len, align 4
-  %lttmp = icmp slt i64 %len52, 65536
-  %ifcond53 = icmp ne i1 %lttmp, false
-  br i1 %ifcond53, label %then54, label %ifcont64
+else50:                                           ; preds = %else
+  %len51 = load i64, ptr %len, align 4
+  %lttmp = icmp slt i64 %len51, 65536
+  %ifcond52 = icmp ne i1 %lttmp, false
+  br i1 %ifcond52, label %then53, label %ifcont64
 
-then54:                                           ; preds = %else51
-  %buf55 = load i64, ptr %buf, align 4
-  %len56 = load i64, ptr %len, align 4
-  %addtmp57 = add i64 %buf55, %len56
-  %buf58 = load i64, ptr %buf, align 4
-  %len59 = load i64, ptr %len, align 4
-  %addtmp60 = add i64 %buf58, %len59
-  %cast.inttoptr = inttoptr i64 %addtmp60 to ptr
+then53:                                           ; preds = %else50
+  %buf54 = load i64, ptr %buf, align 4
+  %len55 = load i64, ptr %len, align 4
+  %addtmp56 = add i64 %buf54, %len55
+  %buf57 = load i64, ptr %buf, align 4
+  %len58 = load i64, ptr %len, align 4
+  %addtmp59 = add i64 %buf57, %len58
+  %cast.inttoptr60 = inttoptr i64 %addtmp59 to ptr
   %c61 = load i32, ptr %c, align 4
   %cast.sext = sext i32 %c61 to i64
   %cast.trunc = trunc i64 %cast.sext to i8
-  store i8 %cast.trunc, ptr %cast.inttoptr, align 1
+  store i8 %cast.trunc, ptr %cast.inttoptr60, align 1
   %len62 = load i64, ptr %len, align 4
   %addtmp63 = add i64 %len62, 1
   store i64 %addtmp63, ptr %len, align 4
   br label %ifcont64
 
-ifcont64:                                         ; preds = %then54, %else51
+ifcont64:                                         ; preds = %then53, %else50
   br label %ifcont65
 
-ifcont65:                                         ; preds = %ifcont64, %ifcont49
+ifcont65:                                         ; preds = %ifcont64, %ifcont48
   br label %ifcont66
 
 ifcont66:                                         ; preds = %ifcont65, %then16
@@ -38827,7 +38853,8 @@ ifcont66:                                         ; preds = %ifcont65, %then16
 
 afterwhile:                                       ; preds = %whilecond
   %buf69 = load i64, ptr %buf, align 4
-  %calltmp70 = call i32 @nitpick_libc_mem_free(i64 %buf69)
+  %cast.inttoptr70 = inttoptr i64 %buf69 to ptr
+  call void @npk_free(ptr %cast.inttoptr70)
   %fp71 = load i64, ptr %fp, align 4
   %calltmp72 = call i32 @fclose(i64 %fp71)
   %uid_str73 = load ptr, ptr %uid_str, align 8
@@ -38863,7 +38890,6 @@ whilecond:                                        ; preds = %whilebody, %entry
   br i1 %null.deref, label %null.fail, label %null.ok
 
 null.fail:                                        ; preds = %whilecond
-  %0 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -38980,7 +39006,6 @@ whilecond:                                        ; preds = %whilebody, %entry
   br i1 %null.deref, label %null.fail, label %null.ok
 
 null.fail:                                        ; preds = %whilecond
-  %0 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -39002,49 +39027,53 @@ afterwhile:                                       ; preds = %null.ok
   %copy = alloca i64, align 8
   %len9 = load i64, ptr %len, align 4
   %addtmp10 = add i64 %len9, 1
-  %calltmp = call i64 @malloc(i64 %addtmp10)
-  store i64 %calltmp, ptr %copy, align 4
+  %wild_ptr = call ptr @npk_alloc(i64 %addtmp10)
+  %len11 = load i64, ptr %len, align 4
+  %addtmp12 = add i64 %len11, 1
+  %wild_ptr13 = call ptr @npk_alloc(i64 %addtmp12)
+  %cast.ptrtoint = ptrtoint ptr %wild_ptr13 to i64
+  store i64 %cast.ptrtoint, ptr %copy, align 4
   %i = alloca i64, align 8
   store i64 0, ptr %i, align 4
-  br label %whilecond11
+  br label %whilecond14
 
-whilecond11:                                      ; preds = %whilebody15, %afterwhile
-  %i12 = load i64, ptr %i, align 4
-  %len13 = load i64, ptr %len, align 4
-  %lttmp = icmp slt i64 %i12, %len13
-  %whilecond14 = icmp ne i1 %lttmp, false
-  br i1 %whilecond14, label %whilebody15, label %afterwhile28
+whilecond14:                                      ; preds = %whilebody18, %afterwhile
+  %i15 = load i64, ptr %i, align 4
+  %len16 = load i64, ptr %len, align 4
+  %lttmp = icmp slt i64 %i15, %len16
+  %whilecond17 = icmp ne i1 %lttmp, false
+  br i1 %whilecond17, label %whilebody18, label %afterwhile30
 
-whilebody15:                                      ; preds = %whilecond11
-  %copy16 = load i64, ptr %copy, align 4
-  %i17 = load i64, ptr %i, align 4
-  %addtmp18 = add i64 %copy16, %i17
+whilebody18:                                      ; preds = %whilecond14
   %copy19 = load i64, ptr %copy, align 4
   %i20 = load i64, ptr %i, align 4
   %addtmp21 = add i64 %copy19, %i20
-  %cast.inttoptr22 = inttoptr i64 %addtmp21 to ptr
-  %s23 = load i64, ptr %s.addr, align 4
-  %i24 = load i64, ptr %i, align 4
-  %calltmp25 = call i64 @npk_mem_read_byte(i64 %s23, i64 %i24)
-  %cast.trunc = trunc i64 %calltmp25 to i8
-  store i8 %cast.trunc, ptr %cast.inttoptr22, align 1
-  %i26 = load i64, ptr %i, align 4
-  %addtmp27 = add i64 %i26, 1
-  store i64 %addtmp27, ptr %i, align 4
+  %copy22 = load i64, ptr %copy, align 4
+  %i23 = load i64, ptr %i, align 4
+  %addtmp24 = add i64 %copy22, %i23
+  %cast.inttoptr25 = inttoptr i64 %addtmp24 to ptr
+  %s26 = load i64, ptr %s.addr, align 4
+  %i27 = load i64, ptr %i, align 4
+  %calltmp = call i64 @npk_mem_read_byte(i64 %s26, i64 %i27)
+  %cast.trunc = trunc i64 %calltmp to i8
+  store i8 %cast.trunc, ptr %cast.inttoptr25, align 1
+  %i28 = load i64, ptr %i, align 4
+  %addtmp29 = add i64 %i28, 1
+  store i64 %addtmp29, ptr %i, align 4
   call void @npk_gc_safepoint()
-  br label %whilecond11
+  br label %whilecond14
 
-afterwhile28:                                     ; preds = %whilecond11
-  %copy29 = load i64, ptr %copy, align 4
-  %len30 = load i64, ptr %len, align 4
-  %addtmp31 = add i64 %copy29, %len30
-  %copy32 = load i64, ptr %copy, align 4
-  %len33 = load i64, ptr %len, align 4
-  %addtmp34 = add i64 %copy32, %len33
-  %cast.inttoptr35 = inttoptr i64 %addtmp34 to ptr
-  store i8 0, ptr %cast.inttoptr35, align 1
-  %copy36 = load i64, ptr %copy, align 4
-  %result.val = insertvalue { i64, ptr, i8 } undef, i64 %copy36, 0
+afterwhile30:                                     ; preds = %whilecond14
+  %copy31 = load i64, ptr %copy, align 4
+  %len32 = load i64, ptr %len, align 4
+  %addtmp33 = add i64 %copy31, %len32
+  %copy34 = load i64, ptr %copy, align 4
+  %len35 = load i64, ptr %len, align 4
+  %addtmp36 = add i64 %copy34, %len35
+  %cast.inttoptr37 = inttoptr i64 %addtmp36 to ptr
+  store i8 0, ptr %cast.inttoptr37, align 1
+  %copy38 = load i64, ptr %copy, align 4
+  %result.val = insertvalue { i64, ptr, i8 } undef, i64 %copy38, 0
   %result.err = insertvalue { i64, ptr, i8 } %result.val, ptr null, 1
   %result.is_error = insertvalue { i64, ptr, i8 } %result.err, i8 0, 2
   ret { i64, ptr, i8 } %result.is_error
@@ -39072,7 +39101,6 @@ whilecond:                                        ; preds = %null.ok16, %entry
   br i1 %null.deref, label %null.fail, label %null.ok
 
 null.fail:                                        ; preds = %whilecond
-  %0 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -39096,7 +39124,6 @@ whilebody:                                        ; preds = %null.ok
   br i1 %null.deref14, label %null.fail15, label %null.ok16
 
 null.fail15:                                      ; preds = %whilebody
-  %1 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -39150,7 +39177,6 @@ whilebody:                                        ; preds = %whilecond
   br i1 %null.deref, label %null.fail, label %null.ok
 
 null.fail:                                        ; preds = %whilebody
-  %0 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -39170,7 +39196,6 @@ null.ok:                                          ; preds = %whilebody
   br i1 %null.deref13, label %null.fail14, label %null.ok15
 
 null.fail14:                                      ; preds = %null.ok
-  %1 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -39945,7 +39970,6 @@ whilebody118:                                     ; preds = %whilecond113
   br i1 %null.deref, label %null.fail, label %null.ok
 
 null.fail:                                        ; preds = %whilebody118
-  %0 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -39963,7 +39987,6 @@ null.ok:                                          ; preds = %whilebody118
   br i1 %null.deref130, label %null.fail131, label %null.ok132
 
 null.fail131:                                     ; preds = %null.ok
-  %1 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -39987,7 +40010,6 @@ null.ok132:                                       ; preds = %null.ok
   br i1 %null.deref142, label %null.fail143, label %null.ok144
 
 null.fail143:                                     ; preds = %null.ok132
-  %2 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -40009,7 +40031,6 @@ null.ok144:                                       ; preds = %null.ok132
   br i1 %null.deref154, label %null.fail155, label %null.ok156
 
 null.fail155:                                     ; preds = %null.ok144
-  %3 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -40027,7 +40048,6 @@ null.ok156:                                       ; preds = %null.ok144
   br i1 %null.deref164, label %null.fail165, label %null.ok166
 
 null.fail165:                                     ; preds = %null.ok156
-  %4 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -40045,7 +40065,6 @@ null.ok166:                                       ; preds = %null.ok156
   br i1 %null.deref174, label %null.fail175, label %null.ok176
 
 null.fail175:                                     ; preds = %null.ok166
-  %5 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -40373,7 +40392,6 @@ whilecond346:                                     ; preds = %whilebody361, %ifco
   br i1 %null.deref354, label %null.fail355, label %null.ok356
 
 null.fail355:                                     ; preds = %whilecond346
-  %6 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -40421,10 +40439,9 @@ afterwhile379:                                    ; preds = %null.ok356
   %cast.inttoptr390 = inttoptr i64 %addtmp389 to ptr
   store i8 0, ptr %cast.inttoptr390, align 1
   %res_stat = alloca i64, align 8
-  %SYS_LSTAT = load i64, ptr @SYS_LSTAT, align 4
   %pathbuf391 = load i64, ptr %pathbuf, align 4
   %statbuf392 = load i64, ptr %statbuf, align 4
-  %syscall_ret393 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 %SYS_LSTAT, i64 %pathbuf391, i64 %statbuf392)
+  %syscall_ret393 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 6, i64 %pathbuf391, i64 %statbuf392)
   %sys_is_err394 = icmp slt i64 %syscall_ret393, 0
   %sys_neg_errno395 = sub i64 0, %syscall_ret393
   %sys_err_ptr396 = inttoptr i64 %sys_neg_errno395 to ptr
@@ -40464,7 +40481,6 @@ then413:                                          ; preds = %merge_block407
   br i1 %null.deref419, label %null.fail420, label %null.ok421
 
 null.fail420:                                     ; preds = %then413
-  %7 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -40517,12 +40533,12 @@ ifcont442:                                        ; preds = %afterwhile441, %aft
   store i64 0, ptr %i, align 4
   br label %whilecond443
 
-whilecond443:                                     ; preds = %ifcont661, %ifcont442
+whilecond443:                                     ; preds = %ifcont660, %ifcont442
   %i444 = load i64, ptr %i, align 4
   %sz445 = load i64, ptr %sz, align 4
   %lttmp446 = icmp slt i64 %i444, %sz445
   %whilecond447 = icmp ne i1 %lttmp446, false
-  br i1 %whilecond447, label %whilebody448, label %afterwhile664
+  br i1 %whilecond447, label %whilebody448, label %afterwhile663
 
 whilebody448:                                     ; preds = %whilecond443
   %name_ptr449 = alloca i64, align 8
@@ -40534,7 +40550,7 @@ whilebody448:                                     ; preds = %whilecond443
   %long_fmt454 = load i32, ptr %long_fmt.addr, align 4
   %eqtmp455 = icmp eq i32 %long_fmt454, 1
   %ifcond456 = icmp ne i1 %eqtmp455, false
-  br i1 %ifcond456, label %then457, label %else644
+  br i1 %ifcond456, label %then457, label %else643
 
 then457:                                          ; preds = %whilebody448
   %d458 = alloca ptr, align 8
@@ -40629,7 +40645,6 @@ whilecond513:                                     ; preds = %whilebody528, %ifco
   br i1 %null.deref521, label %null.fail522, label %null.ok523
 
 null.fail522:                                     ; preds = %whilecond513
-  %8 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -40677,332 +40692,331 @@ afterwhile546:                                    ; preds = %null.ok523
   %cast.inttoptr557 = inttoptr i64 %addtmp556 to ptr
   store i8 0, ptr %cast.inttoptr557, align 1
   %res_stat558 = alloca i64, align 8
-  %SYS_LSTAT559 = load i64, ptr @SYS_LSTAT, align 4
-  %pathbuf560 = load i64, ptr %pathbuf, align 4
-  %statbuf561 = load i64, ptr %statbuf, align 4
-  %syscall_ret562 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 %SYS_LSTAT559, i64 %pathbuf560, i64 %statbuf561)
-  %sys_is_err563 = icmp slt i64 %syscall_ret562, 0
-  %sys_neg_errno564 = sub i64 0, %syscall_ret562
-  %sys_err_ptr565 = inttoptr i64 %sys_neg_errno564 to ptr
-  %sys_val566 = select i1 %sys_is_err563, i64 0, i64 %syscall_ret562
-  %sys_err567 = select i1 %sys_is_err563, ptr %sys_err_ptr565, ptr null
-  %sys_flag568 = select i1 %sys_is_err563, i8 1, i8 0
-  %sys_result.val569 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val566, 0
-  %sys_result.err570 = insertvalue %struct.NpkResult_int64 %sys_result.val569, ptr %sys_err567, 1
-  %sys_result.is_error571 = insertvalue %struct.NpkResult_int64 %sys_result.err570, i8 %sys_flag568, 2
-  %is_error572 = extractvalue %struct.NpkResult_int64 %sys_result.is_error571, 2
-  %is_error_bool573 = icmp ne i8 %is_error572, 0
-  br i1 %is_error_bool573, label %error_block574, label %success_block575
+  %pathbuf559 = load i64, ptr %pathbuf, align 4
+  %statbuf560 = load i64, ptr %statbuf, align 4
+  %syscall_ret561 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 6, i64 %pathbuf559, i64 %statbuf560)
+  %sys_is_err562 = icmp slt i64 %syscall_ret561, 0
+  %sys_neg_errno563 = sub i64 0, %syscall_ret561
+  %sys_err_ptr564 = inttoptr i64 %sys_neg_errno563 to ptr
+  %sys_val565 = select i1 %sys_is_err562, i64 0, i64 %syscall_ret561
+  %sys_err566 = select i1 %sys_is_err562, ptr %sys_err_ptr564, ptr null
+  %sys_flag567 = select i1 %sys_is_err562, i8 1, i8 0
+  %sys_result.val568 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val565, 0
+  %sys_result.err569 = insertvalue %struct.NpkResult_int64 %sys_result.val568, ptr %sys_err566, 1
+  %sys_result.is_error570 = insertvalue %struct.NpkResult_int64 %sys_result.err569, i8 %sys_flag567, 2
+  %is_error571 = extractvalue %struct.NpkResult_int64 %sys_result.is_error570, 2
+  %is_error_bool572 = icmp ne i8 %is_error571, 0
+  br i1 %is_error_bool572, label %error_block573, label %success_block574
 
-error_block574:                                   ; preds = %afterwhile546
-  br label %merge_block576
+error_block573:                                   ; preds = %afterwhile546
+  br label %merge_block575
 
-success_block575:                                 ; preds = %afterwhile546
-  %value577 = extractvalue %struct.NpkResult_int64 %sys_result.is_error571, 0
-  br label %merge_block576
+success_block574:                                 ; preds = %afterwhile546
+  %value576 = extractvalue %struct.NpkResult_int64 %sys_result.is_error570, 0
+  br label %merge_block575
 
-merge_block576:                                   ; preds = %success_block575, %error_block574
-  %unwrap_result578 = phi i64 [ -1, %error_block574 ], [ %value577, %success_block575 ]
-  store i64 %unwrap_result578, ptr %res_stat558, align 4
-  %res_stat579 = load i64, ptr %res_stat558, align 4
-  %getmp580 = icmp sge i64 %res_stat579, 0
-  %ifcond581 = icmp ne i1 %getmp580, false
-  br i1 %ifcond581, label %then582, label %ifcont643
+merge_block575:                                   ; preds = %success_block574, %error_block573
+  %unwrap_result577 = phi i64 [ -1, %error_block573 ], [ %value576, %success_block574 ]
+  store i64 %unwrap_result577, ptr %res_stat558, align 4
+  %res_stat578 = load i64, ptr %res_stat558, align 4
+  %getmp579 = icmp sge i64 %res_stat578, 0
+  %ifcond580 = icmp ne i1 %getmp579, false
+  br i1 %ifcond580, label %then581, label %ifcont642
 
-then582:                                          ; preds = %merge_block576
+then581:                                          ; preds = %merge_block575
   %st_mode = alloca i32, align 4
-  %statbuf583 = load i64, ptr %statbuf, align 4
-  %calltmp584 = call i32 @npk_mem_read_int32(i64 %statbuf583, i64 24)
-  store i32 %calltmp584, ptr %st_mode, align 4
+  %statbuf582 = load i64, ptr %statbuf, align 4
+  %calltmp583 = call i32 @npk_mem_read_int32(i64 %statbuf582, i64 24)
+  store i32 %calltmp583, ptr %st_mode, align 4
   %st_nlink = alloca i64, align 8
-  %statbuf585 = load i64, ptr %statbuf, align 4
-  %addtmp586 = add i64 %statbuf585, 16
-  %statbuf587 = load i64, ptr %statbuf, align 4
-  %addtmp588 = add i64 %statbuf587, 16
-  %cast.inttoptr589 = inttoptr i64 %addtmp588 to ptr
-  %null.deref590 = icmp eq ptr %cast.inttoptr589, null
-  br i1 %null.deref590, label %null.fail591, label %null.ok592
+  %statbuf584 = load i64, ptr %statbuf, align 4
+  %addtmp585 = add i64 %statbuf584, 16
+  %statbuf586 = load i64, ptr %statbuf, align 4
+  %addtmp587 = add i64 %statbuf586, 16
+  %cast.inttoptr588 = inttoptr i64 %addtmp587 to ptr
+  %null.deref589 = icmp eq ptr %cast.inttoptr588, null
+  br i1 %null.deref589, label %null.fail590, label %null.ok591
 
-null.fail591:                                     ; preds = %then582
-  %9 = call i32 @failsafe(i32 46)
+null.fail590:                                     ; preds = %then581
   call void @exit(i32 46)
   unreachable
 
-null.ok592:                                       ; preds = %then582
-  %deref593 = load i32, ptr %cast.inttoptr589, align 4
-  %init_sext594 = sext i32 %deref593 to i64
-  store i64 %init_sext594, ptr %st_nlink, align 4
+null.ok591:                                       ; preds = %then581
+  %deref592 = load i32, ptr %cast.inttoptr588, align 4
+  %init_sext593 = sext i32 %deref592 to i64
+  store i64 %init_sext593, ptr %st_nlink, align 4
   %st_uid = alloca i32, align 4
-  %statbuf595 = load i64, ptr %statbuf, align 4
-  %calltmp596 = call i32 @npk_mem_read_int32(i64 %statbuf595, i64 28)
-  store i32 %calltmp596, ptr %st_uid, align 4
+  %statbuf594 = load i64, ptr %statbuf, align 4
+  %calltmp595 = call i32 @npk_mem_read_int32(i64 %statbuf594, i64 28)
+  store i32 %calltmp595, ptr %st_uid, align 4
   %st_gid = alloca i32, align 4
-  %statbuf597 = load i64, ptr %statbuf, align 4
-  %calltmp598 = call i32 @npk_mem_read_int32(i64 %statbuf597, i64 32)
-  store i32 %calltmp598, ptr %st_gid, align 4
-  %st_size599 = alloca i64, align 8
-  %statbuf600 = load i64, ptr %statbuf, align 4
-  %addtmp601 = add i64 %statbuf600, 48
-  %statbuf602 = load i64, ptr %statbuf, align 4
-  %addtmp603 = add i64 %statbuf602, 48
-  %cast.inttoptr604 = inttoptr i64 %addtmp603 to ptr
-  %null.deref605 = icmp eq ptr %cast.inttoptr604, null
-  br i1 %null.deref605, label %null.fail606, label %null.ok607
+  %statbuf596 = load i64, ptr %statbuf, align 4
+  %calltmp597 = call i32 @npk_mem_read_int32(i64 %statbuf596, i64 32)
+  store i32 %calltmp597, ptr %st_gid, align 4
+  %st_size598 = alloca i64, align 8
+  %statbuf599 = load i64, ptr %statbuf, align 4
+  %addtmp600 = add i64 %statbuf599, 48
+  %statbuf601 = load i64, ptr %statbuf, align 4
+  %addtmp602 = add i64 %statbuf601, 48
+  %cast.inttoptr603 = inttoptr i64 %addtmp602 to ptr
+  %null.deref604 = icmp eq ptr %cast.inttoptr603, null
+  br i1 %null.deref604, label %null.fail605, label %null.ok606
 
-null.fail606:                                     ; preds = %null.ok592
-  %10 = call i32 @failsafe(i32 46)
+null.fail605:                                     ; preds = %null.ok591
   call void @exit(i32 46)
   unreachable
 
-null.ok607:                                       ; preds = %null.ok592
-  %deref608 = load i32, ptr %cast.inttoptr604, align 4
-  %init_sext609 = sext i32 %deref608 to i64
-  store i64 %init_sext609, ptr %st_size599, align 4
-  %st_mode610 = load i32, ptr %st_mode, align 4
-  %calltmp611 = call { i32, ptr, i8 } @ls.print_perms(i32 %st_mode610)
-  %calltmp612 = call { i32, ptr, i8 } @logname.print_str_safe(ptr @.str.2037)
-  %st_nlink613 = load i64, ptr %st_nlink, align 4
-  %from_int_result614 = call ptr @npk_string_from_int_simple(i64 %st_nlink613)
-  %calltmp615 = call { i32, ptr, i8 } @logname.print_str_safe(ptr %from_int_result614)
-  %calltmp616 = call { i32, ptr, i8 } @logname.print_str_safe(ptr @.str.2039)
-  %st_uid617 = load i32, ptr %st_uid, align 4
-  %cast.sext618 = sext i32 %st_uid617 to i64
-  %from_int_result619 = call ptr @npk_string_from_int_simple(i64 %cast.sext618)
-  %calltmp620 = call { i32, ptr, i8 } @logname.print_str_safe(ptr %from_int_result619)
-  %calltmp621 = call { i32, ptr, i8 } @logname.print_str_safe(ptr @.str.2041)
-  %st_gid622 = load i32, ptr %st_gid, align 4
-  %cast.sext623 = sext i32 %st_gid622 to i64
-  %from_int_result624 = call ptr @npk_string_from_int_simple(i64 %cast.sext623)
-  %calltmp625 = call { i32, ptr, i8 } @logname.print_str_safe(ptr %from_int_result624)
-  %calltmp626 = call { i32, ptr, i8 } @logname.print_str_safe(ptr @.str.2043)
-  %human_fmt627 = load i32, ptr %human_fmt.addr, align 4
-  %eqtmp628 = icmp eq i32 %human_fmt627, 1
-  %ifcond629 = icmp ne i1 %eqtmp628, false
-  br i1 %ifcond629, label %then630, label %else636
+null.ok606:                                       ; preds = %null.ok591
+  %deref607 = load i32, ptr %cast.inttoptr603, align 4
+  %init_sext608 = sext i32 %deref607 to i64
+  store i64 %init_sext608, ptr %st_size598, align 4
+  %st_mode609 = load i32, ptr %st_mode, align 4
+  %calltmp610 = call { i32, ptr, i8 } @ls.print_perms(i32 %st_mode609)
+  %calltmp611 = call { i32, ptr, i8 } @logname.print_str_safe(ptr @.str.2037)
+  %st_nlink612 = load i64, ptr %st_nlink, align 4
+  %from_int_result613 = call ptr @npk_string_from_int_simple(i64 %st_nlink612)
+  %calltmp614 = call { i32, ptr, i8 } @logname.print_str_safe(ptr %from_int_result613)
+  %calltmp615 = call { i32, ptr, i8 } @logname.print_str_safe(ptr @.str.2039)
+  %st_uid616 = load i32, ptr %st_uid, align 4
+  %cast.sext617 = sext i32 %st_uid616 to i64
+  %from_int_result618 = call ptr @npk_string_from_int_simple(i64 %cast.sext617)
+  %calltmp619 = call { i32, ptr, i8 } @logname.print_str_safe(ptr %from_int_result618)
+  %calltmp620 = call { i32, ptr, i8 } @logname.print_str_safe(ptr @.str.2041)
+  %st_gid621 = load i32, ptr %st_gid, align 4
+  %cast.sext622 = sext i32 %st_gid621 to i64
+  %from_int_result623 = call ptr @npk_string_from_int_simple(i64 %cast.sext622)
+  %calltmp624 = call { i32, ptr, i8 } @logname.print_str_safe(ptr %from_int_result623)
+  %calltmp625 = call { i32, ptr, i8 } @logname.print_str_safe(ptr @.str.2043)
+  %human_fmt626 = load i32, ptr %human_fmt.addr, align 4
+  %eqtmp627 = icmp eq i32 %human_fmt626, 1
+  %ifcond628 = icmp ne i1 %eqtmp627, false
+  br i1 %ifcond628, label %then629, label %else635
 
-then630:                                          ; preds = %null.ok607
-  %st_size631 = load i64, ptr %st_size599, align 4
-  %max_size_w632 = load i64, ptr %max_size_w, align 4
-  %calltmp633 = call { i32, ptr, i8 } @ls.print_human_num_padded(i64 %st_size631, i64 %max_size_w632)
-  %raw.value634 = extractvalue { i32, ptr, i8 } %calltmp633, 0
-  %calltmp635 = call { i32, ptr, i8 } @logname.print_str_safe(ptr @.str.2045)
+then629:                                          ; preds = %null.ok606
+  %st_size630 = load i64, ptr %st_size598, align 4
+  %max_size_w631 = load i64, ptr %max_size_w, align 4
+  %calltmp632 = call { i32, ptr, i8 } @ls.print_human_num_padded(i64 %st_size630, i64 %max_size_w631)
+  %raw.value633 = extractvalue { i32, ptr, i8 } %calltmp632, 0
+  %calltmp634 = call { i32, ptr, i8 } @logname.print_str_safe(ptr @.str.2045)
+  br label %ifcont641
+
+else635:                                          ; preds = %null.ok606
+  %st_size636 = load i64, ptr %st_size598, align 4
+  %max_size_w637 = load i64, ptr %max_size_w, align 4
+  %calltmp638 = call { i32, ptr, i8 } @ls.print_num_padded(i64 %st_size636, i64 %max_size_w637)
+  %raw.value639 = extractvalue { i32, ptr, i8 } %calltmp638, 0
+  %calltmp640 = call { i32, ptr, i8 } @logname.print_str_safe(ptr @.str.2047)
+  br label %ifcont641
+
+ifcont641:                                        ; preds = %else635, %then629
   br label %ifcont642
 
-else636:                                          ; preds = %null.ok607
-  %st_size637 = load i64, ptr %st_size599, align 4
-  %max_size_w638 = load i64, ptr %max_size_w, align 4
-  %calltmp639 = call { i32, ptr, i8 } @ls.print_num_padded(i64 %st_size637, i64 %max_size_w638)
-  %raw.value640 = extractvalue { i32, ptr, i8 } %calltmp639, 0
-  %calltmp641 = call { i32, ptr, i8 } @logname.print_str_safe(ptr @.str.2047)
-  br label %ifcont642
-
-ifcont642:                                        ; preds = %else636, %then630
-  br label %ifcont643
-
-ifcont643:                                        ; preds = %ifcont642, %merge_block576
-  br label %ifcont651
-
-else644:                                          ; preds = %whilebody448
-  %has_printed645 = load i32, ptr %has_printed, align 4
-  %eqtmp646 = icmp eq i32 %has_printed645, 1
-  %ifcond647 = icmp ne i1 %eqtmp646, false
-  br i1 %ifcond647, label %then648, label %ifcont650
-
-then648:                                          ; preds = %else644
-  %calltmp649 = call { i32, ptr, i8 } @logname.print_str_safe(ptr @.str.2049)
+ifcont642:                                        ; preds = %ifcont641, %merge_block575
   br label %ifcont650
 
-ifcont650:                                        ; preds = %then648, %else644
-  br label %ifcont651
+else643:                                          ; preds = %whilebody448
+  %has_printed644 = load i32, ptr %has_printed, align 4
+  %eqtmp645 = icmp eq i32 %has_printed644, 1
+  %ifcond646 = icmp ne i1 %eqtmp645, false
+  br i1 %ifcond646, label %then647, label %ifcont649
 
-ifcont651:                                        ; preds = %ifcont650, %ifcont643
-  %name_ptr652 = load i64, ptr %name_ptr449, align 4
-  %calltmp653 = call { ptr, ptr, i8 } @mem_utils.ptr_to_string(i64 %name_ptr652)
-  %raw.value654 = extractvalue { ptr, ptr, i8 } %calltmp653, 0
-  %calltmp655 = call { i32, ptr, i8 } @logname.print_str_safe(ptr %raw.value654)
-  %long_fmt656 = load i32, ptr %long_fmt.addr, align 4
-  %eqtmp657 = icmp eq i32 %long_fmt656, 1
-  %ifcond658 = icmp ne i1 %eqtmp657, false
-  br i1 %ifcond658, label %then659, label %ifcont661
+then647:                                          ; preds = %else643
+  %calltmp648 = call { i32, ptr, i8 } @logname.print_str_safe(ptr @.str.2049)
+  br label %ifcont649
 
-then659:                                          ; preds = %ifcont651
-  %calltmp660 = call { i32, ptr, i8 } @logname.print_str_safe(ptr @.str.2051)
-  br label %ifcont661
+ifcont649:                                        ; preds = %then647, %else643
+  br label %ifcont650
 
-ifcont661:                                        ; preds = %then659, %ifcont651
+ifcont650:                                        ; preds = %ifcont649, %ifcont642
+  %name_ptr651 = load i64, ptr %name_ptr449, align 4
+  %calltmp652 = call { ptr, ptr, i8 } @mem_utils.ptr_to_string(i64 %name_ptr651)
+  %raw.value653 = extractvalue { ptr, ptr, i8 } %calltmp652, 0
+  %calltmp654 = call { i32, ptr, i8 } @logname.print_str_safe(ptr %raw.value653)
+  %long_fmt655 = load i32, ptr %long_fmt.addr, align 4
+  %eqtmp656 = icmp eq i32 %long_fmt655, 1
+  %ifcond657 = icmp ne i1 %eqtmp656, false
+  br i1 %ifcond657, label %then658, label %ifcont660
+
+then658:                                          ; preds = %ifcont650
+  %calltmp659 = call { i32, ptr, i8 } @logname.print_str_safe(ptr @.str.2051)
+  br label %ifcont660
+
+ifcont660:                                        ; preds = %then658, %ifcont650
   store i32 1, ptr %has_printed, align 4
-  %i662 = load i64, ptr %i, align 4
-  %addtmp663 = add i64 %i662, 1
-  store i64 %addtmp663, ptr %i, align 4
+  %i661 = load i64, ptr %i, align 4
+  %addtmp662 = add i64 %i661, 1
+  store i64 %addtmp662, ptr %i, align 4
   call void @npk_gc_safepoint()
   br label %whilecond443
 
-afterwhile664:                                    ; preds = %whilecond443
-  %long_fmt665 = load i32, ptr %long_fmt.addr, align 4
-  %eqtmp666 = icmp eq i32 %long_fmt665, 0
-  %and.lhs667 = icmp ne i1 %eqtmp666, false
-  br i1 %and.lhs667, label %and.rhs668, label %and.merge669
+afterwhile663:                                    ; preds = %whilecond443
+  %long_fmt664 = load i32, ptr %long_fmt.addr, align 4
+  %eqtmp665 = icmp eq i32 %long_fmt664, 0
+  %and.lhs666 = icmp ne i1 %eqtmp665, false
+  br i1 %and.lhs666, label %and.rhs667, label %and.merge668
 
-and.rhs668:                                       ; preds = %afterwhile664
-  %has_printed670 = load i32, ptr %has_printed, align 4
-  %eqtmp671 = icmp eq i32 %has_printed670, 1
-  %and.rhs672 = icmp ne i1 %eqtmp671, false
-  br label %and.merge669
+and.rhs667:                                       ; preds = %afterwhile663
+  %has_printed669 = load i32, ptr %has_printed, align 4
+  %eqtmp670 = icmp eq i32 %has_printed669, 1
+  %and.rhs671 = icmp ne i1 %eqtmp670, false
+  br label %and.merge668
 
-and.merge669:                                     ; preds = %and.rhs668, %afterwhile664
-  %and.result673 = phi i1 [ false, %afterwhile664 ], [ %and.rhs672, %and.rhs668 ]
-  %ifcond674 = icmp ne i1 %and.result673, false
-  br i1 %ifcond674, label %then675, label %ifcont677
+and.merge668:                                     ; preds = %and.rhs667, %afterwhile663
+  %and.result672 = phi i1 [ false, %afterwhile663 ], [ %and.rhs671, %and.rhs667 ]
+  %ifcond673 = icmp ne i1 %and.result672, false
+  br i1 %ifcond673, label %then674, label %ifcont676
 
-then675:                                          ; preds = %and.merge669
-  %calltmp676 = call { i32, ptr, i8 } @logname.print_str_safe(ptr @.str.2053)
-  br label %ifcont677
+then674:                                          ; preds = %and.merge668
+  %calltmp675 = call { i32, ptr, i8 } @logname.print_str_safe(ptr @.str.2053)
+  br label %ifcont676
 
-ifcont677:                                        ; preds = %then675, %and.merge669
+ifcont676:                                        ; preds = %then674, %and.merge668
   store i64 0, ptr %i, align 4
-  br label %whilecond678
+  br label %whilecond677
 
-whilecond678:                                     ; preds = %whilebody683, %ifcont677
-  %i679 = load i64, ptr %i, align 4
-  %sz680 = load i64, ptr %sz, align 4
-  %lttmp681 = icmp slt i64 %i679, %sz680
-  %whilecond682 = icmp ne i1 %lttmp681, false
-  br i1 %whilecond682, label %whilebody683, label %afterwhile691
+whilecond677:                                     ; preds = %whilebody682, %ifcont676
+  %i678 = load i64, ptr %i, align 4
+  %sz679 = load i64, ptr %sz, align 4
+  %lttmp680 = icmp slt i64 %i678, %sz679
+  %whilecond681 = icmp ne i1 %lttmp680, false
+  br i1 %whilecond681, label %whilebody682, label %afterwhile690
 
-whilebody683:                                     ; preds = %whilecond678
-  %lst684 = load i64, ptr %lst, align 4
-  %i685 = load i64, ptr %i, align 4
-  %calltmp686 = call { i64, ptr, i8 } @alist.alist_get(i64 %lst684, i64 %i685)
-  %raw.value687 = extractvalue { i64, ptr, i8 } %calltmp686, 0
-  %calltmp688 = call i32 @nitpick_libc_mem_free(i64 %raw.value687)
-  %i689 = load i64, ptr %i, align 4
-  %addtmp690 = add i64 %i689, 1
-  store i64 %addtmp690, ptr %i, align 4
+whilebody682:                                     ; preds = %whilecond677
+  %lst683 = load i64, ptr %lst, align 4
+  %i684 = load i64, ptr %i, align 4
+  %calltmp685 = call { i64, ptr, i8 } @alist.alist_get(i64 %lst683, i64 %i684)
+  %raw.value686 = extractvalue { i64, ptr, i8 } %calltmp685, 0
+  %cast.inttoptr687 = inttoptr i64 %raw.value686 to ptr
+  call void @npk_free(ptr %cast.inttoptr687)
+  %i688 = load i64, ptr %i, align 4
+  %addtmp689 = add i64 %i688, 1
+  store i64 %addtmp689, ptr %i, align 4
   call void @npk_gc_safepoint()
-  br label %whilecond678
+  br label %whilecond677
 
-afterwhile691:                                    ; preds = %whilecond678
-  %buf692 = load i64, ptr %buf, align 4
-  %syscall_ret693 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 11, i64 %buf692, i64 32768)
-  %sys_is_err694 = icmp slt i64 %syscall_ret693, 0
-  %sys_neg_errno695 = sub i64 0, %syscall_ret693
-  %sys_err_ptr696 = inttoptr i64 %sys_neg_errno695 to ptr
-  %sys_val697 = select i1 %sys_is_err694, i64 0, i64 %syscall_ret693
-  %sys_err698 = select i1 %sys_is_err694, ptr %sys_err_ptr696, ptr null
-  %sys_flag699 = select i1 %sys_is_err694, i8 1, i8 0
-  %sys_result.val700 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val697, 0
-  %sys_result.err701 = insertvalue %struct.NpkResult_int64 %sys_result.val700, ptr %sys_err698, 1
-  %sys_result.is_error702 = insertvalue %struct.NpkResult_int64 %sys_result.err701, i8 %sys_flag699, 2
-  %pathbuf703 = load i64, ptr %pathbuf, align 4
-  %syscall_ret704 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 11, i64 %pathbuf703, i64 4096)
-  %sys_is_err705 = icmp slt i64 %syscall_ret704, 0
-  %sys_neg_errno706 = sub i64 0, %syscall_ret704
-  %sys_err_ptr707 = inttoptr i64 %sys_neg_errno706 to ptr
-  %sys_val708 = select i1 %sys_is_err705, i64 0, i64 %syscall_ret704
-  %sys_err709 = select i1 %sys_is_err705, ptr %sys_err_ptr707, ptr null
-  %sys_flag710 = select i1 %sys_is_err705, i8 1, i8 0
-  %sys_result.val711 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val708, 0
-  %sys_result.err712 = insertvalue %struct.NpkResult_int64 %sys_result.val711, ptr %sys_err709, 1
-  %sys_result.is_error713 = insertvalue %struct.NpkResult_int64 %sys_result.err712, i8 %sys_flag710, 2
-  %statbuf714 = load i64, ptr %statbuf, align 4
-  %syscall_ret715 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 11, i64 %statbuf714, i64 144)
-  %sys_is_err716 = icmp slt i64 %syscall_ret715, 0
-  %sys_neg_errno717 = sub i64 0, %syscall_ret715
-  %sys_err_ptr718 = inttoptr i64 %sys_neg_errno717 to ptr
-  %sys_val719 = select i1 %sys_is_err716, i64 0, i64 %syscall_ret715
-  %sys_err720 = select i1 %sys_is_err716, ptr %sys_err_ptr718, ptr null
-  %sys_flag721 = select i1 %sys_is_err716, i8 1, i8 0
-  %sys_result.val722 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val719, 0
-  %sys_result.err723 = insertvalue %struct.NpkResult_int64 %sys_result.val722, ptr %sys_err720, 1
-  %sys_result.is_error724 = insertvalue %struct.NpkResult_int64 %sys_result.err723, i8 %sys_flag721, 2
-  %recursive725 = load i32, ptr %recursive.addr, align 4
-  %eqtmp726 = icmp eq i32 %recursive725, 1
-  %ifcond727 = icmp ne i1 %eqtmp726, false
-  br i1 %ifcond727, label %then728, label %ifcont761
+afterwhile690:                                    ; preds = %whilecond677
+  %buf691 = load i64, ptr %buf, align 4
+  %syscall_ret692 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 11, i64 %buf691, i64 32768)
+  %sys_is_err693 = icmp slt i64 %syscall_ret692, 0
+  %sys_neg_errno694 = sub i64 0, %syscall_ret692
+  %sys_err_ptr695 = inttoptr i64 %sys_neg_errno694 to ptr
+  %sys_val696 = select i1 %sys_is_err693, i64 0, i64 %syscall_ret692
+  %sys_err697 = select i1 %sys_is_err693, ptr %sys_err_ptr695, ptr null
+  %sys_flag698 = select i1 %sys_is_err693, i8 1, i8 0
+  %sys_result.val699 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val696, 0
+  %sys_result.err700 = insertvalue %struct.NpkResult_int64 %sys_result.val699, ptr %sys_err697, 1
+  %sys_result.is_error701 = insertvalue %struct.NpkResult_int64 %sys_result.err700, i8 %sys_flag698, 2
+  %pathbuf702 = load i64, ptr %pathbuf, align 4
+  %syscall_ret703 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 11, i64 %pathbuf702, i64 4096)
+  %sys_is_err704 = icmp slt i64 %syscall_ret703, 0
+  %sys_neg_errno705 = sub i64 0, %syscall_ret703
+  %sys_err_ptr706 = inttoptr i64 %sys_neg_errno705 to ptr
+  %sys_val707 = select i1 %sys_is_err704, i64 0, i64 %syscall_ret703
+  %sys_err708 = select i1 %sys_is_err704, ptr %sys_err_ptr706, ptr null
+  %sys_flag709 = select i1 %sys_is_err704, i8 1, i8 0
+  %sys_result.val710 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val707, 0
+  %sys_result.err711 = insertvalue %struct.NpkResult_int64 %sys_result.val710, ptr %sys_err708, 1
+  %sys_result.is_error712 = insertvalue %struct.NpkResult_int64 %sys_result.err711, i8 %sys_flag709, 2
+  %statbuf713 = load i64, ptr %statbuf, align 4
+  %syscall_ret714 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 11, i64 %statbuf713, i64 144)
+  %sys_is_err715 = icmp slt i64 %syscall_ret714, 0
+  %sys_neg_errno716 = sub i64 0, %syscall_ret714
+  %sys_err_ptr717 = inttoptr i64 %sys_neg_errno716 to ptr
+  %sys_val718 = select i1 %sys_is_err715, i64 0, i64 %syscall_ret714
+  %sys_err719 = select i1 %sys_is_err715, ptr %sys_err_ptr717, ptr null
+  %sys_flag720 = select i1 %sys_is_err715, i8 1, i8 0
+  %sys_result.val721 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val718, 0
+  %sys_result.err722 = insertvalue %struct.NpkResult_int64 %sys_result.val721, ptr %sys_err719, 1
+  %sys_result.is_error723 = insertvalue %struct.NpkResult_int64 %sys_result.err722, i8 %sys_flag720, 2
+  %recursive724 = load i32, ptr %recursive.addr, align 4
+  %eqtmp725 = icmp eq i32 %recursive724, 1
+  %ifcond726 = icmp ne i1 %eqtmp725, false
+  br i1 %ifcond726, label %then727, label %ifcont760
 
-then728:                                          ; preds = %afterwhile691
-  br label %whilecond729
+then727:                                          ; preds = %afterwhile690
+  br label %whilecond728
 
-whilecond729:                                     ; preds = %ifcont751, %then728
-  %sl_size730 = load i64, ptr %sl_size, align 4
-  %gttmp731 = icmp sgt i64 %sl_size730, 0
-  %whilecond732 = icmp ne i1 %gttmp731, false
-  br i1 %whilecond732, label %whilebody733, label %afterwhile760
+whilecond728:                                     ; preds = %ifcont750, %then727
+  %sl_size729 = load i64, ptr %sl_size, align 4
+  %gttmp730 = icmp sgt i64 %sl_size729, 0
+  %whilecond731 = icmp ne i1 %gttmp730, false
+  br i1 %whilecond731, label %whilebody732, label %afterwhile759
 
-whilebody733:                                     ; preds = %whilecond729
-  %sl_size734 = load i64, ptr %sl_size, align 4
-  %subtmp735 = sub i64 %sl_size734, 1
-  store i64 %subtmp735, ptr %sl_size, align 4
+whilebody732:                                     ; preds = %whilecond728
+  %sl_size733 = load i64, ptr %sl_size, align 4
+  %subtmp734 = sub i64 %sl_size733, 1
+  store i64 %subtmp734, ptr %sl_size, align 4
   %child_ptr = alloca i64, align 8
-  %sl736 = load i64, ptr %sl, align 4
-  %sl_size737 = load i64, ptr %sl_size, align 4
-  %from_int_result738 = call ptr @npk_string_from_int_simple(i64 %sl_size737)
-  %uhash_key_struct739 = load %struct.NpkString, ptr %from_int_result738, align 8
-  %uhash_key_data740 = extractvalue %struct.NpkString %uhash_key_struct739, 0
-  %uhash_get = call i64 @npk_uhash_get(i64 %sl736, ptr %uhash_key_data740, i64 3)
+  %sl735 = load i64, ptr %sl, align 4
+  %sl_size736 = load i64, ptr %sl_size, align 4
+  %from_int_result737 = call ptr @npk_string_from_int_simple(i64 %sl_size736)
+  %uhash_key_struct738 = load %struct.NpkString, ptr %from_int_result737, align 8
+  %uhash_key_data739 = extractvalue %struct.NpkString %uhash_key_struct738, 0
+  %uhash_get = call i64 @npk_uhash_get(i64 %sl735, ptr %uhash_key_data739, i64 3)
   store i64 %uhash_get, ptr %child_ptr, align 4
   %child_name = alloca ptr, align 8
-  %child_ptr741 = load i64, ptr %child_ptr, align 4
-  %calltmp742 = call { ptr, ptr, i8 } @mem_utils.ptr_to_string(i64 %child_ptr741)
-  %raw.value743 = extractvalue { ptr, ptr, i8 } %calltmp742, 0
-  store ptr %raw.value743, ptr %child_name, align 8
+  %child_ptr740 = load i64, ptr %child_ptr, align 4
+  %calltmp741 = call { ptr, ptr, i8 } @mem_utils.ptr_to_string(i64 %child_ptr740)
+  %raw.value742 = extractvalue { ptr, ptr, i8 } %calltmp741, 0
+  store ptr %raw.value742, ptr %child_name, align 8
   %child_path = alloca ptr, align 8
   store ptr @.str.2055, ptr %child_path, align 8
   %str1 = load %struct.NpkString, ptr %dir, align 8
   %str2 = load %struct.NpkString, ptr @.str.2057, align 8
   %equals = call i1 @npk_string_equals(%struct.NpkString %str1, %struct.NpkString %str2)
-  %ifcond744 = icmp ne i1 %equals, false
-  br i1 %ifcond744, label %then745, label %else747
+  %ifcond743 = icmp ne i1 %equals, false
+  br i1 %ifcond743, label %then744, label %else746
 
-then745:                                          ; preds = %whilebody733
-  %child_name746 = load ptr, ptr %child_name, align 8
-  %concat_str = call ptr @npk_string_concat_simple(ptr %dir, ptr %child_name746)
+then744:                                          ; preds = %whilebody732
+  %child_name745 = load ptr, ptr %child_name, align 8
+  %concat_str = call ptr @npk_string_concat_simple(ptr %dir, ptr %child_name745)
   store ptr %concat_str, ptr %child_path, align 8
-  br label %ifcont751
+  br label %ifcont750
 
-else747:                                          ; preds = %whilebody733
-  %child_name748 = load ptr, ptr %child_name, align 8
-  %concat_str749 = call ptr @npk_string_concat_simple(ptr @.str.2059, ptr %child_name748)
-  %concat_str750 = call ptr @npk_string_concat_simple(ptr %dir, ptr %concat_str749)
-  store ptr %concat_str750, ptr %child_path, align 8
-  br label %ifcont751
+else746:                                          ; preds = %whilebody732
+  %child_name747 = load ptr, ptr %child_name, align 8
+  %concat_str748 = call ptr @npk_string_concat_simple(ptr @.str.2059, ptr %child_name747)
+  %concat_str749 = call ptr @npk_string_concat_simple(ptr %dir, ptr %concat_str748)
+  store ptr %concat_str749, ptr %child_path, align 8
+  br label %ifcont750
 
-ifcont751:                                        ; preds = %else747, %then745
-  %child_path752 = load ptr, ptr %child_path, align 8
-  %recursive753 = load i32, ptr %recursive.addr, align 4
-  %show_hidden754 = load i32, ptr %show_hidden.addr, align 4
-  %long_fmt755 = load i32, ptr %long_fmt.addr, align 4
-  %human_fmt756 = load i32, ptr %human_fmt.addr, align 4
-  %calltmp757 = call { i32, ptr, i8 } @ls.list_dir(ptr %child_path752, i32 1, i32 %recursive753, i32 %show_hidden754, i32 %long_fmt755, i32 %human_fmt756, i32 0)
-  %child_ptr758 = load i64, ptr %child_ptr, align 4
-  %calltmp759 = call i32 @nitpick_libc_mem_free(i64 %child_ptr758)
+ifcont750:                                        ; preds = %else746, %then744
+  %child_path751 = load ptr, ptr %child_path, align 8
+  %recursive752 = load i32, ptr %recursive.addr, align 4
+  %show_hidden753 = load i32, ptr %show_hidden.addr, align 4
+  %long_fmt754 = load i32, ptr %long_fmt.addr, align 4
+  %human_fmt755 = load i32, ptr %human_fmt.addr, align 4
+  %calltmp756 = call { i32, ptr, i8 } @ls.list_dir(ptr %child_path751, i32 1, i32 %recursive752, i32 %show_hidden753, i32 %long_fmt754, i32 %human_fmt755, i32 0)
+  %child_ptr757 = load i64, ptr %child_ptr, align 4
+  %cast.inttoptr758 = inttoptr i64 %child_ptr757 to ptr
+  call void @npk_free(ptr %cast.inttoptr758)
   call void @npk_gc_safepoint()
-  br label %whilecond729
+  br label %whilecond728
 
-afterwhile760:                                    ; preds = %whilecond729
-  br label %ifcont761
+afterwhile759:                                    ; preds = %whilecond728
+  br label %ifcont760
 
-ifcont761:                                        ; preds = %afterwhile760, %afterwhile691
-  %fd762 = load i64, ptr %fd, align 4
-  %getmp763 = icmp sge i64 %fd762, 0
-  %ifcond764 = icmp ne i1 %getmp763, false
-  br i1 %ifcond764, label %then765, label %ifcont777
+ifcont760:                                        ; preds = %afterwhile759, %afterwhile690
+  %fd761 = load i64, ptr %fd, align 4
+  %getmp762 = icmp sge i64 %fd761, 0
+  %ifcond763 = icmp ne i1 %getmp762, false
+  br i1 %ifcond763, label %then764, label %ifcont776
 
-then765:                                          ; preds = %ifcont761
-  %fd766 = load i64, ptr %fd, align 4
-  %syscall_ret767 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %fd766)
-  %sys_is_err768 = icmp slt i64 %syscall_ret767, 0
-  %sys_neg_errno769 = sub i64 0, %syscall_ret767
-  %sys_err_ptr770 = inttoptr i64 %sys_neg_errno769 to ptr
-  %sys_val771 = select i1 %sys_is_err768, i64 0, i64 %syscall_ret767
-  %sys_err772 = select i1 %sys_is_err768, ptr %sys_err_ptr770, ptr null
-  %sys_flag773 = select i1 %sys_is_err768, i8 1, i8 0
-  %sys_result.val774 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val771, 0
-  %sys_result.err775 = insertvalue %struct.NpkResult_int64 %sys_result.val774, ptr %sys_err772, 1
-  %sys_result.is_error776 = insertvalue %struct.NpkResult_int64 %sys_result.err775, i8 %sys_flag773, 2
-  br label %ifcont777
+then764:                                          ; preds = %ifcont760
+  %fd765 = load i64, ptr %fd, align 4
+  %syscall_ret766 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %fd765)
+  %sys_is_err767 = icmp slt i64 %syscall_ret766, 0
+  %sys_neg_errno768 = sub i64 0, %syscall_ret766
+  %sys_err_ptr769 = inttoptr i64 %sys_neg_errno768 to ptr
+  %sys_val770 = select i1 %sys_is_err767, i64 0, i64 %syscall_ret766
+  %sys_err771 = select i1 %sys_is_err767, ptr %sys_err_ptr769, ptr null
+  %sys_flag772 = select i1 %sys_is_err767, i8 1, i8 0
+  %sys_result.val773 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val770, 0
+  %sys_result.err774 = insertvalue %struct.NpkResult_int64 %sys_result.val773, ptr %sys_err771, 1
+  %sys_result.is_error775 = insertvalue %struct.NpkResult_int64 %sys_result.err774, i8 %sys_flag772, 2
+  br label %ifcont776
 
-ifcont777:                                        ; preds = %then765, %ifcont761
+ifcont776:                                        ; preds = %then764, %ifcont760
   ret { i32, ptr, i8 } zeroinitializer
 }
 
@@ -42280,12 +42294,12 @@ whilebody:                                        ; preds = %whilecond
   %raw.value13 = extractvalue { ptr, ptr, i8 } %calltmp12, 0
   store ptr %raw.value13, ptr %file, align 8
   %res = alloca i64, align 8
-  %SYS_MKNOD = load i64, ptr @SYS_MKNOD, align 4
+  %MKNOD = load i64, ptr @MKNOD, align 4
   %file14 = load ptr, ptr %file, align 8
   %sys_str_struct = load %struct.NpkString, ptr %file14, align 8
   %sys_str_data = extractvalue %struct.NpkString %sys_str_struct, 0
   %sys_strvar_int = ptrtoint ptr %sys_str_data to i64
-  %syscall_ret = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 %SYS_MKNOD, i64 %sys_strvar_int, i64 4534, i64 0)
+  %syscall_ret = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 %MKNOD, i64 %sys_strvar_int, i64 4534, i64 0)
   %sys_is_err = icmp slt i64 %syscall_ret, 0
   %sys_neg_errno = sub i64 0, %syscall_ret
   %sys_err_ptr = inttoptr i64 %sys_neg_errno to ptr
@@ -42522,14 +42536,14 @@ ifcont87:                                         ; preds = %ifcont84
 
 ifcont88:                                         ; preds = %ifcont87, %then50
   %res = alloca i64, align 8
-  %SYS_MKNOD = load i64, ptr @SYS_MKNOD, align 4
+  %MKNOD = load i64, ptr @MKNOD, align 4
   %m_name89 = load ptr, ptr %m_name, align 8
   %sys_str_struct = load %struct.NpkString, ptr %m_name89, align 8
   %sys_str_data = extractvalue %struct.NpkString %sys_str_struct, 0
   %sys_strvar_int = ptrtoint ptr %sys_str_data to i64
   %mode90 = load i64, ptr %mode, align 4
   %dev91 = load i64, ptr %dev, align 4
-  %syscall_ret = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 %SYS_MKNOD, i64 %sys_strvar_int, i64 %mode90, i64 %dev91)
+  %syscall_ret = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 %MKNOD, i64 %sys_strvar_int, i64 %mode90, i64 %dev91)
   %sys_is_err = icmp slt i64 %syscall_ret, 0
   %sys_neg_errno = sub i64 0, %syscall_ret
   %sys_err_ptr = inttoptr i64 %sys_neg_errno to ptr
@@ -42837,367 +42851,374 @@ ifcont68:                                         ; preds = %ifcont67, %afterwhi
   %x_count73 = load i64, ptr %x_count, align 4
   %multmp = mul i64 %x_count73, 2
   %addtmp74 = add i64 %multmp, 16
-  %calltmp75 = call i64 @malloc(i64 %addtmp74)
-  store i64 %calltmp75, ptr %buf, align 4
-  br label %whilecond76
+  %wild_ptr = call ptr @npk_alloc(i64 %addtmp74)
+  %x_count75 = load i64, ptr %x_count, align 4
+  %multmp76 = mul i64 %x_count75, 2
+  %addtmp77 = add i64 %multmp76, 16
+  %wild_ptr78 = call ptr @npk_alloc(i64 %addtmp77)
+  %cast.ptrtoint = ptrtoint ptr %wild_ptr78 to i64
+  store i64 %cast.ptrtoint, ptr %buf, align 4
+  br label %whilecond79
 
-whilecond76:                                      ; preds = %ifcont251, %ifcont68
-  %tries77 = load i32, ptr %tries, align 4
-  %lttmp78 = icmp slt i32 %tries77, 1000
-  %whilecond79 = icmp ne i1 %lttmp78, false
-  br i1 %whilecond79, label %whilebody80, label %afterwhile254
+whilecond79:                                      ; preds = %ifcont254, %ifcont68
+  %tries80 = load i32, ptr %tries, align 4
+  %lttmp81 = icmp slt i32 %tries80, 1000
+  %whilecond82 = icmp ne i1 %lttmp81, false
+  br i1 %whilecond82, label %whilebody83, label %afterwhile257
 
-whilebody80:                                      ; preds = %whilecond76
-  %success81 = load i64, ptr %success, align 4
-  %eqtmp82 = icmp eq i64 %success81, 0
-  %ifcond83 = icmp ne i1 %eqtmp82, false
-  br i1 %ifcond83, label %then84, label %ifcont251
+whilebody83:                                      ; preds = %whilecond79
+  %success84 = load i64, ptr %success, align 4
+  %eqtmp85 = icmp eq i64 %success84, 0
+  %ifcond86 = icmp ne i1 %eqtmp85, false
+  br i1 %ifcond86, label %then87, label %ifcont254
 
-then84:                                           ; preds = %whilebody80
+then87:                                           ; preds = %whilebody83
   %nread = alloca i64, align 8
-  %urandom_fd85 = load i64, ptr %urandom_fd, align 4
-  %buf86 = load i64, ptr %buf, align 4
-  %x_count87 = load i64, ptr %x_count, align 4
-  %multmp88 = mul i64 %x_count87, 2
-  %syscall_ret89 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 0, i64 %urandom_fd85, i64 %buf86, i64 %multmp88)
-  %sys_is_err90 = icmp slt i64 %syscall_ret89, 0
-  %sys_neg_errno91 = sub i64 0, %syscall_ret89
-  %sys_err_ptr92 = inttoptr i64 %sys_neg_errno91 to ptr
-  %sys_val93 = select i1 %sys_is_err90, i64 0, i64 %syscall_ret89
-  %sys_err94 = select i1 %sys_is_err90, ptr %sys_err_ptr92, ptr null
-  %sys_flag95 = select i1 %sys_is_err90, i8 1, i8 0
-  %sys_result.val96 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val93, 0
-  %sys_result.err97 = insertvalue %struct.NpkResult_int64 %sys_result.val96, ptr %sys_err94, 1
-  %sys_result.is_error98 = insertvalue %struct.NpkResult_int64 %sys_result.err97, i8 %sys_flag95, 2
-  %is_error99 = extractvalue %struct.NpkResult_int64 %sys_result.is_error98, 2
-  %is_error_bool100 = icmp ne i8 %is_error99, 0
-  br i1 %is_error_bool100, label %error_block101, label %success_block102
+  %urandom_fd88 = load i64, ptr %urandom_fd, align 4
+  %buf89 = load i64, ptr %buf, align 4
+  %x_count90 = load i64, ptr %x_count, align 4
+  %multmp91 = mul i64 %x_count90, 2
+  %syscall_ret92 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 0, i64 %urandom_fd88, i64 %buf89, i64 %multmp91)
+  %sys_is_err93 = icmp slt i64 %syscall_ret92, 0
+  %sys_neg_errno94 = sub i64 0, %syscall_ret92
+  %sys_err_ptr95 = inttoptr i64 %sys_neg_errno94 to ptr
+  %sys_val96 = select i1 %sys_is_err93, i64 0, i64 %syscall_ret92
+  %sys_err97 = select i1 %sys_is_err93, ptr %sys_err_ptr95, ptr null
+  %sys_flag98 = select i1 %sys_is_err93, i8 1, i8 0
+  %sys_result.val99 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val96, 0
+  %sys_result.err100 = insertvalue %struct.NpkResult_int64 %sys_result.val99, ptr %sys_err97, 1
+  %sys_result.is_error101 = insertvalue %struct.NpkResult_int64 %sys_result.err100, i8 %sys_flag98, 2
+  %is_error102 = extractvalue %struct.NpkResult_int64 %sys_result.is_error101, 2
+  %is_error_bool103 = icmp ne i8 %is_error102, 0
+  br i1 %is_error_bool103, label %error_block104, label %success_block105
 
-error_block101:                                   ; preds = %then84
-  br label %merge_block103
+error_block104:                                   ; preds = %then87
+  br label %merge_block106
 
-success_block102:                                 ; preds = %then84
-  %value104 = extractvalue %struct.NpkResult_int64 %sys_result.is_error98, 0
-  br label %merge_block103
+success_block105:                                 ; preds = %then87
+  %value107 = extractvalue %struct.NpkResult_int64 %sys_result.is_error101, 0
+  br label %merge_block106
 
-merge_block103:                                   ; preds = %success_block102, %error_block101
-  %unwrap_result105 = phi i64 [ -1, %error_block101 ], [ %value104, %success_block102 ]
-  store i64 %unwrap_result105, ptr %nread, align 4
-  %nread106 = load i64, ptr %nread, align 4
-  %letmp = icmp sle i64 %nread106, 0
-  %ifcond107 = icmp ne i1 %letmp, false
-  br i1 %ifcond107, label %then108, label %ifcont128
+merge_block106:                                   ; preds = %success_block105, %error_block104
+  %unwrap_result108 = phi i64 [ -1, %error_block104 ], [ %value107, %success_block105 ]
+  store i64 %unwrap_result108, ptr %nread, align 4
+  %nread109 = load i64, ptr %nread, align 4
+  %letmp = icmp sle i64 %nread109, 0
+  %ifcond110 = icmp ne i1 %letmp, false
+  br i1 %ifcond110, label %then111, label %ifcont130
 
-then108:                                          ; preds = %merge_block103
-  %calltmp109 = call { i32, ptr, i8 } @md5sum.print_err(ptr @.str.2181)
-  %buf110 = load i64, ptr %buf, align 4
-  %calltmp111 = call i32 @nitpick_libc_mem_free(i64 %buf110)
-  %urandom_fd112 = load i64, ptr %urandom_fd, align 4
-  %getmp113 = icmp sge i64 %urandom_fd112, 0
-  %ifcond114 = icmp ne i1 %getmp113, false
-  br i1 %ifcond114, label %then115, label %ifcont127
+then111:                                          ; preds = %merge_block106
+  %calltmp112 = call { i32, ptr, i8 } @md5sum.print_err(ptr @.str.2181)
+  %buf113 = load i64, ptr %buf, align 4
+  %cast.inttoptr = inttoptr i64 %buf113 to ptr
+  call void @npk_free(ptr %cast.inttoptr)
+  %urandom_fd114 = load i64, ptr %urandom_fd, align 4
+  %getmp115 = icmp sge i64 %urandom_fd114, 0
+  %ifcond116 = icmp ne i1 %getmp115, false
+  br i1 %ifcond116, label %then117, label %ifcont129
 
-then115:                                          ; preds = %then108
-  %urandom_fd116 = load i64, ptr %urandom_fd, align 4
-  %syscall_ret117 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %urandom_fd116)
-  %sys_is_err118 = icmp slt i64 %syscall_ret117, 0
-  %sys_neg_errno119 = sub i64 0, %syscall_ret117
-  %sys_err_ptr120 = inttoptr i64 %sys_neg_errno119 to ptr
-  %sys_val121 = select i1 %sys_is_err118, i64 0, i64 %syscall_ret117
-  %sys_err122 = select i1 %sys_is_err118, ptr %sys_err_ptr120, ptr null
-  %sys_flag123 = select i1 %sys_is_err118, i8 1, i8 0
-  %sys_result.val124 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val121, 0
-  %sys_result.err125 = insertvalue %struct.NpkResult_int64 %sys_result.val124, ptr %sys_err122, 1
-  %sys_result.is_error126 = insertvalue %struct.NpkResult_int64 %sys_result.err125, i8 %sys_flag123, 2
-  br label %ifcont127
+then117:                                          ; preds = %then111
+  %urandom_fd118 = load i64, ptr %urandom_fd, align 4
+  %syscall_ret119 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %urandom_fd118)
+  %sys_is_err120 = icmp slt i64 %syscall_ret119, 0
+  %sys_neg_errno121 = sub i64 0, %syscall_ret119
+  %sys_err_ptr122 = inttoptr i64 %sys_neg_errno121 to ptr
+  %sys_val123 = select i1 %sys_is_err120, i64 0, i64 %syscall_ret119
+  %sys_err124 = select i1 %sys_is_err120, ptr %sys_err_ptr122, ptr null
+  %sys_flag125 = select i1 %sys_is_err120, i8 1, i8 0
+  %sys_result.val126 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val123, 0
+  %sys_result.err127 = insertvalue %struct.NpkResult_int64 %sys_result.val126, ptr %sys_err124, 1
+  %sys_result.is_error128 = insertvalue %struct.NpkResult_int64 %sys_result.err127, i8 %sys_flag125, 2
+  br label %ifcont129
 
-ifcont127:                                        ; preds = %then115, %then108
+ifcont129:                                        ; preds = %then117, %then111
   ret { i32, ptr, i8 } { i32 1, ptr null, i8 0 }
 
-ifcont128:                                        ; preds = %merge_block103
+ifcont130:                                        ; preds = %merge_block106
   %rand_str = alloca ptr, align 8
   store ptr @.str.2183, ptr %rand_str, align 8
   %j = alloca i64, align 8
   store i64 0, ptr %j, align 4
   %k = alloca i64, align 8
   store i64 0, ptr %k, align 4
-  br label %whilecond129
+  br label %whilecond131
 
-whilecond129:                                     ; preds = %ifcont205, %ifcont128
-  %j130 = load i64, ptr %j, align 4
-  %x_count131 = load i64, ptr %x_count, align 4
-  %lttmp132 = icmp slt i64 %j130, %x_count131
-  %whilecond133 = icmp ne i1 %lttmp132, false
-  br i1 %whilecond133, label %whilebody134, label %afterwhile206
+whilecond131:                                     ; preds = %ifcont208, %ifcont130
+  %j132 = load i64, ptr %j, align 4
+  %x_count133 = load i64, ptr %x_count, align 4
+  %lttmp134 = icmp slt i64 %j132, %x_count133
+  %whilecond135 = icmp ne i1 %lttmp134, false
+  br i1 %whilecond135, label %whilebody136, label %afterwhile209
 
-whilebody134:                                     ; preds = %whilecond129
-  %k135 = load i64, ptr %k, align 4
-  %nread136 = load i64, ptr %nread, align 4
-  %getmp137 = icmp sge i64 %k135, %nread136
-  %ifcond138 = icmp ne i1 %getmp137, false
-  br i1 %ifcond138, label %then139, label %ifcont185
+whilebody136:                                     ; preds = %whilecond131
+  %k137 = load i64, ptr %k, align 4
+  %nread138 = load i64, ptr %nread, align 4
+  %getmp139 = icmp sge i64 %k137, %nread138
+  %ifcond140 = icmp ne i1 %getmp139, false
+  br i1 %ifcond140, label %then141, label %ifcont187
 
-then139:                                          ; preds = %whilebody134
+then141:                                          ; preds = %whilebody136
   store i64 0, ptr %k, align 4
-  %urandom_fd140 = load i64, ptr %urandom_fd, align 4
-  %buf141 = load i64, ptr %buf, align 4
-  %x_count142 = load i64, ptr %x_count, align 4
-  %multmp143 = mul i64 %x_count142, 2
-  %syscall_ret144 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 0, i64 %urandom_fd140, i64 %buf141, i64 %multmp143)
-  %sys_is_err145 = icmp slt i64 %syscall_ret144, 0
-  %sys_neg_errno146 = sub i64 0, %syscall_ret144
-  %sys_err_ptr147 = inttoptr i64 %sys_neg_errno146 to ptr
-  %sys_val148 = select i1 %sys_is_err145, i64 0, i64 %syscall_ret144
-  %sys_err149 = select i1 %sys_is_err145, ptr %sys_err_ptr147, ptr null
-  %sys_flag150 = select i1 %sys_is_err145, i8 1, i8 0
-  %sys_result.val151 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val148, 0
-  %sys_result.err152 = insertvalue %struct.NpkResult_int64 %sys_result.val151, ptr %sys_err149, 1
-  %sys_result.is_error153 = insertvalue %struct.NpkResult_int64 %sys_result.err152, i8 %sys_flag150, 2
-  %is_error154 = extractvalue %struct.NpkResult_int64 %sys_result.is_error153, 2
-  %is_error_bool155 = icmp ne i8 %is_error154, 0
-  br i1 %is_error_bool155, label %error_block156, label %success_block157
+  %urandom_fd142 = load i64, ptr %urandom_fd, align 4
+  %buf143 = load i64, ptr %buf, align 4
+  %x_count144 = load i64, ptr %x_count, align 4
+  %multmp145 = mul i64 %x_count144, 2
+  %syscall_ret146 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 0, i64 %urandom_fd142, i64 %buf143, i64 %multmp145)
+  %sys_is_err147 = icmp slt i64 %syscall_ret146, 0
+  %sys_neg_errno148 = sub i64 0, %syscall_ret146
+  %sys_err_ptr149 = inttoptr i64 %sys_neg_errno148 to ptr
+  %sys_val150 = select i1 %sys_is_err147, i64 0, i64 %syscall_ret146
+  %sys_err151 = select i1 %sys_is_err147, ptr %sys_err_ptr149, ptr null
+  %sys_flag152 = select i1 %sys_is_err147, i8 1, i8 0
+  %sys_result.val153 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val150, 0
+  %sys_result.err154 = insertvalue %struct.NpkResult_int64 %sys_result.val153, ptr %sys_err151, 1
+  %sys_result.is_error155 = insertvalue %struct.NpkResult_int64 %sys_result.err154, i8 %sys_flag152, 2
+  %is_error156 = extractvalue %struct.NpkResult_int64 %sys_result.is_error155, 2
+  %is_error_bool157 = icmp ne i8 %is_error156, 0
+  br i1 %is_error_bool157, label %error_block158, label %success_block159
 
-error_block156:                                   ; preds = %then139
-  br label %merge_block158
+error_block158:                                   ; preds = %then141
+  br label %merge_block160
 
-success_block157:                                 ; preds = %then139
-  %value159 = extractvalue %struct.NpkResult_int64 %sys_result.is_error153, 0
-  br label %merge_block158
+success_block159:                                 ; preds = %then141
+  %value161 = extractvalue %struct.NpkResult_int64 %sys_result.is_error155, 0
+  br label %merge_block160
 
-merge_block158:                                   ; preds = %success_block157, %error_block156
-  %unwrap_result160 = phi i64 [ -1, %error_block156 ], [ %value159, %success_block157 ]
-  store i64 %unwrap_result160, ptr %nread, align 4
-  %nread161 = load i64, ptr %nread, align 4
-  %letmp162 = icmp sle i64 %nread161, 0
-  %ifcond163 = icmp ne i1 %letmp162, false
-  br i1 %ifcond163, label %then164, label %ifcont184
+merge_block160:                                   ; preds = %success_block159, %error_block158
+  %unwrap_result162 = phi i64 [ -1, %error_block158 ], [ %value161, %success_block159 ]
+  store i64 %unwrap_result162, ptr %nread, align 4
+  %nread163 = load i64, ptr %nread, align 4
+  %letmp164 = icmp sle i64 %nread163, 0
+  %ifcond165 = icmp ne i1 %letmp164, false
+  br i1 %ifcond165, label %then166, label %ifcont186
 
-then164:                                          ; preds = %merge_block158
-  %calltmp165 = call { i32, ptr, i8 } @md5sum.print_err(ptr @.str.2185)
-  %buf166 = load i64, ptr %buf, align 4
-  %calltmp167 = call i32 @nitpick_libc_mem_free(i64 %buf166)
-  %urandom_fd168 = load i64, ptr %urandom_fd, align 4
-  %getmp169 = icmp sge i64 %urandom_fd168, 0
-  %ifcond170 = icmp ne i1 %getmp169, false
-  br i1 %ifcond170, label %then171, label %ifcont183
+then166:                                          ; preds = %merge_block160
+  %calltmp167 = call { i32, ptr, i8 } @md5sum.print_err(ptr @.str.2185)
+  %buf168 = load i64, ptr %buf, align 4
+  %cast.inttoptr169 = inttoptr i64 %buf168 to ptr
+  call void @npk_free(ptr %cast.inttoptr169)
+  %urandom_fd170 = load i64, ptr %urandom_fd, align 4
+  %getmp171 = icmp sge i64 %urandom_fd170, 0
+  %ifcond172 = icmp ne i1 %getmp171, false
+  br i1 %ifcond172, label %then173, label %ifcont185
 
-then171:                                          ; preds = %then164
-  %urandom_fd172 = load i64, ptr %urandom_fd, align 4
-  %syscall_ret173 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %urandom_fd172)
-  %sys_is_err174 = icmp slt i64 %syscall_ret173, 0
-  %sys_neg_errno175 = sub i64 0, %syscall_ret173
-  %sys_err_ptr176 = inttoptr i64 %sys_neg_errno175 to ptr
-  %sys_val177 = select i1 %sys_is_err174, i64 0, i64 %syscall_ret173
-  %sys_err178 = select i1 %sys_is_err174, ptr %sys_err_ptr176, ptr null
-  %sys_flag179 = select i1 %sys_is_err174, i8 1, i8 0
-  %sys_result.val180 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val177, 0
-  %sys_result.err181 = insertvalue %struct.NpkResult_int64 %sys_result.val180, ptr %sys_err178, 1
-  %sys_result.is_error182 = insertvalue %struct.NpkResult_int64 %sys_result.err181, i8 %sys_flag179, 2
-  br label %ifcont183
-
-ifcont183:                                        ; preds = %then171, %then164
-  ret { i32, ptr, i8 } { i32 1, ptr null, i8 0 }
-
-ifcont184:                                        ; preds = %merge_block158
+then173:                                          ; preds = %then166
+  %urandom_fd174 = load i64, ptr %urandom_fd, align 4
+  %syscall_ret175 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %urandom_fd174)
+  %sys_is_err176 = icmp slt i64 %syscall_ret175, 0
+  %sys_neg_errno177 = sub i64 0, %syscall_ret175
+  %sys_err_ptr178 = inttoptr i64 %sys_neg_errno177 to ptr
+  %sys_val179 = select i1 %sys_is_err176, i64 0, i64 %syscall_ret175
+  %sys_err180 = select i1 %sys_is_err176, ptr %sys_err_ptr178, ptr null
+  %sys_flag181 = select i1 %sys_is_err176, i8 1, i8 0
+  %sys_result.val182 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val179, 0
+  %sys_result.err183 = insertvalue %struct.NpkResult_int64 %sys_result.val182, ptr %sys_err180, 1
+  %sys_result.is_error184 = insertvalue %struct.NpkResult_int64 %sys_result.err183, i8 %sys_flag181, 2
   br label %ifcont185
 
-ifcont185:                                        ; preds = %ifcont184, %whilebody134
+ifcont185:                                        ; preds = %then173, %then166
+  ret { i32, ptr, i8 } { i32 1, ptr null, i8 0 }
+
+ifcont186:                                        ; preds = %merge_block160
+  br label %ifcont187
+
+ifcont187:                                        ; preds = %ifcont186, %whilebody136
   %c = alloca i64, align 8
-  %buf186 = load i64, ptr %buf, align 4
-  %k187 = load i64, ptr %k, align 4
-  %addtmp188 = add i64 %buf186, %k187
-  %buf189 = load i64, ptr %buf, align 4
-  %k190 = load i64, ptr %k, align 4
-  %addtmp191 = add i64 %buf189, %k190
-  %cast.inttoptr = inttoptr i64 %addtmp191 to ptr
-  %null.deref = icmp eq ptr %cast.inttoptr, null
+  %buf188 = load i64, ptr %buf, align 4
+  %k189 = load i64, ptr %k, align 4
+  %addtmp190 = add i64 %buf188, %k189
+  %buf191 = load i64, ptr %buf, align 4
+  %k192 = load i64, ptr %k, align 4
+  %addtmp193 = add i64 %buf191, %k192
+  %cast.inttoptr194 = inttoptr i64 %addtmp193 to ptr
+  %null.deref = icmp eq ptr %cast.inttoptr194, null
   br i1 %null.deref, label %null.fail, label %null.ok
 
-null.fail:                                        ; preds = %ifcont185
-  %0 = call i32 @failsafe(i32 46)
+null.fail:                                        ; preds = %ifcont187
   call void @exit(i32 46)
   unreachable
 
-null.ok:                                          ; preds = %ifcont185
-  %deref = load i32, ptr %cast.inttoptr, align 4
+null.ok:                                          ; preds = %ifcont187
+  %deref = load i32, ptr %cast.inttoptr194, align 4
   %cast.sext = sext i32 %deref to i64
   store i64 %cast.sext, ptr %c, align 4
-  %k192 = load i64, ptr %k, align 4
-  %addtmp193 = add i64 %k192, 1
-  store i64 %addtmp193, ptr %k, align 4
-  %c194 = load i64, ptr %c, align 4
-  %lttmp195 = icmp slt i64 %c194, 248
-  %ifcond196 = icmp ne i1 %lttmp195, false
-  br i1 %ifcond196, label %then197, label %ifcont205
+  %k195 = load i64, ptr %k, align 4
+  %addtmp196 = add i64 %k195, 1
+  store i64 %addtmp196, ptr %k, align 4
+  %c197 = load i64, ptr %c, align 4
+  %lttmp198 = icmp slt i64 %c197, 248
+  %ifcond199 = icmp ne i1 %lttmp198, false
+  br i1 %ifcond199, label %then200, label %ifcont208
 
-then197:                                          ; preds = %null.ok
-  %rand_str198 = load ptr, ptr %rand_str, align 8
-  %c199 = load i64, ptr %c, align 4
-  %calltmp200 = call { ptr, ptr, i8 } @mktemp.get_rand_char(i64 %c199)
-  %raw.value201 = extractvalue { ptr, ptr, i8 } %calltmp200, 0
-  %concat_str202 = call ptr @npk_string_concat_simple(ptr %rand_str198, ptr %raw.value201)
-  store ptr %concat_str202, ptr %rand_str, align 8
-  %j203 = load i64, ptr %j, align 4
-  %addtmp204 = add i64 %j203, 1
-  store i64 %addtmp204, ptr %j, align 4
-  br label %ifcont205
+then200:                                          ; preds = %null.ok
+  %rand_str201 = load ptr, ptr %rand_str, align 8
+  %c202 = load i64, ptr %c, align 4
+  %calltmp203 = call { ptr, ptr, i8 } @mktemp.get_rand_char(i64 %c202)
+  %raw.value204 = extractvalue { ptr, ptr, i8 } %calltmp203, 0
+  %concat_str205 = call ptr @npk_string_concat_simple(ptr %rand_str201, ptr %raw.value204)
+  store ptr %concat_str205, ptr %rand_str, align 8
+  %j206 = load i64, ptr %j, align 4
+  %addtmp207 = add i64 %j206, 1
+  store i64 %addtmp207, ptr %j, align 4
+  br label %ifcont208
 
-ifcont205:                                        ; preds = %then197, %null.ok
+ifcont208:                                        ; preds = %then200, %null.ok
   call void @npk_gc_safepoint()
-  br label %whilecond129
+  br label %whilecond131
 
-afterwhile206:                                    ; preds = %whilecond129
-  %base207 = load ptr, ptr %base, align 8
-  %rand_str208 = load ptr, ptr %rand_str, align 8
-  %concat_str209 = call ptr @npk_string_concat_simple(ptr %base207, ptr %rand_str208)
-  store ptr %concat_str209, ptr %final_path, align 8
+afterwhile209:                                    ; preds = %whilecond131
+  %base210 = load ptr, ptr %base, align 8
+  %rand_str211 = load ptr, ptr %rand_str, align 8
+  %concat_str212 = call ptr @npk_string_concat_simple(ptr %base210, ptr %rand_str211)
+  store ptr %concat_str212, ptr %final_path, align 8
   %res = alloca i64, align 8
-  %final_path210 = load ptr, ptr %final_path, align 8
-  %sys_str_struct211 = load %struct.NpkString, ptr %final_path210, align 8
-  %sys_str_data212 = extractvalue %struct.NpkString %sys_str_struct211, 0
-  %sys_strvar_int = ptrtoint ptr %sys_str_data212 to i64
-  %syscall_ret213 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 2, i64 %sys_strvar_int, i64 194, i64 384)
-  %sys_is_err214 = icmp slt i64 %syscall_ret213, 0
-  %sys_neg_errno215 = sub i64 0, %syscall_ret213
-  %sys_err_ptr216 = inttoptr i64 %sys_neg_errno215 to ptr
-  %sys_val217 = select i1 %sys_is_err214, i64 0, i64 %syscall_ret213
-  %sys_err218 = select i1 %sys_is_err214, ptr %sys_err_ptr216, ptr null
-  %sys_flag219 = select i1 %sys_is_err214, i8 1, i8 0
-  %sys_result.val220 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val217, 0
-  %sys_result.err221 = insertvalue %struct.NpkResult_int64 %sys_result.val220, ptr %sys_err218, 1
-  %sys_result.is_error222 = insertvalue %struct.NpkResult_int64 %sys_result.err221, i8 %sys_flag219, 2
-  %is_error223 = extractvalue %struct.NpkResult_int64 %sys_result.is_error222, 2
-  %is_error_bool224 = icmp ne i8 %is_error223, 0
-  br i1 %is_error_bool224, label %error_block225, label %success_block226
+  %final_path213 = load ptr, ptr %final_path, align 8
+  %sys_str_struct214 = load %struct.NpkString, ptr %final_path213, align 8
+  %sys_str_data215 = extractvalue %struct.NpkString %sys_str_struct214, 0
+  %sys_strvar_int = ptrtoint ptr %sys_str_data215 to i64
+  %syscall_ret216 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 2, i64 %sys_strvar_int, i64 194, i64 384)
+  %sys_is_err217 = icmp slt i64 %syscall_ret216, 0
+  %sys_neg_errno218 = sub i64 0, %syscall_ret216
+  %sys_err_ptr219 = inttoptr i64 %sys_neg_errno218 to ptr
+  %sys_val220 = select i1 %sys_is_err217, i64 0, i64 %syscall_ret216
+  %sys_err221 = select i1 %sys_is_err217, ptr %sys_err_ptr219, ptr null
+  %sys_flag222 = select i1 %sys_is_err217, i8 1, i8 0
+  %sys_result.val223 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val220, 0
+  %sys_result.err224 = insertvalue %struct.NpkResult_int64 %sys_result.val223, ptr %sys_err221, 1
+  %sys_result.is_error225 = insertvalue %struct.NpkResult_int64 %sys_result.err224, i8 %sys_flag222, 2
+  %is_error226 = extractvalue %struct.NpkResult_int64 %sys_result.is_error225, 2
+  %is_error_bool227 = icmp ne i8 %is_error226, 0
+  br i1 %is_error_bool227, label %error_block228, label %success_block229
 
-error_block225:                                   ; preds = %afterwhile206
-  br label %merge_block227
+error_block228:                                   ; preds = %afterwhile209
+  br label %merge_block230
 
-success_block226:                                 ; preds = %afterwhile206
-  %value228 = extractvalue %struct.NpkResult_int64 %sys_result.is_error222, 0
-  br label %merge_block227
+success_block229:                                 ; preds = %afterwhile209
+  %value231 = extractvalue %struct.NpkResult_int64 %sys_result.is_error225, 0
+  br label %merge_block230
 
-merge_block227:                                   ; preds = %success_block226, %error_block225
-  %unwrap_result229 = phi i64 [ -1, %error_block225 ], [ %value228, %success_block226 ]
-  store i64 %unwrap_result229, ptr %res, align 4
-  %res230 = load i64, ptr %res, align 4
-  %getmp231 = icmp sge i64 %res230, 0
-  %ifcond232 = icmp ne i1 %getmp231, false
-  br i1 %ifcond232, label %then233, label %ifcont234
+merge_block230:                                   ; preds = %success_block229, %error_block228
+  %unwrap_result232 = phi i64 [ -1, %error_block228 ], [ %value231, %success_block229 ]
+  store i64 %unwrap_result232, ptr %res, align 4
+  %res233 = load i64, ptr %res, align 4
+  %getmp234 = icmp sge i64 %res233, 0
+  %ifcond235 = icmp ne i1 %getmp234, false
+  br i1 %ifcond235, label %then236, label %ifcont237
 
-then233:                                          ; preds = %merge_block227
+then236:                                          ; preds = %merge_block230
   store i64 1, ptr %success, align 4
-  br label %ifcont234
+  br label %ifcont237
 
-ifcont234:                                        ; preds = %then233, %merge_block227
-  %res235 = load i64, ptr %res, align 4
-  %getmp236 = icmp sge i64 %res235, 0
-  %ifcond237 = icmp ne i1 %getmp236, false
-  br i1 %ifcond237, label %then238, label %ifcont250
+ifcont237:                                        ; preds = %then236, %merge_block230
+  %res238 = load i64, ptr %res, align 4
+  %getmp239 = icmp sge i64 %res238, 0
+  %ifcond240 = icmp ne i1 %getmp239, false
+  br i1 %ifcond240, label %then241, label %ifcont253
 
-then238:                                          ; preds = %ifcont234
-  %res239 = load i64, ptr %res, align 4
-  %syscall_ret240 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %res239)
-  %sys_is_err241 = icmp slt i64 %syscall_ret240, 0
-  %sys_neg_errno242 = sub i64 0, %syscall_ret240
-  %sys_err_ptr243 = inttoptr i64 %sys_neg_errno242 to ptr
-  %sys_val244 = select i1 %sys_is_err241, i64 0, i64 %syscall_ret240
-  %sys_err245 = select i1 %sys_is_err241, ptr %sys_err_ptr243, ptr null
-  %sys_flag246 = select i1 %sys_is_err241, i8 1, i8 0
-  %sys_result.val247 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val244, 0
-  %sys_result.err248 = insertvalue %struct.NpkResult_int64 %sys_result.val247, ptr %sys_err245, 1
-  %sys_result.is_error249 = insertvalue %struct.NpkResult_int64 %sys_result.err248, i8 %sys_flag246, 2
-  br label %ifcont250
+then241:                                          ; preds = %ifcont237
+  %res242 = load i64, ptr %res, align 4
+  %syscall_ret243 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %res242)
+  %sys_is_err244 = icmp slt i64 %syscall_ret243, 0
+  %sys_neg_errno245 = sub i64 0, %syscall_ret243
+  %sys_err_ptr246 = inttoptr i64 %sys_neg_errno245 to ptr
+  %sys_val247 = select i1 %sys_is_err244, i64 0, i64 %syscall_ret243
+  %sys_err248 = select i1 %sys_is_err244, ptr %sys_err_ptr246, ptr null
+  %sys_flag249 = select i1 %sys_is_err244, i8 1, i8 0
+  %sys_result.val250 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val247, 0
+  %sys_result.err251 = insertvalue %struct.NpkResult_int64 %sys_result.val250, ptr %sys_err248, 1
+  %sys_result.is_error252 = insertvalue %struct.NpkResult_int64 %sys_result.err251, i8 %sys_flag249, 2
+  br label %ifcont253
 
-ifcont250:                                        ; preds = %then238, %ifcont234
-  br label %ifcont251
+ifcont253:                                        ; preds = %then241, %ifcont237
+  br label %ifcont254
 
-ifcont251:                                        ; preds = %ifcont250, %whilebody80
-  %tries252 = load i32, ptr %tries, align 4
-  %addtmp253 = add i32 %tries252, 1
-  store i32 %addtmp253, ptr %tries, align 4
+ifcont254:                                        ; preds = %ifcont253, %whilebody83
+  %tries255 = load i32, ptr %tries, align 4
+  %addtmp256 = add i32 %tries255, 1
+  store i32 %addtmp256, ptr %tries, align 4
   call void @npk_gc_safepoint()
-  br label %whilecond76
+  br label %whilecond79
 
-afterwhile254:                                    ; preds = %whilecond76
-  %buf255 = load i64, ptr %buf, align 4
-  %calltmp256 = call i32 @nitpick_libc_mem_free(i64 %buf255)
-  %success257 = load i64, ptr %success, align 4
-  %eqtmp258 = icmp eq i64 %success257, 1
-  %ifcond259 = icmp ne i1 %eqtmp258, false
-  br i1 %ifcond259, label %then260, label %else280
+afterwhile257:                                    ; preds = %whilecond79
+  %buf258 = load i64, ptr %buf, align 4
+  %cast.inttoptr259 = inttoptr i64 %buf258 to ptr
+  call void @npk_free(ptr %cast.inttoptr259)
+  %success260 = load i64, ptr %success, align 4
+  %eqtmp261 = icmp eq i64 %success260, 1
+  %ifcond262 = icmp ne i1 %eqtmp261, false
+  br i1 %ifcond262, label %then263, label %else283
 
-then260:                                          ; preds = %afterwhile254
-  %final_path261 = load ptr, ptr %final_path, align 8
-  %calltmp262 = call { i32, ptr, i8 } @logname.print_str_safe(ptr %final_path261)
-  %calltmp263 = call { i32, ptr, i8 } @logname.print_str_safe(ptr @.str.2187)
-  %urandom_fd264 = load i64, ptr %urandom_fd, align 4
-  %getmp265 = icmp sge i64 %urandom_fd264, 0
-  %ifcond266 = icmp ne i1 %getmp265, false
-  br i1 %ifcond266, label %then267, label %ifcont279
+then263:                                          ; preds = %afterwhile257
+  %final_path264 = load ptr, ptr %final_path, align 8
+  %calltmp265 = call { i32, ptr, i8 } @logname.print_str_safe(ptr %final_path264)
+  %calltmp266 = call { i32, ptr, i8 } @logname.print_str_safe(ptr @.str.2187)
+  %urandom_fd267 = load i64, ptr %urandom_fd, align 4
+  %getmp268 = icmp sge i64 %urandom_fd267, 0
+  %ifcond269 = icmp ne i1 %getmp268, false
+  br i1 %ifcond269, label %then270, label %ifcont282
 
-then267:                                          ; preds = %then260
-  %urandom_fd268 = load i64, ptr %urandom_fd, align 4
-  %syscall_ret269 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %urandom_fd268)
-  %sys_is_err270 = icmp slt i64 %syscall_ret269, 0
-  %sys_neg_errno271 = sub i64 0, %syscall_ret269
-  %sys_err_ptr272 = inttoptr i64 %sys_neg_errno271 to ptr
-  %sys_val273 = select i1 %sys_is_err270, i64 0, i64 %syscall_ret269
-  %sys_err274 = select i1 %sys_is_err270, ptr %sys_err_ptr272, ptr null
-  %sys_flag275 = select i1 %sys_is_err270, i8 1, i8 0
-  %sys_result.val276 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val273, 0
-  %sys_result.err277 = insertvalue %struct.NpkResult_int64 %sys_result.val276, ptr %sys_err274, 1
-  %sys_result.is_error278 = insertvalue %struct.NpkResult_int64 %sys_result.err277, i8 %sys_flag275, 2
-  br label %ifcont279
+then270:                                          ; preds = %then263
+  %urandom_fd271 = load i64, ptr %urandom_fd, align 4
+  %syscall_ret272 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %urandom_fd271)
+  %sys_is_err273 = icmp slt i64 %syscall_ret272, 0
+  %sys_neg_errno274 = sub i64 0, %syscall_ret272
+  %sys_err_ptr275 = inttoptr i64 %sys_neg_errno274 to ptr
+  %sys_val276 = select i1 %sys_is_err273, i64 0, i64 %syscall_ret272
+  %sys_err277 = select i1 %sys_is_err273, ptr %sys_err_ptr275, ptr null
+  %sys_flag278 = select i1 %sys_is_err273, i8 1, i8 0
+  %sys_result.val279 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val276, 0
+  %sys_result.err280 = insertvalue %struct.NpkResult_int64 %sys_result.val279, ptr %sys_err277, 1
+  %sys_result.is_error281 = insertvalue %struct.NpkResult_int64 %sys_result.err280, i8 %sys_flag278, 2
+  br label %ifcont282
 
-ifcont279:                                        ; preds = %then267, %then260
+ifcont282:                                        ; preds = %then270, %then263
   ret { i32, ptr, i8 } zeroinitializer
 
-else280:                                          ; preds = %afterwhile254
-  %calltmp281 = call { i32, ptr, i8 } @md5sum.print_err(ptr @.str.2189)
-  %urandom_fd282 = load i64, ptr %urandom_fd, align 4
-  %getmp283 = icmp sge i64 %urandom_fd282, 0
-  %ifcond284 = icmp ne i1 %getmp283, false
-  br i1 %ifcond284, label %then285, label %ifcont297
+else283:                                          ; preds = %afterwhile257
+  %calltmp284 = call { i32, ptr, i8 } @md5sum.print_err(ptr @.str.2189)
+  %urandom_fd285 = load i64, ptr %urandom_fd, align 4
+  %getmp286 = icmp sge i64 %urandom_fd285, 0
+  %ifcond287 = icmp ne i1 %getmp286, false
+  br i1 %ifcond287, label %then288, label %ifcont300
 
-then285:                                          ; preds = %else280
-  %urandom_fd286 = load i64, ptr %urandom_fd, align 4
-  %syscall_ret287 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %urandom_fd286)
-  %sys_is_err288 = icmp slt i64 %syscall_ret287, 0
-  %sys_neg_errno289 = sub i64 0, %syscall_ret287
-  %sys_err_ptr290 = inttoptr i64 %sys_neg_errno289 to ptr
-  %sys_val291 = select i1 %sys_is_err288, i64 0, i64 %syscall_ret287
-  %sys_err292 = select i1 %sys_is_err288, ptr %sys_err_ptr290, ptr null
-  %sys_flag293 = select i1 %sys_is_err288, i8 1, i8 0
-  %sys_result.val294 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val291, 0
-  %sys_result.err295 = insertvalue %struct.NpkResult_int64 %sys_result.val294, ptr %sys_err292, 1
-  %sys_result.is_error296 = insertvalue %struct.NpkResult_int64 %sys_result.err295, i8 %sys_flag293, 2
-  br label %ifcont297
+then288:                                          ; preds = %else283
+  %urandom_fd289 = load i64, ptr %urandom_fd, align 4
+  %syscall_ret290 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %urandom_fd289)
+  %sys_is_err291 = icmp slt i64 %syscall_ret290, 0
+  %sys_neg_errno292 = sub i64 0, %syscall_ret290
+  %sys_err_ptr293 = inttoptr i64 %sys_neg_errno292 to ptr
+  %sys_val294 = select i1 %sys_is_err291, i64 0, i64 %syscall_ret290
+  %sys_err295 = select i1 %sys_is_err291, ptr %sys_err_ptr293, ptr null
+  %sys_flag296 = select i1 %sys_is_err291, i8 1, i8 0
+  %sys_result.val297 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val294, 0
+  %sys_result.err298 = insertvalue %struct.NpkResult_int64 %sys_result.val297, ptr %sys_err295, 1
+  %sys_result.is_error299 = insertvalue %struct.NpkResult_int64 %sys_result.err298, i8 %sys_flag296, 2
+  br label %ifcont300
 
-ifcont297:                                        ; preds = %then285, %else280
+ifcont300:                                        ; preds = %then288, %else283
   ret { i32, ptr, i8 } { i32 1, ptr null, i8 0 }
 
-ifcont298:                                        ; No predecessors!
-  %urandom_fd299 = load i64, ptr %urandom_fd, align 4
-  %getmp300 = icmp sge i64 %urandom_fd299, 0
-  %ifcond301 = icmp ne i1 %getmp300, false
-  br i1 %ifcond301, label %then302, label %ifcont314
+ifcont301:                                        ; No predecessors!
+  %urandom_fd302 = load i64, ptr %urandom_fd, align 4
+  %getmp303 = icmp sge i64 %urandom_fd302, 0
+  %ifcond304 = icmp ne i1 %getmp303, false
+  br i1 %ifcond304, label %then305, label %ifcont317
 
-then302:                                          ; preds = %ifcont298
-  %urandom_fd303 = load i64, ptr %urandom_fd, align 4
-  %syscall_ret304 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %urandom_fd303)
-  %sys_is_err305 = icmp slt i64 %syscall_ret304, 0
-  %sys_neg_errno306 = sub i64 0, %syscall_ret304
-  %sys_err_ptr307 = inttoptr i64 %sys_neg_errno306 to ptr
-  %sys_val308 = select i1 %sys_is_err305, i64 0, i64 %syscall_ret304
-  %sys_err309 = select i1 %sys_is_err305, ptr %sys_err_ptr307, ptr null
-  %sys_flag310 = select i1 %sys_is_err305, i8 1, i8 0
-  %sys_result.val311 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val308, 0
-  %sys_result.err312 = insertvalue %struct.NpkResult_int64 %sys_result.val311, ptr %sys_err309, 1
-  %sys_result.is_error313 = insertvalue %struct.NpkResult_int64 %sys_result.err312, i8 %sys_flag310, 2
-  br label %ifcont314
+then305:                                          ; preds = %ifcont301
+  %urandom_fd306 = load i64, ptr %urandom_fd, align 4
+  %syscall_ret307 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %urandom_fd306)
+  %sys_is_err308 = icmp slt i64 %syscall_ret307, 0
+  %sys_neg_errno309 = sub i64 0, %syscall_ret307
+  %sys_err_ptr310 = inttoptr i64 %sys_neg_errno309 to ptr
+  %sys_val311 = select i1 %sys_is_err308, i64 0, i64 %syscall_ret307
+  %sys_err312 = select i1 %sys_is_err308, ptr %sys_err_ptr310, ptr null
+  %sys_flag313 = select i1 %sys_is_err308, i8 1, i8 0
+  %sys_result.val314 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val311, 0
+  %sys_result.err315 = insertvalue %struct.NpkResult_int64 %sys_result.val314, ptr %sys_err312, 1
+  %sys_result.is_error316 = insertvalue %struct.NpkResult_int64 %sys_result.err315, i8 %sys_flag313, 2
+  br label %ifcont317
 
-ifcont314:                                        ; preds = %then302, %ifcont298
+ifcont317:                                        ; preds = %then305, %ifcont301
   ret { i32, ptr, i8 } zeroinitializer
 }
 
@@ -43334,7 +43355,6 @@ whilecond:                                        ; preds = %null.ok16, %entry
   br i1 %null.deref, label %null.fail, label %null.ok
 
 null.fail:                                        ; preds = %whilecond
-  %0 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -43358,7 +43378,6 @@ whilebody:                                        ; preds = %null.ok
   br i1 %null.deref14, label %null.fail15, label %null.ok16
 
 null.fail15:                                      ; preds = %whilebody
-  %1 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -43555,7 +43574,6 @@ then62:                                           ; preds = %merge_block57
   br i1 %null.deref, label %null.fail, label %null.ok
 
 null.fail:                                        ; preds = %then62
-  %0 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -43573,7 +43591,6 @@ null.ok:                                          ; preds = %then62
   br i1 %null.deref72, label %null.fail73, label %null.ok74
 
 null.fail73:                                      ; preds = %null.ok
-  %1 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -43591,7 +43608,6 @@ null.ok74:                                        ; preds = %null.ok
   br i1 %null.deref82, label %null.fail83, label %null.ok84
 
 null.fail83:                                      ; preds = %null.ok74
-  %2 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -43609,7 +43625,6 @@ null.ok84:                                        ; preds = %null.ok74
   br i1 %null.deref92, label %null.fail93, label %null.ok94
 
 null.fail93:                                      ; preds = %null.ok84
-  %3 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -43907,7 +43922,6 @@ whilebody:                                        ; preds = %whilecond
   br i1 %null.deref, label %null.fail, label %null.ok
 
 null.fail:                                        ; preds = %whilebody
-  %0 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -44207,7 +44221,6 @@ whilebody:                                        ; preds = %whilecond
   br i1 %null.deref, label %null.fail, label %null.ok
 
 null.fail:                                        ; preds = %whilebody
-  %0 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -44259,7 +44272,6 @@ whilebody111:                                     ; preds = %whilecond106
   br i1 %null.deref120, label %null.fail121, label %null.ok122
 
 null.fail121:                                     ; preds = %whilebody111
-  %1 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -44372,7 +44384,6 @@ whilebody180:                                     ; preds = %whilecond175
   br i1 %null.deref189, label %null.fail190, label %null.ok191
 
 null.fail190:                                     ; preds = %whilebody180
-  %2 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -44469,7 +44480,6 @@ whilebody240:                                     ; preds = %whilecond235
   br i1 %null.deref249, label %null.fail250, label %null.ok251
 
 null.fail250:                                     ; preds = %whilebody240
-  %3 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -44503,7 +44513,6 @@ then257:                                          ; preds = %null.ok251
   br i1 %null.deref273, label %null.fail274, label %null.ok275
 
 null.fail274:                                     ; preds = %then257
-  %4 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -44529,7 +44538,6 @@ and.merge:                                        ; preds = %null.ok286, %null.o
   br i1 %and.lhs291, label %and.rhs292, label %and.merge293
 
 null.fail285:                                     ; preds = %and.rhs
-  %5 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -44555,7 +44563,6 @@ and.merge293:                                     ; preds = %null.ok301, %and.me
   br i1 %and.lhs307, label %and.rhs308, label %and.merge309
 
 null.fail300:                                     ; preds = %and.rhs292
-  %6 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -44581,7 +44588,6 @@ and.merge309:                                     ; preds = %null.ok317, %and.me
   br i1 %and.lhs323, label %and.rhs324, label %and.merge325
 
 null.fail316:                                     ; preds = %and.rhs308
-  %7 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -44607,7 +44613,6 @@ and.merge325:                                     ; preds = %null.ok333, %and.me
   br i1 %ifcond339, label %then340, label %ifcont343
 
 null.fail332:                                     ; preds = %and.rhs324
-  %8 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -44658,7 +44663,7 @@ afterwhile353:                                    ; preds = %whilecond235
   %argv_idx363 = load i64, ptr %argv_idx, align 4
   %gttmp = icmp sgt i64 %argv_idx363, 0
   %ifcond364 = icmp ne i1 %gttmp, false
-  br i1 %ifcond364, label %then365, label %ifcont735
+  br i1 %ifcond364, label %then365, label %ifcont734
 
 then365:                                          ; preds = %afterwhile353
   %argv366 = load i64, ptr %argv, align 4
@@ -44670,7 +44675,6 @@ then365:                                          ; preds = %afterwhile353
   br i1 %null.deref371, label %null.fail372, label %null.ok373
 
 null.fail372:                                     ; preds = %then365
-  %9 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -44688,7 +44692,6 @@ null.ok373:                                       ; preds = %then365
   br i1 %null.deref380, label %null.fail381, label %null.ok382
 
 null.fail381:                                     ; preds = %null.ok373
-  %10 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -44764,11 +44767,10 @@ then418:                                          ; preds = %ifcont414
   br label %ifcont430
 
 ifcont430:                                        ; preds = %then418, %ifcont414
-  %SYS_EXECVE = load i64, ptr @SYS_EXECVE, align 4
   %cmd_ptr431 = load i64, ptr %cmd_ptr, align 4
   %argv432 = load i64, ptr %argv, align 4
   %envp433 = load i64, ptr %envp, align 4
-  %syscall_ret434 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 %SYS_EXECVE, i64 %cmd_ptr431, i64 %argv432, i64 %envp433)
+  %syscall_ret434 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 59, i64 %cmd_ptr431, i64 %argv432, i64 %envp433)
   %sys_is_err435 = icmp slt i64 %syscall_ret434, 0
   %sys_neg_errno436 = sub i64 0, %syscall_ret434
   %sys_err_ptr437 = inttoptr i64 %sys_neg_errno436 to ptr
@@ -44863,7 +44865,6 @@ whilecond486:                                     ; preds = %whilebody500, %merg
   br i1 %null.deref494, label %null.fail495, label %null.ok496
 
 null.fail495:                                     ; preds = %whilecond486
-  %11 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -44888,11 +44889,11 @@ afterwhile503:                                    ; preds = %null.ok496
   store i32 1, ptr %run, align 4
   br label %whilecond504
 
-whilecond504:                                     ; preds = %ifcont699, %afterwhile503
+whilecond504:                                     ; preds = %ifcont698, %afterwhile503
   %run505 = load i32, ptr %run, align 4
   %eqtmp506 = icmp eq i32 %run505, 1
   %whilecond507 = icmp ne i1 %eqtmp506, false
-  br i1 %whilecond507, label %whilebody508, label %afterwhile702
+  br i1 %whilecond507, label %whilebody508, label %afterwhile701
 
 whilebody508:                                     ; preds = %whilecond504
   %pc = alloca i64, align 8
@@ -44907,7 +44908,6 @@ whilebody508:                                     ; preds = %whilecond504
   br i1 %null.deref516, label %null.fail517, label %null.ok518
 
 null.fail517:                                     ; preds = %whilebody508
-  %12 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -44948,7 +44948,6 @@ whilebody528:                                     ; preds = %whilecond527
   br i1 %null.deref536, label %null.fail537, label %null.ok538
 
 null.fail537:                                     ; preds = %whilebody528
-  %13 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -45046,7 +45045,6 @@ and.merge583:                                     ; preds = %null.ok594, %and.me
   br i1 %ifcond600, label %then601, label %ifcont611
 
 null.fail593:                                     ; preds = %and.rhs582
-  %14 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -45114,7 +45112,6 @@ ifcont623:                                        ; preds = %afterbreak622, %whi
   br i1 %null.deref638, label %null.fail639, label %null.ok640
 
 null.fail639:                                     ; preds = %ifcont623
-  %15 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -45142,10 +45139,9 @@ afterwhile648:                                    ; preds = %then621, %whilecond
   %cast.inttoptr655 = inttoptr i64 %addtmp654 to ptr
   store i8 0, ptr %cast.inttoptr655, align 1
   %res_stat = alloca i64, align 8
-  %SYS_STAT = load i64, ptr @SYS_STAT, align 4
   %pathbuf656 = load i64, ptr %pathbuf, align 4
   %statbuf657 = load i64, ptr %statbuf, align 4
-  %syscall_ret658 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 %SYS_STAT, i64 %pathbuf656, i64 %statbuf657)
+  %syscall_ret658 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 4, i64 %pathbuf656, i64 %statbuf657)
   %sys_is_err659 = icmp slt i64 %syscall_ret658, 0
   %sys_neg_errno660 = sub i64 0, %syscall_ret658
   %sys_err_ptr661 = inttoptr i64 %sys_neg_errno660 to ptr
@@ -45172,128 +45168,127 @@ merge_block672:                                   ; preds = %success_block671, %
   %res_stat675 = load i64, ptr %res_stat, align 4
   %eqtmp676 = icmp eq i64 %res_stat675, 0
   %ifcond677 = icmp ne i1 %eqtmp676, false
-  br i1 %ifcond677, label %then678, label %ifcont693
+  br i1 %ifcond677, label %then678, label %ifcont692
 
 then678:                                          ; preds = %merge_block672
-  %SYS_EXECVE679 = load i64, ptr @SYS_EXECVE, align 4
-  %pathbuf680 = load i64, ptr %pathbuf, align 4
-  %argv681 = load i64, ptr %argv, align 4
-  %envp682 = load i64, ptr %envp, align 4
-  %syscall_ret683 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 %SYS_EXECVE679, i64 %pathbuf680, i64 %argv681, i64 %envp682)
-  %sys_is_err684 = icmp slt i64 %syscall_ret683, 0
-  %sys_neg_errno685 = sub i64 0, %syscall_ret683
-  %sys_err_ptr686 = inttoptr i64 %sys_neg_errno685 to ptr
-  %sys_val687 = select i1 %sys_is_err684, i64 0, i64 %syscall_ret683
-  %sys_err688 = select i1 %sys_is_err684, ptr %sys_err_ptr686, ptr null
-  %sys_flag689 = select i1 %sys_is_err684, i8 1, i8 0
-  %sys_result.val690 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val687, 0
-  %sys_result.err691 = insertvalue %struct.NpkResult_int64 %sys_result.val690, ptr %sys_err688, 1
-  %sys_result.is_error692 = insertvalue %struct.NpkResult_int64 %sys_result.err691, i8 %sys_flag689, 2
-  br label %ifcont693
+  %pathbuf679 = load i64, ptr %pathbuf, align 4
+  %argv680 = load i64, ptr %argv, align 4
+  %envp681 = load i64, ptr %envp, align 4
+  %syscall_ret682 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 59, i64 %pathbuf679, i64 %argv680, i64 %envp681)
+  %sys_is_err683 = icmp slt i64 %syscall_ret682, 0
+  %sys_neg_errno684 = sub i64 0, %syscall_ret682
+  %sys_err_ptr685 = inttoptr i64 %sys_neg_errno684 to ptr
+  %sys_val686 = select i1 %sys_is_err683, i64 0, i64 %syscall_ret682
+  %sys_err687 = select i1 %sys_is_err683, ptr %sys_err_ptr685, ptr null
+  %sys_flag688 = select i1 %sys_is_err683, i8 1, i8 0
+  %sys_result.val689 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val686, 0
+  %sys_result.err690 = insertvalue %struct.NpkResult_int64 %sys_result.val689, ptr %sys_err687, 1
+  %sys_result.is_error691 = insertvalue %struct.NpkResult_int64 %sys_result.err690, i8 %sys_flag688, 2
+  br label %ifcont692
 
-ifcont693:                                        ; preds = %then678, %merge_block672
-  %pc694 = load i64, ptr %pc, align 4
-  %eqtmp695 = icmp eq i64 %pc694, 0
-  %ifcond696 = icmp ne i1 %eqtmp695, false
-  br i1 %ifcond696, label %then697, label %ifcont699
+ifcont692:                                        ; preds = %then678, %merge_block672
+  %pc693 = load i64, ptr %pc, align 4
+  %eqtmp694 = icmp eq i64 %pc693, 0
+  %ifcond695 = icmp ne i1 %eqtmp694, false
+  br i1 %ifcond695, label %then696, label %ifcont698
 
-then697:                                          ; preds = %ifcont693
-  br label %afterwhile702
+then696:                                          ; preds = %ifcont692
+  br label %afterwhile701
 
-afterbreak698:                                    ; No predecessors!
-  br label %ifcont699
+afterbreak697:                                    ; No predecessors!
+  br label %ifcont698
 
-ifcont699:                                        ; preds = %afterbreak698, %ifcont693
-  %tok_i700 = load i64, ptr %tok_i, align 4
-  %addtmp701 = add i64 %tok_i700, 1
-  store i64 %addtmp701, ptr %p_i, align 4
+ifcont698:                                        ; preds = %afterbreak697, %ifcont692
+  %tok_i699 = load i64, ptr %tok_i, align 4
+  %addtmp700 = add i64 %tok_i699, 1
+  store i64 %addtmp700, ptr %p_i, align 4
   call void @npk_gc_safepoint()
   br label %whilecond504
 
-afterwhile702:                                    ; preds = %then697, %whilecond504
-  %env_fd703 = load i64, ptr %env_fd, align 4
-  %getmp704 = icmp sge i64 %env_fd703, 0
-  %ifcond705 = icmp ne i1 %getmp704, false
-  br i1 %ifcond705, label %then706, label %ifcont718
+afterwhile701:                                    ; preds = %then696, %whilecond504
+  %env_fd702 = load i64, ptr %env_fd, align 4
+  %getmp703 = icmp sge i64 %env_fd702, 0
+  %ifcond704 = icmp ne i1 %getmp703, false
+  br i1 %ifcond704, label %then705, label %ifcont717
 
-then706:                                          ; preds = %afterwhile702
-  %env_fd707 = load i64, ptr %env_fd, align 4
-  %syscall_ret708 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %env_fd707)
-  %sys_is_err709 = icmp slt i64 %syscall_ret708, 0
-  %sys_neg_errno710 = sub i64 0, %syscall_ret708
-  %sys_err_ptr711 = inttoptr i64 %sys_neg_errno710 to ptr
-  %sys_val712 = select i1 %sys_is_err709, i64 0, i64 %syscall_ret708
-  %sys_err713 = select i1 %sys_is_err709, ptr %sys_err_ptr711, ptr null
-  %sys_flag714 = select i1 %sys_is_err709, i8 1, i8 0
-  %sys_result.val715 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val712, 0
-  %sys_result.err716 = insertvalue %struct.NpkResult_int64 %sys_result.val715, ptr %sys_err713, 1
-  %sys_result.is_error717 = insertvalue %struct.NpkResult_int64 %sys_result.err716, i8 %sys_flag714, 2
-  br label %ifcont718
+then705:                                          ; preds = %afterwhile701
+  %env_fd706 = load i64, ptr %env_fd, align 4
+  %syscall_ret707 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %env_fd706)
+  %sys_is_err708 = icmp slt i64 %syscall_ret707, 0
+  %sys_neg_errno709 = sub i64 0, %syscall_ret707
+  %sys_err_ptr710 = inttoptr i64 %sys_neg_errno709 to ptr
+  %sys_val711 = select i1 %sys_is_err708, i64 0, i64 %syscall_ret707
+  %sys_err712 = select i1 %sys_is_err708, ptr %sys_err_ptr710, ptr null
+  %sys_flag713 = select i1 %sys_is_err708, i8 1, i8 0
+  %sys_result.val714 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val711, 0
+  %sys_result.err715 = insertvalue %struct.NpkResult_int64 %sys_result.val714, ptr %sys_err712, 1
+  %sys_result.is_error716 = insertvalue %struct.NpkResult_int64 %sys_result.err715, i8 %sys_flag713, 2
+  br label %ifcont717
 
-ifcont718:                                        ; preds = %then706, %afterwhile702
-  %fd719 = load i64, ptr %fd, align 4
-  %getmp720 = icmp sge i64 %fd719, 0
-  %ifcond721 = icmp ne i1 %getmp720, false
-  br i1 %ifcond721, label %then722, label %ifcont734
+ifcont717:                                        ; preds = %then705, %afterwhile701
+  %fd718 = load i64, ptr %fd, align 4
+  %getmp719 = icmp sge i64 %fd718, 0
+  %ifcond720 = icmp ne i1 %getmp719, false
+  br i1 %ifcond720, label %then721, label %ifcont733
 
-then722:                                          ; preds = %ifcont718
-  %fd723 = load i64, ptr %fd, align 4
-  %syscall_ret724 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %fd723)
-  %sys_is_err725 = icmp slt i64 %syscall_ret724, 0
-  %sys_neg_errno726 = sub i64 0, %syscall_ret724
-  %sys_err_ptr727 = inttoptr i64 %sys_neg_errno726 to ptr
-  %sys_val728 = select i1 %sys_is_err725, i64 0, i64 %syscall_ret724
-  %sys_err729 = select i1 %sys_is_err725, ptr %sys_err_ptr727, ptr null
-  %sys_flag730 = select i1 %sys_is_err725, i8 1, i8 0
-  %sys_result.val731 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val728, 0
-  %sys_result.err732 = insertvalue %struct.NpkResult_int64 %sys_result.val731, ptr %sys_err729, 1
-  %sys_result.is_error733 = insertvalue %struct.NpkResult_int64 %sys_result.err732, i8 %sys_flag730, 2
-  br label %ifcont734
+then721:                                          ; preds = %ifcont717
+  %fd722 = load i64, ptr %fd, align 4
+  %syscall_ret723 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %fd722)
+  %sys_is_err724 = icmp slt i64 %syscall_ret723, 0
+  %sys_neg_errno725 = sub i64 0, %syscall_ret723
+  %sys_err_ptr726 = inttoptr i64 %sys_neg_errno725 to ptr
+  %sys_val727 = select i1 %sys_is_err724, i64 0, i64 %syscall_ret723
+  %sys_err728 = select i1 %sys_is_err724, ptr %sys_err_ptr726, ptr null
+  %sys_flag729 = select i1 %sys_is_err724, i8 1, i8 0
+  %sys_result.val730 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val727, 0
+  %sys_result.err731 = insertvalue %struct.NpkResult_int64 %sys_result.val730, ptr %sys_err728, 1
+  %sys_result.is_error732 = insertvalue %struct.NpkResult_int64 %sys_result.err731, i8 %sys_flag729, 2
+  br label %ifcont733
 
-ifcont734:                                        ; preds = %then722, %ifcont718
+ifcont733:                                        ; preds = %then721, %ifcont717
   ret { i64, ptr, i8 } { i64 -1, ptr null, i8 0 }
 
-ifcont735:                                        ; preds = %afterwhile353
-  %env_fd736 = load i64, ptr %env_fd, align 4
-  %getmp737 = icmp sge i64 %env_fd736, 0
-  %ifcond738 = icmp ne i1 %getmp737, false
-  br i1 %ifcond738, label %then739, label %ifcont751
+ifcont734:                                        ; preds = %afterwhile353
+  %env_fd735 = load i64, ptr %env_fd, align 4
+  %getmp736 = icmp sge i64 %env_fd735, 0
+  %ifcond737 = icmp ne i1 %getmp736, false
+  br i1 %ifcond737, label %then738, label %ifcont750
 
-then739:                                          ; preds = %ifcont735
-  %env_fd740 = load i64, ptr %env_fd, align 4
-  %syscall_ret741 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %env_fd740)
-  %sys_is_err742 = icmp slt i64 %syscall_ret741, 0
-  %sys_neg_errno743 = sub i64 0, %syscall_ret741
-  %sys_err_ptr744 = inttoptr i64 %sys_neg_errno743 to ptr
-  %sys_val745 = select i1 %sys_is_err742, i64 0, i64 %syscall_ret741
-  %sys_err746 = select i1 %sys_is_err742, ptr %sys_err_ptr744, ptr null
-  %sys_flag747 = select i1 %sys_is_err742, i8 1, i8 0
-  %sys_result.val748 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val745, 0
-  %sys_result.err749 = insertvalue %struct.NpkResult_int64 %sys_result.val748, ptr %sys_err746, 1
-  %sys_result.is_error750 = insertvalue %struct.NpkResult_int64 %sys_result.err749, i8 %sys_flag747, 2
-  br label %ifcont751
+then738:                                          ; preds = %ifcont734
+  %env_fd739 = load i64, ptr %env_fd, align 4
+  %syscall_ret740 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %env_fd739)
+  %sys_is_err741 = icmp slt i64 %syscall_ret740, 0
+  %sys_neg_errno742 = sub i64 0, %syscall_ret740
+  %sys_err_ptr743 = inttoptr i64 %sys_neg_errno742 to ptr
+  %sys_val744 = select i1 %sys_is_err741, i64 0, i64 %syscall_ret740
+  %sys_err745 = select i1 %sys_is_err741, ptr %sys_err_ptr743, ptr null
+  %sys_flag746 = select i1 %sys_is_err741, i8 1, i8 0
+  %sys_result.val747 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val744, 0
+  %sys_result.err748 = insertvalue %struct.NpkResult_int64 %sys_result.val747, ptr %sys_err745, 1
+  %sys_result.is_error749 = insertvalue %struct.NpkResult_int64 %sys_result.err748, i8 %sys_flag746, 2
+  br label %ifcont750
 
-ifcont751:                                        ; preds = %then739, %ifcont735
-  %fd752 = load i64, ptr %fd, align 4
-  %getmp753 = icmp sge i64 %fd752, 0
-  %ifcond754 = icmp ne i1 %getmp753, false
-  br i1 %ifcond754, label %then755, label %ifcont767
+ifcont750:                                        ; preds = %then738, %ifcont734
+  %fd751 = load i64, ptr %fd, align 4
+  %getmp752 = icmp sge i64 %fd751, 0
+  %ifcond753 = icmp ne i1 %getmp752, false
+  br i1 %ifcond753, label %then754, label %ifcont766
 
-then755:                                          ; preds = %ifcont751
-  %fd756 = load i64, ptr %fd, align 4
-  %syscall_ret757 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %fd756)
-  %sys_is_err758 = icmp slt i64 %syscall_ret757, 0
-  %sys_neg_errno759 = sub i64 0, %syscall_ret757
-  %sys_err_ptr760 = inttoptr i64 %sys_neg_errno759 to ptr
-  %sys_val761 = select i1 %sys_is_err758, i64 0, i64 %syscall_ret757
-  %sys_err762 = select i1 %sys_is_err758, ptr %sys_err_ptr760, ptr null
-  %sys_flag763 = select i1 %sys_is_err758, i8 1, i8 0
-  %sys_result.val764 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val761, 0
-  %sys_result.err765 = insertvalue %struct.NpkResult_int64 %sys_result.val764, ptr %sys_err762, 1
-  %sys_result.is_error766 = insertvalue %struct.NpkResult_int64 %sys_result.err765, i8 %sys_flag763, 2
-  br label %ifcont767
+then754:                                          ; preds = %ifcont750
+  %fd755 = load i64, ptr %fd, align 4
+  %syscall_ret756 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %fd755)
+  %sys_is_err757 = icmp slt i64 %syscall_ret756, 0
+  %sys_neg_errno758 = sub i64 0, %syscall_ret756
+  %sys_err_ptr759 = inttoptr i64 %sys_neg_errno758 to ptr
+  %sys_val760 = select i1 %sys_is_err757, i64 0, i64 %syscall_ret756
+  %sys_err761 = select i1 %sys_is_err757, ptr %sys_err_ptr759, ptr null
+  %sys_flag762 = select i1 %sys_is_err757, i8 1, i8 0
+  %sys_result.val763 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val760, 0
+  %sys_result.err764 = insertvalue %struct.NpkResult_int64 %sys_result.val763, ptr %sys_err761, 1
+  %sys_result.is_error765 = insertvalue %struct.NpkResult_int64 %sys_result.err764, i8 %sys_flag762, 2
+  br label %ifcont766
 
-ifcont767:                                        ; preds = %then755, %ifcont751
+ifcont766:                                        ; preds = %then754, %ifcont750
   ret { i64, ptr, i8 } { i64 -1, ptr null, i8 0 }
 }
 
@@ -47282,7 +47277,6 @@ then121:                                          ; preds = %whilebody116
   br i1 %null.deref, label %null.fail, label %null.ok
 
 null.fail:                                        ; preds = %then121
-  %0 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -47367,7 +47361,6 @@ whilebody169:                                     ; preds = %whilecond164
   br i1 %null.deref180, label %null.fail181, label %null.ok182
 
 null.fail181:                                     ; preds = %whilebody169
-  %1 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -47448,7 +47441,6 @@ afterwhile214:                                    ; preds = %whilecond
   br i1 %null.deref230, label %null.fail231, label %null.ok232
 
 null.fail231:                                     ; preds = %afterwhile214
-  %2 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -47507,31 +47499,36 @@ ifcont:                                           ; preds = %then, %entry
   %arg_count6 = load i32, ptr %arg_count, align 4
   %cast.sext = sext i32 %arg_count6 to i64
   %multmp = mul i64 %cast.sext, 8
-  %calltmp7 = call i64 @malloc(i64 %multmp)
-  store i64 %calltmp7, ptr %fp_array, align 4
+  %wild_ptr = call ptr @npk_alloc(i64 %multmp)
+  %arg_count7 = load i32, ptr %arg_count, align 4
+  %cast.sext8 = sext i32 %arg_count7 to i64
+  %multmp9 = mul i64 %cast.sext8, 8
+  %wild_ptr10 = call ptr @npk_alloc(i64 %multmp9)
+  %cast.ptrtoint = ptrtoint ptr %wild_ptr10 to i64
+  store i64 %cast.ptrtoint, ptr %fp_array, align 4
   %n_files = alloca i64, align 8
   store i64 0, ptr %n_files, align 4
   %i = alloca i32, align 4
   store i32 1, ptr %i, align 4
   br label %whilecond
 
-whilecond:                                        ; preds = %ifcont24, %ifcont
-  %i8 = load i32, ptr %i, align 4
-  %arg_count9 = load i32, ptr %arg_count, align 4
-  %letmp = icmp sle i32 %i8, %arg_count9
-  %whilecond10 = icmp ne i1 %letmp, false
-  br i1 %whilecond10, label %whilebody, label %afterwhile
+whilecond:                                        ; preds = %ifcont27, %ifcont
+  %i11 = load i32, ptr %i, align 4
+  %arg_count12 = load i32, ptr %arg_count, align 4
+  %letmp = icmp sle i32 %i11, %arg_count12
+  %whilecond13 = icmp ne i1 %letmp, false
+  br i1 %whilecond13, label %whilebody, label %afterwhile
 
 whilebody:                                        ; preds = %whilecond
   %file = alloca ptr, align 8
-  %args11 = load ptr, ptr %args, align 8
-  %i12 = load i32, ptr %i, align 4
-  %calltmp13 = call { ptr, ptr, i8 } @nitpick_args.args_at(ptr %args11, i32 %i12)
-  %raw.value14 = extractvalue { ptr, ptr, i8 } %calltmp13, 0
-  store ptr %raw.value14, ptr %file, align 8
+  %args14 = load ptr, ptr %args, align 8
+  %i15 = load i32, ptr %i, align 4
+  %calltmp16 = call { ptr, ptr, i8 } @nitpick_args.args_at(ptr %args14, i32 %i15)
+  %raw.value17 = extractvalue { ptr, ptr, i8 } %calltmp16, 0
+  store ptr %raw.value17, ptr %file, align 8
   %fd = alloca i64, align 8
-  %file15 = load ptr, ptr %file, align 8
-  %sys_str_struct = load %struct.NpkString, ptr %file15, align 8
+  %file18 = load ptr, ptr %file, align 8
+  %sys_str_struct = load %struct.NpkString, ptr %file18, align 8
   %sys_str_data = extractvalue %struct.NpkString %sys_str_struct, 0
   %sys_strvar_int = ptrtoint ptr %sys_str_data to i64
   %syscall_ret = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 2, i64 %sys_strvar_int, i64 0, i64 0)
@@ -47558,303 +47555,304 @@ success_block:                                    ; preds = %whilebody
 merge_block:                                      ; preds = %success_block, %error_block
   %unwrap_result = phi i64 [ -1, %error_block ], [ %value, %success_block ]
   store i64 %unwrap_result, ptr %fd, align 4
-  %fd16 = load i64, ptr %fd, align 4
-  %lttmp17 = icmp slt i64 %fd16, 0
-  %ifcond18 = icmp ne i1 %lttmp17, false
-  br i1 %ifcond18, label %then19, label %ifcont24
+  %fd19 = load i64, ptr %fd, align 4
+  %lttmp20 = icmp slt i64 %fd19, 0
+  %ifcond21 = icmp ne i1 %lttmp20, false
+  br i1 %ifcond21, label %then22, label %ifcont27
 
-then19:                                           ; preds = %merge_block
-  %calltmp20 = call { i32, ptr, i8 } @md5sum.print_err(ptr @.str.2381)
-  %file21 = load ptr, ptr %file, align 8
-  %calltmp22 = call { i32, ptr, i8 } @md5sum.print_err(ptr %file21)
-  %calltmp23 = call { i32, ptr, i8 } @md5sum.print_err(ptr @.str.2383)
+then22:                                           ; preds = %merge_block
+  %calltmp23 = call { i32, ptr, i8 } @md5sum.print_err(ptr @.str.2381)
+  %file24 = load ptr, ptr %file, align 8
+  %calltmp25 = call { i32, ptr, i8 } @md5sum.print_err(ptr %file24)
+  %calltmp26 = call { i32, ptr, i8 } @md5sum.print_err(ptr @.str.2383)
   ret { i32, ptr, i8 } { i32 1, ptr null, i8 0 }
 
-ifcont24:                                         ; preds = %merge_block
+ifcont27:                                         ; preds = %merge_block
   %fp = alloca i64, align 8
-  %fd25 = load i64, ptr %fd, align 4
-  %calltmp26 = call { i64, ptr, i8 } @io_utils.io_buf_new(i64 %fd25)
-  %raw.value27 = extractvalue { i64, ptr, i8 } %calltmp26, 0
-  store i64 %raw.value27, ptr %fp, align 4
-  %fp_array28 = load i64, ptr %fp_array, align 4
-  %n_files29 = load i64, ptr %n_files, align 4
-  %multmp30 = mul i64 %n_files29, 8
-  %addtmp = add i64 %fp_array28, %multmp30
+  %fd28 = load i64, ptr %fd, align 4
+  %calltmp29 = call { i64, ptr, i8 } @io_utils.io_buf_new(i64 %fd28)
+  %raw.value30 = extractvalue { i64, ptr, i8 } %calltmp29, 0
+  store i64 %raw.value30, ptr %fp, align 4
   %fp_array31 = load i64, ptr %fp_array, align 4
   %n_files32 = load i64, ptr %n_files, align 4
   %multmp33 = mul i64 %n_files32, 8
-  %addtmp34 = add i64 %fp_array31, %multmp33
-  %cast.inttoptr = inttoptr i64 %addtmp34 to ptr
-  %fp35 = load i64, ptr %fp, align 4
-  store i64 %fp35, ptr %cast.inttoptr, align 4
-  %n_files36 = load i64, ptr %n_files, align 4
-  %addtmp37 = add i64 %n_files36, 1
-  store i64 %addtmp37, ptr %n_files, align 4
-  %i38 = load i32, ptr %i, align 4
-  %addtmp39 = add i32 %i38, 1
-  store i32 %addtmp39, ptr %i, align 4
+  %addtmp = add i64 %fp_array31, %multmp33
+  %fp_array34 = load i64, ptr %fp_array, align 4
+  %n_files35 = load i64, ptr %n_files, align 4
+  %multmp36 = mul i64 %n_files35, 8
+  %addtmp37 = add i64 %fp_array34, %multmp36
+  %cast.inttoptr = inttoptr i64 %addtmp37 to ptr
+  %fp38 = load i64, ptr %fp, align 4
+  store i64 %fp38, ptr %cast.inttoptr, align 4
+  %n_files39 = load i64, ptr %n_files, align 4
+  %addtmp40 = add i64 %n_files39, 1
+  store i64 %addtmp40, ptr %n_files, align 4
+  %i41 = load i32, ptr %i, align 4
+  %addtmp42 = add i32 %i41, 1
+  store i32 %addtmp42, ptr %i, align 4
   call void @npk_gc_safepoint()
   br label %whilecond
 
 afterwhile:                                       ; preds = %whilecond
   %running = alloca i32, align 4
   store i32 1, ptr %running, align 4
-  br label %whilecond40
+  br label %whilecond43
 
-whilecond40:                                      ; preds = %ifcont180, %afterwhile
-  %running41 = load i32, ptr %running, align 4
-  %eqtmp = icmp eq i32 %running41, 1
-  %whilecond42 = icmp ne i1 %eqtmp, false
-  br i1 %whilecond42, label %whilebody43, label %afterwhile181
+whilecond43:                                      ; preds = %ifcont185, %afterwhile
+  %running44 = load i32, ptr %running, align 4
+  %eqtmp = icmp eq i32 %running44, 1
+  %whilecond45 = icmp ne i1 %eqtmp, false
+  br i1 %whilecond45, label %whilebody46, label %afterwhile186
 
-whilebody43:                                      ; preds = %whilecond40
+whilebody46:                                      ; preds = %whilecond43
   %j = alloca i64, align 8
   store i64 0, ptr %j, align 4
   %any_data = alloca i32, align 4
   store i32 0, ptr %any_data, align 4
-  br label %whilecond44
+  br label %whilecond47
 
-whilecond44:                                      ; preds = %ifcont170, %whilebody43
-  %j45 = load i64, ptr %j, align 4
-  %n_files46 = load i64, ptr %n_files, align 4
-  %lttmp47 = icmp slt i64 %j45, %n_files46
-  %whilecond48 = icmp ne i1 %lttmp47, false
-  br i1 %whilecond48, label %whilebody49, label %afterwhile173
+whilecond47:                                      ; preds = %ifcont175, %whilebody46
+  %j48 = load i64, ptr %j, align 4
+  %n_files49 = load i64, ptr %n_files, align 4
+  %lttmp50 = icmp slt i64 %j48, %n_files49
+  %whilecond51 = icmp ne i1 %lttmp50, false
+  br i1 %whilecond51, label %whilebody52, label %afterwhile178
 
-whilebody49:                                      ; preds = %whilecond44
-  %fp50 = alloca i64, align 8
-  %fp_array51 = load i64, ptr %fp_array, align 4
-  %j52 = load i64, ptr %j, align 4
-  %multmp53 = mul i64 %j52, 8
-  %addtmp54 = add i64 %fp_array51, %multmp53
-  %fp_array55 = load i64, ptr %fp_array, align 4
-  %j56 = load i64, ptr %j, align 4
-  %multmp57 = mul i64 %j56, 8
-  %addtmp58 = add i64 %fp_array55, %multmp57
-  %cast.inttoptr59 = inttoptr i64 %addtmp58 to ptr
-  %null.deref = icmp eq ptr %cast.inttoptr59, null
+whilebody52:                                      ; preds = %whilecond47
+  %fp53 = alloca i64, align 8
+  %fp_array54 = load i64, ptr %fp_array, align 4
+  %j55 = load i64, ptr %j, align 4
+  %multmp56 = mul i64 %j55, 8
+  %addtmp57 = add i64 %fp_array54, %multmp56
+  %fp_array58 = load i64, ptr %fp_array, align 4
+  %j59 = load i64, ptr %j, align 4
+  %multmp60 = mul i64 %j59, 8
+  %addtmp61 = add i64 %fp_array58, %multmp60
+  %cast.inttoptr62 = inttoptr i64 %addtmp61 to ptr
+  %null.deref = icmp eq ptr %cast.inttoptr62, null
   br i1 %null.deref, label %null.fail, label %null.ok
 
-null.fail:                                        ; preds = %whilebody49
-  %0 = call i32 @failsafe(i32 46)
+null.fail:                                        ; preds = %whilebody52
   call void @exit(i32 46)
   unreachable
 
-null.ok:                                          ; preds = %whilebody49
-  %deref = load i32, ptr %cast.inttoptr59, align 4
+null.ok:                                          ; preds = %whilebody52
+  %deref = load i32, ptr %cast.inttoptr62, align 4
   %init_sext = sext i32 %deref to i64
-  store i64 %init_sext, ptr %fp50, align 4
-  %fp60 = load i64, ptr %fp50, align 4
-  %netmp = icmp ne i64 %fp60, 0
-  %ifcond61 = icmp ne i1 %netmp, false
-  br i1 %ifcond61, label %then62, label %ifcont163
+  store i64 %init_sext, ptr %fp53, align 4
+  %fp63 = load i64, ptr %fp53, align 4
+  %netmp = icmp ne i64 %fp63, 0
+  %ifcond64 = icmp ne i1 %netmp, false
+  br i1 %ifcond64, label %then65, label %ifcont168
 
-then62:                                           ; preds = %null.ok
+then65:                                           ; preds = %null.ok
   %buf = alloca i64, align 8
-  %calltmp63 = call i64 @malloc(i64 65536)
-  store i64 %calltmp63, ptr %buf, align 4
+  %wild_ptr66 = call ptr @npk_alloc(i64 65536)
+  %wild_ptr67 = call ptr @npk_alloc(i64 65536)
+  %cast.ptrtoint68 = ptrtoint ptr %wild_ptr67 to i64
+  store i64 %cast.ptrtoint68, ptr %buf, align 4
   %len = alloca i64, align 8
   store i64 0, ptr %len, align 4
   %c = alloca i32, align 4
-  %fp64 = load i64, ptr %fp50, align 4
-  %calltmp65 = call { i32, ptr, i8 } @io_utils.io_buf_getc(i64 %fp64)
-  %raw.value66 = extractvalue { i32, ptr, i8 } %calltmp65, 0
-  store i32 %raw.value66, ptr %c, align 4
-  %c67 = load i32, ptr %c, align 4
-  %lttmp68 = icmp slt i32 %c67, 0
-  %ifcond69 = icmp ne i1 %lttmp68, false
-  br i1 %ifcond69, label %then70, label %else
+  %fp69 = load i64, ptr %fp53, align 4
+  %calltmp70 = call { i32, ptr, i8 } @io_utils.io_buf_getc(i64 %fp69)
+  %raw.value71 = extractvalue { i32, ptr, i8 } %calltmp70, 0
+  store i32 %raw.value71, ptr %c, align 4
+  %c72 = load i32, ptr %c, align 4
+  %lttmp73 = icmp slt i32 %c72, 0
+  %ifcond74 = icmp ne i1 %lttmp73, false
+  br i1 %ifcond74, label %then75, label %else
 
-then70:                                           ; preds = %then62
-  %fp_array71 = load i64, ptr %fp_array, align 4
-  %j72 = load i64, ptr %j, align 4
-  %multmp73 = mul i64 %j72, 8
-  %addtmp74 = add i64 %fp_array71, %multmp73
-  %fp_array75 = load i64, ptr %fp_array, align 4
-  %j76 = load i64, ptr %j, align 4
-  %multmp77 = mul i64 %j76, 8
-  %addtmp78 = add i64 %fp_array75, %multmp77
-  %cast.inttoptr79 = inttoptr i64 %addtmp78 to ptr
-  store i64 0, ptr %cast.inttoptr79, align 4
-  %fd_c = alloca i64, align 8
-  %fp80 = load i64, ptr %fp50, align 4
-  %addtmp81 = add i64 %fp80, 0
-  %fp82 = load i64, ptr %fp50, align 4
-  %addtmp83 = add i64 %fp82, 0
+then75:                                           ; preds = %then65
+  %fp_array76 = load i64, ptr %fp_array, align 4
+  %j77 = load i64, ptr %j, align 4
+  %multmp78 = mul i64 %j77, 8
+  %addtmp79 = add i64 %fp_array76, %multmp78
+  %fp_array80 = load i64, ptr %fp_array, align 4
+  %j81 = load i64, ptr %j, align 4
+  %multmp82 = mul i64 %j81, 8
+  %addtmp83 = add i64 %fp_array80, %multmp82
   %cast.inttoptr84 = inttoptr i64 %addtmp83 to ptr
-  %null.deref85 = icmp eq ptr %cast.inttoptr84, null
-  br i1 %null.deref85, label %null.fail86, label %null.ok87
+  store i64 0, ptr %cast.inttoptr84, align 4
+  %fd_c = alloca i64, align 8
+  %fp85 = load i64, ptr %fp53, align 4
+  %addtmp86 = add i64 %fp85, 0
+  %fp87 = load i64, ptr %fp53, align 4
+  %addtmp88 = add i64 %fp87, 0
+  %cast.inttoptr89 = inttoptr i64 %addtmp88 to ptr
+  %null.deref90 = icmp eq ptr %cast.inttoptr89, null
+  br i1 %null.deref90, label %null.fail91, label %null.ok92
 
-null.fail86:                                      ; preds = %then70
-  %1 = call i32 @failsafe(i32 46)
+null.fail91:                                      ; preds = %then75
   call void @exit(i32 46)
   unreachable
 
-null.ok87:                                        ; preds = %then70
-  %deref88 = load i32, ptr %cast.inttoptr84, align 4
-  %init_sext89 = sext i32 %deref88 to i64
-  store i64 %init_sext89, ptr %fd_c, align 4
-  %fd_c90 = load i64, ptr %fd_c, align 4
-  %getmp = icmp sge i64 %fd_c90, 0
-  %ifcond91 = icmp ne i1 %getmp, false
-  br i1 %ifcond91, label %then92, label %ifcont104
+null.ok92:                                        ; preds = %then75
+  %deref93 = load i32, ptr %cast.inttoptr89, align 4
+  %init_sext94 = sext i32 %deref93 to i64
+  store i64 %init_sext94, ptr %fd_c, align 4
+  %fd_c95 = load i64, ptr %fd_c, align 4
+  %getmp = icmp sge i64 %fd_c95, 0
+  %ifcond96 = icmp ne i1 %getmp, false
+  br i1 %ifcond96, label %then97, label %ifcont109
 
-then92:                                           ; preds = %null.ok87
-  %fd_c93 = load i64, ptr %fd_c, align 4
-  %syscall_ret94 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %fd_c93)
-  %sys_is_err95 = icmp slt i64 %syscall_ret94, 0
-  %sys_neg_errno96 = sub i64 0, %syscall_ret94
-  %sys_err_ptr97 = inttoptr i64 %sys_neg_errno96 to ptr
-  %sys_val98 = select i1 %sys_is_err95, i64 0, i64 %syscall_ret94
-  %sys_err99 = select i1 %sys_is_err95, ptr %sys_err_ptr97, ptr null
-  %sys_flag100 = select i1 %sys_is_err95, i8 1, i8 0
-  %sys_result.val101 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val98, 0
-  %sys_result.err102 = insertvalue %struct.NpkResult_int64 %sys_result.val101, ptr %sys_err99, 1
-  %sys_result.is_error103 = insertvalue %struct.NpkResult_int64 %sys_result.err102, i8 %sys_flag100, 2
-  br label %ifcont104
+then97:                                           ; preds = %null.ok92
+  %fd_c98 = load i64, ptr %fd_c, align 4
+  %syscall_ret99 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %fd_c98)
+  %sys_is_err100 = icmp slt i64 %syscall_ret99, 0
+  %sys_neg_errno101 = sub i64 0, %syscall_ret99
+  %sys_err_ptr102 = inttoptr i64 %sys_neg_errno101 to ptr
+  %sys_val103 = select i1 %sys_is_err100, i64 0, i64 %syscall_ret99
+  %sys_err104 = select i1 %sys_is_err100, ptr %sys_err_ptr102, ptr null
+  %sys_flag105 = select i1 %sys_is_err100, i8 1, i8 0
+  %sys_result.val106 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val103, 0
+  %sys_result.err107 = insertvalue %struct.NpkResult_int64 %sys_result.val106, ptr %sys_err104, 1
+  %sys_result.is_error108 = insertvalue %struct.NpkResult_int64 %sys_result.err107, i8 %sys_flag105, 2
+  br label %ifcont109
 
-ifcont104:                                        ; preds = %then92, %null.ok87
-  %fp105 = load i64, ptr %fp50, align 4
-  %calltmp106 = call { i32, ptr, i8 } @io_utils.io_buf_free(i64 %fp105)
-  %raw.value107 = extractvalue { i32, ptr, i8 } %calltmp106, 0
-  br label %ifcont160
+ifcont109:                                        ; preds = %then97, %null.ok92
+  %fp110 = load i64, ptr %fp53, align 4
+  %calltmp111 = call { i32, ptr, i8 } @io_utils.io_buf_free(i64 %fp110)
+  %raw.value112 = extractvalue { i32, ptr, i8 } %calltmp111, 0
+  br label %ifcont165
 
-else:                                             ; preds = %then62
+else:                                             ; preds = %then65
   store i32 1, ptr %any_data, align 4
-  br label %whilecond108
+  br label %whilecond113
 
-whilecond108:                                     ; preds = %ifcont136, %else
-  %c109 = load i32, ptr %c, align 4
-  %getmp110 = icmp sge i32 %c109, 0
-  %whilecond111 = icmp ne i1 %getmp110, false
-  br i1 %whilecond111, label %whilebody112, label %afterwhile137
+whilecond113:                                     ; preds = %ifcont141, %else
+  %c114 = load i32, ptr %c, align 4
+  %getmp115 = icmp sge i32 %c114, 0
+  %whilecond116 = icmp ne i1 %getmp115, false
+  br i1 %whilecond116, label %whilebody117, label %afterwhile142
 
-whilebody112:                                     ; preds = %whilecond108
-  %c113 = load i32, ptr %c, align 4
-  %eqtmp114 = icmp eq i32 %c113, 10
-  %ifcond115 = icmp ne i1 %eqtmp114, false
-  br i1 %ifcond115, label %then116, label %else117
+whilebody117:                                     ; preds = %whilecond113
+  %c118 = load i32, ptr %c, align 4
+  %eqtmp119 = icmp eq i32 %c118, 10
+  %ifcond120 = icmp ne i1 %eqtmp119, false
+  br i1 %ifcond120, label %then121, label %else122
 
-then116:                                          ; preds = %whilebody112
+then121:                                          ; preds = %whilebody117
   store i32 -1, ptr %c, align 4
-  br label %ifcont136
+  br label %ifcont141
 
-else117:                                          ; preds = %whilebody112
-  %len118 = load i64, ptr %len, align 4
-  %lttmp119 = icmp slt i64 %len118, 65536
-  %ifcond120 = icmp ne i1 %lttmp119, false
-  br i1 %ifcond120, label %then121, label %ifcont132
-
-then121:                                          ; preds = %else117
-  %buf122 = load i64, ptr %buf, align 4
+else122:                                          ; preds = %whilebody117
   %len123 = load i64, ptr %len, align 4
-  %addtmp124 = add i64 %buf122, %len123
-  %buf125 = load i64, ptr %buf, align 4
-  %len126 = load i64, ptr %len, align 4
-  %addtmp127 = add i64 %buf125, %len126
-  %cast.inttoptr128 = inttoptr i64 %addtmp127 to ptr
-  %c129 = load i32, ptr %c, align 4
-  %cast.trunc = trunc i32 %c129 to i8
-  store i8 %cast.trunc, ptr %cast.inttoptr128, align 1
-  %len130 = load i64, ptr %len, align 4
-  %addtmp131 = add i64 %len130, 1
-  store i64 %addtmp131, ptr %len, align 4
-  br label %ifcont132
+  %lttmp124 = icmp slt i64 %len123, 65536
+  %ifcond125 = icmp ne i1 %lttmp124, false
+  br i1 %ifcond125, label %then126, label %ifcont137
 
-ifcont132:                                        ; preds = %then121, %else117
-  %fp133 = load i64, ptr %fp50, align 4
-  %calltmp134 = call { i32, ptr, i8 } @io_utils.io_buf_getc(i64 %fp133)
-  %raw.value135 = extractvalue { i32, ptr, i8 } %calltmp134, 0
-  store i32 %raw.value135, ptr %c, align 4
-  br label %ifcont136
+then126:                                          ; preds = %else122
+  %buf127 = load i64, ptr %buf, align 4
+  %len128 = load i64, ptr %len, align 4
+  %addtmp129 = add i64 %buf127, %len128
+  %buf130 = load i64, ptr %buf, align 4
+  %len131 = load i64, ptr %len, align 4
+  %addtmp132 = add i64 %buf130, %len131
+  %cast.inttoptr133 = inttoptr i64 %addtmp132 to ptr
+  %c134 = load i32, ptr %c, align 4
+  %cast.trunc = trunc i32 %c134 to i8
+  store i8 %cast.trunc, ptr %cast.inttoptr133, align 1
+  %len135 = load i64, ptr %len, align 4
+  %addtmp136 = add i64 %len135, 1
+  store i64 %addtmp136, ptr %len, align 4
+  br label %ifcont137
 
-ifcont136:                                        ; preds = %ifcont132, %then116
+ifcont137:                                        ; preds = %then126, %else122
+  %fp138 = load i64, ptr %fp53, align 4
+  %calltmp139 = call { i32, ptr, i8 } @io_utils.io_buf_getc(i64 %fp138)
+  %raw.value140 = extractvalue { i32, ptr, i8 } %calltmp139, 0
+  store i32 %raw.value140, ptr %c, align 4
+  br label %ifcont141
+
+ifcont141:                                        ; preds = %ifcont137, %then121
   call void @npk_gc_safepoint()
-  br label %whilecond108
+  br label %whilecond113
 
-afterwhile137:                                    ; preds = %whilecond108
-  %len138 = load i64, ptr %len, align 4
-  %gttmp = icmp sgt i64 %len138, 0
-  %ifcond139 = icmp ne i1 %gttmp, false
-  br i1 %ifcond139, label %then140, label %ifcont159
+afterwhile142:                                    ; preds = %whilecond113
+  %len143 = load i64, ptr %len, align 4
+  %gttmp = icmp sgt i64 %len143, 0
+  %ifcond144 = icmp ne i1 %gttmp, false
+  br i1 %ifcond144, label %then145, label %ifcont164
 
-then140:                                          ; preds = %afterwhile137
-  %buf141 = load i64, ptr %buf, align 4
-  %len142 = load i64, ptr %len, align 4
-  %syscall_ret143 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 1, i64 1, i64 %buf141, i64 %len142)
-  %sys_is_err144 = icmp slt i64 %syscall_ret143, 0
-  %sys_neg_errno145 = sub i64 0, %syscall_ret143
-  %sys_err_ptr146 = inttoptr i64 %sys_neg_errno145 to ptr
-  %sys_val147 = select i1 %sys_is_err144, i64 0, i64 %syscall_ret143
-  %sys_err148 = select i1 %sys_is_err144, ptr %sys_err_ptr146, ptr null
-  %sys_flag149 = select i1 %sys_is_err144, i8 1, i8 0
-  %sys_result.val150 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val147, 0
-  %sys_result.err151 = insertvalue %struct.NpkResult_int64 %sys_result.val150, ptr %sys_err148, 1
-  %sys_result.is_error152 = insertvalue %struct.NpkResult_int64 %sys_result.err151, i8 %sys_flag149, 2
-  %is_error153 = extractvalue %struct.NpkResult_int64 %sys_result.is_error152, 2
-  %is_error_bool154 = icmp ne i8 %is_error153, 0
-  br i1 %is_error_bool154, label %error_block155, label %success_block156
+then145:                                          ; preds = %afterwhile142
+  %buf146 = load i64, ptr %buf, align 4
+  %len147 = load i64, ptr %len, align 4
+  %syscall_ret148 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 1, i64 1, i64 %buf146, i64 %len147)
+  %sys_is_err149 = icmp slt i64 %syscall_ret148, 0
+  %sys_neg_errno150 = sub i64 0, %syscall_ret148
+  %sys_err_ptr151 = inttoptr i64 %sys_neg_errno150 to ptr
+  %sys_val152 = select i1 %sys_is_err149, i64 0, i64 %syscall_ret148
+  %sys_err153 = select i1 %sys_is_err149, ptr %sys_err_ptr151, ptr null
+  %sys_flag154 = select i1 %sys_is_err149, i8 1, i8 0
+  %sys_result.val155 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val152, 0
+  %sys_result.err156 = insertvalue %struct.NpkResult_int64 %sys_result.val155, ptr %sys_err153, 1
+  %sys_result.is_error157 = insertvalue %struct.NpkResult_int64 %sys_result.err156, i8 %sys_flag154, 2
+  %is_error158 = extractvalue %struct.NpkResult_int64 %sys_result.is_error157, 2
+  %is_error_bool159 = icmp ne i8 %is_error158, 0
+  br i1 %is_error_bool159, label %error_block160, label %success_block161
 
-error_block155:                                   ; preds = %then140
-  br label %merge_block157
+error_block160:                                   ; preds = %then145
+  br label %merge_block162
 
-success_block156:                                 ; preds = %then140
-  %unwrap_value = extractvalue %struct.NpkResult_int64 %sys_result.is_error152, 0
-  br label %merge_block157
+success_block161:                                 ; preds = %then145
+  %unwrap_value = extractvalue %struct.NpkResult_int64 %sys_result.is_error157, 0
+  br label %merge_block162
 
-merge_block157:                                   ; preds = %success_block156, %error_block155
-  %unwrap_result158 = phi i64 [ -1, %error_block155 ], [ %unwrap_value, %success_block156 ]
-  br label %ifcont159
+merge_block162:                                   ; preds = %success_block161, %error_block160
+  %unwrap_result163 = phi i64 [ -1, %error_block160 ], [ %unwrap_value, %success_block161 ]
+  br label %ifcont164
 
-ifcont159:                                        ; preds = %merge_block157, %afterwhile137
-  br label %ifcont160
+ifcont164:                                        ; preds = %merge_block162, %afterwhile142
+  br label %ifcont165
 
-ifcont160:                                        ; preds = %ifcont159, %ifcont104
-  %buf161 = load i64, ptr %buf, align 4
-  %cast.inttoptr162 = inttoptr i64 %buf161 to ptr
-  call void @npk_free(ptr %cast.inttoptr162)
-  br label %ifcont163
+ifcont165:                                        ; preds = %ifcont164, %ifcont109
+  %buf166 = load i64, ptr %buf, align 4
+  %cast.inttoptr167 = inttoptr i64 %buf166 to ptr
+  call void @npk_free(ptr %cast.inttoptr167)
+  br label %ifcont168
 
-ifcont163:                                        ; preds = %ifcont160, %null.ok
-  %j164 = load i64, ptr %j, align 4
-  %n_files165 = load i64, ptr %n_files, align 4
-  %subtmp = sub i64 %n_files165, 1
-  %lttmp166 = icmp slt i64 %j164, %subtmp
-  %ifcond167 = icmp ne i1 %lttmp166, false
-  br i1 %ifcond167, label %then168, label %ifcont170
+ifcont168:                                        ; preds = %ifcont165, %null.ok
+  %j169 = load i64, ptr %j, align 4
+  %n_files170 = load i64, ptr %n_files, align 4
+  %subtmp = sub i64 %n_files170, 1
+  %lttmp171 = icmp slt i64 %j169, %subtmp
+  %ifcond172 = icmp ne i1 %lttmp171, false
+  br i1 %ifcond172, label %then173, label %ifcont175
 
-then168:                                          ; preds = %ifcont163
-  %calltmp169 = call { i32, ptr, i8 } @md5sum.print_out(ptr @.str.2385)
-  br label %ifcont170
+then173:                                          ; preds = %ifcont168
+  %calltmp174 = call { i32, ptr, i8 } @md5sum.print_out(ptr @.str.2385)
+  br label %ifcont175
 
-ifcont170:                                        ; preds = %then168, %ifcont163
-  %j171 = load i64, ptr %j, align 4
-  %addtmp172 = add i64 %j171, 1
-  store i64 %addtmp172, ptr %j, align 4
+ifcont175:                                        ; preds = %then173, %ifcont168
+  %j176 = load i64, ptr %j, align 4
+  %addtmp177 = add i64 %j176, 1
+  store i64 %addtmp177, ptr %j, align 4
   call void @npk_gc_safepoint()
-  br label %whilecond44
+  br label %whilecond47
 
-afterwhile173:                                    ; preds = %whilecond44
-  %any_data174 = load i32, ptr %any_data, align 4
-  %eqtmp175 = icmp eq i32 %any_data174, 1
-  %ifcond176 = icmp ne i1 %eqtmp175, false
-  br i1 %ifcond176, label %then177, label %else179
+afterwhile178:                                    ; preds = %whilecond47
+  %any_data179 = load i32, ptr %any_data, align 4
+  %eqtmp180 = icmp eq i32 %any_data179, 1
+  %ifcond181 = icmp ne i1 %eqtmp180, false
+  br i1 %ifcond181, label %then182, label %else184
 
-then177:                                          ; preds = %afterwhile173
-  %calltmp178 = call { i32, ptr, i8 } @md5sum.print_out(ptr @.str.2387)
-  br label %ifcont180
+then182:                                          ; preds = %afterwhile178
+  %calltmp183 = call { i32, ptr, i8 } @md5sum.print_out(ptr @.str.2387)
+  br label %ifcont185
 
-else179:                                          ; preds = %afterwhile173
+else184:                                          ; preds = %afterwhile178
   store i32 0, ptr %running, align 4
-  br label %ifcont180
+  br label %ifcont185
 
-ifcont180:                                        ; preds = %else179, %then177
+ifcont185:                                        ; preds = %else184, %then182
   call void @npk_gc_safepoint()
-  br label %whilecond40
+  br label %whilecond43
 
-afterwhile181:                                    ; preds = %whilecond40
-  %fp_array182 = load i64, ptr %fp_array, align 4
-  %calltmp183 = call i32 @nitpick_libc_mem_free(i64 %fp_array182)
+afterwhile186:                                    ; preds = %whilecond43
+  %fp_array187 = load i64, ptr %fp_array, align 4
+  %cast.inttoptr188 = inttoptr i64 %fp_array187 to ptr
+  call void @npk_free(ptr %cast.inttoptr188)
   ret { i32, ptr, i8 } zeroinitializer
 }
 
@@ -48058,8 +48056,10 @@ ifcont:                                           ; preds = %merge_block
   %raw.value = extractvalue { i64, ptr, i8 } %calltmp, 0
   store i64 %raw.value, ptr %lst, align 4
   %buf = alloca i64, align 8
-  %calltmp2 = call i64 @malloc(i64 384)
-  store i64 %calltmp2, ptr %buf, align 4
+  %wild_ptr = call ptr @npk_alloc(i64 384)
+  %wild_ptr2 = call ptr @npk_alloc(i64 384)
+  %cast.ptrtoint = ptrtoint ptr %wild_ptr2 to i64
+  store i64 %cast.ptrtoint, ptr %buf, align 4
   %buf_ptr = call ptr @npk_alloc(i64 8)
   %buf3 = load i64, ptr %buf, align 4
   %buf4 = load i64, ptr %buf, align 4
@@ -48067,8 +48067,8 @@ ifcont:                                           ; preds = %merge_block
   store ptr %cast.inttoptr, ptr %buf_ptr, align 8
   br label %whilecond
 
-whilecond:                                        ; preds = %ifcont157, %ifcont
-  br i1 true, label %whilebody, label %afterwhile158
+whilecond:                                        ; preds = %ifcont161, %ifcont
+  br i1 true, label %whilebody, label %afterwhile162
 
 whilebody:                                        ; preds = %whilecond
   %bytes = alloca i64, align 8
@@ -48104,7 +48104,7 @@ merge_block21:                                    ; preds = %success_block20, %e
   br i1 %ifcond26, label %then27, label %ifcont28
 
 then27:                                           ; preds = %merge_block21
-  br label %afterwhile158
+  br label %afterwhile162
 
 afterbreak:                                       ; No predecessors!
   br label %ifcont28
@@ -48120,7 +48120,6 @@ ifcont28:                                         ; preds = %afterbreak, %merge_
   br i1 %null.deref, label %null.fail, label %null.ok
 
 null.fail:                                        ; preds = %ifcont28
-  %0 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -48139,7 +48138,6 @@ null.ok:                                          ; preds = %ifcont28
   br i1 %null.deref38, label %null.fail39, label %null.ok40
 
 null.fail39:                                      ; preds = %null.ok
-  %1 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -48150,216 +48148,220 @@ null.ok40:                                        ; preds = %null.ok
   %type_val43 = load i64, ptr %type_val, align 4
   %eqtmp = icmp eq i64 %type_val43, 7
   %ifcond44 = icmp ne i1 %eqtmp, false
-  br i1 %ifcond44, label %then45, label %ifcont157
+  br i1 %ifcond44, label %then45, label %ifcont161
 
 then45:                                           ; preds = %null.ok40
   %user_str = alloca i64, align 8
-  %calltmp46 = call i64 @malloc(i64 33)
-  store i64 %calltmp46, ptr %user_str, align 4
+  %wild_ptr46 = call ptr @npk_alloc(i64 33)
+  %wild_ptr47 = call ptr @npk_alloc(i64 33)
+  %cast.ptrtoint48 = ptrtoint ptr %wild_ptr47 to i64
+  store i64 %cast.ptrtoint48, ptr %user_str, align 4
   %i = alloca i64, align 8
   store i64 0, ptr %i, align 4
-  br label %whilecond47
+  br label %whilecond49
 
-whilecond47:                                      ; preds = %ifcont71, %then45
-  %i48 = load i64, ptr %i, align 4
-  %lttmp49 = icmp slt i64 %i48, 32
-  %whilecond50 = icmp ne i1 %lttmp49, false
-  br i1 %whilecond50, label %whilebody51, label %afterwhile
+whilecond49:                                      ; preds = %ifcont73, %then45
+  %i50 = load i64, ptr %i, align 4
+  %lttmp51 = icmp slt i64 %i50, 32
+  %whilecond52 = icmp ne i1 %lttmp51, false
+  br i1 %whilecond52, label %whilebody53, label %afterwhile
 
-whilebody51:                                      ; preds = %whilecond47
+whilebody53:                                      ; preds = %whilecond49
   %c = alloca i64, align 8
-  %buf52 = load i64, ptr %buf, align 4
-  %i53 = load i64, ptr %i, align 4
-  %addtmp54 = add i64 44, %i53
-  %addtmp55 = add i64 %buf52, %addtmp54
-  %buf56 = load i64, ptr %buf, align 4
-  %i57 = load i64, ptr %i, align 4
-  %addtmp58 = add i64 44, %i57
-  %addtmp59 = add i64 %buf56, %addtmp58
-  %cast.inttoptr60 = inttoptr i64 %addtmp59 to ptr
-  %null.deref61 = icmp eq ptr %cast.inttoptr60, null
-  br i1 %null.deref61, label %null.fail62, label %null.ok63
+  %buf54 = load i64, ptr %buf, align 4
+  %i55 = load i64, ptr %i, align 4
+  %addtmp56 = add i64 44, %i55
+  %addtmp57 = add i64 %buf54, %addtmp56
+  %buf58 = load i64, ptr %buf, align 4
+  %i59 = load i64, ptr %i, align 4
+  %addtmp60 = add i64 44, %i59
+  %addtmp61 = add i64 %buf58, %addtmp60
+  %cast.inttoptr62 = inttoptr i64 %addtmp61 to ptr
+  %null.deref63 = icmp eq ptr %cast.inttoptr62, null
+  br i1 %null.deref63, label %null.fail64, label %null.ok65
 
-null.fail62:                                      ; preds = %whilebody51
-  %2 = call i32 @failsafe(i32 46)
+null.fail64:                                      ; preds = %whilebody53
   call void @exit(i32 46)
   unreachable
 
-null.ok63:                                        ; preds = %whilebody51
-  %deref64 = load i32, ptr %cast.inttoptr60, align 4
-  %cast.sext65 = sext i32 %deref64 to i64
-  store i64 %cast.sext65, ptr %c, align 4
-  %c66 = load i64, ptr %c, align 4
-  %eqtmp67 = icmp eq i64 %c66, 0
-  %ifcond68 = icmp ne i1 %eqtmp67, false
-  br i1 %ifcond68, label %then69, label %ifcont71
+null.ok65:                                        ; preds = %whilebody53
+  %deref66 = load i32, ptr %cast.inttoptr62, align 4
+  %cast.sext67 = sext i32 %deref66 to i64
+  store i64 %cast.sext67, ptr %c, align 4
+  %c68 = load i64, ptr %c, align 4
+  %eqtmp69 = icmp eq i64 %c68, 0
+  %ifcond70 = icmp ne i1 %eqtmp69, false
+  br i1 %ifcond70, label %then71, label %ifcont73
 
-then69:                                           ; preds = %null.ok63
+then71:                                           ; preds = %null.ok65
   br label %afterwhile
 
-afterbreak70:                                     ; No predecessors!
-  br label %ifcont71
+afterbreak72:                                     ; No predecessors!
+  br label %ifcont73
 
-ifcont71:                                         ; preds = %afterbreak70, %null.ok63
-  %user_str72 = load i64, ptr %user_str, align 4
-  %i73 = load i64, ptr %i, align 4
-  %addtmp74 = add i64 %user_str72, %i73
-  %user_str75 = load i64, ptr %user_str, align 4
-  %i76 = load i64, ptr %i, align 4
-  %addtmp77 = add i64 %user_str75, %i76
-  %cast.inttoptr78 = inttoptr i64 %addtmp77 to ptr
-  %c79 = load i64, ptr %c, align 4
-  %cast.trunc80 = trunc i64 %c79 to i8
-  store i8 %cast.trunc80, ptr %cast.inttoptr78, align 1
-  %i81 = load i64, ptr %i, align 4
-  %addtmp82 = add i64 %i81, 1
-  store i64 %addtmp82, ptr %i, align 4
+ifcont73:                                         ; preds = %afterbreak72, %null.ok65
+  %user_str74 = load i64, ptr %user_str, align 4
+  %i75 = load i64, ptr %i, align 4
+  %addtmp76 = add i64 %user_str74, %i75
+  %user_str77 = load i64, ptr %user_str, align 4
+  %i78 = load i64, ptr %i, align 4
+  %addtmp79 = add i64 %user_str77, %i78
+  %cast.inttoptr80 = inttoptr i64 %addtmp79 to ptr
+  %c81 = load i64, ptr %c, align 4
+  %cast.trunc82 = trunc i64 %c81 to i8
+  store i8 %cast.trunc82, ptr %cast.inttoptr80, align 1
+  %i83 = load i64, ptr %i, align 4
+  %addtmp84 = add i64 %i83, 1
+  store i64 %addtmp84, ptr %i, align 4
   call void @npk_gc_safepoint()
-  br label %whilecond47
+  br label %whilecond49
 
-afterwhile:                                       ; preds = %then69, %whilecond47
-  %user_str83 = load i64, ptr %user_str, align 4
-  %i84 = load i64, ptr %i, align 4
-  %addtmp85 = add i64 %user_str83, %i84
-  %user_str86 = load i64, ptr %user_str, align 4
-  %i87 = load i64, ptr %i, align 4
-  %addtmp88 = add i64 %user_str86, %i87
-  %cast.inttoptr89 = inttoptr i64 %addtmp88 to ptr
-  store i8 0, ptr %cast.inttoptr89, align 1
+afterwhile:                                       ; preds = %then71, %whilecond49
+  %user_str85 = load i64, ptr %user_str, align 4
+  %i86 = load i64, ptr %i, align 4
+  %addtmp87 = add i64 %user_str85, %i86
+  %user_str88 = load i64, ptr %user_str, align 4
+  %i89 = load i64, ptr %i, align 4
+  %addtmp90 = add i64 %user_str88, %i89
+  %cast.inttoptr91 = inttoptr i64 %addtmp90 to ptr
+  store i8 0, ptr %cast.inttoptr91, align 1
   %line_str = alloca i64, align 8
-  %calltmp90 = call i64 @malloc(i64 33)
-  store i64 %calltmp90, ptr %line_str, align 4
+  %wild_ptr92 = call ptr @npk_alloc(i64 33)
+  %wild_ptr93 = call ptr @npk_alloc(i64 33)
+  %cast.ptrtoint94 = ptrtoint ptr %wild_ptr93 to i64
+  store i64 %cast.ptrtoint94, ptr %line_str, align 4
   %j = alloca i64, align 8
   store i64 0, ptr %j, align 4
-  br label %whilecond91
+  br label %whilecond95
 
-whilecond91:                                      ; preds = %ifcont116, %afterwhile
-  %j92 = load i64, ptr %j, align 4
-  %lttmp93 = icmp slt i64 %j92, 32
-  %whilecond94 = icmp ne i1 %lttmp93, false
-  br i1 %whilecond94, label %whilebody95, label %afterwhile128
+whilecond95:                                      ; preds = %ifcont120, %afterwhile
+  %j96 = load i64, ptr %j, align 4
+  %lttmp97 = icmp slt i64 %j96, 32
+  %whilecond98 = icmp ne i1 %lttmp97, false
+  br i1 %whilecond98, label %whilebody99, label %afterwhile132
 
-whilebody95:                                      ; preds = %whilecond91
-  %c96 = alloca i64, align 8
-  %buf97 = load i64, ptr %buf, align 4
-  %j98 = load i64, ptr %j, align 4
-  %addtmp99 = add i64 8, %j98
-  %addtmp100 = add i64 %buf97, %addtmp99
+whilebody99:                                      ; preds = %whilecond95
+  %c100 = alloca i64, align 8
   %buf101 = load i64, ptr %buf, align 4
   %j102 = load i64, ptr %j, align 4
   %addtmp103 = add i64 8, %j102
   %addtmp104 = add i64 %buf101, %addtmp103
-  %cast.inttoptr105 = inttoptr i64 %addtmp104 to ptr
-  %null.deref106 = icmp eq ptr %cast.inttoptr105, null
-  br i1 %null.deref106, label %null.fail107, label %null.ok108
+  %buf105 = load i64, ptr %buf, align 4
+  %j106 = load i64, ptr %j, align 4
+  %addtmp107 = add i64 8, %j106
+  %addtmp108 = add i64 %buf105, %addtmp107
+  %cast.inttoptr109 = inttoptr i64 %addtmp108 to ptr
+  %null.deref110 = icmp eq ptr %cast.inttoptr109, null
+  br i1 %null.deref110, label %null.fail111, label %null.ok112
 
-null.fail107:                                     ; preds = %whilebody95
-  %3 = call i32 @failsafe(i32 46)
+null.fail111:                                     ; preds = %whilebody99
   call void @exit(i32 46)
   unreachable
 
-null.ok108:                                       ; preds = %whilebody95
-  %deref109 = load i32, ptr %cast.inttoptr105, align 4
-  %cast.sext110 = sext i32 %deref109 to i64
-  store i64 %cast.sext110, ptr %c96, align 4
-  %c111 = load i64, ptr %c96, align 4
-  %eqtmp112 = icmp eq i64 %c111, 0
-  %ifcond113 = icmp ne i1 %eqtmp112, false
-  br i1 %ifcond113, label %then114, label %ifcont116
+null.ok112:                                       ; preds = %whilebody99
+  %deref113 = load i32, ptr %cast.inttoptr109, align 4
+  %cast.sext114 = sext i32 %deref113 to i64
+  store i64 %cast.sext114, ptr %c100, align 4
+  %c115 = load i64, ptr %c100, align 4
+  %eqtmp116 = icmp eq i64 %c115, 0
+  %ifcond117 = icmp ne i1 %eqtmp116, false
+  br i1 %ifcond117, label %then118, label %ifcont120
 
-then114:                                          ; preds = %null.ok108
-  br label %afterwhile128
+then118:                                          ; preds = %null.ok112
+  br label %afterwhile132
 
-afterbreak115:                                    ; No predecessors!
-  br label %ifcont116
+afterbreak119:                                    ; No predecessors!
+  br label %ifcont120
 
-ifcont116:                                        ; preds = %afterbreak115, %null.ok108
-  %line_str117 = load i64, ptr %line_str, align 4
-  %j118 = load i64, ptr %j, align 4
-  %addtmp119 = add i64 %line_str117, %j118
-  %line_str120 = load i64, ptr %line_str, align 4
-  %j121 = load i64, ptr %j, align 4
-  %addtmp122 = add i64 %line_str120, %j121
-  %cast.inttoptr123 = inttoptr i64 %addtmp122 to ptr
-  %c124 = load i64, ptr %c96, align 4
-  %cast.trunc125 = trunc i64 %c124 to i8
-  store i8 %cast.trunc125, ptr %cast.inttoptr123, align 1
-  %j126 = load i64, ptr %j, align 4
-  %addtmp127 = add i64 %j126, 1
-  store i64 %addtmp127, ptr %j, align 4
-  call void @npk_gc_safepoint()
-  br label %whilecond91
-
-afterwhile128:                                    ; preds = %then114, %whilecond91
-  %line_str129 = load i64, ptr %line_str, align 4
+ifcont120:                                        ; preds = %afterbreak119, %null.ok112
+  %line_str121 = load i64, ptr %line_str, align 4
+  %j122 = load i64, ptr %j, align 4
+  %addtmp123 = add i64 %line_str121, %j122
+  %line_str124 = load i64, ptr %line_str, align 4
+  %j125 = load i64, ptr %j, align 4
+  %addtmp126 = add i64 %line_str124, %j125
+  %cast.inttoptr127 = inttoptr i64 %addtmp126 to ptr
+  %c128 = load i64, ptr %c100, align 4
+  %cast.trunc129 = trunc i64 %c128 to i8
+  store i8 %cast.trunc129, ptr %cast.inttoptr127, align 1
   %j130 = load i64, ptr %j, align 4
-  %addtmp131 = add i64 %line_str129, %j130
-  %line_str132 = load i64, ptr %line_str, align 4
-  %j133 = load i64, ptr %j, align 4
-  %addtmp134 = add i64 %line_str132, %j133
-  %cast.inttoptr135 = inttoptr i64 %addtmp134 to ptr
-  store i8 0, ptr %cast.inttoptr135, align 1
-  %lst136 = load i64, ptr %lst, align 4
-  %user_str137 = load i64, ptr %user_str, align 4
-  %calltmp138 = call { i64, ptr, i8 } @alist.alist_push(i64 %lst136, i64 %user_str137)
-  %raw.value139 = extractvalue { i64, ptr, i8 } %calltmp138, 0
+  %addtmp131 = add i64 %j130, 1
+  store i64 %addtmp131, ptr %j, align 4
+  call void @npk_gc_safepoint()
+  br label %whilecond95
+
+afterwhile132:                                    ; preds = %then118, %whilecond95
+  %line_str133 = load i64, ptr %line_str, align 4
+  %j134 = load i64, ptr %j, align 4
+  %addtmp135 = add i64 %line_str133, %j134
+  %line_str136 = load i64, ptr %line_str, align 4
+  %j137 = load i64, ptr %j, align 4
+  %addtmp138 = add i64 %line_str136, %j137
+  %cast.inttoptr139 = inttoptr i64 %addtmp138 to ptr
+  store i8 0, ptr %cast.inttoptr139, align 1
   %lst140 = load i64, ptr %lst, align 4
-  %line_str141 = load i64, ptr %line_str, align 4
-  %calltmp142 = call { i64, ptr, i8 } @alist.alist_push(i64 %lst140, i64 %line_str141)
+  %user_str141 = load i64, ptr %user_str, align 4
+  %calltmp142 = call { i64, ptr, i8 } @alist.alist_push(i64 %lst140, i64 %user_str141)
   %raw.value143 = extractvalue { i64, ptr, i8 } %calltmp142, 0
-  %line_str144 = load i64, ptr %line_str, align 4
-  %netmp = icmp ne i64 %line_str144, 0
-  %ifcond145 = icmp ne i1 %netmp, false
-  br i1 %ifcond145, label %then146, label %ifcont149
+  %lst144 = load i64, ptr %lst, align 4
+  %line_str145 = load i64, ptr %line_str, align 4
+  %calltmp146 = call { i64, ptr, i8 } @alist.alist_push(i64 %lst144, i64 %line_str145)
+  %raw.value147 = extractvalue { i64, ptr, i8 } %calltmp146, 0
+  %line_str148 = load i64, ptr %line_str, align 4
+  %netmp = icmp ne i64 %line_str148, 0
+  %ifcond149 = icmp ne i1 %netmp, false
+  br i1 %ifcond149, label %then150, label %ifcont153
 
-then146:                                          ; preds = %afterwhile128
-  %line_str147 = load i64, ptr %line_str, align 4
-  %calltmp148 = call i32 @nitpick_libc_mem_free(i64 %line_str147)
-  br label %ifcont149
+then150:                                          ; preds = %afterwhile132
+  %line_str151 = load i64, ptr %line_str, align 4
+  %cast.inttoptr152 = inttoptr i64 %line_str151 to ptr
+  call void @npk_free(ptr %cast.inttoptr152)
+  br label %ifcont153
 
-ifcont149:                                        ; preds = %then146, %afterwhile128
-  %user_str150 = load i64, ptr %user_str, align 4
-  %netmp151 = icmp ne i64 %user_str150, 0
-  %ifcond152 = icmp ne i1 %netmp151, false
-  br i1 %ifcond152, label %then153, label %ifcont156
-
-then153:                                          ; preds = %ifcont149
+ifcont153:                                        ; preds = %then150, %afterwhile132
   %user_str154 = load i64, ptr %user_str, align 4
-  %calltmp155 = call i32 @nitpick_libc_mem_free(i64 %user_str154)
-  br label %ifcont156
+  %netmp155 = icmp ne i64 %user_str154, 0
+  %ifcond156 = icmp ne i1 %netmp155, false
+  br i1 %ifcond156, label %then157, label %ifcont160
 
-ifcont156:                                        ; preds = %then153, %ifcont149
-  br label %ifcont157
+then157:                                          ; preds = %ifcont153
+  %user_str158 = load i64, ptr %user_str, align 4
+  %cast.inttoptr159 = inttoptr i64 %user_str158 to ptr
+  call void @npk_free(ptr %cast.inttoptr159)
+  br label %ifcont160
 
-ifcont157:                                        ; preds = %ifcont156, %null.ok40
+ifcont160:                                        ; preds = %then157, %ifcont153
+  br label %ifcont161
+
+ifcont161:                                        ; preds = %ifcont160, %null.ok40
   call void @npk_gc_safepoint()
   br label %whilecond
 
-afterwhile158:                                    ; preds = %then27, %whilecond
-  %buf_ptr159 = load ptr, ptr %buf_ptr, align 8
-  call void @npk_free(ptr %buf_ptr159)
-  %fd160 = load i64, ptr %fd, align 4
-  %getmp = icmp sge i64 %fd160, 0
-  %ifcond161 = icmp ne i1 %getmp, false
-  br i1 %ifcond161, label %then162, label %ifcont174
+afterwhile162:                                    ; preds = %then27, %whilecond
+  %buf_ptr163 = load ptr, ptr %buf_ptr, align 8
+  call void @npk_free(ptr %buf_ptr163)
+  %fd164 = load i64, ptr %fd, align 4
+  %getmp = icmp sge i64 %fd164, 0
+  %ifcond165 = icmp ne i1 %getmp, false
+  br i1 %ifcond165, label %then166, label %ifcont178
 
-then162:                                          ; preds = %afterwhile158
-  %fd163 = load i64, ptr %fd, align 4
-  %syscall_ret164 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %fd163)
-  %sys_is_err165 = icmp slt i64 %syscall_ret164, 0
-  %sys_neg_errno166 = sub i64 0, %syscall_ret164
-  %sys_err_ptr167 = inttoptr i64 %sys_neg_errno166 to ptr
-  %sys_val168 = select i1 %sys_is_err165, i64 0, i64 %syscall_ret164
-  %sys_err169 = select i1 %sys_is_err165, ptr %sys_err_ptr167, ptr null
-  %sys_flag170 = select i1 %sys_is_err165, i8 1, i8 0
-  %sys_result.val171 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val168, 0
-  %sys_result.err172 = insertvalue %struct.NpkResult_int64 %sys_result.val171, ptr %sys_err169, 1
-  %sys_result.is_error173 = insertvalue %struct.NpkResult_int64 %sys_result.err172, i8 %sys_flag170, 2
-  br label %ifcont174
+then166:                                          ; preds = %afterwhile162
+  %fd167 = load i64, ptr %fd, align 4
+  %syscall_ret168 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %fd167)
+  %sys_is_err169 = icmp slt i64 %syscall_ret168, 0
+  %sys_neg_errno170 = sub i64 0, %syscall_ret168
+  %sys_err_ptr171 = inttoptr i64 %sys_neg_errno170 to ptr
+  %sys_val172 = select i1 %sys_is_err169, i64 0, i64 %syscall_ret168
+  %sys_err173 = select i1 %sys_is_err169, ptr %sys_err_ptr171, ptr null
+  %sys_flag174 = select i1 %sys_is_err169, i8 1, i8 0
+  %sys_result.val175 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val172, 0
+  %sys_result.err176 = insertvalue %struct.NpkResult_int64 %sys_result.val175, ptr %sys_err173, 1
+  %sys_result.is_error177 = insertvalue %struct.NpkResult_int64 %sys_result.err176, i8 %sys_flag174, 2
+  br label %ifcont178
 
-ifcont174:                                        ; preds = %then162, %afterwhile158
-  %lst175 = load i64, ptr %lst, align 4
-  %result.val = insertvalue { i64, ptr, i8 } undef, i64 %lst175, 0
+ifcont178:                                        ; preds = %then166, %afterwhile162
+  %lst179 = load i64, ptr %lst, align 4
+  %result.val = insertvalue { i64, ptr, i8 } undef, i64 %lst179, 0
   %result.err = insertvalue { i64, ptr, i8 } %result.val, ptr null, 1
   %result.is_error = insertvalue { i64, ptr, i8 } %result.err, i8 0, 2
   ret { i64, ptr, i8 } %result.is_error
@@ -48580,7 +48582,6 @@ whilebody:                                        ; preds = %whilecond
   br i1 %null.deref, label %null.fail, label %null.ok
 
 null.fail:                                        ; preds = %whilebody
-  %0 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -48928,9 +48929,11 @@ ifcont264:                                        ; preds = %ifcont263, %whilebo
   %calltmp279 = call { i32, ptr, i8 } @nohup.print_str(ptr %fmt_date278)
   %calltmp280 = call { i32, ptr, i8 } @nohup.print_str(ptr @.str.2467)
   %u_ptr281 = load i64, ptr %u_ptr, align 4
-  %calltmp282 = call i32 @nitpick_libc_mem_free(i64 %u_ptr281)
+  %cast.inttoptr282 = inttoptr i64 %u_ptr281 to ptr
+  call void @npk_free(ptr %cast.inttoptr282)
   %l_ptr283 = load i64, ptr %l_ptr, align 4
-  %calltmp284 = call i32 @nitpick_libc_mem_free(i64 %l_ptr283)
+  %cast.inttoptr284 = inttoptr i64 %l_ptr283 to ptr
+  call void @npk_free(ptr %cast.inttoptr284)
   %idx285 = load i64, ptr %idx, align 4
   %addtmp286 = add i64 %idx285, 2
   store i64 %addtmp286, ptr %idx, align 4
@@ -49192,8 +49195,10 @@ ifcont39:                                         ; preds = %merge_block18
   %page_count40 = load i64, ptr %page_count, align 4
   %calltmp41 = call { i32, ptr, i8 } @pr.print_page_header(ptr %filename, i64 %page_count40)
   %out_buf = alloca i64, align 8
-  %calltmp42 = call i64 @malloc(i64 65536)
-  store i64 %calltmp42, ptr %out_buf, align 4
+  %wild_ptr = call ptr @npk_alloc(i64 65536)
+  %wild_ptr42 = call ptr @npk_alloc(i64 65536)
+  %cast.ptrtoint = ptrtoint ptr %wild_ptr42 to i64
+  store i64 %cast.ptrtoint, ptr %out_buf, align 4
   %out_len = alloca i64, align 8
   store i64 0, ptr %out_len, align 4
   br label %whilecond
@@ -49266,7 +49271,6 @@ whilebody73:                                      ; preds = %whilecond68
   br i1 %null.deref, label %null.fail, label %null.ok
 
 null.fail:                                        ; preds = %whilebody73
-  %0 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -49446,7 +49450,8 @@ then180:                                          ; preds = %afterwhile176
 ifcont193:                                        ; preds = %then180, %afterwhile176
   %calltmp194 = call { i32, ptr, i8 } @md5sum.print_out(ptr @.str.2491)
   %out_buf195 = load i64, ptr %out_buf, align 4
-  %calltmp196 = call i32 @nitpick_libc_mem_free(i64 %out_buf195)
+  %cast.inttoptr196 = inttoptr i64 %out_buf195 to ptr
+  call void @npk_free(ptr %cast.inttoptr196)
   %buf197 = load i64, ptr %buf, align 4
   %syscall_ret198 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 11, i64 %buf197, i64 65536)
   %sys_is_err199 = icmp slt i64 %syscall_ret198, 0
@@ -50728,6 +50733,8 @@ ifcont:                                           ; preds = %merge_block
   ret { i32, ptr, i8 } zeroinitializer
 }
 
+declare void @free(ptr)
+
 define linkonce_odr i32 @__pwd_init() {
 entry:
   ret i32 0
@@ -51104,13 +51111,12 @@ merge_block:                                      ; preds = %success_block, %err
   %unwrap_result = phi i64 [ -1, %error_block ], [ %value, %success_block ]
   store i64 %unwrap_result, ptr %buf, align 4
   %res = alloca i64, align 8
-  %SYS_STAT = load i64, ptr @SYS_STAT, align 4
   %path14 = load ptr, ptr %path, align 8
   %sys_str_struct = load %struct.NpkString, ptr %path14, align 8
   %sys_str_data = extractvalue %struct.NpkString %sys_str_struct, 0
   %sys_strvar_int = ptrtoint ptr %sys_str_data to i64
   %buf15 = load i64, ptr %buf, align 4
-  %syscall_ret16 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 %SYS_STAT, i64 %sys_strvar_int, i64 %buf15)
+  %syscall_ret16 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 4, i64 %sys_strvar_int, i64 %buf15)
   %sys_is_err17 = icmp slt i64 %syscall_ret16, 0
   %sys_neg_errno18 = sub i64 0, %syscall_ret16
   %sys_err_ptr19 = inttoptr i64 %sys_neg_errno18 to ptr
@@ -51564,7 +51570,6 @@ whilecond:                                        ; preds = %whilebody, %entry
   br i1 %null.deref, label %null.fail, label %null.ok
 
 null.fail:                                        ; preds = %whilecond
-  %0 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -51586,49 +51591,53 @@ afterwhile:                                       ; preds = %null.ok
   %copy = alloca i64, align 8
   %len9 = load i64, ptr %len, align 4
   %addtmp10 = add i64 %len9, 1
-  %calltmp = call i64 @malloc(i64 %addtmp10)
-  store i64 %calltmp, ptr %copy, align 4
+  %wild_ptr = call ptr @npk_alloc(i64 %addtmp10)
+  %len11 = load i64, ptr %len, align 4
+  %addtmp12 = add i64 %len11, 1
+  %wild_ptr13 = call ptr @npk_alloc(i64 %addtmp12)
+  %cast.ptrtoint = ptrtoint ptr %wild_ptr13 to i64
+  store i64 %cast.ptrtoint, ptr %copy, align 4
   %i = alloca i64, align 8
   store i64 0, ptr %i, align 4
-  br label %whilecond11
+  br label %whilecond14
 
-whilecond11:                                      ; preds = %whilebody15, %afterwhile
-  %i12 = load i64, ptr %i, align 4
-  %len13 = load i64, ptr %len, align 4
-  %lttmp = icmp slt i64 %i12, %len13
-  %whilecond14 = icmp ne i1 %lttmp, false
-  br i1 %whilecond14, label %whilebody15, label %afterwhile28
+whilecond14:                                      ; preds = %whilebody18, %afterwhile
+  %i15 = load i64, ptr %i, align 4
+  %len16 = load i64, ptr %len, align 4
+  %lttmp = icmp slt i64 %i15, %len16
+  %whilecond17 = icmp ne i1 %lttmp, false
+  br i1 %whilecond17, label %whilebody18, label %afterwhile30
 
-whilebody15:                                      ; preds = %whilecond11
-  %copy16 = load i64, ptr %copy, align 4
-  %i17 = load i64, ptr %i, align 4
-  %addtmp18 = add i64 %copy16, %i17
+whilebody18:                                      ; preds = %whilecond14
   %copy19 = load i64, ptr %copy, align 4
   %i20 = load i64, ptr %i, align 4
   %addtmp21 = add i64 %copy19, %i20
-  %cast.inttoptr22 = inttoptr i64 %addtmp21 to ptr
-  %s23 = load i64, ptr %s.addr, align 4
-  %i24 = load i64, ptr %i, align 4
-  %calltmp25 = call i64 @npk_mem_read_byte(i64 %s23, i64 %i24)
-  %cast.trunc = trunc i64 %calltmp25 to i8
-  store i8 %cast.trunc, ptr %cast.inttoptr22, align 1
-  %i26 = load i64, ptr %i, align 4
-  %addtmp27 = add i64 %i26, 1
-  store i64 %addtmp27, ptr %i, align 4
+  %copy22 = load i64, ptr %copy, align 4
+  %i23 = load i64, ptr %i, align 4
+  %addtmp24 = add i64 %copy22, %i23
+  %cast.inttoptr25 = inttoptr i64 %addtmp24 to ptr
+  %s26 = load i64, ptr %s.addr, align 4
+  %i27 = load i64, ptr %i, align 4
+  %calltmp = call i64 @npk_mem_read_byte(i64 %s26, i64 %i27)
+  %cast.trunc = trunc i64 %calltmp to i8
+  store i8 %cast.trunc, ptr %cast.inttoptr25, align 1
+  %i28 = load i64, ptr %i, align 4
+  %addtmp29 = add i64 %i28, 1
+  store i64 %addtmp29, ptr %i, align 4
   call void @npk_gc_safepoint()
-  br label %whilecond11
+  br label %whilecond14
 
-afterwhile28:                                     ; preds = %whilecond11
-  %copy29 = load i64, ptr %copy, align 4
-  %len30 = load i64, ptr %len, align 4
-  %addtmp31 = add i64 %copy29, %len30
-  %copy32 = load i64, ptr %copy, align 4
-  %len33 = load i64, ptr %len, align 4
-  %addtmp34 = add i64 %copy32, %len33
-  %cast.inttoptr35 = inttoptr i64 %addtmp34 to ptr
-  store i8 0, ptr %cast.inttoptr35, align 1
-  %copy36 = load i64, ptr %copy, align 4
-  %result.val = insertvalue { i64, ptr, i8 } undef, i64 %copy36, 0
+afterwhile30:                                     ; preds = %whilecond14
+  %copy31 = load i64, ptr %copy, align 4
+  %len32 = load i64, ptr %len, align 4
+  %addtmp33 = add i64 %copy31, %len32
+  %copy34 = load i64, ptr %copy, align 4
+  %len35 = load i64, ptr %len, align 4
+  %addtmp36 = add i64 %copy34, %len35
+  %cast.inttoptr37 = inttoptr i64 %addtmp36 to ptr
+  store i8 0, ptr %cast.inttoptr37, align 1
+  %copy38 = load i64, ptr %copy, align 4
+  %result.val = insertvalue { i64, ptr, i8 } undef, i64 %copy38, 0
   %result.err = insertvalue { i64, ptr, i8 } %result.val, ptr null, 1
   %result.is_error = insertvalue { i64, ptr, i8 } %result.err, i8 0, 2
   ret { i64, ptr, i8 } %result.is_error
@@ -51656,7 +51665,6 @@ whilecond:                                        ; preds = %null.ok16, %entry
   br i1 %null.deref, label %null.fail, label %null.ok
 
 null.fail:                                        ; preds = %whilecond
-  %0 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -51680,7 +51688,6 @@ whilebody:                                        ; preds = %null.ok
   br i1 %null.deref14, label %null.fail15, label %null.ok16
 
 null.fail15:                                      ; preds = %whilebody
-  %1 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -51810,7 +51817,6 @@ ifcont36:                                         ; preds = %merge_block16
   br i1 %null.deref, label %null.fail, label %null.ok
 
 null.fail:                                        ; preds = %ifcont36
-  %0 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -51828,7 +51834,6 @@ null.ok:                                          ; preds = %ifcont36
   br i1 %null.deref45, label %null.fail46, label %null.ok47
 
 null.fail46:                                      ; preds = %null.ok
-  %1 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -51846,7 +51851,6 @@ null.ok47:                                        ; preds = %null.ok
   br i1 %null.deref55, label %null.fail56, label %null.ok57
 
 null.fail56:                                      ; preds = %null.ok47
-  %2 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -51864,7 +51868,6 @@ null.ok57:                                        ; preds = %null.ok47
   br i1 %null.deref65, label %null.fail66, label %null.ok67
 
 null.fail66:                                      ; preds = %null.ok57
-  %3 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -52092,7 +52095,6 @@ whilebody197:                                     ; preds = %whilecond192
   br i1 %null.deref206, label %null.fail207, label %null.ok208
 
 null.fail207:                                     ; preds = %whilebody197
-  %4 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -52110,7 +52112,6 @@ null.ok208:                                       ; preds = %whilebody197
   br i1 %null.deref216, label %null.fail217, label %null.ok218
 
 null.fail217:                                     ; preds = %null.ok208
-  %5 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -52138,7 +52139,6 @@ null.ok218:                                       ; preds = %null.ok208
   br i1 %null.deref232, label %null.fail233, label %null.ok234
 
 null.fail233:                                     ; preds = %null.ok218
-  %6 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -52156,7 +52156,6 @@ null.ok234:                                       ; preds = %null.ok218
   br i1 %null.deref242, label %null.fail243, label %null.ok244
 
 null.fail243:                                     ; preds = %null.ok234
-  %7 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -52174,7 +52173,6 @@ null.ok244:                                       ; preds = %null.ok234
   br i1 %null.deref252, label %null.fail253, label %null.ok254
 
 null.fail253:                                     ; preds = %null.ok244
-  %8 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -52313,7 +52311,8 @@ then328:                                          ; preds = %whilebody311
 
 ifcont329:                                        ; preds = %then328, %whilebody311
   %child_ptr330 = load i64, ptr %child_ptr, align 4
-  %calltmp331 = call i32 @nitpick_libc_mem_free(i64 %child_ptr330)
+  %cast.inttoptr331 = inttoptr i64 %child_ptr330 to ptr
+  call void @npk_free(ptr %cast.inttoptr331)
   call void @npk_gc_safepoint()
   br label %whilecond306
 
@@ -53936,13 +53935,12 @@ whilebody:                                        ; preds = %whilecond
   %raw.value62 = extractvalue { ptr, ptr, i8 } %calltmp61, 0
   store ptr %raw.value62, ptr %file, align 8
   %res = alloca i64, align 8
-  %SYS_STAT = load i64, ptr @SYS_STAT, align 4
   %file63 = load ptr, ptr %file, align 8
   %sys_str_struct64 = load %struct.NpkString, ptr %file63, align 8
   %sys_str_data65 = extractvalue %struct.NpkString %sys_str_struct64, 0
   %sys_strvar_int = ptrtoint ptr %sys_str_data65 to i64
   %stat_buf66 = load i64, ptr %stat_buf, align 4
-  %syscall_ret67 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 %SYS_STAT, i64 %sys_strvar_int, i64 %stat_buf66)
+  %syscall_ret67 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 4, i64 %sys_strvar_int, i64 %stat_buf66)
   %sys_is_err68 = icmp slt i64 %syscall_ret67, 0
   %sys_neg_errno69 = sub i64 0, %syscall_ret67
   %sys_err_ptr70 = inttoptr i64 %sys_neg_errno69 to ptr
@@ -53990,7 +53988,6 @@ else:                                             ; preds = %merge_block81
   br i1 %null.deref, label %null.fail, label %null.ok
 
 null.fail:                                        ; preds = %else
-  %0 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -54653,7 +54650,6 @@ whilecond:                                        ; preds = %null.ok16, %entry
   br i1 %null.deref, label %null.fail, label %null.ok
 
 null.fail:                                        ; preds = %whilecond
-  %0 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -54677,7 +54673,6 @@ whilebody:                                        ; preds = %null.ok
   br i1 %null.deref14, label %null.fail15, label %null.ok16
 
 null.fail15:                                      ; preds = %whilebody
-  %1 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -54725,7 +54720,6 @@ whilecond:                                        ; preds = %whilebody, %entry
   br i1 %null.deref, label %null.fail, label %null.ok
 
 null.fail:                                        ; preds = %whilecond
-  %0 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -54747,49 +54741,53 @@ afterwhile:                                       ; preds = %null.ok
   %copy = alloca i64, align 8
   %len9 = load i64, ptr %len, align 4
   %addtmp10 = add i64 %len9, 1
-  %calltmp = call i64 @malloc(i64 %addtmp10)
-  store i64 %calltmp, ptr %copy, align 4
+  %wild_ptr = call ptr @npk_alloc(i64 %addtmp10)
+  %len11 = load i64, ptr %len, align 4
+  %addtmp12 = add i64 %len11, 1
+  %wild_ptr13 = call ptr @npk_alloc(i64 %addtmp12)
+  %cast.ptrtoint = ptrtoint ptr %wild_ptr13 to i64
+  store i64 %cast.ptrtoint, ptr %copy, align 4
   %i = alloca i64, align 8
   store i64 0, ptr %i, align 4
-  br label %whilecond11
+  br label %whilecond14
 
-whilecond11:                                      ; preds = %whilebody15, %afterwhile
-  %i12 = load i64, ptr %i, align 4
-  %len13 = load i64, ptr %len, align 4
-  %lttmp = icmp slt i64 %i12, %len13
-  %whilecond14 = icmp ne i1 %lttmp, false
-  br i1 %whilecond14, label %whilebody15, label %afterwhile28
+whilecond14:                                      ; preds = %whilebody18, %afterwhile
+  %i15 = load i64, ptr %i, align 4
+  %len16 = load i64, ptr %len, align 4
+  %lttmp = icmp slt i64 %i15, %len16
+  %whilecond17 = icmp ne i1 %lttmp, false
+  br i1 %whilecond17, label %whilebody18, label %afterwhile30
 
-whilebody15:                                      ; preds = %whilecond11
-  %copy16 = load i64, ptr %copy, align 4
-  %i17 = load i64, ptr %i, align 4
-  %addtmp18 = add i64 %copy16, %i17
+whilebody18:                                      ; preds = %whilecond14
   %copy19 = load i64, ptr %copy, align 4
   %i20 = load i64, ptr %i, align 4
   %addtmp21 = add i64 %copy19, %i20
-  %cast.inttoptr22 = inttoptr i64 %addtmp21 to ptr
-  %s23 = load i64, ptr %s.addr, align 4
-  %i24 = load i64, ptr %i, align 4
-  %calltmp25 = call i64 @npk_mem_read_byte(i64 %s23, i64 %i24)
-  %cast.trunc = trunc i64 %calltmp25 to i8
-  store i8 %cast.trunc, ptr %cast.inttoptr22, align 1
-  %i26 = load i64, ptr %i, align 4
-  %addtmp27 = add i64 %i26, 1
-  store i64 %addtmp27, ptr %i, align 4
+  %copy22 = load i64, ptr %copy, align 4
+  %i23 = load i64, ptr %i, align 4
+  %addtmp24 = add i64 %copy22, %i23
+  %cast.inttoptr25 = inttoptr i64 %addtmp24 to ptr
+  %s26 = load i64, ptr %s.addr, align 4
+  %i27 = load i64, ptr %i, align 4
+  %calltmp = call i64 @npk_mem_read_byte(i64 %s26, i64 %i27)
+  %cast.trunc = trunc i64 %calltmp to i8
+  store i8 %cast.trunc, ptr %cast.inttoptr25, align 1
+  %i28 = load i64, ptr %i, align 4
+  %addtmp29 = add i64 %i28, 1
+  store i64 %addtmp29, ptr %i, align 4
   call void @npk_gc_safepoint()
-  br label %whilecond11
+  br label %whilecond14
 
-afterwhile28:                                     ; preds = %whilecond11
-  %copy29 = load i64, ptr %copy, align 4
-  %len30 = load i64, ptr %len, align 4
-  %addtmp31 = add i64 %copy29, %len30
-  %copy32 = load i64, ptr %copy, align 4
-  %len33 = load i64, ptr %len, align 4
-  %addtmp34 = add i64 %copy32, %len33
-  %cast.inttoptr35 = inttoptr i64 %addtmp34 to ptr
-  store i8 0, ptr %cast.inttoptr35, align 1
-  %copy36 = load i64, ptr %copy, align 4
-  %result.val = insertvalue { i64, ptr, i8 } undef, i64 %copy36, 0
+afterwhile30:                                     ; preds = %whilecond14
+  %copy31 = load i64, ptr %copy, align 4
+  %len32 = load i64, ptr %len, align 4
+  %addtmp33 = add i64 %copy31, %len32
+  %copy34 = load i64, ptr %copy, align 4
+  %len35 = load i64, ptr %len, align 4
+  %addtmp36 = add i64 %copy34, %len35
+  %cast.inttoptr37 = inttoptr i64 %addtmp36 to ptr
+  store i8 0, ptr %cast.inttoptr37, align 1
+  %copy38 = load i64, ptr %copy, align 4
+  %result.val = insertvalue { i64, ptr, i8 } undef, i64 %copy38, 0
   %result.err = insertvalue { i64, ptr, i8 } %result.val, ptr null, 1
   %result.is_error = insertvalue { i64, ptr, i8 } %result.err, i8 0, 2
   ret { i64, ptr, i8 } %result.is_error
@@ -54821,7 +54819,6 @@ whilebody:                                        ; preds = %whilecond
   br i1 %null.deref, label %null.fail, label %null.ok
 
 null.fail:                                        ; preds = %whilebody
-  %0 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -54841,7 +54838,6 @@ null.ok:                                          ; preds = %whilebody
   br i1 %null.deref13, label %null.fail14, label %null.ok15
 
 null.fail14:                                      ; preds = %null.ok
-  %1 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -55057,8 +55053,10 @@ whilebody63:                                      ; preds = %whilecond58
   %raw.value70 = extractvalue { i64, ptr, i8 } %calltmp69, 0
   store i64 %raw.value70, ptr %state, align 4
   %line_buf = alloca i64, align 8
-  %calltmp71 = call i64 @malloc(i64 65536)
-  store i64 %calltmp71, ptr %line_buf, align 4
+  %wild_ptr = call ptr @npk_alloc(i64 65536)
+  %wild_ptr71 = call ptr @npk_alloc(i64 65536)
+  %cast.ptrtoint = ptrtoint ptr %wild_ptr71 to i64
+  store i64 %cast.ptrtoint, ptr %line_buf, align 4
   %running = alloca i32, align 4
   store i32 1, ptr %running, align 4
   br label %whilecond72
@@ -55101,7 +55099,8 @@ ifcont92:                                         ; preds = %else85, %then84
 
 afterwhile93:                                     ; preds = %whilecond72
   %line_buf94 = load i64, ptr %line_buf, align 4
-  %calltmp95 = call i32 @nitpick_libc_mem_free(i64 %line_buf94)
+  %cast.inttoptr95 = inttoptr i64 %line_buf94 to ptr
+  call void @npk_free(ptr %cast.inttoptr95)
   %state96 = load i64, ptr %state, align 4
   %calltmp97 = call { i32, ptr, i8 } @io_utils.io_buf_free(i64 %state96)
   call void @npk_gc_safepoint()
@@ -55116,309 +55115,318 @@ afterwhile98:                                     ; preds = %whilecond58
   %size102 = load i64, ptr %size, align 4
   %gttmp103 = icmp sgt i64 %size102, 1
   %ifcond104 = icmp ne i1 %gttmp103, false
-  br i1 %ifcond104, label %then105, label %ifcont290
+  br i1 %ifcond104, label %then105, label %ifcont296
 
 then105:                                          ; preds = %afterwhile98
   %arr = alloca i64, align 8
   %size106 = load i64, ptr %size, align 4
   %multmp = mul i64 %size106, 8
-  %calltmp107 = call i64 @malloc(i64 %multmp)
-  store i64 %calltmp107, ptr %arr, align 4
+  %wild_ptr107 = call ptr @npk_alloc(i64 %multmp)
+  %size108 = load i64, ptr %size, align 4
+  %multmp109 = mul i64 %size108, 8
+  %wild_ptr110 = call ptr @npk_alloc(i64 %multmp109)
+  %cast.ptrtoint111 = ptrtoint ptr %wild_ptr110 to i64
+  store i64 %cast.ptrtoint111, ptr %arr, align 4
   %idx = alloca i64, align 8
   store i64 0, ptr %idx, align 4
-  br label %whilecond108
+  br label %whilecond112
 
-whilecond108:                                     ; preds = %whilebody114, %then105
-  %sl109 = load i64, ptr %sl, align 4
-  %calltmp110 = call { i64, ptr, i8 } @alist.alist_size(i64 %sl109)
-  %raw.value111 = extractvalue { i64, ptr, i8 } %calltmp110, 0
-  %gttmp112 = icmp sgt i64 %raw.value111, 0
-  %whilecond113 = icmp ne i1 %gttmp112, false
-  br i1 %whilecond113, label %whilebody114, label %afterwhile125
+whilecond112:                                     ; preds = %whilebody118, %then105
+  %sl113 = load i64, ptr %sl, align 4
+  %calltmp114 = call { i64, ptr, i8 } @alist.alist_size(i64 %sl113)
+  %raw.value115 = extractvalue { i64, ptr, i8 } %calltmp114, 0
+  %gttmp116 = icmp sgt i64 %raw.value115, 0
+  %whilecond117 = icmp ne i1 %gttmp116, false
+  br i1 %whilecond117, label %whilebody118, label %afterwhile129
 
-whilebody114:                                     ; preds = %whilecond108
+whilebody118:                                     ; preds = %whilecond112
   %ptr = alloca i64, align 8
-  %sl115 = load i64, ptr %sl, align 4
-  %calltmp116 = call { i64, ptr, i8 } @cp.alist_pop_front(i64 %sl115)
-  %raw.value117 = extractvalue { i64, ptr, i8 } %calltmp116, 0
-  store i64 %raw.value117, ptr %ptr, align 4
-  %arr118 = load i64, ptr %arr, align 4
-  %idx119 = load i64, ptr %idx, align 4
-  %multmp120 = mul i64 %idx119, 8
-  %ptr121 = load i64, ptr %ptr, align 4
-  %calltmp122 = call i32 @nitpick_libc_mem_write_i64(i64 %arr118, i64 %multmp120, i64 %ptr121)
+  %sl119 = load i64, ptr %sl, align 4
+  %calltmp120 = call { i64, ptr, i8 } @cp.alist_pop_front(i64 %sl119)
+  %raw.value121 = extractvalue { i64, ptr, i8 } %calltmp120, 0
+  store i64 %raw.value121, ptr %ptr, align 4
+  %arr122 = load i64, ptr %arr, align 4
   %idx123 = load i64, ptr %idx, align 4
-  %addtmp124 = add i64 %idx123, 1
-  store i64 %addtmp124, ptr %idx, align 4
+  %multmp124 = mul i64 %idx123, 8
+  %ptr125 = load i64, ptr %ptr, align 4
+  %calltmp126 = call i32 @nitpick_libc_mem_write_i64(i64 %arr122, i64 %multmp124, i64 %ptr125)
+  %idx127 = load i64, ptr %idx, align 4
+  %addtmp128 = add i64 %idx127, 1
+  store i64 %addtmp128, ptr %idx, align 4
   call void @npk_gc_safepoint()
-  br label %whilecond108
+  br label %whilecond112
 
-afterwhile125:                                    ; preds = %whilecond108
+afterwhile129:                                    ; preds = %whilecond112
   %stack = alloca i64, align 8
-  %calltmp126 = call i64 @malloc(i64 2048)
-  store i64 %calltmp126, ptr %stack, align 4
+  %wild_ptr130 = call ptr @npk_alloc(i64 2048)
+  %wild_ptr131 = call ptr @npk_alloc(i64 2048)
+  %cast.ptrtoint132 = ptrtoint ptr %wild_ptr131 to i64
+  store i64 %cast.ptrtoint132, ptr %stack, align 4
   %top = alloca i64, align 8
   store i64 -1, ptr %top, align 4
-  %top127 = load i64, ptr %top, align 4
-  %addtmp128 = add i64 %top127, 1
-  store i64 %addtmp128, ptr %top, align 4
-  %stack129 = load i64, ptr %stack, align 4
-  %top130 = load i64, ptr %top, align 4
-  %multmp131 = mul i64 %top130, 8
-  %calltmp132 = call i32 @nitpick_libc_mem_write_i64(i64 %stack129, i64 %multmp131, i64 0)
   %top133 = load i64, ptr %top, align 4
   %addtmp134 = add i64 %top133, 1
   store i64 %addtmp134, ptr %top, align 4
   %stack135 = load i64, ptr %stack, align 4
   %top136 = load i64, ptr %top, align 4
   %multmp137 = mul i64 %top136, 8
-  %size138 = load i64, ptr %size, align 4
-  %subtmp = sub i64 %size138, 1
-  %calltmp139 = call i32 @nitpick_libc_mem_write_i64(i64 %stack135, i64 %multmp137, i64 %subtmp)
-  br label %whilecond140
+  %calltmp138 = call i32 @nitpick_libc_mem_write_i64(i64 %stack135, i64 %multmp137, i64 0)
+  %top139 = load i64, ptr %top, align 4
+  %addtmp140 = add i64 %top139, 1
+  store i64 %addtmp140, ptr %top, align 4
+  %stack141 = load i64, ptr %stack, align 4
+  %top142 = load i64, ptr %top, align 4
+  %multmp143 = mul i64 %top142, 8
+  %size144 = load i64, ptr %size, align 4
+  %subtmp = sub i64 %size144, 1
+  %calltmp145 = call i32 @nitpick_libc_mem_write_i64(i64 %stack141, i64 %multmp143, i64 %subtmp)
+  br label %whilecond146
 
-whilecond140:                                     ; preds = %ifcont268, %afterwhile125
-  %top141 = load i64, ptr %top, align 4
-  %getmp142 = icmp sge i64 %top141, 0
-  %whilecond143 = icmp ne i1 %getmp142, false
-  br i1 %whilecond143, label %whilebody144, label %afterwhile269
+whilecond146:                                     ; preds = %ifcont274, %afterwhile129
+  %top147 = load i64, ptr %top, align 4
+  %getmp148 = icmp sge i64 %top147, 0
+  %whilecond149 = icmp ne i1 %getmp148, false
+  br i1 %whilecond149, label %whilebody150, label %afterwhile275
 
-whilebody144:                                     ; preds = %whilecond140
+whilebody150:                                     ; preds = %whilecond146
   %h = alloca i64, align 8
-  %stack145 = load i64, ptr %stack, align 4
-  %top146 = load i64, ptr %top, align 4
-  %multmp147 = mul i64 %top146, 8
-  %calltmp148 = call i64 @nitpick_libc_mem_read_i64(i64 %stack145, i64 %multmp147)
-  store i64 %calltmp148, ptr %h, align 4
-  %top149 = load i64, ptr %top, align 4
-  %subtmp150 = sub i64 %top149, 1
-  store i64 %subtmp150, ptr %top, align 4
-  %l = alloca i64, align 8
   %stack151 = load i64, ptr %stack, align 4
   %top152 = load i64, ptr %top, align 4
   %multmp153 = mul i64 %top152, 8
   %calltmp154 = call i64 @nitpick_libc_mem_read_i64(i64 %stack151, i64 %multmp153)
-  store i64 %calltmp154, ptr %l, align 4
+  store i64 %calltmp154, ptr %h, align 4
   %top155 = load i64, ptr %top, align 4
   %subtmp156 = sub i64 %top155, 1
   store i64 %subtmp156, ptr %top, align 4
+  %l = alloca i64, align 8
+  %stack157 = load i64, ptr %stack, align 4
+  %top158 = load i64, ptr %top, align 4
+  %multmp159 = mul i64 %top158, 8
+  %calltmp160 = call i64 @nitpick_libc_mem_read_i64(i64 %stack157, i64 %multmp159)
+  store i64 %calltmp160, ptr %l, align 4
+  %top161 = load i64, ptr %top, align 4
+  %subtmp162 = sub i64 %top161, 1
+  store i64 %subtmp162, ptr %top, align 4
   %pivot_val = alloca i64, align 8
-  %arr157 = load i64, ptr %arr, align 4
-  %h158 = load i64, ptr %h, align 4
-  %multmp159 = mul i64 %h158, 8
-  %calltmp160 = call i64 @nitpick_libc_mem_read_i64(i64 %arr157, i64 %multmp159)
-  store i64 %calltmp160, ptr %pivot_val, align 4
-  %l161 = load i64, ptr %l, align 4
-  %subtmp162 = sub i64 %l161, 1
-  store i64 %subtmp162, ptr %idx, align 4
+  %arr163 = load i64, ptr %arr, align 4
+  %h164 = load i64, ptr %h, align 4
+  %multmp165 = mul i64 %h164, 8
+  %calltmp166 = call i64 @nitpick_libc_mem_read_i64(i64 %arr163, i64 %multmp165)
+  store i64 %calltmp166, ptr %pivot_val, align 4
+  %l167 = load i64, ptr %l, align 4
+  %subtmp168 = sub i64 %l167, 1
+  store i64 %subtmp168, ptr %idx, align 4
   %j = alloca i64, align 8
-  %l163 = load i64, ptr %l, align 4
-  store i64 %l163, ptr %j, align 4
-  br label %whilecond164
+  %l169 = load i64, ptr %l, align 4
+  store i64 %l169, ptr %j, align 4
+  br label %whilecond170
 
-whilecond164:                                     ; preds = %ifcont201, %whilebody144
-  %j165 = load i64, ptr %j, align 4
-  %h166 = load i64, ptr %h, align 4
-  %subtmp167 = sub i64 %h166, 1
-  %letmp168 = icmp sle i64 %j165, %subtmp167
-  %whilecond169 = icmp ne i1 %letmp168, false
-  br i1 %whilecond169, label %whilebody170, label %afterwhile204
+whilecond170:                                     ; preds = %ifcont207, %whilebody150
+  %j171 = load i64, ptr %j, align 4
+  %h172 = load i64, ptr %h, align 4
+  %subtmp173 = sub i64 %h172, 1
+  %letmp174 = icmp sle i64 %j171, %subtmp173
+  %whilecond175 = icmp ne i1 %letmp174, false
+  br i1 %whilecond175, label %whilebody176, label %afterwhile210
 
-whilebody170:                                     ; preds = %whilecond164
+whilebody176:                                     ; preds = %whilecond170
   %p_j = alloca i64, align 8
-  %arr171 = load i64, ptr %arr, align 4
-  %j172 = load i64, ptr %j, align 4
-  %multmp173 = mul i64 %j172, 8
-  %calltmp174 = call i64 @nitpick_libc_mem_read_i64(i64 %arr171, i64 %multmp173)
-  store i64 %calltmp174, ptr %p_j, align 4
-  %p_j175 = load i64, ptr %p_j, align 4
-  %calltmp176 = call { ptr, ptr, i8 } @mem_utils.ptr_to_string(i64 %p_j175)
-  %raw.value177 = extractvalue { ptr, ptr, i8 } %calltmp176, 0
-  %pivot_val178 = load i64, ptr %pivot_val, align 4
-  %calltmp179 = call { ptr, ptr, i8 } @mem_utils.ptr_to_string(i64 %pivot_val178)
-  %raw.value180 = extractvalue { ptr, ptr, i8 } %calltmp179, 0
-  %calltmp181 = call i32 @strcmp(ptr %raw.value177, ptr %raw.value180)
-  %letmp182 = icmp sle i32 %calltmp181, 0
-  %ifcond183 = icmp ne i1 %letmp182, false
-  br i1 %ifcond183, label %then184, label %ifcont201
+  %arr177 = load i64, ptr %arr, align 4
+  %j178 = load i64, ptr %j, align 4
+  %multmp179 = mul i64 %j178, 8
+  %calltmp180 = call i64 @nitpick_libc_mem_read_i64(i64 %arr177, i64 %multmp179)
+  store i64 %calltmp180, ptr %p_j, align 4
+  %p_j181 = load i64, ptr %p_j, align 4
+  %calltmp182 = call { ptr, ptr, i8 } @mem_utils.ptr_to_string(i64 %p_j181)
+  %raw.value183 = extractvalue { ptr, ptr, i8 } %calltmp182, 0
+  %pivot_val184 = load i64, ptr %pivot_val, align 4
+  %calltmp185 = call { ptr, ptr, i8 } @mem_utils.ptr_to_string(i64 %pivot_val184)
+  %raw.value186 = extractvalue { ptr, ptr, i8 } %calltmp185, 0
+  %calltmp187 = call i32 @strcmp(ptr %raw.value183, ptr %raw.value186)
+  %letmp188 = icmp sle i32 %calltmp187, 0
+  %ifcond189 = icmp ne i1 %letmp188, false
+  br i1 %ifcond189, label %then190, label %ifcont207
 
-then184:                                          ; preds = %whilebody170
-  %idx185 = load i64, ptr %idx, align 4
-  %addtmp186 = add i64 %idx185, 1
-  store i64 %addtmp186, ptr %idx, align 4
+then190:                                          ; preds = %whilebody176
+  %idx191 = load i64, ptr %idx, align 4
+  %addtmp192 = add i64 %idx191, 1
+  store i64 %addtmp192, ptr %idx, align 4
   %temp = alloca i64, align 8
-  %arr187 = load i64, ptr %arr, align 4
-  %idx188 = load i64, ptr %idx, align 4
-  %multmp189 = mul i64 %idx188, 8
-  %calltmp190 = call i64 @nitpick_libc_mem_read_i64(i64 %arr187, i64 %multmp189)
-  store i64 %calltmp190, ptr %temp, align 4
-  %arr191 = load i64, ptr %arr, align 4
-  %idx192 = load i64, ptr %idx, align 4
-  %multmp193 = mul i64 %idx192, 8
-  %p_j194 = load i64, ptr %p_j, align 4
-  %calltmp195 = call i32 @nitpick_libc_mem_write_i64(i64 %arr191, i64 %multmp193, i64 %p_j194)
-  %arr196 = load i64, ptr %arr, align 4
-  %j197 = load i64, ptr %j, align 4
-  %multmp198 = mul i64 %j197, 8
-  %temp199 = load i64, ptr %temp, align 4
-  %calltmp200 = call i32 @nitpick_libc_mem_write_i64(i64 %arr196, i64 %multmp198, i64 %temp199)
-  br label %ifcont201
+  %arr193 = load i64, ptr %arr, align 4
+  %idx194 = load i64, ptr %idx, align 4
+  %multmp195 = mul i64 %idx194, 8
+  %calltmp196 = call i64 @nitpick_libc_mem_read_i64(i64 %arr193, i64 %multmp195)
+  store i64 %calltmp196, ptr %temp, align 4
+  %arr197 = load i64, ptr %arr, align 4
+  %idx198 = load i64, ptr %idx, align 4
+  %multmp199 = mul i64 %idx198, 8
+  %p_j200 = load i64, ptr %p_j, align 4
+  %calltmp201 = call i32 @nitpick_libc_mem_write_i64(i64 %arr197, i64 %multmp199, i64 %p_j200)
+  %arr202 = load i64, ptr %arr, align 4
+  %j203 = load i64, ptr %j, align 4
+  %multmp204 = mul i64 %j203, 8
+  %temp205 = load i64, ptr %temp, align 4
+  %calltmp206 = call i32 @nitpick_libc_mem_write_i64(i64 %arr202, i64 %multmp204, i64 %temp205)
+  br label %ifcont207
 
-ifcont201:                                        ; preds = %then184, %whilebody170
-  %j202 = load i64, ptr %j, align 4
-  %addtmp203 = add i64 %j202, 1
-  store i64 %addtmp203, ptr %j, align 4
+ifcont207:                                        ; preds = %then190, %whilebody176
+  %j208 = load i64, ptr %j, align 4
+  %addtmp209 = add i64 %j208, 1
+  store i64 %addtmp209, ptr %j, align 4
   call void @npk_gc_safepoint()
-  br label %whilecond164
+  br label %whilecond170
 
-afterwhile204:                                    ; preds = %whilecond164
+afterwhile210:                                    ; preds = %whilecond170
   %temp2 = alloca i64, align 8
-  %arr205 = load i64, ptr %arr, align 4
-  %idx206 = load i64, ptr %idx, align 4
-  %addtmp207 = add i64 %idx206, 1
-  %multmp208 = mul i64 %addtmp207, 8
-  %calltmp209 = call i64 @nitpick_libc_mem_read_i64(i64 %arr205, i64 %multmp208)
-  store i64 %calltmp209, ptr %temp2, align 4
-  %arr210 = load i64, ptr %arr, align 4
-  %idx211 = load i64, ptr %idx, align 4
-  %addtmp212 = add i64 %idx211, 1
-  %multmp213 = mul i64 %addtmp212, 8
-  %arr214 = load i64, ptr %arr, align 4
-  %h215 = load i64, ptr %h, align 4
-  %multmp216 = mul i64 %h215, 8
-  %calltmp217 = call i64 @nitpick_libc_mem_read_i64(i64 %arr214, i64 %multmp216)
-  %calltmp218 = call i32 @nitpick_libc_mem_write_i64(i64 %arr210, i64 %multmp213, i64 %calltmp217)
-  %arr219 = load i64, ptr %arr, align 4
-  %h220 = load i64, ptr %h, align 4
-  %multmp221 = mul i64 %h220, 8
-  %temp2222 = load i64, ptr %temp2, align 4
-  %calltmp223 = call i32 @nitpick_libc_mem_write_i64(i64 %arr219, i64 %multmp221, i64 %temp2222)
+  %arr211 = load i64, ptr %arr, align 4
+  %idx212 = load i64, ptr %idx, align 4
+  %addtmp213 = add i64 %idx212, 1
+  %multmp214 = mul i64 %addtmp213, 8
+  %calltmp215 = call i64 @nitpick_libc_mem_read_i64(i64 %arr211, i64 %multmp214)
+  store i64 %calltmp215, ptr %temp2, align 4
+  %arr216 = load i64, ptr %arr, align 4
+  %idx217 = load i64, ptr %idx, align 4
+  %addtmp218 = add i64 %idx217, 1
+  %multmp219 = mul i64 %addtmp218, 8
+  %arr220 = load i64, ptr %arr, align 4
+  %h221 = load i64, ptr %h, align 4
+  %multmp222 = mul i64 %h221, 8
+  %calltmp223 = call i64 @nitpick_libc_mem_read_i64(i64 %arr220, i64 %multmp222)
+  %calltmp224 = call i32 @nitpick_libc_mem_write_i64(i64 %arr216, i64 %multmp219, i64 %calltmp223)
+  %arr225 = load i64, ptr %arr, align 4
+  %h226 = load i64, ptr %h, align 4
+  %multmp227 = mul i64 %h226, 8
+  %temp2228 = load i64, ptr %temp2, align 4
+  %calltmp229 = call i32 @nitpick_libc_mem_write_i64(i64 %arr225, i64 %multmp227, i64 %temp2228)
   %p = alloca i64, align 8
-  %idx224 = load i64, ptr %idx, align 4
-  %addtmp225 = add i64 %idx224, 1
-  store i64 %addtmp225, ptr %p, align 4
-  %p226 = load i64, ptr %p, align 4
-  %subtmp227 = sub i64 %p226, 1
-  %l228 = load i64, ptr %l, align 4
-  %gttmp229 = icmp sgt i64 %subtmp227, %l228
-  %ifcond230 = icmp ne i1 %gttmp229, false
-  br i1 %ifcond230, label %then231, label %ifcont247
+  %idx230 = load i64, ptr %idx, align 4
+  %addtmp231 = add i64 %idx230, 1
+  store i64 %addtmp231, ptr %p, align 4
+  %p232 = load i64, ptr %p, align 4
+  %subtmp233 = sub i64 %p232, 1
+  %l234 = load i64, ptr %l, align 4
+  %gttmp235 = icmp sgt i64 %subtmp233, %l234
+  %ifcond236 = icmp ne i1 %gttmp235, false
+  br i1 %ifcond236, label %then237, label %ifcont253
 
-then231:                                          ; preds = %afterwhile204
-  %top232 = load i64, ptr %top, align 4
-  %addtmp233 = add i64 %top232, 1
-  store i64 %addtmp233, ptr %top, align 4
-  %stack234 = load i64, ptr %stack, align 4
-  %top235 = load i64, ptr %top, align 4
-  %multmp236 = mul i64 %top235, 8
-  %l237 = load i64, ptr %l, align 4
-  %calltmp238 = call i32 @nitpick_libc_mem_write_i64(i64 %stack234, i64 %multmp236, i64 %l237)
-  %top239 = load i64, ptr %top, align 4
-  %addtmp240 = add i64 %top239, 1
-  store i64 %addtmp240, ptr %top, align 4
-  %stack241 = load i64, ptr %stack, align 4
-  %top242 = load i64, ptr %top, align 4
-  %multmp243 = mul i64 %top242, 8
-  %p244 = load i64, ptr %p, align 4
-  %subtmp245 = sub i64 %p244, 1
-  %calltmp246 = call i32 @nitpick_libc_mem_write_i64(i64 %stack241, i64 %multmp243, i64 %subtmp245)
-  br label %ifcont247
+then237:                                          ; preds = %afterwhile210
+  %top238 = load i64, ptr %top, align 4
+  %addtmp239 = add i64 %top238, 1
+  store i64 %addtmp239, ptr %top, align 4
+  %stack240 = load i64, ptr %stack, align 4
+  %top241 = load i64, ptr %top, align 4
+  %multmp242 = mul i64 %top241, 8
+  %l243 = load i64, ptr %l, align 4
+  %calltmp244 = call i32 @nitpick_libc_mem_write_i64(i64 %stack240, i64 %multmp242, i64 %l243)
+  %top245 = load i64, ptr %top, align 4
+  %addtmp246 = add i64 %top245, 1
+  store i64 %addtmp246, ptr %top, align 4
+  %stack247 = load i64, ptr %stack, align 4
+  %top248 = load i64, ptr %top, align 4
+  %multmp249 = mul i64 %top248, 8
+  %p250 = load i64, ptr %p, align 4
+  %subtmp251 = sub i64 %p250, 1
+  %calltmp252 = call i32 @nitpick_libc_mem_write_i64(i64 %stack247, i64 %multmp249, i64 %subtmp251)
+  br label %ifcont253
 
-ifcont247:                                        ; preds = %then231, %afterwhile204
-  %p248 = load i64, ptr %p, align 4
-  %addtmp249 = add i64 %p248, 1
-  %h250 = load i64, ptr %h, align 4
-  %lttmp = icmp slt i64 %addtmp249, %h250
-  %ifcond251 = icmp ne i1 %lttmp, false
-  br i1 %ifcond251, label %then252, label %ifcont268
+ifcont253:                                        ; preds = %then237, %afterwhile210
+  %p254 = load i64, ptr %p, align 4
+  %addtmp255 = add i64 %p254, 1
+  %h256 = load i64, ptr %h, align 4
+  %lttmp = icmp slt i64 %addtmp255, %h256
+  %ifcond257 = icmp ne i1 %lttmp, false
+  br i1 %ifcond257, label %then258, label %ifcont274
 
-then252:                                          ; preds = %ifcont247
-  %top253 = load i64, ptr %top, align 4
-  %addtmp254 = add i64 %top253, 1
-  store i64 %addtmp254, ptr %top, align 4
-  %stack255 = load i64, ptr %stack, align 4
-  %top256 = load i64, ptr %top, align 4
-  %multmp257 = mul i64 %top256, 8
-  %p258 = load i64, ptr %p, align 4
-  %addtmp259 = add i64 %p258, 1
-  %calltmp260 = call i32 @nitpick_libc_mem_write_i64(i64 %stack255, i64 %multmp257, i64 %addtmp259)
-  %top261 = load i64, ptr %top, align 4
-  %addtmp262 = add i64 %top261, 1
-  store i64 %addtmp262, ptr %top, align 4
-  %stack263 = load i64, ptr %stack, align 4
-  %top264 = load i64, ptr %top, align 4
-  %multmp265 = mul i64 %top264, 8
-  %h266 = load i64, ptr %h, align 4
-  %calltmp267 = call i32 @nitpick_libc_mem_write_i64(i64 %stack263, i64 %multmp265, i64 %h266)
-  br label %ifcont268
+then258:                                          ; preds = %ifcont253
+  %top259 = load i64, ptr %top, align 4
+  %addtmp260 = add i64 %top259, 1
+  store i64 %addtmp260, ptr %top, align 4
+  %stack261 = load i64, ptr %stack, align 4
+  %top262 = load i64, ptr %top, align 4
+  %multmp263 = mul i64 %top262, 8
+  %p264 = load i64, ptr %p, align 4
+  %addtmp265 = add i64 %p264, 1
+  %calltmp266 = call i32 @nitpick_libc_mem_write_i64(i64 %stack261, i64 %multmp263, i64 %addtmp265)
+  %top267 = load i64, ptr %top, align 4
+  %addtmp268 = add i64 %top267, 1
+  store i64 %addtmp268, ptr %top, align 4
+  %stack269 = load i64, ptr %stack, align 4
+  %top270 = load i64, ptr %top, align 4
+  %multmp271 = mul i64 %top270, 8
+  %h272 = load i64, ptr %h, align 4
+  %calltmp273 = call i32 @nitpick_libc_mem_write_i64(i64 %stack269, i64 %multmp271, i64 %h272)
+  br label %ifcont274
 
-ifcont268:                                        ; preds = %then252, %ifcont247
+ifcont274:                                        ; preds = %then258, %ifcont253
   call void @npk_gc_safepoint()
-  br label %whilecond140
+  br label %whilecond146
 
-afterwhile269:                                    ; preds = %whilecond140
+afterwhile275:                                    ; preds = %whilecond146
   %k = alloca i64, align 8
   store i64 0, ptr %k, align 4
-  br label %whilecond270
+  br label %whilecond276
 
-whilecond270:                                     ; preds = %whilebody275, %afterwhile269
-  %k271 = load i64, ptr %k, align 4
-  %size272 = load i64, ptr %size, align 4
-  %lttmp273 = icmp slt i64 %k271, %size272
-  %whilecond274 = icmp ne i1 %lttmp273, false
-  br i1 %whilecond274, label %whilebody275, label %afterwhile285
+whilecond276:                                     ; preds = %whilebody281, %afterwhile275
+  %k277 = load i64, ptr %k, align 4
+  %size278 = load i64, ptr %size, align 4
+  %lttmp279 = icmp slt i64 %k277, %size278
+  %whilecond280 = icmp ne i1 %lttmp279, false
+  br i1 %whilecond280, label %whilebody281, label %afterwhile291
 
-whilebody275:                                     ; preds = %whilecond270
-  %sl276 = load i64, ptr %sl, align 4
-  %arr277 = load i64, ptr %arr, align 4
-  %k278 = load i64, ptr %k, align 4
-  %multmp279 = mul i64 %k278, 8
-  %calltmp280 = call i64 @nitpick_libc_mem_read_i64(i64 %arr277, i64 %multmp279)
-  %calltmp281 = call { i64, ptr, i8 } @alist.alist_push(i64 %sl276, i64 %calltmp280)
-  %raw.value282 = extractvalue { i64, ptr, i8 } %calltmp281, 0
-  %k283 = load i64, ptr %k, align 4
-  %addtmp284 = add i64 %k283, 1
-  store i64 %addtmp284, ptr %k, align 4
+whilebody281:                                     ; preds = %whilecond276
+  %sl282 = load i64, ptr %sl, align 4
+  %arr283 = load i64, ptr %arr, align 4
+  %k284 = load i64, ptr %k, align 4
+  %multmp285 = mul i64 %k284, 8
+  %calltmp286 = call i64 @nitpick_libc_mem_read_i64(i64 %arr283, i64 %multmp285)
+  %calltmp287 = call { i64, ptr, i8 } @alist.alist_push(i64 %sl282, i64 %calltmp286)
+  %raw.value288 = extractvalue { i64, ptr, i8 } %calltmp287, 0
+  %k289 = load i64, ptr %k, align 4
+  %addtmp290 = add i64 %k289, 1
+  store i64 %addtmp290, ptr %k, align 4
   call void @npk_gc_safepoint()
-  br label %whilecond270
+  br label %whilecond276
 
-afterwhile285:                                    ; preds = %whilecond270
-  %stack286 = load i64, ptr %stack, align 4
-  %calltmp287 = call i32 @nitpick_libc_mem_free(i64 %stack286)
-  %arr288 = load i64, ptr %arr, align 4
-  %calltmp289 = call i32 @nitpick_libc_mem_free(i64 %arr288)
-  br label %ifcont290
+afterwhile291:                                    ; preds = %whilecond276
+  %stack292 = load i64, ptr %stack, align 4
+  %cast.inttoptr293 = inttoptr i64 %stack292 to ptr
+  call void @npk_free(ptr %cast.inttoptr293)
+  %arr294 = load i64, ptr %arr, align 4
+  %cast.inttoptr295 = inttoptr i64 %arr294 to ptr
+  call void @npk_free(ptr %cast.inttoptr295)
+  br label %ifcont296
 
-ifcont290:                                        ; preds = %afterwhile285, %afterwhile98
-  br label %whilecond291
+ifcont296:                                        ; preds = %afterwhile291, %afterwhile98
+  br label %whilecond297
 
-whilecond291:                                     ; preds = %whilebody297, %ifcont290
-  %sl292 = load i64, ptr %sl, align 4
-  %calltmp293 = call { i64, ptr, i8 } @alist.alist_size(i64 %sl292)
-  %raw.value294 = extractvalue { i64, ptr, i8 } %calltmp293, 0
-  %gttmp295 = icmp sgt i64 %raw.value294, 0
-  %whilecond296 = icmp ne i1 %gttmp295, false
-  br i1 %whilecond296, label %whilebody297, label %afterwhile309
+whilecond297:                                     ; preds = %whilebody303, %ifcont296
+  %sl298 = load i64, ptr %sl, align 4
+  %calltmp299 = call { i64, ptr, i8 } @alist.alist_size(i64 %sl298)
+  %raw.value300 = extractvalue { i64, ptr, i8 } %calltmp299, 0
+  %gttmp301 = icmp sgt i64 %raw.value300, 0
+  %whilecond302 = icmp ne i1 %gttmp301, false
+  br i1 %whilecond302, label %whilebody303, label %afterwhile315
 
-whilebody297:                                     ; preds = %whilecond291
-  %ptr298 = alloca i64, align 8
-  %sl299 = load i64, ptr %sl, align 4
-  %calltmp300 = call { i64, ptr, i8 } @cp.alist_pop_front(i64 %sl299)
-  %raw.value301 = extractvalue { i64, ptr, i8 } %calltmp300, 0
-  store i64 %raw.value301, ptr %ptr298, align 4
+whilebody303:                                     ; preds = %whilecond297
+  %ptr304 = alloca i64, align 8
+  %sl305 = load i64, ptr %sl, align 4
+  %calltmp306 = call { i64, ptr, i8 } @cp.alist_pop_front(i64 %sl305)
+  %raw.value307 = extractvalue { i64, ptr, i8 } %calltmp306, 0
+  store i64 %raw.value307, ptr %ptr304, align 4
   %s = alloca ptr, align 8
-  %ptr302 = load i64, ptr %ptr298, align 4
-  %calltmp303 = call { ptr, ptr, i8 } @mem_utils.ptr_to_string(i64 %ptr302)
-  %raw.value304 = extractvalue { ptr, ptr, i8 } %calltmp303, 0
-  store ptr %raw.value304, ptr %s, align 8
-  %s305 = load ptr, ptr %s, align 8
-  %calltmp306 = call { i32, ptr, i8 } @md5sum.print_out(ptr %s305)
-  %ptr307 = load i64, ptr %ptr298, align 4
-  %calltmp308 = call i32 @nitpick_libc_mem_free(i64 %ptr307)
+  %ptr308 = load i64, ptr %ptr304, align 4
+  %calltmp309 = call { ptr, ptr, i8 } @mem_utils.ptr_to_string(i64 %ptr308)
+  %raw.value310 = extractvalue { ptr, ptr, i8 } %calltmp309, 0
+  store ptr %raw.value310, ptr %s, align 8
+  %s311 = load ptr, ptr %s, align 8
+  %calltmp312 = call { i32, ptr, i8 } @md5sum.print_out(ptr %s311)
+  %ptr313 = load i64, ptr %ptr304, align 4
+  %cast.inttoptr314 = inttoptr i64 %ptr313 to ptr
+  call void @npk_free(ptr %cast.inttoptr314)
   call void @npk_gc_safepoint()
-  br label %whilecond291
+  br label %whilecond297
 
-afterwhile309:                                    ; preds = %whilecond291
+afterwhile315:                                    ; preds = %whilecond297
   ret { i32, ptr, i8 } zeroinitializer
 }
 
@@ -55666,17 +55674,20 @@ ifcont72:                                         ; preds = %ifcont71, %then38
   store i64 65536, ptr %buf_size, align 4
   %buf = alloca i64, align 8
   %buf_size73 = load i64, ptr %buf_size, align 4
-  %calltmp74 = call i64 @malloc(i64 %buf_size73)
-  store i64 %calltmp74, ptr %buf, align 4
-  %buf75 = load i64, ptr %buf, align 4
-  %lttmp76 = icmp slt i64 %buf75, 0
-  %ifcond77 = icmp ne i1 %lttmp76, false
-  br i1 %ifcond77, label %then78, label %ifcont79
+  %wild_ptr = call ptr @npk_alloc(i64 %buf_size73)
+  %buf_size74 = load i64, ptr %buf_size, align 4
+  %wild_ptr75 = call ptr @npk_alloc(i64 %buf_size74)
+  %cast.ptrtoint = ptrtoint ptr %wild_ptr75 to i64
+  store i64 %cast.ptrtoint, ptr %buf, align 4
+  %buf76 = load i64, ptr %buf, align 4
+  %lttmp77 = icmp slt i64 %buf76, 0
+  %ifcond78 = icmp ne i1 %lttmp77, false
+  br i1 %ifcond78, label %then79, label %ifcont80
 
-then78:                                           ; preds = %ifcont72
+then79:                                           ; preds = %ifcont72
   ret { i32, ptr, i8 } { i32 1, ptr null, i8 0 }
 
-ifcont79:                                         ; preds = %ifcont72
+ifcont80:                                         ; preds = %ifcont72
   %lines_in_current = alloca i64, align 8
   store i64 0, ptr %lines_in_current, align 4
   %fd_out = alloca i64, align 8
@@ -55687,343 +55698,343 @@ ifcont79:                                         ; preds = %ifcont72
   store i64 0, ptr %file_idx, align 4
   %running = alloca i32, align 4
   store i32 1, ptr %running, align 4
-  br label %whilecond80
+  br label %whilecond81
 
-whilecond80:                                      ; preds = %ifcont266, %ifcont79
-  %running81 = load i32, ptr %running, align 4
-  %eqtmp82 = icmp eq i32 %running81, 1
-  %whilecond83 = icmp ne i1 %eqtmp82, false
-  br i1 %whilecond83, label %whilebody84, label %afterwhile267
+whilecond81:                                      ; preds = %ifcont267, %ifcont80
+  %running82 = load i32, ptr %running, align 4
+  %eqtmp83 = icmp eq i32 %running82, 1
+  %whilecond84 = icmp ne i1 %eqtmp83, false
+  br i1 %whilecond84, label %whilebody85, label %afterwhile268
 
-whilebody84:                                      ; preds = %whilecond80
+whilebody85:                                      ; preds = %whilecond81
   %n = alloca i64, align 8
-  %fd_in85 = load i64, ptr %fd_in, align 4
-  %buf86 = load i64, ptr %buf, align 4
-  %buf_size87 = load i64, ptr %buf_size, align 4
-  %syscall_ret88 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 0, i64 %fd_in85, i64 %buf86, i64 %buf_size87)
-  %sys_is_err89 = icmp slt i64 %syscall_ret88, 0
-  %sys_neg_errno90 = sub i64 0, %syscall_ret88
-  %sys_err_ptr91 = inttoptr i64 %sys_neg_errno90 to ptr
-  %sys_val92 = select i1 %sys_is_err89, i64 0, i64 %syscall_ret88
-  %sys_err93 = select i1 %sys_is_err89, ptr %sys_err_ptr91, ptr null
-  %sys_flag94 = select i1 %sys_is_err89, i8 1, i8 0
-  %sys_result.val95 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val92, 0
-  %sys_result.err96 = insertvalue %struct.NpkResult_int64 %sys_result.val95, ptr %sys_err93, 1
-  %sys_result.is_error97 = insertvalue %struct.NpkResult_int64 %sys_result.err96, i8 %sys_flag94, 2
-  %is_error98 = extractvalue %struct.NpkResult_int64 %sys_result.is_error97, 2
-  %is_error_bool99 = icmp ne i8 %is_error98, 0
-  br i1 %is_error_bool99, label %error_block100, label %success_block101
+  %fd_in86 = load i64, ptr %fd_in, align 4
+  %buf87 = load i64, ptr %buf, align 4
+  %buf_size88 = load i64, ptr %buf_size, align 4
+  %syscall_ret89 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 0, i64 %fd_in86, i64 %buf87, i64 %buf_size88)
+  %sys_is_err90 = icmp slt i64 %syscall_ret89, 0
+  %sys_neg_errno91 = sub i64 0, %syscall_ret89
+  %sys_err_ptr92 = inttoptr i64 %sys_neg_errno91 to ptr
+  %sys_val93 = select i1 %sys_is_err90, i64 0, i64 %syscall_ret89
+  %sys_err94 = select i1 %sys_is_err90, ptr %sys_err_ptr92, ptr null
+  %sys_flag95 = select i1 %sys_is_err90, i8 1, i8 0
+  %sys_result.val96 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val93, 0
+  %sys_result.err97 = insertvalue %struct.NpkResult_int64 %sys_result.val96, ptr %sys_err94, 1
+  %sys_result.is_error98 = insertvalue %struct.NpkResult_int64 %sys_result.err97, i8 %sys_flag95, 2
+  %is_error99 = extractvalue %struct.NpkResult_int64 %sys_result.is_error98, 2
+  %is_error_bool100 = icmp ne i8 %is_error99, 0
+  br i1 %is_error_bool100, label %error_block101, label %success_block102
 
-error_block100:                                   ; preds = %whilebody84
-  br label %merge_block102
+error_block101:                                   ; preds = %whilebody85
+  br label %merge_block103
 
-success_block101:                                 ; preds = %whilebody84
-  %value103 = extractvalue %struct.NpkResult_int64 %sys_result.is_error97, 0
-  br label %merge_block102
+success_block102:                                 ; preds = %whilebody85
+  %value104 = extractvalue %struct.NpkResult_int64 %sys_result.is_error98, 0
+  br label %merge_block103
 
-merge_block102:                                   ; preds = %success_block101, %error_block100
-  %unwrap_result104 = phi i64 [ -1, %error_block100 ], [ %value103, %success_block101 ]
-  store i64 %unwrap_result104, ptr %n, align 4
-  %n105 = load i64, ptr %n, align 4
-  %letmp106 = icmp sle i64 %n105, 0
-  %ifcond107 = icmp ne i1 %letmp106, false
-  br i1 %ifcond107, label %then108, label %else109
+merge_block103:                                   ; preds = %success_block102, %error_block101
+  %unwrap_result105 = phi i64 [ -1, %error_block101 ], [ %value104, %success_block102 ]
+  store i64 %unwrap_result105, ptr %n, align 4
+  %n106 = load i64, ptr %n, align 4
+  %letmp107 = icmp sle i64 %n106, 0
+  %ifcond108 = icmp ne i1 %letmp107, false
+  br i1 %ifcond108, label %then109, label %else110
 
-then108:                                          ; preds = %merge_block102
+then109:                                          ; preds = %merge_block103
   store i32 0, ptr %running, align 4
-  br label %ifcont266
+  br label %ifcont267
 
-else109:                                          ; preds = %merge_block102
+else110:                                          ; preds = %merge_block103
   %j = alloca i64, align 8
   store i64 0, ptr %j, align 4
   %start = alloca i64, align 8
   store i64 0, ptr %start, align 4
-  br label %whilecond110
+  br label %whilecond111
 
-whilecond110:                                     ; preds = %ifcont236, %else109
-  %j111 = load i64, ptr %j, align 4
-  %n112 = load i64, ptr %n, align 4
-  %lttmp113 = icmp slt i64 %j111, %n112
-  %whilecond114 = icmp ne i1 %lttmp113, false
-  br i1 %whilecond114, label %whilebody115, label %afterwhile239
+whilecond111:                                     ; preds = %ifcont237, %else110
+  %j112 = load i64, ptr %j, align 4
+  %n113 = load i64, ptr %n, align 4
+  %lttmp114 = icmp slt i64 %j112, %n113
+  %whilecond115 = icmp ne i1 %lttmp114, false
+  br i1 %whilecond115, label %whilebody116, label %afterwhile240
 
-whilebody115:                                     ; preds = %whilecond110
-  %fd_out116 = load i64, ptr %fd_out, align 4
-  %eqtmp117 = icmp eq i64 %fd_out116, -1
-  %ifcond118 = icmp ne i1 %eqtmp117, false
-  br i1 %ifcond118, label %then119, label %ifcont198
+whilebody116:                                     ; preds = %whilecond111
+  %fd_out117 = load i64, ptr %fd_out, align 4
+  %eqtmp118 = icmp eq i64 %fd_out117, -1
+  %ifcond119 = icmp ne i1 %eqtmp118, false
+  br i1 %ifcond119, label %then120, label %ifcont199
 
-then119:                                          ; preds = %whilebody115
+then120:                                          ; preds = %whilebody116
   %fname = alloca ptr, align 8
-  %prefix120 = load ptr, ptr %prefix, align 8
-  store ptr %prefix120, ptr %fname, align 8
+  %prefix121 = load ptr, ptr %prefix, align 8
+  store ptr %prefix121, ptr %fname, align 8
   %num = alloca i64, align 8
-  %file_idx121 = load i64, ptr %file_idx, align 4
-  store i64 %file_idx121, ptr %num, align 4
+  %file_idx122 = load i64, ptr %file_idx, align 4
+  store i64 %file_idx122, ptr %num, align 4
   %t = alloca i64, align 8
   store i64 0, ptr %t, align 4
   %max_files = alloca i64, align 8
   store i64 1, ptr %max_files, align 4
   %k = alloca i64, align 8
   store i64 0, ptr %k, align 4
-  br label %whilecond122
+  br label %whilecond123
 
-whilecond122:                                     ; preds = %whilebody127, %then119
-  %k123 = load i64, ptr %k, align 4
-  %suffix_len124 = load i64, ptr %suffix_len, align 4
-  %lttmp125 = icmp slt i64 %k123, %suffix_len124
-  %whilecond126 = icmp ne i1 %lttmp125, false
-  br i1 %whilecond126, label %whilebody127, label %afterwhile131
+whilecond123:                                     ; preds = %whilebody128, %then120
+  %k124 = load i64, ptr %k, align 4
+  %suffix_len125 = load i64, ptr %suffix_len, align 4
+  %lttmp126 = icmp slt i64 %k124, %suffix_len125
+  %whilecond127 = icmp ne i1 %lttmp126, false
+  br i1 %whilecond127, label %whilebody128, label %afterwhile132
 
-whilebody127:                                     ; preds = %whilecond122
-  %max_files128 = load i64, ptr %max_files, align 4
-  %multmp = mul i64 %max_files128, 26
+whilebody128:                                     ; preds = %whilecond123
+  %max_files129 = load i64, ptr %max_files, align 4
+  %multmp = mul i64 %max_files129, 26
   store i64 %multmp, ptr %max_files, align 4
-  %k129 = load i64, ptr %k, align 4
-  %addtmp130 = add i64 %k129, 1
-  store i64 %addtmp130, ptr %k, align 4
+  %k130 = load i64, ptr %k, align 4
+  %addtmp131 = add i64 %k130, 1
+  store i64 %addtmp131, ptr %k, align 4
   call void @npk_gc_safepoint()
-  br label %whilecond122
+  br label %whilecond123
 
-afterwhile131:                                    ; preds = %whilecond122
-  %num132 = load i64, ptr %num, align 4
-  %max_files133 = load i64, ptr %max_files, align 4
-  %getmp134 = icmp sge i64 %num132, %max_files133
-  %ifcond135 = icmp ne i1 %getmp134, false
-  br i1 %ifcond135, label %then136, label %ifcont140
+afterwhile132:                                    ; preds = %whilecond123
+  %num133 = load i64, ptr %num, align 4
+  %max_files134 = load i64, ptr %max_files, align 4
+  %getmp135 = icmp sge i64 %num133, %max_files134
+  %ifcond136 = icmp ne i1 %getmp135, false
+  br i1 %ifcond136, label %then137, label %ifcont141
 
-then136:                                          ; preds = %afterwhile131
-  %suffix_len137 = load i64, ptr %suffix_len, align 4
-  %addtmp138 = add i64 %suffix_len137, 1
-  store i64 %addtmp138, ptr %suffix_len, align 4
-  %file_idx139 = load i64, ptr %file_idx, align 4
-  store i64 %file_idx139, ptr %num, align 4
-  br label %ifcont140
+then137:                                          ; preds = %afterwhile132
+  %suffix_len138 = load i64, ptr %suffix_len, align 4
+  %addtmp139 = add i64 %suffix_len138, 1
+  store i64 %addtmp139, ptr %suffix_len, align 4
+  %file_idx140 = load i64, ptr %file_idx, align 4
+  store i64 %file_idx140, ptr %num, align 4
+  br label %ifcont141
 
-ifcont140:                                        ; preds = %then136, %afterwhile131
+ifcont141:                                        ; preds = %then137, %afterwhile132
   %suf = alloca ptr, align 8
   store ptr @.str.2731, ptr %suf, align 8
   store i64 0, ptr %k, align 4
   %tmp = alloca i64, align 8
-  %num141 = load i64, ptr %num, align 4
-  store i64 %num141, ptr %tmp, align 4
-  br label %whilecond142
+  %num142 = load i64, ptr %num, align 4
+  store i64 %num142, ptr %tmp, align 4
+  br label %whilecond143
 
-whilecond142:                                     ; preds = %whilebody147, %ifcont140
-  %k143 = load i64, ptr %k, align 4
-  %suffix_len144 = load i64, ptr %suffix_len, align 4
-  %lttmp145 = icmp slt i64 %k143, %suffix_len144
-  %whilecond146 = icmp ne i1 %lttmp145, false
-  br i1 %whilecond146, label %whilebody147, label %afterwhile155
+whilecond143:                                     ; preds = %whilebody148, %ifcont141
+  %k144 = load i64, ptr %k, align 4
+  %suffix_len145 = load i64, ptr %suffix_len, align 4
+  %lttmp146 = icmp slt i64 %k144, %suffix_len145
+  %whilecond147 = icmp ne i1 %lttmp146, false
+  br i1 %whilecond147, label %whilebody148, label %afterwhile156
 
-whilebody147:                                     ; preds = %whilecond142
+whilebody148:                                     ; preds = %whilecond143
   %rem = alloca i64, align 8
-  %tmp148 = load i64, ptr %tmp, align 4
-  %modtmp = srem i64 %tmp148, 26
+  %tmp149 = load i64, ptr %tmp, align 4
+  %modtmp = srem i64 %tmp149, 26
   %safe.modtmp = select i1 false, i64 9223372036854775807, i64 %modtmp
   store i64 %safe.modtmp, ptr %rem, align 4
-  %tmp149 = load i64, ptr %tmp, align 4
-  %divtmp = sdiv i64 %tmp149, 26
+  %tmp150 = load i64, ptr %tmp, align 4
+  %divtmp = sdiv i64 %tmp150, 26
   %safe.divtmp = select i1 false, i64 9223372036854775807, i64 %divtmp
   store i64 %safe.divtmp, ptr %tmp, align 4
-  %rem150 = load i64, ptr %rem, align 4
-  %addtmp151 = add i64 97, %rem150
-  %cast.trunc = trunc i64 %addtmp151 to i8
+  %rem151 = load i64, ptr %rem, align 4
+  %addtmp152 = add i64 97, %rem151
+  %cast.trunc = trunc i64 %addtmp152 to i8
   %char_str = call ptr @npk_string_from_char_simple(i8 %cast.trunc)
-  %suf152 = load ptr, ptr %suf, align 8
-  %concat_str = call ptr @npk_string_concat_simple(ptr %char_str, ptr %suf152)
+  %suf153 = load ptr, ptr %suf, align 8
+  %concat_str = call ptr @npk_string_concat_simple(ptr %char_str, ptr %suf153)
   store ptr %concat_str, ptr %suf, align 8
-  %k153 = load i64, ptr %k, align 4
-  %addtmp154 = add i64 %k153, 1
-  store i64 %addtmp154, ptr %k, align 4
+  %k154 = load i64, ptr %k, align 4
+  %addtmp155 = add i64 %k154, 1
+  store i64 %addtmp155, ptr %k, align 4
   call void @npk_gc_safepoint()
-  br label %whilecond142
+  br label %whilecond143
 
-afterwhile155:                                    ; preds = %whilecond142
-  %fname156 = load ptr, ptr %fname, align 8
-  %suf157 = load ptr, ptr %suf, align 8
-  %concat_str158 = call ptr @npk_string_concat_simple(ptr %fname156, ptr %suf157)
-  store ptr %concat_str158, ptr %fname, align 8
-  %fname159 = load ptr, ptr %fname, align 8
-  %sys_str_struct160 = load %struct.NpkString, ptr %fname159, align 8
-  %sys_str_data161 = extractvalue %struct.NpkString %sys_str_struct160, 0
-  %sys_strvar_int162 = ptrtoint ptr %sys_str_data161 to i64
-  %syscall_ret163 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 2, i64 %sys_strvar_int162, i64 577, i64 420)
-  %sys_is_err164 = icmp slt i64 %syscall_ret163, 0
-  %sys_neg_errno165 = sub i64 0, %syscall_ret163
-  %sys_err_ptr166 = inttoptr i64 %sys_neg_errno165 to ptr
-  %sys_val167 = select i1 %sys_is_err164, i64 0, i64 %syscall_ret163
-  %sys_err168 = select i1 %sys_is_err164, ptr %sys_err_ptr166, ptr null
-  %sys_flag169 = select i1 %sys_is_err164, i8 1, i8 0
-  %sys_result.val170 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val167, 0
-  %sys_result.err171 = insertvalue %struct.NpkResult_int64 %sys_result.val170, ptr %sys_err168, 1
-  %sys_result.is_error172 = insertvalue %struct.NpkResult_int64 %sys_result.err171, i8 %sys_flag169, 2
-  %is_error173 = extractvalue %struct.NpkResult_int64 %sys_result.is_error172, 2
-  %is_error_bool174 = icmp ne i8 %is_error173, 0
-  br i1 %is_error_bool174, label %error_block175, label %success_block176
+afterwhile156:                                    ; preds = %whilecond143
+  %fname157 = load ptr, ptr %fname, align 8
+  %suf158 = load ptr, ptr %suf, align 8
+  %concat_str159 = call ptr @npk_string_concat_simple(ptr %fname157, ptr %suf158)
+  store ptr %concat_str159, ptr %fname, align 8
+  %fname160 = load ptr, ptr %fname, align 8
+  %sys_str_struct161 = load %struct.NpkString, ptr %fname160, align 8
+  %sys_str_data162 = extractvalue %struct.NpkString %sys_str_struct161, 0
+  %sys_strvar_int163 = ptrtoint ptr %sys_str_data162 to i64
+  %syscall_ret164 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 2, i64 %sys_strvar_int163, i64 577, i64 420)
+  %sys_is_err165 = icmp slt i64 %syscall_ret164, 0
+  %sys_neg_errno166 = sub i64 0, %syscall_ret164
+  %sys_err_ptr167 = inttoptr i64 %sys_neg_errno166 to ptr
+  %sys_val168 = select i1 %sys_is_err165, i64 0, i64 %syscall_ret164
+  %sys_err169 = select i1 %sys_is_err165, ptr %sys_err_ptr167, ptr null
+  %sys_flag170 = select i1 %sys_is_err165, i8 1, i8 0
+  %sys_result.val171 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val168, 0
+  %sys_result.err172 = insertvalue %struct.NpkResult_int64 %sys_result.val171, ptr %sys_err169, 1
+  %sys_result.is_error173 = insertvalue %struct.NpkResult_int64 %sys_result.err172, i8 %sys_flag170, 2
+  %is_error174 = extractvalue %struct.NpkResult_int64 %sys_result.is_error173, 2
+  %is_error_bool175 = icmp ne i8 %is_error174, 0
+  br i1 %is_error_bool175, label %error_block176, label %success_block177
 
-error_block175:                                   ; preds = %afterwhile155
-  br label %merge_block177
+error_block176:                                   ; preds = %afterwhile156
+  br label %merge_block178
 
-success_block176:                                 ; preds = %afterwhile155
-  %value178 = extractvalue %struct.NpkResult_int64 %sys_result.is_error172, 0
-  br label %merge_block177
+success_block177:                                 ; preds = %afterwhile156
+  %value179 = extractvalue %struct.NpkResult_int64 %sys_result.is_error173, 0
+  br label %merge_block178
 
-merge_block177:                                   ; preds = %success_block176, %error_block175
-  %unwrap_result179 = phi i64 [ -1, %error_block175 ], [ %value178, %success_block176 ]
-  store i64 %unwrap_result179, ptr %fd_out, align 4
-  %file_idx180 = load i64, ptr %file_idx, align 4
-  %addtmp181 = add i64 %file_idx180, 1
-  store i64 %addtmp181, ptr %file_idx, align 4
-  %fd_out182 = load i64, ptr %fd_out, align 4
-  %getmp183 = icmp sge i64 %fd_out182, 0
-  %ifcond184 = icmp ne i1 %getmp183, false
-  br i1 %ifcond184, label %then185, label %ifcont197
+merge_block178:                                   ; preds = %success_block177, %error_block176
+  %unwrap_result180 = phi i64 [ -1, %error_block176 ], [ %value179, %success_block177 ]
+  store i64 %unwrap_result180, ptr %fd_out, align 4
+  %file_idx181 = load i64, ptr %file_idx, align 4
+  %addtmp182 = add i64 %file_idx181, 1
+  store i64 %addtmp182, ptr %file_idx, align 4
+  %fd_out183 = load i64, ptr %fd_out, align 4
+  %getmp184 = icmp sge i64 %fd_out183, 0
+  %ifcond185 = icmp ne i1 %getmp184, false
+  br i1 %ifcond185, label %then186, label %ifcont198
 
-then185:                                          ; preds = %merge_block177
-  %fd_out186 = load i64, ptr %fd_out, align 4
-  %syscall_ret187 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %fd_out186)
-  %sys_is_err188 = icmp slt i64 %syscall_ret187, 0
-  %sys_neg_errno189 = sub i64 0, %syscall_ret187
-  %sys_err_ptr190 = inttoptr i64 %sys_neg_errno189 to ptr
-  %sys_val191 = select i1 %sys_is_err188, i64 0, i64 %syscall_ret187
-  %sys_err192 = select i1 %sys_is_err188, ptr %sys_err_ptr190, ptr null
-  %sys_flag193 = select i1 %sys_is_err188, i8 1, i8 0
-  %sys_result.val194 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val191, 0
-  %sys_result.err195 = insertvalue %struct.NpkResult_int64 %sys_result.val194, ptr %sys_err192, 1
-  %sys_result.is_error196 = insertvalue %struct.NpkResult_int64 %sys_result.err195, i8 %sys_flag193, 2
-  br label %ifcont197
-
-ifcont197:                                        ; preds = %then185, %merge_block177
+then186:                                          ; preds = %merge_block178
+  %fd_out187 = load i64, ptr %fd_out, align 4
+  %syscall_ret188 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %fd_out187)
+  %sys_is_err189 = icmp slt i64 %syscall_ret188, 0
+  %sys_neg_errno190 = sub i64 0, %syscall_ret188
+  %sys_err_ptr191 = inttoptr i64 %sys_neg_errno190 to ptr
+  %sys_val192 = select i1 %sys_is_err189, i64 0, i64 %syscall_ret188
+  %sys_err193 = select i1 %sys_is_err189, ptr %sys_err_ptr191, ptr null
+  %sys_flag194 = select i1 %sys_is_err189, i8 1, i8 0
+  %sys_result.val195 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val192, 0
+  %sys_result.err196 = insertvalue %struct.NpkResult_int64 %sys_result.val195, ptr %sys_err193, 1
+  %sys_result.is_error197 = insertvalue %struct.NpkResult_int64 %sys_result.err196, i8 %sys_flag194, 2
   br label %ifcont198
 
-ifcont198:                                        ; preds = %ifcont197, %whilebody115
+ifcont198:                                        ; preds = %then186, %merge_block178
+  br label %ifcont199
+
+ifcont199:                                        ; preds = %ifcont198, %whilebody116
   %c = alloca i64, align 8
-  %buf199 = load i64, ptr %buf, align 4
-  %j200 = load i64, ptr %j, align 4
-  %addtmp201 = add i64 %buf199, %j200
-  %buf202 = load i64, ptr %buf, align 4
-  %j203 = load i64, ptr %j, align 4
-  %addtmp204 = add i64 %buf202, %j203
-  %cast.inttoptr = inttoptr i64 %addtmp204 to ptr
+  %buf200 = load i64, ptr %buf, align 4
+  %j201 = load i64, ptr %j, align 4
+  %addtmp202 = add i64 %buf200, %j201
+  %buf203 = load i64, ptr %buf, align 4
+  %j204 = load i64, ptr %j, align 4
+  %addtmp205 = add i64 %buf203, %j204
+  %cast.inttoptr = inttoptr i64 %addtmp205 to ptr
   %null.deref = icmp eq ptr %cast.inttoptr, null
   br i1 %null.deref, label %null.fail, label %null.ok
 
-null.fail:                                        ; preds = %ifcont198
-  %0 = call i32 @failsafe(i32 46)
+null.fail:                                        ; preds = %ifcont199
   call void @exit(i32 46)
   unreachable
 
-null.ok:                                          ; preds = %ifcont198
+null.ok:                                          ; preds = %ifcont199
   %deref = load i32, ptr %cast.inttoptr, align 4
   %cast.sext = sext i32 %deref to i64
   store i64 %cast.sext, ptr %c, align 4
-  %c205 = load i64, ptr %c, align 4
-  %eqtmp206 = icmp eq i64 %c205, 10
-  %ifcond207 = icmp ne i1 %eqtmp206, false
-  br i1 %ifcond207, label %then208, label %ifcont236
+  %c206 = load i64, ptr %c, align 4
+  %eqtmp207 = icmp eq i64 %c206, 10
+  %ifcond208 = icmp ne i1 %eqtmp207, false
+  br i1 %ifcond208, label %then209, label %ifcont237
 
-then208:                                          ; preds = %null.ok
-  %lines_in_current209 = load i64, ptr %lines_in_current, align 4
-  %addtmp210 = add i64 %lines_in_current209, 1
-  store i64 %addtmp210, ptr %lines_in_current, align 4
-  %lines_in_current211 = load i64, ptr %lines_in_current, align 4
-  %lines_per_file212 = load i64, ptr %lines_per_file, align 4
-  %eqtmp213 = icmp eq i64 %lines_in_current211, %lines_per_file212
-  %ifcond214 = icmp ne i1 %eqtmp213, false
-  br i1 %ifcond214, label %then215, label %ifcont235
+then209:                                          ; preds = %null.ok
+  %lines_in_current210 = load i64, ptr %lines_in_current, align 4
+  %addtmp211 = add i64 %lines_in_current210, 1
+  store i64 %addtmp211, ptr %lines_in_current, align 4
+  %lines_in_current212 = load i64, ptr %lines_in_current, align 4
+  %lines_per_file213 = load i64, ptr %lines_per_file, align 4
+  %eqtmp214 = icmp eq i64 %lines_in_current212, %lines_per_file213
+  %ifcond215 = icmp ne i1 %eqtmp214, false
+  br i1 %ifcond215, label %then216, label %ifcont236
 
-then215:                                          ; preds = %then208
-  %fd_out216 = load i64, ptr %fd_out, align 4
-  %buf217 = load i64, ptr %buf, align 4
-  %start218 = load i64, ptr %start, align 4
-  %addtmp219 = add i64 %buf217, %start218
-  %j220 = load i64, ptr %j, align 4
-  %start221 = load i64, ptr %start, align 4
-  %subtmp = sub i64 %j220, %start221
-  %addtmp222 = add i64 %subtmp, 1
-  %syscall_ret223 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 1, i64 %fd_out216, i64 %addtmp219, i64 %addtmp222)
-  %sys_is_err224 = icmp slt i64 %syscall_ret223, 0
-  %sys_neg_errno225 = sub i64 0, %syscall_ret223
-  %sys_err_ptr226 = inttoptr i64 %sys_neg_errno225 to ptr
-  %sys_val227 = select i1 %sys_is_err224, i64 0, i64 %syscall_ret223
-  %sys_err228 = select i1 %sys_is_err224, ptr %sys_err_ptr226, ptr null
-  %sys_flag229 = select i1 %sys_is_err224, i8 1, i8 0
-  %sys_result.val230 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val227, 0
-  %sys_result.err231 = insertvalue %struct.NpkResult_int64 %sys_result.val230, ptr %sys_err228, 1
-  %sys_result.is_error232 = insertvalue %struct.NpkResult_int64 %sys_result.err231, i8 %sys_flag229, 2
+then216:                                          ; preds = %then209
+  %fd_out217 = load i64, ptr %fd_out, align 4
+  %buf218 = load i64, ptr %buf, align 4
+  %start219 = load i64, ptr %start, align 4
+  %addtmp220 = add i64 %buf218, %start219
+  %j221 = load i64, ptr %j, align 4
+  %start222 = load i64, ptr %start, align 4
+  %subtmp = sub i64 %j221, %start222
+  %addtmp223 = add i64 %subtmp, 1
+  %syscall_ret224 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 1, i64 %fd_out217, i64 %addtmp220, i64 %addtmp223)
+  %sys_is_err225 = icmp slt i64 %syscall_ret224, 0
+  %sys_neg_errno226 = sub i64 0, %syscall_ret224
+  %sys_err_ptr227 = inttoptr i64 %sys_neg_errno226 to ptr
+  %sys_val228 = select i1 %sys_is_err225, i64 0, i64 %syscall_ret224
+  %sys_err229 = select i1 %sys_is_err225, ptr %sys_err_ptr227, ptr null
+  %sys_flag230 = select i1 %sys_is_err225, i8 1, i8 0
+  %sys_result.val231 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val228, 0
+  %sys_result.err232 = insertvalue %struct.NpkResult_int64 %sys_result.val231, ptr %sys_err229, 1
+  %sys_result.is_error233 = insertvalue %struct.NpkResult_int64 %sys_result.err232, i8 %sys_flag230, 2
   store i64 -1, ptr %fd_out, align 4
   store i64 0, ptr %lines_in_current, align 4
-  %j233 = load i64, ptr %j, align 4
-  %addtmp234 = add i64 %j233, 1
-  store i64 %addtmp234, ptr %start, align 4
-  br label %ifcont235
-
-ifcont235:                                        ; preds = %then215, %then208
+  %j234 = load i64, ptr %j, align 4
+  %addtmp235 = add i64 %j234, 1
+  store i64 %addtmp235, ptr %start, align 4
   br label %ifcont236
 
-ifcont236:                                        ; preds = %ifcont235, %null.ok
-  %j237 = load i64, ptr %j, align 4
-  %addtmp238 = add i64 %j237, 1
-  store i64 %addtmp238, ptr %j, align 4
+ifcont236:                                        ; preds = %then216, %then209
+  br label %ifcont237
+
+ifcont237:                                        ; preds = %ifcont236, %null.ok
+  %j238 = load i64, ptr %j, align 4
+  %addtmp239 = add i64 %j238, 1
+  store i64 %addtmp239, ptr %j, align 4
   call void @npk_gc_safepoint()
-  br label %whilecond110
+  br label %whilecond111
 
-afterwhile239:                                    ; preds = %whilecond110
-  %fd_out240 = load i64, ptr %fd_out, align 4
-  %netmp = icmp ne i64 %fd_out240, -1
-  %ifcond241 = icmp ne i1 %netmp, false
-  br i1 %ifcond241, label %then242, label %ifcont265
+afterwhile240:                                    ; preds = %whilecond111
+  %fd_out241 = load i64, ptr %fd_out, align 4
+  %netmp = icmp ne i64 %fd_out241, -1
+  %ifcond242 = icmp ne i1 %netmp, false
+  br i1 %ifcond242, label %then243, label %ifcont266
 
-then242:                                          ; preds = %afterwhile239
-  %j243 = load i64, ptr %j, align 4
-  %start244 = load i64, ptr %start, align 4
-  %gttmp = icmp sgt i64 %j243, %start244
-  %ifcond245 = icmp ne i1 %gttmp, false
-  br i1 %ifcond245, label %then246, label %ifcont264
+then243:                                          ; preds = %afterwhile240
+  %j244 = load i64, ptr %j, align 4
+  %start245 = load i64, ptr %start, align 4
+  %gttmp = icmp sgt i64 %j244, %start245
+  %ifcond246 = icmp ne i1 %gttmp, false
+  br i1 %ifcond246, label %then247, label %ifcont265
 
-then246:                                          ; preds = %then242
-  %fd_out247 = load i64, ptr %fd_out, align 4
-  %buf248 = load i64, ptr %buf, align 4
-  %start249 = load i64, ptr %start, align 4
-  %addtmp250 = add i64 %buf248, %start249
-  %j251 = load i64, ptr %j, align 4
-  %start252 = load i64, ptr %start, align 4
-  %subtmp253 = sub i64 %j251, %start252
-  %syscall_ret254 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 1, i64 %fd_out247, i64 %addtmp250, i64 %subtmp253)
-  %sys_is_err255 = icmp slt i64 %syscall_ret254, 0
-  %sys_neg_errno256 = sub i64 0, %syscall_ret254
-  %sys_err_ptr257 = inttoptr i64 %sys_neg_errno256 to ptr
-  %sys_val258 = select i1 %sys_is_err255, i64 0, i64 %syscall_ret254
-  %sys_err259 = select i1 %sys_is_err255, ptr %sys_err_ptr257, ptr null
-  %sys_flag260 = select i1 %sys_is_err255, i8 1, i8 0
-  %sys_result.val261 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val258, 0
-  %sys_result.err262 = insertvalue %struct.NpkResult_int64 %sys_result.val261, ptr %sys_err259, 1
-  %sys_result.is_error263 = insertvalue %struct.NpkResult_int64 %sys_result.err262, i8 %sys_flag260, 2
-  br label %ifcont264
-
-ifcont264:                                        ; preds = %then246, %then242
+then247:                                          ; preds = %then243
+  %fd_out248 = load i64, ptr %fd_out, align 4
+  %buf249 = load i64, ptr %buf, align 4
+  %start250 = load i64, ptr %start, align 4
+  %addtmp251 = add i64 %buf249, %start250
+  %j252 = load i64, ptr %j, align 4
+  %start253 = load i64, ptr %start, align 4
+  %subtmp254 = sub i64 %j252, %start253
+  %syscall_ret255 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 1, i64 %fd_out248, i64 %addtmp251, i64 %subtmp254)
+  %sys_is_err256 = icmp slt i64 %syscall_ret255, 0
+  %sys_neg_errno257 = sub i64 0, %syscall_ret255
+  %sys_err_ptr258 = inttoptr i64 %sys_neg_errno257 to ptr
+  %sys_val259 = select i1 %sys_is_err256, i64 0, i64 %syscall_ret255
+  %sys_err260 = select i1 %sys_is_err256, ptr %sys_err_ptr258, ptr null
+  %sys_flag261 = select i1 %sys_is_err256, i8 1, i8 0
+  %sys_result.val262 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val259, 0
+  %sys_result.err263 = insertvalue %struct.NpkResult_int64 %sys_result.val262, ptr %sys_err260, 1
+  %sys_result.is_error264 = insertvalue %struct.NpkResult_int64 %sys_result.err263, i8 %sys_flag261, 2
   br label %ifcont265
 
-ifcont265:                                        ; preds = %ifcont264, %afterwhile239
+ifcont265:                                        ; preds = %then247, %then243
   br label %ifcont266
 
-ifcont266:                                        ; preds = %ifcont265, %then108
+ifcont266:                                        ; preds = %ifcont265, %afterwhile240
+  br label %ifcont267
+
+ifcont267:                                        ; preds = %ifcont266, %then109
   call void @npk_gc_safepoint()
-  br label %whilecond80
+  br label %whilecond81
 
-afterwhile267:                                    ; preds = %whilecond80
-  %fd_out268 = load i64, ptr %fd_out, align 4
-  %netmp269 = icmp ne i64 %fd_out268, -1
-  %ifcond270 = icmp ne i1 %netmp269, false
-  br i1 %ifcond270, label %then271, label %ifcont272
+afterwhile268:                                    ; preds = %whilecond81
+  %fd_out269 = load i64, ptr %fd_out, align 4
+  %netmp270 = icmp ne i64 %fd_out269, -1
+  %ifcond271 = icmp ne i1 %netmp270, false
+  br i1 %ifcond271, label %then272, label %ifcont273
 
-then271:                                          ; preds = %afterwhile267
-  br label %ifcont272
+then272:                                          ; preds = %afterwhile268
+  br label %ifcont273
 
-ifcont272:                                        ; preds = %then271, %afterwhile267
-  %buf273 = load i64, ptr %buf, align 4
-  %calltmp274 = call i32 @nitpick_libc_mem_free(i64 %buf273)
+ifcont273:                                        ; preds = %then272, %afterwhile268
+  %buf274 = load i64, ptr %buf, align 4
+  %cast.inttoptr275 = inttoptr i64 %buf274 to ptr
+  call void @npk_free(ptr %cast.inttoptr275)
   ret { i32, ptr, i8 } zeroinitializer
 }
 
@@ -56113,7 +56124,6 @@ whilebody:                                        ; preds = %whilecond
   br i1 %null.deref, label %null.fail, label %null.ok
 
 null.fail:                                        ; preds = %whilebody
-  %0 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -56177,7 +56187,6 @@ whilebody:                                        ; preds = %whilecond
   br i1 %null.deref, label %null.fail, label %null.ok
 
 null.fail:                                        ; preds = %whilebody
-  %0 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -56925,7 +56934,6 @@ whilebody251:                                     ; preds = %whilecond246
   br i1 %null.deref, label %null.fail, label %null.ok
 
 null.fail:                                        ; preds = %whilebody251
-  %0 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -57020,7 +57028,6 @@ whilebody305:                                     ; preds = %whilecond300
   br i1 %null.deref314, label %null.fail315, label %null.ok316
 
 null.fail315:                                     ; preds = %whilebody305
-  %1 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -57054,7 +57061,6 @@ then322:                                          ; preds = %null.ok316
   br i1 %null.deref338, label %null.fail339, label %null.ok340
 
 null.fail339:                                     ; preds = %then322
-  %2 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -57080,7 +57086,6 @@ and.merge:                                        ; preds = %null.ok351, %null.o
   br i1 %and.lhs356, label %and.rhs357, label %and.merge358
 
 null.fail350:                                     ; preds = %and.rhs
-  %3 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -57106,7 +57111,6 @@ and.merge358:                                     ; preds = %null.ok366, %and.me
   br i1 %and.lhs372, label %and.rhs373, label %and.merge374
 
 null.fail365:                                     ; preds = %and.rhs357
-  %4 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -57132,7 +57136,6 @@ and.merge374:                                     ; preds = %null.ok382, %and.me
   br i1 %and.lhs388, label %and.rhs389, label %and.merge390
 
 null.fail381:                                     ; preds = %and.rhs373
-  %5 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -57158,7 +57161,6 @@ and.merge390:                                     ; preds = %null.ok398, %and.me
   br i1 %ifcond404, label %then405, label %ifcont408
 
 null.fail397:                                     ; preds = %and.rhs389
-  %6 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -57306,7 +57308,7 @@ ifcont492:                                        ; preds = %then477, %ifcont471
   %argv_idx502 = load i64, ptr %argv_idx, align 4
   %gttmp503 = icmp sgt i64 %argv_idx502, 0
   %ifcond504 = icmp ne i1 %gttmp503, false
-  br i1 %ifcond504, label %then505, label %ifcont786
+  br i1 %ifcond504, label %then505, label %ifcont785
 
 then505:                                          ; preds = %ifcont492
   %n_argv506 = load i64, ptr %n_argv, align 4
@@ -57318,7 +57320,6 @@ then505:                                          ; preds = %ifcont492
   br i1 %null.deref511, label %null.fail512, label %null.ok513
 
 null.fail512:                                     ; preds = %then505
-  %7 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -57336,7 +57337,6 @@ null.ok513:                                       ; preds = %then505
   br i1 %null.deref520, label %null.fail521, label %null.ok522
 
 null.fail521:                                     ; preds = %null.ok513
-  %8 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -57372,11 +57372,10 @@ or.merge532:                                      ; preds = %or.rhs531, %or.merg
   br i1 %ifcond537, label %then538, label %ifcont552
 
 then538:                                          ; preds = %or.merge532
-  %SYS_EXECVE = load i64, ptr @SYS_EXECVE, align 4
   %cmd_ptr539 = load i64, ptr %cmd_ptr, align 4
   %n_argv540 = load i64, ptr %n_argv, align 4
   %n_envp541 = load i64, ptr %n_envp, align 4
-  %syscall_ret542 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 %SYS_EXECVE, i64 %cmd_ptr539, i64 %n_argv540, i64 %n_envp541)
+  %syscall_ret542 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 59, i64 %cmd_ptr539, i64 %n_argv540, i64 %n_envp541)
   %sys_is_err543 = icmp slt i64 %syscall_ret542, 0
   %sys_neg_errno544 = sub i64 0, %syscall_ret542
   %sys_err_ptr545 = inttoptr i64 %sys_neg_errno544 to ptr
@@ -57455,7 +57454,6 @@ whilecond587:                                     ; preds = %whilebody601, %merg
   br i1 %null.deref595, label %null.fail596, label %null.ok597
 
 null.fail596:                                     ; preds = %whilecond587
-  %9 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -57480,11 +57478,11 @@ afterwhile604:                                    ; preds = %null.ok597
   store i32 1, ptr %run, align 4
   br label %whilecond605
 
-whilecond605:                                     ; preds = %ifcont782, %afterwhile604
+whilecond605:                                     ; preds = %ifcont781, %afterwhile604
   %run606 = load i32, ptr %run, align 4
   %eqtmp607 = icmp eq i32 %run606, 1
   %whilecond608 = icmp ne i1 %eqtmp607, false
-  br i1 %whilecond608, label %whilebody609, label %afterwhile785
+  br i1 %whilecond608, label %whilebody609, label %afterwhile784
 
 whilebody609:                                     ; preds = %whilecond605
   %pc = alloca i64, align 8
@@ -57499,7 +57497,6 @@ whilebody609:                                     ; preds = %whilecond605
   br i1 %null.deref617, label %null.fail618, label %null.ok619
 
 null.fail618:                                     ; preds = %whilebody609
-  %10 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -57540,7 +57537,6 @@ whilebody629:                                     ; preds = %whilecond628
   br i1 %null.deref637, label %null.fail638, label %null.ok639
 
 null.fail638:                                     ; preds = %whilebody629
-  %11 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -57615,7 +57611,6 @@ and.merge672:                                     ; preds = %null.ok683, %afterw
   br i1 %ifcond689, label %then690, label %ifcont700
 
 null.fail682:                                     ; preds = %and.rhs671
-  %12 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -57671,7 +57666,6 @@ whilebody706:                                     ; preds = %whilecond701
   br i1 %null.deref721, label %null.fail722, label %null.ok723
 
 null.fail722:                                     ; preds = %whilebody706
-  %13 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -57699,10 +57693,9 @@ afterwhile731:                                    ; preds = %whilecond701
   %cast.inttoptr738 = inttoptr i64 %addtmp737 to ptr
   store i8 0, ptr %cast.inttoptr738, align 1
   %res_stat = alloca i64, align 8
-  %SYS_STAT = load i64, ptr @SYS_STAT, align 4
   %pathbuf739 = load i64, ptr %pathbuf, align 4
   %statbuf740 = load i64, ptr %statbuf, align 4
-  %syscall_ret741 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 %SYS_STAT, i64 %pathbuf739, i64 %statbuf740)
+  %syscall_ret741 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 4, i64 %pathbuf739, i64 %statbuf740)
   %sys_is_err742 = icmp slt i64 %syscall_ret741, 0
   %sys_neg_errno743 = sub i64 0, %syscall_ret741
   %sys_err_ptr744 = inttoptr i64 %sys_neg_errno743 to ptr
@@ -57729,89 +57722,88 @@ merge_block755:                                   ; preds = %success_block754, %
   %res_stat758 = load i64, ptr %res_stat, align 4
   %eqtmp759 = icmp eq i64 %res_stat758, 0
   %ifcond760 = icmp ne i1 %eqtmp759, false
-  br i1 %ifcond760, label %then761, label %ifcont776
+  br i1 %ifcond760, label %then761, label %ifcont775
 
 then761:                                          ; preds = %merge_block755
-  %SYS_EXECVE762 = load i64, ptr @SYS_EXECVE, align 4
-  %pathbuf763 = load i64, ptr %pathbuf, align 4
-  %n_argv764 = load i64, ptr %n_argv, align 4
-  %n_envp765 = load i64, ptr %n_envp, align 4
-  %syscall_ret766 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 %SYS_EXECVE762, i64 %pathbuf763, i64 %n_argv764, i64 %n_envp765)
-  %sys_is_err767 = icmp slt i64 %syscall_ret766, 0
-  %sys_neg_errno768 = sub i64 0, %syscall_ret766
-  %sys_err_ptr769 = inttoptr i64 %sys_neg_errno768 to ptr
-  %sys_val770 = select i1 %sys_is_err767, i64 0, i64 %syscall_ret766
-  %sys_err771 = select i1 %sys_is_err767, ptr %sys_err_ptr769, ptr null
-  %sys_flag772 = select i1 %sys_is_err767, i8 1, i8 0
-  %sys_result.val773 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val770, 0
-  %sys_result.err774 = insertvalue %struct.NpkResult_int64 %sys_result.val773, ptr %sys_err771, 1
-  %sys_result.is_error775 = insertvalue %struct.NpkResult_int64 %sys_result.err774, i8 %sys_flag772, 2
-  br label %ifcont776
+  %pathbuf762 = load i64, ptr %pathbuf, align 4
+  %n_argv763 = load i64, ptr %n_argv, align 4
+  %n_envp764 = load i64, ptr %n_envp, align 4
+  %syscall_ret765 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 59, i64 %pathbuf762, i64 %n_argv763, i64 %n_envp764)
+  %sys_is_err766 = icmp slt i64 %syscall_ret765, 0
+  %sys_neg_errno767 = sub i64 0, %syscall_ret765
+  %sys_err_ptr768 = inttoptr i64 %sys_neg_errno767 to ptr
+  %sys_val769 = select i1 %sys_is_err766, i64 0, i64 %syscall_ret765
+  %sys_err770 = select i1 %sys_is_err766, ptr %sys_err_ptr768, ptr null
+  %sys_flag771 = select i1 %sys_is_err766, i8 1, i8 0
+  %sys_result.val772 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val769, 0
+  %sys_result.err773 = insertvalue %struct.NpkResult_int64 %sys_result.val772, ptr %sys_err770, 1
+  %sys_result.is_error774 = insertvalue %struct.NpkResult_int64 %sys_result.err773, i8 %sys_flag771, 2
+  br label %ifcont775
 
-ifcont776:                                        ; preds = %then761, %merge_block755
-  %pc777 = load i64, ptr %pc, align 4
-  %eqtmp778 = icmp eq i64 %pc777, 0
-  %ifcond779 = icmp ne i1 %eqtmp778, false
-  br i1 %ifcond779, label %then780, label %ifcont782
+ifcont775:                                        ; preds = %then761, %merge_block755
+  %pc776 = load i64, ptr %pc, align 4
+  %eqtmp777 = icmp eq i64 %pc776, 0
+  %ifcond778 = icmp ne i1 %eqtmp777, false
+  br i1 %ifcond778, label %then779, label %ifcont781
 
-then780:                                          ; preds = %ifcont776
-  br label %afterwhile785
+then779:                                          ; preds = %ifcont775
+  br label %afterwhile784
 
-afterbreak781:                                    ; No predecessors!
-  br label %ifcont782
+afterbreak780:                                    ; No predecessors!
+  br label %ifcont781
 
-ifcont782:                                        ; preds = %afterbreak781, %ifcont776
-  %tok_i783 = load i64, ptr %tok_i, align 4
-  %addtmp784 = add i64 %tok_i783, 1
-  store i64 %addtmp784, ptr %p_i, align 4
+ifcont781:                                        ; preds = %afterbreak780, %ifcont775
+  %tok_i782 = load i64, ptr %tok_i, align 4
+  %addtmp783 = add i64 %tok_i782, 1
+  store i64 %addtmp783, ptr %p_i, align 4
   call void @npk_gc_safepoint()
   br label %whilecond605
 
-afterwhile785:                                    ; preds = %then780, %whilecond605
-  br label %ifcont786
+afterwhile784:                                    ; preds = %then779, %whilecond605
+  br label %ifcont785
 
-ifcont786:                                        ; preds = %afterwhile785, %ifcont492
-  %calltmp787 = call { i32, ptr, i8 } @md5sum.print_err(ptr @.str.2791)
-  %env_fd788 = load i64, ptr %env_fd, align 4
-  %getmp789 = icmp sge i64 %env_fd788, 0
-  %ifcond790 = icmp ne i1 %getmp789, false
-  br i1 %ifcond790, label %then791, label %ifcont803
+ifcont785:                                        ; preds = %afterwhile784, %ifcont492
+  %calltmp786 = call { i32, ptr, i8 } @md5sum.print_err(ptr @.str.2791)
+  %env_fd787 = load i64, ptr %env_fd, align 4
+  %getmp788 = icmp sge i64 %env_fd787, 0
+  %ifcond789 = icmp ne i1 %getmp788, false
+  br i1 %ifcond789, label %then790, label %ifcont802
 
-then791:                                          ; preds = %ifcont786
-  %env_fd792 = load i64, ptr %env_fd, align 4
-  %syscall_ret793 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %env_fd792)
-  %sys_is_err794 = icmp slt i64 %syscall_ret793, 0
-  %sys_neg_errno795 = sub i64 0, %syscall_ret793
-  %sys_err_ptr796 = inttoptr i64 %sys_neg_errno795 to ptr
-  %sys_val797 = select i1 %sys_is_err794, i64 0, i64 %syscall_ret793
-  %sys_err798 = select i1 %sys_is_err794, ptr %sys_err_ptr796, ptr null
-  %sys_flag799 = select i1 %sys_is_err794, i8 1, i8 0
-  %sys_result.val800 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val797, 0
-  %sys_result.err801 = insertvalue %struct.NpkResult_int64 %sys_result.val800, ptr %sys_err798, 1
-  %sys_result.is_error802 = insertvalue %struct.NpkResult_int64 %sys_result.err801, i8 %sys_flag799, 2
-  br label %ifcont803
+then790:                                          ; preds = %ifcont785
+  %env_fd791 = load i64, ptr %env_fd, align 4
+  %syscall_ret792 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %env_fd791)
+  %sys_is_err793 = icmp slt i64 %syscall_ret792, 0
+  %sys_neg_errno794 = sub i64 0, %syscall_ret792
+  %sys_err_ptr795 = inttoptr i64 %sys_neg_errno794 to ptr
+  %sys_val796 = select i1 %sys_is_err793, i64 0, i64 %syscall_ret792
+  %sys_err797 = select i1 %sys_is_err793, ptr %sys_err_ptr795, ptr null
+  %sys_flag798 = select i1 %sys_is_err793, i8 1, i8 0
+  %sys_result.val799 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val796, 0
+  %sys_result.err800 = insertvalue %struct.NpkResult_int64 %sys_result.val799, ptr %sys_err797, 1
+  %sys_result.is_error801 = insertvalue %struct.NpkResult_int64 %sys_result.err800, i8 %sys_flag798, 2
+  br label %ifcont802
 
-ifcont803:                                        ; preds = %then791, %ifcont786
-  %fd804 = load i64, ptr %fd, align 4
-  %getmp805 = icmp sge i64 %fd804, 0
-  %ifcond806 = icmp ne i1 %getmp805, false
-  br i1 %ifcond806, label %then807, label %ifcont819
+ifcont802:                                        ; preds = %then790, %ifcont785
+  %fd803 = load i64, ptr %fd, align 4
+  %getmp804 = icmp sge i64 %fd803, 0
+  %ifcond805 = icmp ne i1 %getmp804, false
+  br i1 %ifcond805, label %then806, label %ifcont818
 
-then807:                                          ; preds = %ifcont803
-  %fd808 = load i64, ptr %fd, align 4
-  %syscall_ret809 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %fd808)
-  %sys_is_err810 = icmp slt i64 %syscall_ret809, 0
-  %sys_neg_errno811 = sub i64 0, %syscall_ret809
-  %sys_err_ptr812 = inttoptr i64 %sys_neg_errno811 to ptr
-  %sys_val813 = select i1 %sys_is_err810, i64 0, i64 %syscall_ret809
-  %sys_err814 = select i1 %sys_is_err810, ptr %sys_err_ptr812, ptr null
-  %sys_flag815 = select i1 %sys_is_err810, i8 1, i8 0
-  %sys_result.val816 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val813, 0
-  %sys_result.err817 = insertvalue %struct.NpkResult_int64 %sys_result.val816, ptr %sys_err814, 1
-  %sys_result.is_error818 = insertvalue %struct.NpkResult_int64 %sys_result.err817, i8 %sys_flag815, 2
-  br label %ifcont819
+then806:                                          ; preds = %ifcont802
+  %fd807 = load i64, ptr %fd, align 4
+  %syscall_ret808 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %fd807)
+  %sys_is_err809 = icmp slt i64 %syscall_ret808, 0
+  %sys_neg_errno810 = sub i64 0, %syscall_ret808
+  %sys_err_ptr811 = inttoptr i64 %sys_neg_errno810 to ptr
+  %sys_val812 = select i1 %sys_is_err809, i64 0, i64 %syscall_ret808
+  %sys_err813 = select i1 %sys_is_err809, ptr %sys_err_ptr811, ptr null
+  %sys_flag814 = select i1 %sys_is_err809, i8 1, i8 0
+  %sys_result.val815 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val812, 0
+  %sys_result.err816 = insertvalue %struct.NpkResult_int64 %sys_result.val815, ptr %sys_err813, 1
+  %sys_result.is_error817 = insertvalue %struct.NpkResult_int64 %sys_result.err816, i8 %sys_flag814, 2
+  br label %ifcont818
 
-ifcont819:                                        ; preds = %then807, %ifcont803
+ifcont818:                                        ; preds = %then806, %ifcont802
   ret { i32, ptr, i8 } { i32 1, ptr null, i8 0 }
 }
 
@@ -57918,10 +57910,13 @@ entry:
   store i64 65536, ptr %buf_size, align 4
   %buf = alloca i64, align 8
   %buf_size5 = load i64, ptr %buf_size, align 4
-  %calltmp6 = call i64 @malloc(i64 %buf_size5)
-  store i64 %calltmp6, ptr %buf, align 4
-  %buf7 = load i64, ptr %buf, align 4
-  %lttmp = icmp slt i64 %buf7, 0
+  %wild_ptr = call ptr @npk_alloc(i64 %buf_size5)
+  %buf_size6 = load i64, ptr %buf_size, align 4
+  %wild_ptr7 = call ptr @npk_alloc(i64 %buf_size6)
+  %cast.ptrtoint = ptrtoint ptr %wild_ptr7 to i64
+  store i64 %cast.ptrtoint, ptr %buf, align 4
+  %buf8 = load i64, ptr %buf, align 4
+  %lttmp = icmp slt i64 %buf8, 0
   %ifcond = icmp ne i1 %lttmp, false
   br i1 %ifcond, label %then, label %ifcont
 
@@ -57933,35 +57928,35 @@ ifcont:                                           ; preds = %entry
   store i32 1, ptr %i, align 4
   %ret = alloca i32, align 4
   store i32 0, ptr %ret, align 4
-  %arg_count8 = load i32, ptr %arg_count, align 4
-  %lttmp9 = icmp slt i32 %arg_count8, 1
-  %ifcond10 = icmp ne i1 %lttmp9, false
-  br i1 %ifcond10, label %then11, label %ifcont13
+  %arg_count9 = load i32, ptr %arg_count, align 4
+  %lttmp10 = icmp slt i32 %arg_count9, 1
+  %ifcond11 = icmp ne i1 %lttmp10, false
+  br i1 %ifcond11, label %then12, label %ifcont14
 
-then11:                                           ; preds = %ifcont
-  %calltmp12 = call { i32, ptr, i8 } @md5sum.print_err(ptr @.str.2793)
+then12:                                           ; preds = %ifcont
+  %calltmp13 = call { i32, ptr, i8 } @md5sum.print_err(ptr @.str.2793)
   ret { i32, ptr, i8 } { i32 1, ptr null, i8 0 }
 
-ifcont13:                                         ; preds = %ifcont
+ifcont14:                                         ; preds = %ifcont
   br label %whilecond
 
-whilecond:                                        ; preds = %ifcont141, %ifcont13
-  %i14 = load i32, ptr %i, align 4
-  %arg_count15 = load i32, ptr %arg_count, align 4
-  %letmp = icmp sle i32 %i14, %arg_count15
-  %whilecond16 = icmp ne i1 %letmp, false
-  br i1 %whilecond16, label %whilebody, label %afterwhile142
+whilecond:                                        ; preds = %ifcont142, %ifcont14
+  %i15 = load i32, ptr %i, align 4
+  %arg_count16 = load i32, ptr %arg_count, align 4
+  %letmp = icmp sle i32 %i15, %arg_count16
+  %whilecond17 = icmp ne i1 %letmp, false
+  br i1 %whilecond17, label %whilebody, label %afterwhile143
 
 whilebody:                                        ; preds = %whilecond
   %file = alloca ptr, align 8
-  %args17 = load ptr, ptr %args, align 8
-  %i18 = load i32, ptr %i, align 4
-  %calltmp19 = call { ptr, ptr, i8 } @nitpick_args.args_at(ptr %args17, i32 %i18)
-  %raw.value20 = extractvalue { ptr, ptr, i8 } %calltmp19, 0
-  store ptr %raw.value20, ptr %file, align 8
+  %args18 = load ptr, ptr %args, align 8
+  %i19 = load i32, ptr %i, align 4
+  %calltmp20 = call { ptr, ptr, i8 } @nitpick_args.args_at(ptr %args18, i32 %i19)
+  %raw.value21 = extractvalue { ptr, ptr, i8 } %calltmp20, 0
+  store ptr %raw.value21, ptr %file, align 8
   %fd = alloca i64, align 8
-  %file21 = load ptr, ptr %file, align 8
-  %sys_str_struct = load %struct.NpkString, ptr %file21, align 8
+  %file22 = load ptr, ptr %file, align 8
+  %sys_str_struct = load %struct.NpkString, ptr %file22, align 8
   %sys_str_data = extractvalue %struct.NpkString %sys_str_struct, 0
   %sys_strvar_int = ptrtoint ptr %sys_str_data to i64
   %syscall_ret = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 2, i64 %sys_strvar_int, i64 0, i64 0)
@@ -57988,18 +57983,18 @@ success_block:                                    ; preds = %whilebody
 merge_block:                                      ; preds = %success_block, %error_block
   %unwrap_result = phi i64 [ -1, %error_block ], [ %value, %success_block ]
   store i64 %unwrap_result, ptr %fd, align 4
-  %fd22 = load i64, ptr %fd, align 4
-  %lttmp23 = icmp slt i64 %fd22, 0
-  %ifcond24 = icmp ne i1 %lttmp23, false
-  br i1 %ifcond24, label %then25, label %else
+  %fd23 = load i64, ptr %fd, align 4
+  %lttmp24 = icmp slt i64 %fd23, 0
+  %ifcond25 = icmp ne i1 %lttmp24, false
+  br i1 %ifcond25, label %then26, label %else
 
-then25:                                           ; preds = %merge_block
-  %calltmp26 = call { i32, ptr, i8 } @md5sum.print_err(ptr @.str.2795)
-  %file27 = load ptr, ptr %file, align 8
-  %calltmp28 = call { i32, ptr, i8 } @md5sum.print_err(ptr %file27)
-  %calltmp29 = call { i32, ptr, i8 } @md5sum.print_err(ptr @.str.2797)
+then26:                                           ; preds = %merge_block
+  %calltmp27 = call { i32, ptr, i8 } @md5sum.print_err(ptr @.str.2795)
+  %file28 = load ptr, ptr %file, align 8
+  %calltmp29 = call { i32, ptr, i8 } @md5sum.print_err(ptr %file28)
+  %calltmp30 = call { i32, ptr, i8 } @md5sum.print_err(ptr @.str.2797)
   store i32 1, ptr %ret, align 4
-  br label %ifcont123
+  br label %ifcont124
 
 else:                                             ; preds = %merge_block
   %running = alloca i32, align 4
@@ -58008,214 +58003,214 @@ else:                                             ; preds = %merge_block
   store ptr @.str.2799, ptr %current_str, align 8
   %str_len = alloca i64, align 8
   store i64 0, ptr %str_len, align 4
-  br label %whilecond30
+  br label %whilecond31
 
-whilecond30:                                      ; preds = %ifcont115, %else
-  %running31 = load i32, ptr %running, align 4
-  %eqtmp = icmp eq i32 %running31, 1
-  %whilecond32 = icmp ne i1 %eqtmp, false
-  br i1 %whilecond32, label %whilebody33, label %afterwhile116
+whilecond31:                                      ; preds = %ifcont116, %else
+  %running32 = load i32, ptr %running, align 4
+  %eqtmp = icmp eq i32 %running32, 1
+  %whilecond33 = icmp ne i1 %eqtmp, false
+  br i1 %whilecond33, label %whilebody34, label %afterwhile117
 
-whilebody33:                                      ; preds = %whilecond30
+whilebody34:                                      ; preds = %whilecond31
   %n = alloca i64, align 8
-  %fd34 = load i64, ptr %fd, align 4
-  %buf35 = load i64, ptr %buf, align 4
-  %buf_size36 = load i64, ptr %buf_size, align 4
-  %syscall_ret37 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 0, i64 %fd34, i64 %buf35, i64 %buf_size36)
-  %sys_is_err38 = icmp slt i64 %syscall_ret37, 0
-  %sys_neg_errno39 = sub i64 0, %syscall_ret37
-  %sys_err_ptr40 = inttoptr i64 %sys_neg_errno39 to ptr
-  %sys_val41 = select i1 %sys_is_err38, i64 0, i64 %syscall_ret37
-  %sys_err42 = select i1 %sys_is_err38, ptr %sys_err_ptr40, ptr null
-  %sys_flag43 = select i1 %sys_is_err38, i8 1, i8 0
-  %sys_result.val44 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val41, 0
-  %sys_result.err45 = insertvalue %struct.NpkResult_int64 %sys_result.val44, ptr %sys_err42, 1
-  %sys_result.is_error46 = insertvalue %struct.NpkResult_int64 %sys_result.err45, i8 %sys_flag43, 2
-  %is_error47 = extractvalue %struct.NpkResult_int64 %sys_result.is_error46, 2
-  %is_error_bool48 = icmp ne i8 %is_error47, 0
-  br i1 %is_error_bool48, label %error_block49, label %success_block50
+  %fd35 = load i64, ptr %fd, align 4
+  %buf36 = load i64, ptr %buf, align 4
+  %buf_size37 = load i64, ptr %buf_size, align 4
+  %syscall_ret38 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 0, i64 %fd35, i64 %buf36, i64 %buf_size37)
+  %sys_is_err39 = icmp slt i64 %syscall_ret38, 0
+  %sys_neg_errno40 = sub i64 0, %syscall_ret38
+  %sys_err_ptr41 = inttoptr i64 %sys_neg_errno40 to ptr
+  %sys_val42 = select i1 %sys_is_err39, i64 0, i64 %syscall_ret38
+  %sys_err43 = select i1 %sys_is_err39, ptr %sys_err_ptr41, ptr null
+  %sys_flag44 = select i1 %sys_is_err39, i8 1, i8 0
+  %sys_result.val45 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val42, 0
+  %sys_result.err46 = insertvalue %struct.NpkResult_int64 %sys_result.val45, ptr %sys_err43, 1
+  %sys_result.is_error47 = insertvalue %struct.NpkResult_int64 %sys_result.err46, i8 %sys_flag44, 2
+  %is_error48 = extractvalue %struct.NpkResult_int64 %sys_result.is_error47, 2
+  %is_error_bool49 = icmp ne i8 %is_error48, 0
+  br i1 %is_error_bool49, label %error_block50, label %success_block51
 
-error_block49:                                    ; preds = %whilebody33
-  br label %merge_block51
+error_block50:                                    ; preds = %whilebody34
+  br label %merge_block52
 
-success_block50:                                  ; preds = %whilebody33
-  %value52 = extractvalue %struct.NpkResult_int64 %sys_result.is_error46, 0
-  br label %merge_block51
+success_block51:                                  ; preds = %whilebody34
+  %value53 = extractvalue %struct.NpkResult_int64 %sys_result.is_error47, 0
+  br label %merge_block52
 
-merge_block51:                                    ; preds = %success_block50, %error_block49
-  %unwrap_result53 = phi i64 [ -1, %error_block49 ], [ %value52, %success_block50 ]
-  store i64 %unwrap_result53, ptr %n, align 4
-  %n54 = load i64, ptr %n, align 4
-  %letmp55 = icmp sle i64 %n54, 0
-  %ifcond56 = icmp ne i1 %letmp55, false
-  br i1 %ifcond56, label %then57, label %else58
+merge_block52:                                    ; preds = %success_block51, %error_block50
+  %unwrap_result54 = phi i64 [ -1, %error_block50 ], [ %value53, %success_block51 ]
+  store i64 %unwrap_result54, ptr %n, align 4
+  %n55 = load i64, ptr %n, align 4
+  %letmp56 = icmp sle i64 %n55, 0
+  %ifcond57 = icmp ne i1 %letmp56, false
+  br i1 %ifcond57, label %then58, label %else59
 
-then57:                                           ; preds = %merge_block51
+then58:                                           ; preds = %merge_block52
   store i32 0, ptr %running, align 4
-  br label %ifcont115
+  br label %ifcont116
 
-else58:                                           ; preds = %merge_block51
+else59:                                           ; preds = %merge_block52
   %j = alloca i64, align 8
   store i64 0, ptr %j, align 4
-  br label %whilecond59
+  br label %whilecond60
 
-whilecond59:                                      ; preds = %ifcont112, %else58
-  %j60 = load i64, ptr %j, align 4
-  %n61 = load i64, ptr %n, align 4
-  %lttmp62 = icmp slt i64 %j60, %n61
-  %whilecond63 = icmp ne i1 %lttmp62, false
-  br i1 %whilecond63, label %whilebody64, label %afterwhile
+whilecond60:                                      ; preds = %ifcont113, %else59
+  %j61 = load i64, ptr %j, align 4
+  %n62 = load i64, ptr %n, align 4
+  %lttmp63 = icmp slt i64 %j61, %n62
+  %whilecond64 = icmp ne i1 %lttmp63, false
+  br i1 %whilecond64, label %whilebody65, label %afterwhile
 
-whilebody64:                                      ; preds = %whilecond59
+whilebody65:                                      ; preds = %whilecond60
   %c = alloca i64, align 8
-  %buf65 = load i64, ptr %buf, align 4
-  %j66 = load i64, ptr %j, align 4
-  %addtmp = add i64 %buf65, %j66
-  %buf67 = load i64, ptr %buf, align 4
-  %j68 = load i64, ptr %j, align 4
-  %addtmp69 = add i64 %buf67, %j68
-  %cast.inttoptr = inttoptr i64 %addtmp69 to ptr
+  %buf66 = load i64, ptr %buf, align 4
+  %j67 = load i64, ptr %j, align 4
+  %addtmp = add i64 %buf66, %j67
+  %buf68 = load i64, ptr %buf, align 4
+  %j69 = load i64, ptr %j, align 4
+  %addtmp70 = add i64 %buf68, %j69
+  %cast.inttoptr = inttoptr i64 %addtmp70 to ptr
   %null.deref = icmp eq ptr %cast.inttoptr, null
   br i1 %null.deref, label %null.fail, label %null.ok
 
-null.fail:                                        ; preds = %whilebody64
-  %0 = call i32 @failsafe(i32 46)
+null.fail:                                        ; preds = %whilebody65
   call void @exit(i32 46)
   unreachable
 
-null.ok:                                          ; preds = %whilebody64
+null.ok:                                          ; preds = %whilebody65
   %deref = load i32, ptr %cast.inttoptr, align 4
   %cast.sext = sext i32 %deref to i64
   store i64 %cast.sext, ptr %c, align 4
-  %c70 = load i64, ptr %c, align 4
-  %calltmp71 = call { i32, ptr, i8 } @strings.is_printable(i64 %c70)
-  %raw.value72 = extractvalue { i32, ptr, i8 } %calltmp71, 0
-  %eqtmp73 = icmp eq i32 %raw.value72, 1
-  %ifcond74 = icmp ne i1 %eqtmp73, false
-  br i1 %ifcond74, label %then75, label %else106
+  %c71 = load i64, ptr %c, align 4
+  %calltmp72 = call { i32, ptr, i8 } @strings.is_printable(i64 %c71)
+  %raw.value73 = extractvalue { i32, ptr, i8 } %calltmp72, 0
+  %eqtmp74 = icmp eq i32 %raw.value73, 1
+  %ifcond75 = icmp ne i1 %eqtmp74, false
+  br i1 %ifcond75, label %then76, label %else107
 
-then75:                                           ; preds = %null.ok
-  %str_len76 = load i64, ptr %str_len, align 4
-  %lttmp77 = icmp slt i64 %str_len76, 4
-  %ifcond78 = icmp ne i1 %lttmp77, false
-  br i1 %ifcond78, label %then79, label %else91
+then76:                                           ; preds = %null.ok
+  %str_len77 = load i64, ptr %str_len, align 4
+  %lttmp78 = icmp slt i64 %str_len77, 4
+  %ifcond79 = icmp ne i1 %lttmp78, false
+  br i1 %ifcond79, label %then80, label %else92
 
-then79:                                           ; preds = %then75
-  %current_str80 = load ptr, ptr %current_str, align 8
-  %c81 = load i64, ptr %c, align 4
-  %cast.trunc = trunc i64 %c81 to i8
+then80:                                           ; preds = %then76
+  %current_str81 = load ptr, ptr %current_str, align 8
+  %c82 = load i64, ptr %c, align 4
+  %cast.trunc = trunc i64 %c82 to i8
   %char_str = call ptr @npk_string_from_char_simple(i8 %cast.trunc)
-  %concat_str = call ptr @npk_string_concat_simple(ptr %current_str80, ptr %char_str)
+  %concat_str = call ptr @npk_string_concat_simple(ptr %current_str81, ptr %char_str)
   store ptr %concat_str, ptr %current_str, align 8
-  %str_len82 = load i64, ptr %str_len, align 4
-  %addtmp83 = add i64 %str_len82, 1
-  store i64 %addtmp83, ptr %str_len, align 4
-  %str_len84 = load i64, ptr %str_len, align 4
-  %eqtmp85 = icmp eq i64 %str_len84, 4
-  %ifcond86 = icmp ne i1 %eqtmp85, false
-  br i1 %ifcond86, label %then87, label %ifcont90
+  %str_len83 = load i64, ptr %str_len, align 4
+  %addtmp84 = add i64 %str_len83, 1
+  store i64 %addtmp84, ptr %str_len, align 4
+  %str_len85 = load i64, ptr %str_len, align 4
+  %eqtmp86 = icmp eq i64 %str_len85, 4
+  %ifcond87 = icmp ne i1 %eqtmp86, false
+  br i1 %ifcond87, label %then88, label %ifcont91
 
-then87:                                           ; preds = %then79
-  %current_str88 = load ptr, ptr %current_str, align 8
-  %calltmp89 = call { i32, ptr, i8 } @logname.print_str_safe(ptr %current_str88)
-  br label %ifcont90
+then88:                                           ; preds = %then80
+  %current_str89 = load ptr, ptr %current_str, align 8
+  %calltmp90 = call { i32, ptr, i8 } @logname.print_str_safe(ptr %current_str89)
+  br label %ifcont91
 
-ifcont90:                                         ; preds = %then87, %then79
-  br label %ifcont105
+ifcont91:                                         ; preds = %then88, %then80
+  br label %ifcont106
 
-else91:                                           ; preds = %then75
-  %buf92 = load i64, ptr %buf, align 4
-  %j93 = load i64, ptr %j, align 4
-  %addtmp94 = add i64 %buf92, %j93
-  %syscall_ret95 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 1, i64 1, i64 %addtmp94, i64 1)
-  %sys_is_err96 = icmp slt i64 %syscall_ret95, 0
-  %sys_neg_errno97 = sub i64 0, %syscall_ret95
-  %sys_err_ptr98 = inttoptr i64 %sys_neg_errno97 to ptr
-  %sys_val99 = select i1 %sys_is_err96, i64 0, i64 %syscall_ret95
-  %sys_err100 = select i1 %sys_is_err96, ptr %sys_err_ptr98, ptr null
-  %sys_flag101 = select i1 %sys_is_err96, i8 1, i8 0
-  %sys_result.val102 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val99, 0
-  %sys_result.err103 = insertvalue %struct.NpkResult_int64 %sys_result.val102, ptr %sys_err100, 1
-  %sys_result.is_error104 = insertvalue %struct.NpkResult_int64 %sys_result.err103, i8 %sys_flag101, 2
-  br label %ifcont105
+else92:                                           ; preds = %then76
+  %buf93 = load i64, ptr %buf, align 4
+  %j94 = load i64, ptr %j, align 4
+  %addtmp95 = add i64 %buf93, %j94
+  %syscall_ret96 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 1, i64 1, i64 %addtmp95, i64 1)
+  %sys_is_err97 = icmp slt i64 %syscall_ret96, 0
+  %sys_neg_errno98 = sub i64 0, %syscall_ret96
+  %sys_err_ptr99 = inttoptr i64 %sys_neg_errno98 to ptr
+  %sys_val100 = select i1 %sys_is_err97, i64 0, i64 %syscall_ret96
+  %sys_err101 = select i1 %sys_is_err97, ptr %sys_err_ptr99, ptr null
+  %sys_flag102 = select i1 %sys_is_err97, i8 1, i8 0
+  %sys_result.val103 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val100, 0
+  %sys_result.err104 = insertvalue %struct.NpkResult_int64 %sys_result.val103, ptr %sys_err101, 1
+  %sys_result.is_error105 = insertvalue %struct.NpkResult_int64 %sys_result.err104, i8 %sys_flag102, 2
+  br label %ifcont106
 
-ifcont105:                                        ; preds = %else91, %ifcont90
+ifcont106:                                        ; preds = %else92, %ifcont91
+  br label %ifcont113
+
+else107:                                          ; preds = %null.ok
+  %str_len108 = load i64, ptr %str_len, align 4
+  %getmp = icmp sge i64 %str_len108, 4
+  %ifcond109 = icmp ne i1 %getmp, false
+  br i1 %ifcond109, label %then110, label %ifcont112
+
+then110:                                          ; preds = %else107
+  %calltmp111 = call { i32, ptr, i8 } @logname.print_str_safe(ptr @.str.2801)
   br label %ifcont112
 
-else106:                                          ; preds = %null.ok
-  %str_len107 = load i64, ptr %str_len, align 4
-  %getmp = icmp sge i64 %str_len107, 4
-  %ifcond108 = icmp ne i1 %getmp, false
-  br i1 %ifcond108, label %then109, label %ifcont111
-
-then109:                                          ; preds = %else106
-  %calltmp110 = call { i32, ptr, i8 } @logname.print_str_safe(ptr @.str.2801)
-  br label %ifcont111
-
-ifcont111:                                        ; preds = %then109, %else106
+ifcont112:                                        ; preds = %then110, %else107
   store i64 0, ptr %str_len, align 4
   store ptr @.str.2803, ptr %current_str, align 8
-  br label %ifcont112
+  br label %ifcont113
 
-ifcont112:                                        ; preds = %ifcont111, %ifcont105
-  %j113 = load i64, ptr %j, align 4
-  %addtmp114 = add i64 %j113, 1
-  store i64 %addtmp114, ptr %j, align 4
+ifcont113:                                        ; preds = %ifcont112, %ifcont106
+  %j114 = load i64, ptr %j, align 4
+  %addtmp115 = add i64 %j114, 1
+  store i64 %addtmp115, ptr %j, align 4
   call void @npk_gc_safepoint()
-  br label %whilecond59
+  br label %whilecond60
 
-afterwhile:                                       ; preds = %whilecond59
-  br label %ifcont115
+afterwhile:                                       ; preds = %whilecond60
+  br label %ifcont116
 
-ifcont115:                                        ; preds = %afterwhile, %then57
+ifcont116:                                        ; preds = %afterwhile, %then58
   call void @npk_gc_safepoint()
-  br label %whilecond30
+  br label %whilecond31
 
-afterwhile116:                                    ; preds = %whilecond30
-  %str_len117 = load i64, ptr %str_len, align 4
-  %getmp118 = icmp sge i64 %str_len117, 4
-  %ifcond119 = icmp ne i1 %getmp118, false
-  br i1 %ifcond119, label %then120, label %ifcont122
+afterwhile117:                                    ; preds = %whilecond31
+  %str_len118 = load i64, ptr %str_len, align 4
+  %getmp119 = icmp sge i64 %str_len118, 4
+  %ifcond120 = icmp ne i1 %getmp119, false
+  br i1 %ifcond120, label %then121, label %ifcont123
 
-then120:                                          ; preds = %afterwhile116
-  %calltmp121 = call { i32, ptr, i8 } @logname.print_str_safe(ptr @.str.2805)
-  br label %ifcont122
-
-ifcont122:                                        ; preds = %then120, %afterwhile116
+then121:                                          ; preds = %afterwhile117
+  %calltmp122 = call { i32, ptr, i8 } @logname.print_str_safe(ptr @.str.2805)
   br label %ifcont123
 
-ifcont123:                                        ; preds = %ifcont122, %then25
-  %i124 = load i32, ptr %i, align 4
-  %addtmp125 = add i32 %i124, 1
-  store i32 %addtmp125, ptr %i, align 4
-  %fd126 = load i64, ptr %fd, align 4
-  %getmp127 = icmp sge i64 %fd126, 0
-  %ifcond128 = icmp ne i1 %getmp127, false
-  br i1 %ifcond128, label %then129, label %ifcont141
+ifcont123:                                        ; preds = %then121, %afterwhile117
+  br label %ifcont124
 
-then129:                                          ; preds = %ifcont123
-  %fd130 = load i64, ptr %fd, align 4
-  %syscall_ret131 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %fd130)
-  %sys_is_err132 = icmp slt i64 %syscall_ret131, 0
-  %sys_neg_errno133 = sub i64 0, %syscall_ret131
-  %sys_err_ptr134 = inttoptr i64 %sys_neg_errno133 to ptr
-  %sys_val135 = select i1 %sys_is_err132, i64 0, i64 %syscall_ret131
-  %sys_err136 = select i1 %sys_is_err132, ptr %sys_err_ptr134, ptr null
-  %sys_flag137 = select i1 %sys_is_err132, i8 1, i8 0
-  %sys_result.val138 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val135, 0
-  %sys_result.err139 = insertvalue %struct.NpkResult_int64 %sys_result.val138, ptr %sys_err136, 1
-  %sys_result.is_error140 = insertvalue %struct.NpkResult_int64 %sys_result.err139, i8 %sys_flag137, 2
-  br label %ifcont141
+ifcont124:                                        ; preds = %ifcont123, %then26
+  %i125 = load i32, ptr %i, align 4
+  %addtmp126 = add i32 %i125, 1
+  store i32 %addtmp126, ptr %i, align 4
+  %fd127 = load i64, ptr %fd, align 4
+  %getmp128 = icmp sge i64 %fd127, 0
+  %ifcond129 = icmp ne i1 %getmp128, false
+  br i1 %ifcond129, label %then130, label %ifcont142
 
-ifcont141:                                        ; preds = %then129, %ifcont123
+then130:                                          ; preds = %ifcont124
+  %fd131 = load i64, ptr %fd, align 4
+  %syscall_ret132 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %fd131)
+  %sys_is_err133 = icmp slt i64 %syscall_ret132, 0
+  %sys_neg_errno134 = sub i64 0, %syscall_ret132
+  %sys_err_ptr135 = inttoptr i64 %sys_neg_errno134 to ptr
+  %sys_val136 = select i1 %sys_is_err133, i64 0, i64 %syscall_ret132
+  %sys_err137 = select i1 %sys_is_err133, ptr %sys_err_ptr135, ptr null
+  %sys_flag138 = select i1 %sys_is_err133, i8 1, i8 0
+  %sys_result.val139 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val136, 0
+  %sys_result.err140 = insertvalue %struct.NpkResult_int64 %sys_result.val139, ptr %sys_err137, 1
+  %sys_result.is_error141 = insertvalue %struct.NpkResult_int64 %sys_result.err140, i8 %sys_flag138, 2
+  br label %ifcont142
+
+ifcont142:                                        ; preds = %then130, %ifcont124
   call void @npk_gc_safepoint()
   br label %whilecond
 
-afterwhile142:                                    ; preds = %whilecond
-  %buf143 = load i64, ptr %buf, align 4
-  %calltmp144 = call i32 @nitpick_libc_mem_free(i64 %buf143)
-  %ret145 = load i32, ptr %ret, align 4
-  %result.val = insertvalue { i32, ptr, i8 } undef, i32 %ret145, 0
+afterwhile143:                                    ; preds = %whilecond
+  %buf144 = load i64, ptr %buf, align 4
+  %cast.inttoptr145 = inttoptr i64 %buf144 to ptr
+  call void @npk_free(ptr %cast.inttoptr145)
+  %ret146 = load i32, ptr %ret, align 4
+  %result.val = insertvalue { i32, ptr, i8 } undef, i32 %ret146, 0
   %result.err = insertvalue { i32, ptr, i8 } %result.val, ptr null, 1
   %result.is_error = insertvalue { i32, ptr, i8 } %result.err, i8 0, 2
   ret { i32, ptr, i8 } %result.is_error
@@ -58800,49 +58795,52 @@ ifcont:                                           ; preds = %then, %entry
   store i64 65536, ptr %buf_size, align 4
   %buf = alloca i64, align 8
   %buf_size8 = load i64, ptr %buf_size, align 4
-  %calltmp9 = call i64 @malloc(i64 %buf_size8)
-  store i64 %calltmp9, ptr %buf, align 4
-  %buf10 = load i64, ptr %buf, align 4
-  %lttmp11 = icmp slt i64 %buf10, 0
-  %ifcond12 = icmp ne i1 %lttmp11, false
-  br i1 %ifcond12, label %then13, label %ifcont14
+  %wild_ptr = call ptr @npk_alloc(i64 %buf_size8)
+  %buf_size9 = load i64, ptr %buf_size, align 4
+  %wild_ptr10 = call ptr @npk_alloc(i64 %buf_size9)
+  %cast.ptrtoint = ptrtoint ptr %wild_ptr10 to i64
+  store i64 %cast.ptrtoint, ptr %buf, align 4
+  %buf11 = load i64, ptr %buf, align 4
+  %lttmp12 = icmp slt i64 %buf11, 0
+  %ifcond13 = icmp ne i1 %lttmp12, false
+  br i1 %ifcond13, label %then14, label %ifcont15
 
-then13:                                           ; preds = %ifcont
+then14:                                           ; preds = %ifcont
   ret { i32, ptr, i8 } { i32 1, ptr null, i8 0 }
 
-ifcont14:                                         ; preds = %ifcont
+ifcont15:                                         ; preds = %ifcont
   br label %whilecond
 
-whilecond:                                        ; preds = %ifcont131, %ifcont14
-  %i15 = load i32, ptr %i, align 4
-  %arg_count16 = load i32, ptr %arg_count, align 4
-  %letmp = icmp sle i32 %i15, %arg_count16
-  %whilecond17 = icmp ne i1 %letmp, false
-  br i1 %whilecond17, label %whilebody, label %afterwhile132
+whilecond:                                        ; preds = %ifcont132, %ifcont15
+  %i16 = load i32, ptr %i, align 4
+  %arg_count17 = load i32, ptr %arg_count, align 4
+  %letmp = icmp sle i32 %i16, %arg_count17
+  %whilecond18 = icmp ne i1 %letmp, false
+  br i1 %whilecond18, label %whilebody, label %afterwhile133
 
 whilebody:                                        ; preds = %whilecond
   %file = alloca ptr, align 8
-  %args18 = load ptr, ptr %args, align 8
-  %i19 = load i32, ptr %i, align 4
-  %calltmp20 = call { ptr, ptr, i8 } @nitpick_args.args_at(ptr %args18, i32 %i19)
-  %raw.value21 = extractvalue { ptr, ptr, i8 } %calltmp20, 0
-  store ptr %raw.value21, ptr %file, align 8
+  %args19 = load ptr, ptr %args, align 8
+  %i20 = load i32, ptr %i, align 4
+  %calltmp21 = call { ptr, ptr, i8 } @nitpick_args.args_at(ptr %args19, i32 %i20)
+  %raw.value22 = extractvalue { ptr, ptr, i8 } %calltmp21, 0
+  store ptr %raw.value22, ptr %file, align 8
   %fd = alloca i64, align 8
   store i64 0, ptr %fd, align 4
-  %file22 = load ptr, ptr %file, align 8
-  %str1 = load %struct.NpkString, ptr %file22, align 8
+  %file23 = load ptr, ptr %file, align 8
+  %str1 = load %struct.NpkString, ptr %file23, align 8
   %str2 = load %struct.NpkString, ptr @.str.2815, align 8
   %equals = call i1 @npk_string_equals(%struct.NpkString %str1, %struct.NpkString %str2)
-  %ifcond23 = icmp ne i1 %equals, false
-  br i1 %ifcond23, label %then24, label %else
+  %ifcond24 = icmp ne i1 %equals, false
+  br i1 %ifcond24, label %then25, label %else
 
-then24:                                           ; preds = %whilebody
+then25:                                           ; preds = %whilebody
   store i64 0, ptr %fd, align 4
-  br label %ifcont26
+  br label %ifcont27
 
 else:                                             ; preds = %whilebody
-  %file25 = load ptr, ptr %file, align 8
-  %sys_str_struct = load %struct.NpkString, ptr %file25, align 8
+  %file26 = load ptr, ptr %file, align 8
+  %sys_str_struct = load %struct.NpkString, ptr %file26, align 8
   %sys_str_data = extractvalue %struct.NpkString %sys_str_struct, 0
   %sys_strvar_int = ptrtoint ptr %sys_str_data to i64
   %syscall_ret = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 2, i64 %sys_strvar_int, i64 0, i64 0)
@@ -58869,205 +58867,205 @@ success_block:                                    ; preds = %else
 merge_block:                                      ; preds = %success_block, %error_block
   %unwrap_result = phi i64 [ -1, %error_block ], [ %value, %success_block ]
   store i64 %unwrap_result, ptr %fd, align 4
-  br label %ifcont26
+  br label %ifcont27
 
-ifcont26:                                         ; preds = %merge_block, %then24
-  %fd27 = load i64, ptr %fd, align 4
-  %lttmp28 = icmp slt i64 %fd27, 0
-  %ifcond29 = icmp ne i1 %lttmp28, false
-  br i1 %ifcond29, label %then30, label %else35
+ifcont27:                                         ; preds = %merge_block, %then25
+  %fd28 = load i64, ptr %fd, align 4
+  %lttmp29 = icmp slt i64 %fd28, 0
+  %ifcond30 = icmp ne i1 %lttmp29, false
+  br i1 %ifcond30, label %then31, label %else36
 
-then30:                                           ; preds = %ifcont26
-  %calltmp31 = call { i32, ptr, i8 } @md5sum.print_err(ptr @.str.2817)
-  %file32 = load ptr, ptr %file, align 8
-  %calltmp33 = call { i32, ptr, i8 } @md5sum.print_err(ptr %file32)
-  %calltmp34 = call { i32, ptr, i8 } @md5sum.print_err(ptr @.str.2819)
+then31:                                           ; preds = %ifcont27
+  %calltmp32 = call { i32, ptr, i8 } @md5sum.print_err(ptr @.str.2817)
+  %file33 = load ptr, ptr %file, align 8
+  %calltmp34 = call { i32, ptr, i8 } @md5sum.print_err(ptr %file33)
+  %calltmp35 = call { i32, ptr, i8 } @md5sum.print_err(ptr @.str.2819)
   store i32 1, ptr %ret, align 4
-  br label %ifcont114
+  br label %ifcont115
 
-else35:                                           ; preds = %ifcont26
+else36:                                           ; preds = %ifcont27
   %checksum = alloca i64, align 8
   store i64 0, ptr %checksum, align 4
   %bytes = alloca i64, align 8
   store i64 0, ptr %bytes, align 4
   %running = alloca i32, align 4
   store i32 1, ptr %running, align 4
-  br label %whilecond36
+  br label %whilecond37
 
-whilecond36:                                      ; preds = %ifcont97, %else35
-  %running37 = load i32, ptr %running, align 4
-  %eqtmp = icmp eq i32 %running37, 1
-  %whilecond38 = icmp ne i1 %eqtmp, false
-  br i1 %whilecond38, label %whilebody39, label %afterwhile98
+whilecond37:                                      ; preds = %ifcont98, %else36
+  %running38 = load i32, ptr %running, align 4
+  %eqtmp = icmp eq i32 %running38, 1
+  %whilecond39 = icmp ne i1 %eqtmp, false
+  br i1 %whilecond39, label %whilebody40, label %afterwhile99
 
-whilebody39:                                      ; preds = %whilecond36
+whilebody40:                                      ; preds = %whilecond37
   %n = alloca i64, align 8
-  %fd40 = load i64, ptr %fd, align 4
-  %buf41 = load i64, ptr %buf, align 4
-  %buf_size42 = load i64, ptr %buf_size, align 4
-  %syscall_ret43 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 0, i64 %fd40, i64 %buf41, i64 %buf_size42)
-  %sys_is_err44 = icmp slt i64 %syscall_ret43, 0
-  %sys_neg_errno45 = sub i64 0, %syscall_ret43
-  %sys_err_ptr46 = inttoptr i64 %sys_neg_errno45 to ptr
-  %sys_val47 = select i1 %sys_is_err44, i64 0, i64 %syscall_ret43
-  %sys_err48 = select i1 %sys_is_err44, ptr %sys_err_ptr46, ptr null
-  %sys_flag49 = select i1 %sys_is_err44, i8 1, i8 0
-  %sys_result.val50 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val47, 0
-  %sys_result.err51 = insertvalue %struct.NpkResult_int64 %sys_result.val50, ptr %sys_err48, 1
-  %sys_result.is_error52 = insertvalue %struct.NpkResult_int64 %sys_result.err51, i8 %sys_flag49, 2
-  %is_error53 = extractvalue %struct.NpkResult_int64 %sys_result.is_error52, 2
-  %is_error_bool54 = icmp ne i8 %is_error53, 0
-  br i1 %is_error_bool54, label %error_block55, label %success_block56
+  %fd41 = load i64, ptr %fd, align 4
+  %buf42 = load i64, ptr %buf, align 4
+  %buf_size43 = load i64, ptr %buf_size, align 4
+  %syscall_ret44 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 0, i64 %fd41, i64 %buf42, i64 %buf_size43)
+  %sys_is_err45 = icmp slt i64 %syscall_ret44, 0
+  %sys_neg_errno46 = sub i64 0, %syscall_ret44
+  %sys_err_ptr47 = inttoptr i64 %sys_neg_errno46 to ptr
+  %sys_val48 = select i1 %sys_is_err45, i64 0, i64 %syscall_ret44
+  %sys_err49 = select i1 %sys_is_err45, ptr %sys_err_ptr47, ptr null
+  %sys_flag50 = select i1 %sys_is_err45, i8 1, i8 0
+  %sys_result.val51 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val48, 0
+  %sys_result.err52 = insertvalue %struct.NpkResult_int64 %sys_result.val51, ptr %sys_err49, 1
+  %sys_result.is_error53 = insertvalue %struct.NpkResult_int64 %sys_result.err52, i8 %sys_flag50, 2
+  %is_error54 = extractvalue %struct.NpkResult_int64 %sys_result.is_error53, 2
+  %is_error_bool55 = icmp ne i8 %is_error54, 0
+  br i1 %is_error_bool55, label %error_block56, label %success_block57
 
-error_block55:                                    ; preds = %whilebody39
-  br label %merge_block57
+error_block56:                                    ; preds = %whilebody40
+  br label %merge_block58
 
-success_block56:                                  ; preds = %whilebody39
-  %value58 = extractvalue %struct.NpkResult_int64 %sys_result.is_error52, 0
-  br label %merge_block57
+success_block57:                                  ; preds = %whilebody40
+  %value59 = extractvalue %struct.NpkResult_int64 %sys_result.is_error53, 0
+  br label %merge_block58
 
-merge_block57:                                    ; preds = %success_block56, %error_block55
-  %unwrap_result59 = phi i64 [ -1, %error_block55 ], [ %value58, %success_block56 ]
-  store i64 %unwrap_result59, ptr %n, align 4
-  %n60 = load i64, ptr %n, align 4
-  %letmp61 = icmp sle i64 %n60, 0
-  %ifcond62 = icmp ne i1 %letmp61, false
-  br i1 %ifcond62, label %then63, label %else64
+merge_block58:                                    ; preds = %success_block57, %error_block56
+  %unwrap_result60 = phi i64 [ -1, %error_block56 ], [ %value59, %success_block57 ]
+  store i64 %unwrap_result60, ptr %n, align 4
+  %n61 = load i64, ptr %n, align 4
+  %letmp62 = icmp sle i64 %n61, 0
+  %ifcond63 = icmp ne i1 %letmp62, false
+  br i1 %ifcond63, label %then64, label %else65
 
-then63:                                           ; preds = %merge_block57
+then64:                                           ; preds = %merge_block58
   store i32 0, ptr %running, align 4
-  br label %ifcont97
+  br label %ifcont98
 
-else64:                                           ; preds = %merge_block57
+else65:                                           ; preds = %merge_block58
   %j = alloca i64, align 8
   store i64 0, ptr %j, align 4
-  br label %whilecond65
+  br label %whilecond66
 
-whilecond65:                                      ; preds = %null.ok, %else64
-  %j66 = load i64, ptr %j, align 4
-  %n67 = load i64, ptr %n, align 4
-  %lttmp68 = icmp slt i64 %j66, %n67
-  %whilecond69 = icmp ne i1 %lttmp68, false
-  br i1 %whilecond69, label %whilebody70, label %afterwhile
+whilecond66:                                      ; preds = %null.ok, %else65
+  %j67 = load i64, ptr %j, align 4
+  %n68 = load i64, ptr %n, align 4
+  %lttmp69 = icmp slt i64 %j67, %n68
+  %whilecond70 = icmp ne i1 %lttmp69, false
+  br i1 %whilecond70, label %whilebody71, label %afterwhile
 
-whilebody70:                                      ; preds = %whilecond65
+whilebody71:                                      ; preds = %whilecond66
   %c = alloca i64, align 8
-  %buf71 = load i64, ptr %buf, align 4
-  %j72 = load i64, ptr %j, align 4
-  %addtmp = add i64 %buf71, %j72
-  %buf73 = load i64, ptr %buf, align 4
-  %j74 = load i64, ptr %j, align 4
-  %addtmp75 = add i64 %buf73, %j74
-  %cast.inttoptr = inttoptr i64 %addtmp75 to ptr
+  %buf72 = load i64, ptr %buf, align 4
+  %j73 = load i64, ptr %j, align 4
+  %addtmp = add i64 %buf72, %j73
+  %buf74 = load i64, ptr %buf, align 4
+  %j75 = load i64, ptr %j, align 4
+  %addtmp76 = add i64 %buf74, %j75
+  %cast.inttoptr = inttoptr i64 %addtmp76 to ptr
   %null.deref = icmp eq ptr %cast.inttoptr, null
   br i1 %null.deref, label %null.fail, label %null.ok
 
-null.fail:                                        ; preds = %whilebody70
-  %0 = call i32 @failsafe(i32 46)
+null.fail:                                        ; preds = %whilebody71
   call void @exit(i32 46)
   unreachable
 
-null.ok:                                          ; preds = %whilebody70
+null.ok:                                          ; preds = %whilebody71
   %deref = load i32, ptr %cast.inttoptr, align 4
   %cast.sext = sext i32 %deref to i64
   store i64 %cast.sext, ptr %c, align 4
   %bit = alloca i64, align 8
-  %checksum76 = load i64, ptr %checksum, align 4
   %checksum77 = load i64, ptr %checksum, align 4
-  %divtmp = sdiv i64 %checksum77, 2
+  %checksum78 = load i64, ptr %checksum, align 4
+  %divtmp = sdiv i64 %checksum78, 2
   %safe.divtmp = select i1 false, i64 9223372036854775807, i64 %divtmp
   %multmp = mul i64 %safe.divtmp, 2
-  %subtmp = sub i64 %checksum76, %multmp
+  %subtmp = sub i64 %checksum77, %multmp
   store i64 %subtmp, ptr %bit, align 4
-  %checksum78 = load i64, ptr %checksum, align 4
-  %divtmp79 = sdiv i64 %checksum78, 2
-  %safe.divtmp80 = select i1 false, i64 9223372036854775807, i64 %divtmp79
-  %bit81 = load i64, ptr %bit, align 4
-  %multmp82 = mul i64 %bit81, 32768
-  %addtmp83 = add i64 %safe.divtmp80, %multmp82
-  store i64 %addtmp83, ptr %checksum, align 4
-  %checksum84 = load i64, ptr %checksum, align 4
-  %c85 = load i64, ptr %c, align 4
-  %addtmp86 = add i64 %checksum84, %c85
-  store i64 %addtmp86, ptr %checksum, align 4
-  %checksum87 = load i64, ptr %checksum, align 4
+  %checksum79 = load i64, ptr %checksum, align 4
+  %divtmp80 = sdiv i64 %checksum79, 2
+  %safe.divtmp81 = select i1 false, i64 9223372036854775807, i64 %divtmp80
+  %bit82 = load i64, ptr %bit, align 4
+  %multmp83 = mul i64 %bit82, 32768
+  %addtmp84 = add i64 %safe.divtmp81, %multmp83
+  store i64 %addtmp84, ptr %checksum, align 4
+  %checksum85 = load i64, ptr %checksum, align 4
+  %c86 = load i64, ptr %c, align 4
+  %addtmp87 = add i64 %checksum85, %c86
+  store i64 %addtmp87, ptr %checksum, align 4
   %checksum88 = load i64, ptr %checksum, align 4
-  %divtmp89 = sdiv i64 %checksum88, 65536
-  %safe.divtmp90 = select i1 false, i64 9223372036854775807, i64 %divtmp89
-  %multmp91 = mul i64 %safe.divtmp90, 65536
-  %subtmp92 = sub i64 %checksum87, %multmp91
-  store i64 %subtmp92, ptr %checksum, align 4
-  %bytes93 = load i64, ptr %bytes, align 4
-  %addtmp94 = add i64 %bytes93, 1
-  store i64 %addtmp94, ptr %bytes, align 4
-  %j95 = load i64, ptr %j, align 4
-  %addtmp96 = add i64 %j95, 1
-  store i64 %addtmp96, ptr %j, align 4
+  %checksum89 = load i64, ptr %checksum, align 4
+  %divtmp90 = sdiv i64 %checksum89, 65536
+  %safe.divtmp91 = select i1 false, i64 9223372036854775807, i64 %divtmp90
+  %multmp92 = mul i64 %safe.divtmp91, 65536
+  %subtmp93 = sub i64 %checksum88, %multmp92
+  store i64 %subtmp93, ptr %checksum, align 4
+  %bytes94 = load i64, ptr %bytes, align 4
+  %addtmp95 = add i64 %bytes94, 1
+  store i64 %addtmp95, ptr %bytes, align 4
+  %j96 = load i64, ptr %j, align 4
+  %addtmp97 = add i64 %j96, 1
+  store i64 %addtmp97, ptr %j, align 4
   call void @npk_gc_safepoint()
-  br label %whilecond65
+  br label %whilecond66
 
-afterwhile:                                       ; preds = %whilecond65
-  br label %ifcont97
+afterwhile:                                       ; preds = %whilecond66
+  br label %ifcont98
 
-ifcont97:                                         ; preds = %afterwhile, %then63
+ifcont98:                                         ; preds = %afterwhile, %then64
   call void @npk_gc_safepoint()
-  br label %whilecond36
+  br label %whilecond37
 
-afterwhile98:                                     ; preds = %whilecond36
+afterwhile99:                                     ; preds = %whilecond37
   %blocks = alloca i64, align 8
-  %bytes99 = load i64, ptr %bytes, align 4
-  %addtmp100 = add i64 %bytes99, 1023
-  %divtmp101 = sdiv i64 %addtmp100, 1024
-  %safe.divtmp102 = select i1 false, i64 9223372036854775807, i64 %divtmp101
-  store i64 %safe.divtmp102, ptr %blocks, align 4
+  %bytes100 = load i64, ptr %bytes, align 4
+  %addtmp101 = add i64 %bytes100, 1023
+  %divtmp102 = sdiv i64 %addtmp101, 1024
+  %safe.divtmp103 = select i1 false, i64 9223372036854775807, i64 %divtmp102
+  store i64 %safe.divtmp103, ptr %blocks, align 4
   %cs_str = alloca ptr, align 8
-  %checksum103 = load i64, ptr %checksum, align 4
-  %from_int_result = call ptr @npk_string_from_int_simple(i64 %checksum103)
+  %checksum104 = load i64, ptr %checksum, align 4
+  %from_int_result = call ptr @npk_string_from_int_simple(i64 %checksum104)
   store ptr %from_int_result, ptr %cs_str, align 8
-  %cs_str104 = load ptr, ptr %cs_str, align 8
-  %calltmp105 = call { i32, ptr, i8 } @logname.print_str_safe(ptr %cs_str104)
-  %calltmp106 = call { i32, ptr, i8 } @logname.print_str_safe(ptr @.str.2821)
-  %blocks107 = load i64, ptr %blocks, align 4
-  %from_int_result108 = call ptr @npk_string_from_int_simple(i64 %blocks107)
-  %calltmp109 = call { i32, ptr, i8 } @logname.print_str_safe(ptr %from_int_result108)
-  %calltmp110 = call { i32, ptr, i8 } @logname.print_str_safe(ptr @.str.2823)
-  %file111 = load ptr, ptr %file, align 8
-  %calltmp112 = call { i32, ptr, i8 } @logname.print_str_safe(ptr %file111)
-  %calltmp113 = call { i32, ptr, i8 } @logname.print_str_safe(ptr @.str.2825)
-  br label %ifcont114
+  %cs_str105 = load ptr, ptr %cs_str, align 8
+  %calltmp106 = call { i32, ptr, i8 } @logname.print_str_safe(ptr %cs_str105)
+  %calltmp107 = call { i32, ptr, i8 } @logname.print_str_safe(ptr @.str.2821)
+  %blocks108 = load i64, ptr %blocks, align 4
+  %from_int_result109 = call ptr @npk_string_from_int_simple(i64 %blocks108)
+  %calltmp110 = call { i32, ptr, i8 } @logname.print_str_safe(ptr %from_int_result109)
+  %calltmp111 = call { i32, ptr, i8 } @logname.print_str_safe(ptr @.str.2823)
+  %file112 = load ptr, ptr %file, align 8
+  %calltmp113 = call { i32, ptr, i8 } @logname.print_str_safe(ptr %file112)
+  %calltmp114 = call { i32, ptr, i8 } @logname.print_str_safe(ptr @.str.2825)
+  br label %ifcont115
 
-ifcont114:                                        ; preds = %afterwhile98, %then30
-  %i115 = load i32, ptr %i, align 4
-  %addtmp116 = add i32 %i115, 1
-  store i32 %addtmp116, ptr %i, align 4
-  %fd117 = load i64, ptr %fd, align 4
-  %getmp = icmp sge i64 %fd117, 0
-  %ifcond118 = icmp ne i1 %getmp, false
-  br i1 %ifcond118, label %then119, label %ifcont131
+ifcont115:                                        ; preds = %afterwhile99, %then31
+  %i116 = load i32, ptr %i, align 4
+  %addtmp117 = add i32 %i116, 1
+  store i32 %addtmp117, ptr %i, align 4
+  %fd118 = load i64, ptr %fd, align 4
+  %getmp = icmp sge i64 %fd118, 0
+  %ifcond119 = icmp ne i1 %getmp, false
+  br i1 %ifcond119, label %then120, label %ifcont132
 
-then119:                                          ; preds = %ifcont114
-  %fd120 = load i64, ptr %fd, align 4
-  %syscall_ret121 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %fd120)
-  %sys_is_err122 = icmp slt i64 %syscall_ret121, 0
-  %sys_neg_errno123 = sub i64 0, %syscall_ret121
-  %sys_err_ptr124 = inttoptr i64 %sys_neg_errno123 to ptr
-  %sys_val125 = select i1 %sys_is_err122, i64 0, i64 %syscall_ret121
-  %sys_err126 = select i1 %sys_is_err122, ptr %sys_err_ptr124, ptr null
-  %sys_flag127 = select i1 %sys_is_err122, i8 1, i8 0
-  %sys_result.val128 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val125, 0
-  %sys_result.err129 = insertvalue %struct.NpkResult_int64 %sys_result.val128, ptr %sys_err126, 1
-  %sys_result.is_error130 = insertvalue %struct.NpkResult_int64 %sys_result.err129, i8 %sys_flag127, 2
-  br label %ifcont131
+then120:                                          ; preds = %ifcont115
+  %fd121 = load i64, ptr %fd, align 4
+  %syscall_ret122 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %fd121)
+  %sys_is_err123 = icmp slt i64 %syscall_ret122, 0
+  %sys_neg_errno124 = sub i64 0, %syscall_ret122
+  %sys_err_ptr125 = inttoptr i64 %sys_neg_errno124 to ptr
+  %sys_val126 = select i1 %sys_is_err123, i64 0, i64 %syscall_ret122
+  %sys_err127 = select i1 %sys_is_err123, ptr %sys_err_ptr125, ptr null
+  %sys_flag128 = select i1 %sys_is_err123, i8 1, i8 0
+  %sys_result.val129 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val126, 0
+  %sys_result.err130 = insertvalue %struct.NpkResult_int64 %sys_result.val129, ptr %sys_err127, 1
+  %sys_result.is_error131 = insertvalue %struct.NpkResult_int64 %sys_result.err130, i8 %sys_flag128, 2
+  br label %ifcont132
 
-ifcont131:                                        ; preds = %then119, %ifcont114
+ifcont132:                                        ; preds = %then120, %ifcont115
   call void @npk_gc_safepoint()
   br label %whilecond
 
-afterwhile132:                                    ; preds = %whilecond
-  %buf133 = load i64, ptr %buf, align 4
-  %calltmp134 = call i32 @nitpick_libc_mem_free(i64 %buf133)
-  %ret135 = load i32, ptr %ret, align 4
-  %result.val = insertvalue { i32, ptr, i8 } undef, i32 %ret135, 0
+afterwhile133:                                    ; preds = %whilecond
+  %buf134 = load i64, ptr %buf, align 4
+  %cast.inttoptr135 = inttoptr i64 %buf134 to ptr
+  call void @npk_free(ptr %cast.inttoptr135)
+  %ret136 = load i32, ptr %ret, align 4
+  %result.val = insertvalue { i32, ptr, i8 } undef, i32 %ret136, 0
   %result.err = insertvalue { i32, ptr, i8 } %result.val, ptr null, 1
   %result.is_error = insertvalue { i32, ptr, i8 } %result.err, i8 0, 2
   ret { i32, ptr, i8 } %result.is_error
@@ -59566,7 +59564,6 @@ then108:                                          ; preds = %then105
   br i1 %null.deref, label %null.fail, label %null.ok
 
 null.fail:                                        ; preds = %then108
-  %0 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -59613,7 +59610,6 @@ whilebody128:                                     ; preds = %whilecond124
   br i1 %null.deref137, label %null.fail138, label %null.ok139
 
 null.fail138:                                     ; preds = %whilebody128
-  %1 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -59863,7 +59859,8 @@ ifcont317:                                        ; preds = %ifcont316, %ifcont2
 
 afterwhile318:                                    ; preds = %whilecond50
   %buf319 = load i64, ptr %buf, align 4
-  %calltmp320 = call i32 @nitpick_libc_mem_free(i64 %buf319)
+  %cast.inttoptr320 = inttoptr i64 %buf319 to ptr
+  call void @npk_free(ptr %cast.inttoptr320)
   br label %ifcont468
 
 else321:                                          ; preds = %merge_block39
@@ -59980,7 +59977,6 @@ then379:                                          ; preds = %afterwhile375
   br i1 %null.deref391, label %null.fail392, label %null.ok393
 
 null.fail392:                                     ; preds = %then379
-  %2 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -60018,7 +60014,6 @@ whilebody405:                                     ; preds = %whilecond401
   br i1 %null.deref414, label %null.fail415, label %null.ok416
 
 null.fail415:                                     ; preds = %whilebody405
-  %3 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -60092,7 +60087,8 @@ afterwhile464:                                    ; preds = %whilecond401
 
 ifcont465:                                        ; preds = %afterwhile464, %afterwhile375
   %buf466 = load i64, ptr %buf322, align 4
-  %calltmp467 = call i32 @nitpick_libc_mem_free(i64 %buf466)
+  %cast.inttoptr467 = inttoptr i64 %buf466 to ptr
+  call void @npk_free(ptr %cast.inttoptr467)
   br label %ifcont468
 
 ifcont468:                                        ; preds = %ifcont465, %afterwhile318
@@ -60461,8 +60457,7 @@ ifcont21:                                         ; preds = %ifcont
   %raw.value24 = extractvalue { ptr, ptr, i8 } %calltmp23, 0
   store ptr %raw.value24, ptr %cmd, align 8
   %pid = alloca i64, align 8
-  %SYS_FORK = load i64, ptr @SYS_FORK, align 4
-  %syscall_ret = call i64 asm sideeffect "syscall", "={rax},{rax},~{rcx},~{r11},~{memory}"(i64 %SYS_FORK)
+  %syscall_ret = call i64 asm sideeffect "syscall", "={rax},{rax},~{rcx},~{r11},~{memory}"(i64 57)
   %sys_is_err = icmp slt i64 %syscall_ret, 0
   %sys_neg_errno = sub i64 0, %syscall_ret
   %sys_err_ptr = inttoptr i64 %sys_neg_errno to ptr
@@ -60509,13 +60504,13 @@ then33:                                           ; preds = %then27
   ret { i32, ptr, i8 } { i32 127, ptr null, i8 0 }
 
 ifcont38:                                         ; preds = %then27
-  br label %ifcont235
+  br label %ifcont234
 
 else:                                             ; preds = %merge_block
   %pid39 = load i64, ptr %pid, align 4
   %gttmp = icmp sgt i64 %pid39, 0
   %ifcond40 = icmp ne i1 %gttmp, false
-  br i1 %ifcond40, label %then41, label %else232
+  br i1 %ifcond40, label %then41, label %else231
 
 then41:                                           ; preds = %else
   %ts_buf = alloca i64, align 8
@@ -60612,7 +60607,7 @@ merge_block96:                                    ; preds = %success_block95, %e
   store i32 0, ptr %exit_status, align 4
   br label %whilecond
 
-whilecond:                                        ; preds = %ifcont203, %merge_block96
+whilecond:                                        ; preds = %ifcont202, %merge_block96
   %running100 = load i32, ptr %running, align 4
   %eqtmp101 = icmp eq i32 %running100, 1
   %whilecond102 = icmp ne i1 %eqtmp101, false
@@ -60620,10 +60615,9 @@ whilecond:                                        ; preds = %ifcont203, %merge_b
 
 whilebody:                                        ; preds = %whilecond
   %res = alloca i64, align 8
-  %SYS_WAIT4 = load i64, ptr @SYS_WAIT4, align 4
   %pid103 = load i64, ptr %pid, align 4
   %status_buf104 = load i64, ptr %status_buf, align 4
-  %syscall_ret105 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},{r10},~{rcx},~{r11},~{memory}"(i64 %SYS_WAIT4, i64 %pid103, i64 %status_buf104, i64 1, i64 0)
+  %syscall_ret105 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},{r10},~{rcx},~{r11},~{memory}"(i64 61, i64 %pid103, i64 %status_buf104, i64 1, i64 0)
   %sys_is_err106 = icmp slt i64 %syscall_ret105, 0
   %sys_neg_errno107 = sub i64 0, %syscall_ret105
   %sys_err_ptr108 = inttoptr i64 %sys_neg_errno107 to ptr
@@ -60665,7 +60659,7 @@ then126:                                          ; preds = %merge_block119
   %divtmp = sdiv i32 %andtmp, 256
   %safe.divtmp = select i1 false, i32 2147483647, i32 %divtmp
   store i32 %safe.divtmp, ptr %exit_status, align 4
-  br label %ifcont203
+  br label %ifcont202
 
 else130:                                          ; preds = %merge_block119
   %res131 = load i64, ptr %res, align 4
@@ -60676,7 +60670,7 @@ else130:                                          ; preds = %merge_block119
 then134:                                          ; preds = %else130
   store i32 1, ptr %child_exited, align 4
   store i32 0, ptr %running, align 4
-  br label %ifcont202
+  br label %ifcont201
 
 else135:                                          ; preds = %else130
   %polls136 = load i64, ptr %polls, align 4
@@ -60686,12 +60680,11 @@ else135:                                          ; preds = %else130
   %max_polls139 = load i64, ptr %max_polls, align 4
   %gttmp140 = icmp sgt i64 %polls138, %max_polls139
   %ifcond141 = icmp ne i1 %gttmp140, false
-  br i1 %ifcond141, label %then142, label %else189
+  br i1 %ifcond141, label %then142, label %else188
 
 then142:                                          ; preds = %else135
-  %SYS_KILL = load i64, ptr @SYS_KILL, align 4
   %pid143 = load i64, ptr %pid, align 4
-  %syscall_ret144 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 %SYS_KILL, i64 %pid143, i64 15)
+  %syscall_ret144 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 62, i64 %pid143, i64 15)
   %sys_is_err145 = icmp slt i64 %syscall_ret144, 0
   %sys_neg_errno146 = sub i64 0, %syscall_ret144
   %sys_err_ptr147 = inttoptr i64 %sys_neg_errno146 to ptr
@@ -60701,114 +60694,113 @@ then142:                                          ; preds = %else135
   %sys_result.val151 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val148, 0
   %sys_result.err152 = insertvalue %struct.NpkResult_int64 %sys_result.val151, ptr %sys_err149, 1
   %sys_result.is_error153 = insertvalue %struct.NpkResult_int64 %sys_result.err152, i8 %sys_flag150, 2
-  %SYS_WAIT4154 = load i64, ptr @SYS_WAIT4, align 4
-  %pid155 = load i64, ptr %pid, align 4
-  %status_buf156 = load i64, ptr %status_buf, align 4
-  %syscall_ret157 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},{r10},~{rcx},~{r11},~{memory}"(i64 %SYS_WAIT4154, i64 %pid155, i64 %status_buf156, i64 0, i64 0)
-  %sys_is_err158 = icmp slt i64 %syscall_ret157, 0
-  %sys_neg_errno159 = sub i64 0, %syscall_ret157
-  %sys_err_ptr160 = inttoptr i64 %sys_neg_errno159 to ptr
-  %sys_val161 = select i1 %sys_is_err158, i64 0, i64 %syscall_ret157
-  %sys_err162 = select i1 %sys_is_err158, ptr %sys_err_ptr160, ptr null
-  %sys_flag163 = select i1 %sys_is_err158, i8 1, i8 0
-  %sys_result.val164 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val161, 0
-  %sys_result.err165 = insertvalue %struct.NpkResult_int64 %sys_result.val164, ptr %sys_err162, 1
-  %sys_result.is_error166 = insertvalue %struct.NpkResult_int64 %sys_result.err165, i8 %sys_flag163, 2
+  %pid154 = load i64, ptr %pid, align 4
+  %status_buf155 = load i64, ptr %status_buf, align 4
+  %syscall_ret156 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},{r10},~{rcx},~{r11},~{memory}"(i64 61, i64 %pid154, i64 %status_buf155, i64 0, i64 0)
+  %sys_is_err157 = icmp slt i64 %syscall_ret156, 0
+  %sys_neg_errno158 = sub i64 0, %syscall_ret156
+  %sys_err_ptr159 = inttoptr i64 %sys_neg_errno158 to ptr
+  %sys_val160 = select i1 %sys_is_err157, i64 0, i64 %syscall_ret156
+  %sys_err161 = select i1 %sys_is_err157, ptr %sys_err_ptr159, ptr null
+  %sys_flag162 = select i1 %sys_is_err157, i8 1, i8 0
+  %sys_result.val163 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val160, 0
+  %sys_result.err164 = insertvalue %struct.NpkResult_int64 %sys_result.val163, ptr %sys_err161, 1
+  %sys_result.is_error165 = insertvalue %struct.NpkResult_int64 %sys_result.err164, i8 %sys_flag162, 2
   store i32 0, ptr %running, align 4
-  %ts_buf167 = load i64, ptr %ts_buf, align 4
-  %syscall_ret168 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 11, i64 %ts_buf167, i64 16)
-  %sys_is_err169 = icmp slt i64 %syscall_ret168, 0
-  %sys_neg_errno170 = sub i64 0, %syscall_ret168
-  %sys_err_ptr171 = inttoptr i64 %sys_neg_errno170 to ptr
-  %sys_val172 = select i1 %sys_is_err169, i64 0, i64 %syscall_ret168
-  %sys_err173 = select i1 %sys_is_err169, ptr %sys_err_ptr171, ptr null
-  %sys_flag174 = select i1 %sys_is_err169, i8 1, i8 0
-  %sys_result.val175 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val172, 0
-  %sys_result.err176 = insertvalue %struct.NpkResult_int64 %sys_result.val175, ptr %sys_err173, 1
-  %sys_result.is_error177 = insertvalue %struct.NpkResult_int64 %sys_result.err176, i8 %sys_flag174, 2
-  %status_buf178 = load i64, ptr %status_buf, align 4
-  %syscall_ret179 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 11, i64 %status_buf178, i64 8)
-  %sys_is_err180 = icmp slt i64 %syscall_ret179, 0
-  %sys_neg_errno181 = sub i64 0, %syscall_ret179
-  %sys_err_ptr182 = inttoptr i64 %sys_neg_errno181 to ptr
-  %sys_val183 = select i1 %sys_is_err180, i64 0, i64 %syscall_ret179
-  %sys_err184 = select i1 %sys_is_err180, ptr %sys_err_ptr182, ptr null
-  %sys_flag185 = select i1 %sys_is_err180, i8 1, i8 0
-  %sys_result.val186 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val183, 0
-  %sys_result.err187 = insertvalue %struct.NpkResult_int64 %sys_result.val186, ptr %sys_err184, 1
-  %sys_result.is_error188 = insertvalue %struct.NpkResult_int64 %sys_result.err187, i8 %sys_flag185, 2
+  %ts_buf166 = load i64, ptr %ts_buf, align 4
+  %syscall_ret167 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 11, i64 %ts_buf166, i64 16)
+  %sys_is_err168 = icmp slt i64 %syscall_ret167, 0
+  %sys_neg_errno169 = sub i64 0, %syscall_ret167
+  %sys_err_ptr170 = inttoptr i64 %sys_neg_errno169 to ptr
+  %sys_val171 = select i1 %sys_is_err168, i64 0, i64 %syscall_ret167
+  %sys_err172 = select i1 %sys_is_err168, ptr %sys_err_ptr170, ptr null
+  %sys_flag173 = select i1 %sys_is_err168, i8 1, i8 0
+  %sys_result.val174 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val171, 0
+  %sys_result.err175 = insertvalue %struct.NpkResult_int64 %sys_result.val174, ptr %sys_err172, 1
+  %sys_result.is_error176 = insertvalue %struct.NpkResult_int64 %sys_result.err175, i8 %sys_flag173, 2
+  %status_buf177 = load i64, ptr %status_buf, align 4
+  %syscall_ret178 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 11, i64 %status_buf177, i64 8)
+  %sys_is_err179 = icmp slt i64 %syscall_ret178, 0
+  %sys_neg_errno180 = sub i64 0, %syscall_ret178
+  %sys_err_ptr181 = inttoptr i64 %sys_neg_errno180 to ptr
+  %sys_val182 = select i1 %sys_is_err179, i64 0, i64 %syscall_ret178
+  %sys_err183 = select i1 %sys_is_err179, ptr %sys_err_ptr181, ptr null
+  %sys_flag184 = select i1 %sys_is_err179, i8 1, i8 0
+  %sys_result.val185 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val182, 0
+  %sys_result.err186 = insertvalue %struct.NpkResult_int64 %sys_result.val185, ptr %sys_err183, 1
+  %sys_result.is_error187 = insertvalue %struct.NpkResult_int64 %sys_result.err186, i8 %sys_flag184, 2
   ret { i32, ptr, i8 } { i32 124, ptr null, i8 0 }
 
-else189:                                          ; preds = %else135
-  %ts_buf190 = load i64, ptr %ts_buf, align 4
-  %syscall_ret191 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 35, i64 %ts_buf190, i64 0)
-  %sys_is_err192 = icmp slt i64 %syscall_ret191, 0
-  %sys_neg_errno193 = sub i64 0, %syscall_ret191
-  %sys_err_ptr194 = inttoptr i64 %sys_neg_errno193 to ptr
-  %sys_val195 = select i1 %sys_is_err192, i64 0, i64 %syscall_ret191
-  %sys_err196 = select i1 %sys_is_err192, ptr %sys_err_ptr194, ptr null
-  %sys_flag197 = select i1 %sys_is_err192, i8 1, i8 0
-  %sys_result.val198 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val195, 0
-  %sys_result.err199 = insertvalue %struct.NpkResult_int64 %sys_result.val198, ptr %sys_err196, 1
-  %sys_result.is_error200 = insertvalue %struct.NpkResult_int64 %sys_result.err199, i8 %sys_flag197, 2
+else188:                                          ; preds = %else135
+  %ts_buf189 = load i64, ptr %ts_buf, align 4
+  %syscall_ret190 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 35, i64 %ts_buf189, i64 0)
+  %sys_is_err191 = icmp slt i64 %syscall_ret190, 0
+  %sys_neg_errno192 = sub i64 0, %syscall_ret190
+  %sys_err_ptr193 = inttoptr i64 %sys_neg_errno192 to ptr
+  %sys_val194 = select i1 %sys_is_err191, i64 0, i64 %syscall_ret190
+  %sys_err195 = select i1 %sys_is_err191, ptr %sys_err_ptr193, ptr null
+  %sys_flag196 = select i1 %sys_is_err191, i8 1, i8 0
+  %sys_result.val197 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val194, 0
+  %sys_result.err198 = insertvalue %struct.NpkResult_int64 %sys_result.val197, ptr %sys_err195, 1
+  %sys_result.is_error199 = insertvalue %struct.NpkResult_int64 %sys_result.err198, i8 %sys_flag196, 2
+  br label %ifcont200
+
+ifcont200:                                        ; preds = %else188
   br label %ifcont201
 
-ifcont201:                                        ; preds = %else189
+ifcont201:                                        ; preds = %ifcont200, %then134
   br label %ifcont202
 
-ifcont202:                                        ; preds = %ifcont201, %then134
-  br label %ifcont203
-
-ifcont203:                                        ; preds = %ifcont202, %then126
+ifcont202:                                        ; preds = %ifcont201, %then126
   call void @npk_gc_safepoint()
   br label %whilecond
 
 afterwhile:                                       ; preds = %whilecond
-  %ts_buf204 = load i64, ptr %ts_buf, align 4
-  %syscall_ret205 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 11, i64 %ts_buf204, i64 16)
-  %sys_is_err206 = icmp slt i64 %syscall_ret205, 0
-  %sys_neg_errno207 = sub i64 0, %syscall_ret205
-  %sys_err_ptr208 = inttoptr i64 %sys_neg_errno207 to ptr
-  %sys_val209 = select i1 %sys_is_err206, i64 0, i64 %syscall_ret205
-  %sys_err210 = select i1 %sys_is_err206, ptr %sys_err_ptr208, ptr null
-  %sys_flag211 = select i1 %sys_is_err206, i8 1, i8 0
-  %sys_result.val212 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val209, 0
-  %sys_result.err213 = insertvalue %struct.NpkResult_int64 %sys_result.val212, ptr %sys_err210, 1
-  %sys_result.is_error214 = insertvalue %struct.NpkResult_int64 %sys_result.err213, i8 %sys_flag211, 2
-  %status_buf215 = load i64, ptr %status_buf, align 4
-  %syscall_ret216 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 11, i64 %status_buf215, i64 8)
-  %sys_is_err217 = icmp slt i64 %syscall_ret216, 0
-  %sys_neg_errno218 = sub i64 0, %syscall_ret216
-  %sys_err_ptr219 = inttoptr i64 %sys_neg_errno218 to ptr
-  %sys_val220 = select i1 %sys_is_err217, i64 0, i64 %syscall_ret216
-  %sys_err221 = select i1 %sys_is_err217, ptr %sys_err_ptr219, ptr null
-  %sys_flag222 = select i1 %sys_is_err217, i8 1, i8 0
-  %sys_result.val223 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val220, 0
-  %sys_result.err224 = insertvalue %struct.NpkResult_int64 %sys_result.val223, ptr %sys_err221, 1
-  %sys_result.is_error225 = insertvalue %struct.NpkResult_int64 %sys_result.err224, i8 %sys_flag222, 2
-  %child_exited226 = load i32, ptr %child_exited, align 4
-  %eqtmp227 = icmp eq i32 %child_exited226, 1
-  %ifcond228 = icmp ne i1 %eqtmp227, false
-  br i1 %ifcond228, label %then229, label %ifcont231
+  %ts_buf203 = load i64, ptr %ts_buf, align 4
+  %syscall_ret204 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 11, i64 %ts_buf203, i64 16)
+  %sys_is_err205 = icmp slt i64 %syscall_ret204, 0
+  %sys_neg_errno206 = sub i64 0, %syscall_ret204
+  %sys_err_ptr207 = inttoptr i64 %sys_neg_errno206 to ptr
+  %sys_val208 = select i1 %sys_is_err205, i64 0, i64 %syscall_ret204
+  %sys_err209 = select i1 %sys_is_err205, ptr %sys_err_ptr207, ptr null
+  %sys_flag210 = select i1 %sys_is_err205, i8 1, i8 0
+  %sys_result.val211 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val208, 0
+  %sys_result.err212 = insertvalue %struct.NpkResult_int64 %sys_result.val211, ptr %sys_err209, 1
+  %sys_result.is_error213 = insertvalue %struct.NpkResult_int64 %sys_result.err212, i8 %sys_flag210, 2
+  %status_buf214 = load i64, ptr %status_buf, align 4
+  %syscall_ret215 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 11, i64 %status_buf214, i64 8)
+  %sys_is_err216 = icmp slt i64 %syscall_ret215, 0
+  %sys_neg_errno217 = sub i64 0, %syscall_ret215
+  %sys_err_ptr218 = inttoptr i64 %sys_neg_errno217 to ptr
+  %sys_val219 = select i1 %sys_is_err216, i64 0, i64 %syscall_ret215
+  %sys_err220 = select i1 %sys_is_err216, ptr %sys_err_ptr218, ptr null
+  %sys_flag221 = select i1 %sys_is_err216, i8 1, i8 0
+  %sys_result.val222 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val219, 0
+  %sys_result.err223 = insertvalue %struct.NpkResult_int64 %sys_result.val222, ptr %sys_err220, 1
+  %sys_result.is_error224 = insertvalue %struct.NpkResult_int64 %sys_result.err223, i8 %sys_flag221, 2
+  %child_exited225 = load i32, ptr %child_exited, align 4
+  %eqtmp226 = icmp eq i32 %child_exited225, 1
+  %ifcond227 = icmp ne i1 %eqtmp226, false
+  br i1 %ifcond227, label %then228, label %ifcont230
 
-then229:                                          ; preds = %afterwhile
-  %exit_status230 = load i32, ptr %exit_status, align 4
-  %result.val = insertvalue { i32, ptr, i8 } undef, i32 %exit_status230, 0
+then228:                                          ; preds = %afterwhile
+  %exit_status229 = load i32, ptr %exit_status, align 4
+  %result.val = insertvalue { i32, ptr, i8 } undef, i32 %exit_status229, 0
   %result.err = insertvalue { i32, ptr, i8 } %result.val, ptr null, 1
   %result.is_error = insertvalue { i32, ptr, i8 } %result.err, i8 0, 2
   ret { i32, ptr, i8 } %result.is_error
 
-ifcont231:                                        ; preds = %afterwhile
-  br label %ifcont234
+ifcont230:                                        ; preds = %afterwhile
+  br label %ifcont233
 
-else232:                                          ; preds = %else
-  %calltmp233 = call { i32, ptr, i8 } @md5sum.print_err(ptr @.str.2889)
+else231:                                          ; preds = %else
+  %calltmp232 = call { i32, ptr, i8 } @md5sum.print_err(ptr @.str.2889)
   ret { i32, ptr, i8 } { i32 125, ptr null, i8 0 }
 
-ifcont234:                                        ; preds = %ifcont231
-  br label %ifcont235
+ifcont233:                                        ; preds = %ifcont230
+  br label %ifcont234
 
-ifcont235:                                        ; preds = %ifcont234, %ifcont38
+ifcont234:                                        ; preds = %ifcont233, %ifcont38
   ret { i32, ptr, i8 } zeroinitializer
 }
 
@@ -61293,179 +61285,181 @@ afterwhile100:                                    ; preds = %whilecond37
   store i64 65536, ptr %buf_size, align 4
   %buf = alloca i64, align 8
   %buf_size101 = load i64, ptr %buf_size, align 4
-  %calltmp102 = call i64 @malloc(i64 %buf_size101)
-  store i64 %calltmp102, ptr %buf, align 4
-  %buf103 = load i64, ptr %buf, align 4
-  %lttmp104 = icmp slt i64 %buf103, 0
-  %ifcond105 = icmp ne i1 %lttmp104, false
-  br i1 %ifcond105, label %then106, label %ifcont107
+  %wild_ptr = call ptr @npk_alloc(i64 %buf_size101)
+  %buf_size102 = load i64, ptr %buf_size, align 4
+  %wild_ptr103 = call ptr @npk_alloc(i64 %buf_size102)
+  %cast.ptrtoint = ptrtoint ptr %wild_ptr103 to i64
+  store i64 %cast.ptrtoint, ptr %buf, align 4
+  %buf104 = load i64, ptr %buf, align 4
+  %lttmp105 = icmp slt i64 %buf104, 0
+  %ifcond106 = icmp ne i1 %lttmp105, false
+  br i1 %ifcond106, label %then107, label %ifcont108
 
-then106:                                          ; preds = %afterwhile100
+then107:                                          ; preds = %afterwhile100
   ret { i32, ptr, i8 } { i32 1, ptr null, i8 0 }
 
-ifcont107:                                        ; preds = %afterwhile100
+ifcont108:                                        ; preds = %afterwhile100
   %running = alloca i32, align 4
   store i32 1, ptr %running, align 4
   %fd = alloca i64, align 8
   store i64 0, ptr %fd, align 4
-  br label %whilecond108
+  br label %whilecond109
 
-whilecond108:                                     ; preds = %ifcont190, %ifcont107
-  %running109 = load i32, ptr %running, align 4
-  %eqtmp110 = icmp eq i32 %running109, 1
-  %whilecond111 = icmp ne i1 %eqtmp110, false
-  br i1 %whilecond111, label %whilebody112, label %afterwhile191
+whilecond109:                                     ; preds = %ifcont191, %ifcont108
+  %running110 = load i32, ptr %running, align 4
+  %eqtmp111 = icmp eq i32 %running110, 1
+  %whilecond112 = icmp ne i1 %eqtmp111, false
+  br i1 %whilecond112, label %whilebody113, label %afterwhile192
 
-whilebody112:                                     ; preds = %whilecond108
+whilebody113:                                     ; preds = %whilecond109
   %n = alloca i64, align 8
-  %fd113 = load i64, ptr %fd, align 4
-  %buf114 = load i64, ptr %buf, align 4
-  %buf_size115 = load i64, ptr %buf_size, align 4
-  %syscall_ret116 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 0, i64 %fd113, i64 %buf114, i64 %buf_size115)
-  %sys_is_err117 = icmp slt i64 %syscall_ret116, 0
-  %sys_neg_errno118 = sub i64 0, %syscall_ret116
-  %sys_err_ptr119 = inttoptr i64 %sys_neg_errno118 to ptr
-  %sys_val120 = select i1 %sys_is_err117, i64 0, i64 %syscall_ret116
-  %sys_err121 = select i1 %sys_is_err117, ptr %sys_err_ptr119, ptr null
-  %sys_flag122 = select i1 %sys_is_err117, i8 1, i8 0
-  %sys_result.val123 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val120, 0
-  %sys_result.err124 = insertvalue %struct.NpkResult_int64 %sys_result.val123, ptr %sys_err121, 1
-  %sys_result.is_error125 = insertvalue %struct.NpkResult_int64 %sys_result.err124, i8 %sys_flag122, 2
-  %is_error126 = extractvalue %struct.NpkResult_int64 %sys_result.is_error125, 2
-  %is_error_bool127 = icmp ne i8 %is_error126, 0
-  br i1 %is_error_bool127, label %error_block128, label %success_block129
+  %fd114 = load i64, ptr %fd, align 4
+  %buf115 = load i64, ptr %buf, align 4
+  %buf_size116 = load i64, ptr %buf_size, align 4
+  %syscall_ret117 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 0, i64 %fd114, i64 %buf115, i64 %buf_size116)
+  %sys_is_err118 = icmp slt i64 %syscall_ret117, 0
+  %sys_neg_errno119 = sub i64 0, %syscall_ret117
+  %sys_err_ptr120 = inttoptr i64 %sys_neg_errno119 to ptr
+  %sys_val121 = select i1 %sys_is_err118, i64 0, i64 %syscall_ret117
+  %sys_err122 = select i1 %sys_is_err118, ptr %sys_err_ptr120, ptr null
+  %sys_flag123 = select i1 %sys_is_err118, i8 1, i8 0
+  %sys_result.val124 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val121, 0
+  %sys_result.err125 = insertvalue %struct.NpkResult_int64 %sys_result.val124, ptr %sys_err122, 1
+  %sys_result.is_error126 = insertvalue %struct.NpkResult_int64 %sys_result.err125, i8 %sys_flag123, 2
+  %is_error127 = extractvalue %struct.NpkResult_int64 %sys_result.is_error126, 2
+  %is_error_bool128 = icmp ne i8 %is_error127, 0
+  br i1 %is_error_bool128, label %error_block129, label %success_block130
 
-error_block128:                                   ; preds = %whilebody112
-  br label %merge_block130
+error_block129:                                   ; preds = %whilebody113
+  br label %merge_block131
 
-success_block129:                                 ; preds = %whilebody112
-  %value131 = extractvalue %struct.NpkResult_int64 %sys_result.is_error125, 0
-  br label %merge_block130
+success_block130:                                 ; preds = %whilebody113
+  %value132 = extractvalue %struct.NpkResult_int64 %sys_result.is_error126, 0
+  br label %merge_block131
 
-merge_block130:                                   ; preds = %success_block129, %error_block128
-  %unwrap_result132 = phi i64 [ -1, %error_block128 ], [ %value131, %success_block129 ]
-  store i64 %unwrap_result132, ptr %n, align 4
-  %n133 = load i64, ptr %n, align 4
-  %letmp = icmp sle i64 %n133, 0
-  %ifcond134 = icmp ne i1 %letmp, false
-  br i1 %ifcond134, label %then135, label %else
+merge_block131:                                   ; preds = %success_block130, %error_block129
+  %unwrap_result133 = phi i64 [ -1, %error_block129 ], [ %value132, %success_block130 ]
+  store i64 %unwrap_result133, ptr %n, align 4
+  %n134 = load i64, ptr %n, align 4
+  %letmp = icmp sle i64 %n134, 0
+  %ifcond135 = icmp ne i1 %letmp, false
+  br i1 %ifcond135, label %then136, label %else
 
-then135:                                          ; preds = %merge_block130
+then136:                                          ; preds = %merge_block131
   store i32 0, ptr %running, align 4
-  br label %ifcont190
+  br label %ifcont191
 
-else:                                             ; preds = %merge_block130
+else:                                             ; preds = %merge_block131
   %j = alloca i64, align 8
   store i64 0, ptr %j, align 4
-  br label %whilecond136
+  br label %whilecond137
 
-whilecond136:                                     ; preds = %ifcont174, %else
-  %j137 = load i64, ptr %j, align 4
-  %n138 = load i64, ptr %n, align 4
-  %lttmp139 = icmp slt i64 %j137, %n138
-  %whilecond140 = icmp ne i1 %lttmp139, false
-  br i1 %whilecond140, label %whilebody141, label %afterwhile177
+whilecond137:                                     ; preds = %ifcont175, %else
+  %j138 = load i64, ptr %j, align 4
+  %n139 = load i64, ptr %n, align 4
+  %lttmp140 = icmp slt i64 %j138, %n139
+  %whilecond141 = icmp ne i1 %lttmp140, false
+  br i1 %whilecond141, label %whilebody142, label %afterwhile178
 
-whilebody141:                                     ; preds = %whilecond136
+whilebody142:                                     ; preds = %whilecond137
   %c = alloca i64, align 8
-  %buf142 = load i64, ptr %buf, align 4
-  %j143 = load i64, ptr %j, align 4
-  %addtmp144 = add i64 %buf142, %j143
-  %buf145 = load i64, ptr %buf, align 4
-  %j146 = load i64, ptr %j, align 4
-  %addtmp147 = add i64 %buf145, %j146
-  %cast.inttoptr148 = inttoptr i64 %addtmp147 to ptr
-  %null.deref = icmp eq ptr %cast.inttoptr148, null
+  %buf143 = load i64, ptr %buf, align 4
+  %j144 = load i64, ptr %j, align 4
+  %addtmp145 = add i64 %buf143, %j144
+  %buf146 = load i64, ptr %buf, align 4
+  %j147 = load i64, ptr %j, align 4
+  %addtmp148 = add i64 %buf146, %j147
+  %cast.inttoptr149 = inttoptr i64 %addtmp148 to ptr
+  %null.deref = icmp eq ptr %cast.inttoptr149, null
   br i1 %null.deref, label %null.fail, label %null.ok
 
-null.fail:                                        ; preds = %whilebody141
-  %0 = call i32 @failsafe(i32 46)
+null.fail:                                        ; preds = %whilebody142
   call void @exit(i32 46)
   unreachable
 
-null.ok:                                          ; preds = %whilebody141
-  %deref = load i32, ptr %cast.inttoptr148, align 4
+null.ok:                                          ; preds = %whilebody142
+  %deref = load i32, ptr %cast.inttoptr149, align 4
   %cast.sext = sext i32 %deref to i64
   store i64 %cast.sext, ptr %c, align 4
   %mapped_c = alloca i64, align 8
-  %tr_map149 = load i64, ptr %tr_map, align 4
-  %c150 = load i64, ptr %c, align 4
-  %addtmp151 = add i64 %tr_map149, %c150
-  %tr_map152 = load i64, ptr %tr_map, align 4
-  %c153 = load i64, ptr %c, align 4
-  %addtmp154 = add i64 %tr_map152, %c153
-  %cast.inttoptr155 = inttoptr i64 %addtmp154 to ptr
-  %null.deref156 = icmp eq ptr %cast.inttoptr155, null
-  br i1 %null.deref156, label %null.fail157, label %null.ok158
+  %tr_map150 = load i64, ptr %tr_map, align 4
+  %c151 = load i64, ptr %c, align 4
+  %addtmp152 = add i64 %tr_map150, %c151
+  %tr_map153 = load i64, ptr %tr_map, align 4
+  %c154 = load i64, ptr %c, align 4
+  %addtmp155 = add i64 %tr_map153, %c154
+  %cast.inttoptr156 = inttoptr i64 %addtmp155 to ptr
+  %null.deref157 = icmp eq ptr %cast.inttoptr156, null
+  br i1 %null.deref157, label %null.fail158, label %null.ok159
 
-null.fail157:                                     ; preds = %null.ok
-  %1 = call i32 @failsafe(i32 46)
+null.fail158:                                     ; preds = %null.ok
   call void @exit(i32 46)
   unreachable
 
-null.ok158:                                       ; preds = %null.ok
-  %deref159 = load i32, ptr %cast.inttoptr155, align 4
-  %cast.sext160 = sext i32 %deref159 to i64
-  store i64 %cast.sext160, ptr %mapped_c, align 4
-  %mapped_c161 = load i64, ptr %mapped_c, align 4
-  %c162 = load i64, ptr %c, align 4
-  %netmp = icmp ne i64 %mapped_c161, %c162
-  %ifcond163 = icmp ne i1 %netmp, false
-  br i1 %ifcond163, label %then164, label %ifcont174
+null.ok159:                                       ; preds = %null.ok
+  %deref160 = load i32, ptr %cast.inttoptr156, align 4
+  %cast.sext161 = sext i32 %deref160 to i64
+  store i64 %cast.sext161, ptr %mapped_c, align 4
+  %mapped_c162 = load i64, ptr %mapped_c, align 4
+  %c163 = load i64, ptr %c, align 4
+  %netmp = icmp ne i64 %mapped_c162, %c163
+  %ifcond164 = icmp ne i1 %netmp, false
+  br i1 %ifcond164, label %then165, label %ifcont175
 
-then164:                                          ; preds = %null.ok158
-  %buf165 = load i64, ptr %buf, align 4
-  %j166 = load i64, ptr %j, align 4
-  %addtmp167 = add i64 %buf165, %j166
-  %buf168 = load i64, ptr %buf, align 4
-  %j169 = load i64, ptr %j, align 4
-  %addtmp170 = add i64 %buf168, %j169
-  %cast.inttoptr171 = inttoptr i64 %addtmp170 to ptr
-  %mapped_c172 = load i64, ptr %mapped_c, align 4
-  %cast.trunc173 = trunc i64 %mapped_c172 to i8
-  store i8 %cast.trunc173, ptr %cast.inttoptr171, align 1
-  br label %ifcont174
+then165:                                          ; preds = %null.ok159
+  %buf166 = load i64, ptr %buf, align 4
+  %j167 = load i64, ptr %j, align 4
+  %addtmp168 = add i64 %buf166, %j167
+  %buf169 = load i64, ptr %buf, align 4
+  %j170 = load i64, ptr %j, align 4
+  %addtmp171 = add i64 %buf169, %j170
+  %cast.inttoptr172 = inttoptr i64 %addtmp171 to ptr
+  %mapped_c173 = load i64, ptr %mapped_c, align 4
+  %cast.trunc174 = trunc i64 %mapped_c173 to i8
+  store i8 %cast.trunc174, ptr %cast.inttoptr172, align 1
+  br label %ifcont175
 
-ifcont174:                                        ; preds = %then164, %null.ok158
-  %j175 = load i64, ptr %j, align 4
-  %addtmp176 = add i64 %j175, 1
-  store i64 %addtmp176, ptr %j, align 4
+ifcont175:                                        ; preds = %then165, %null.ok159
+  %j176 = load i64, ptr %j, align 4
+  %addtmp177 = add i64 %j176, 1
+  store i64 %addtmp177, ptr %j, align 4
   call void @npk_gc_safepoint()
-  br label %whilecond136
+  br label %whilecond137
 
-afterwhile177:                                    ; preds = %whilecond136
-  %buf178 = load i64, ptr %buf, align 4
-  %n179 = load i64, ptr %n, align 4
-  %syscall_ret180 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 1, i64 1, i64 %buf178, i64 %n179)
-  %sys_is_err181 = icmp slt i64 %syscall_ret180, 0
-  %sys_neg_errno182 = sub i64 0, %syscall_ret180
-  %sys_err_ptr183 = inttoptr i64 %sys_neg_errno182 to ptr
-  %sys_val184 = select i1 %sys_is_err181, i64 0, i64 %syscall_ret180
-  %sys_err185 = select i1 %sys_is_err181, ptr %sys_err_ptr183, ptr null
-  %sys_flag186 = select i1 %sys_is_err181, i8 1, i8 0
-  %sys_result.val187 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val184, 0
-  %sys_result.err188 = insertvalue %struct.NpkResult_int64 %sys_result.val187, ptr %sys_err185, 1
-  %sys_result.is_error189 = insertvalue %struct.NpkResult_int64 %sys_result.err188, i8 %sys_flag186, 2
-  br label %ifcont190
+afterwhile178:                                    ; preds = %whilecond137
+  %buf179 = load i64, ptr %buf, align 4
+  %n180 = load i64, ptr %n, align 4
+  %syscall_ret181 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 1, i64 1, i64 %buf179, i64 %n180)
+  %sys_is_err182 = icmp slt i64 %syscall_ret181, 0
+  %sys_neg_errno183 = sub i64 0, %syscall_ret181
+  %sys_err_ptr184 = inttoptr i64 %sys_neg_errno183 to ptr
+  %sys_val185 = select i1 %sys_is_err182, i64 0, i64 %syscall_ret181
+  %sys_err186 = select i1 %sys_is_err182, ptr %sys_err_ptr184, ptr null
+  %sys_flag187 = select i1 %sys_is_err182, i8 1, i8 0
+  %sys_result.val188 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val185, 0
+  %sys_result.err189 = insertvalue %struct.NpkResult_int64 %sys_result.val188, ptr %sys_err186, 1
+  %sys_result.is_error190 = insertvalue %struct.NpkResult_int64 %sys_result.err189, i8 %sys_flag187, 2
+  br label %ifcont191
 
-ifcont190:                                        ; preds = %afterwhile177, %then135
+ifcont191:                                        ; preds = %afterwhile178, %then136
   call void @npk_gc_safepoint()
-  br label %whilecond108
+  br label %whilecond109
 
-afterwhile191:                                    ; preds = %whilecond108
-  %tr_map192 = load i64, ptr %tr_map, align 4
-  %syscall_ret193 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 11, i64 %tr_map192, i64 256)
-  %sys_is_err194 = icmp slt i64 %syscall_ret193, 0
-  %sys_neg_errno195 = sub i64 0, %syscall_ret193
-  %sys_err_ptr196 = inttoptr i64 %sys_neg_errno195 to ptr
-  %sys_val197 = select i1 %sys_is_err194, i64 0, i64 %syscall_ret193
-  %sys_err198 = select i1 %sys_is_err194, ptr %sys_err_ptr196, ptr null
-  %sys_flag199 = select i1 %sys_is_err194, i8 1, i8 0
-  %sys_result.val200 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val197, 0
-  %sys_result.err201 = insertvalue %struct.NpkResult_int64 %sys_result.val200, ptr %sys_err198, 1
-  %sys_result.is_error202 = insertvalue %struct.NpkResult_int64 %sys_result.err201, i8 %sys_flag199, 2
-  %buf203 = load i64, ptr %buf, align 4
-  %calltmp204 = call i32 @nitpick_libc_mem_free(i64 %buf203)
+afterwhile192:                                    ; preds = %whilecond109
+  %tr_map193 = load i64, ptr %tr_map, align 4
+  %syscall_ret194 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 11, i64 %tr_map193, i64 256)
+  %sys_is_err195 = icmp slt i64 %syscall_ret194, 0
+  %sys_neg_errno196 = sub i64 0, %syscall_ret194
+  %sys_err_ptr197 = inttoptr i64 %sys_neg_errno196 to ptr
+  %sys_val198 = select i1 %sys_is_err195, i64 0, i64 %syscall_ret194
+  %sys_err199 = select i1 %sys_is_err195, ptr %sys_err_ptr197, ptr null
+  %sys_flag200 = select i1 %sys_is_err195, i8 1, i8 0
+  %sys_result.val201 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val198, 0
+  %sys_result.err202 = insertvalue %struct.NpkResult_int64 %sys_result.val201, ptr %sys_err199, 1
+  %sys_result.is_error203 = insertvalue %struct.NpkResult_int64 %sys_result.err202, i8 %sys_flag200, 2
+  %buf204 = load i64, ptr %buf, align 4
+  %cast.inttoptr205 = inttoptr i64 %buf204 to ptr
+  call void @npk_free(ptr %cast.inttoptr205)
   ret { i32, ptr, i8 } zeroinitializer
 }
 
@@ -61686,7 +61680,6 @@ entry:
   br i1 %null.deref, label %null.fail, label %null.ok
 
 null.fail:                                        ; preds = %entry
-  %0 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -61704,7 +61697,6 @@ null.ok:                                          ; preds = %entry
   br i1 %null.deref12, label %null.fail13, label %null.ok14
 
 null.fail13:                                      ; preds = %null.ok
-  %1 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -61722,7 +61714,6 @@ null.ok14:                                        ; preds = %null.ok
   br i1 %null.deref22, label %null.fail23, label %null.ok24
 
 null.fail23:                                      ; preds = %null.ok14
-  %2 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -61740,7 +61731,6 @@ null.ok24:                                        ; preds = %null.ok14
   br i1 %null.deref32, label %null.fail33, label %null.ok34
 
 null.fail33:                                      ; preds = %null.ok24
-  %3 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -61758,7 +61748,6 @@ null.ok34:                                        ; preds = %null.ok24
   br i1 %null.deref42, label %null.fail43, label %null.ok44
 
 null.fail43:                                      ; preds = %null.ok34
-  %4 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -61776,7 +61765,6 @@ null.ok44:                                        ; preds = %null.ok34
   br i1 %null.deref52, label %null.fail53, label %null.ok54
 
 null.fail53:                                      ; preds = %null.ok44
-  %5 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -61794,7 +61782,6 @@ null.ok54:                                        ; preds = %null.ok44
   br i1 %null.deref62, label %null.fail63, label %null.ok64
 
 null.fail63:                                      ; preds = %null.ok54
-  %6 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -61812,7 +61799,6 @@ null.ok64:                                        ; preds = %null.ok54
   br i1 %null.deref72, label %null.fail73, label %null.ok74
 
 null.fail73:                                      ; preds = %null.ok64
-  %7 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -62087,7 +62073,6 @@ whilebody22:                                      ; preds = %whilecond17
   br i1 %null.deref, label %null.fail, label %null.ok
 
 null.fail:                                        ; preds = %whilebody22
-  %0 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -62111,7 +62096,6 @@ null.ok:                                          ; preds = %whilebody22
   br i1 %null.deref43, label %null.fail44, label %null.ok45
 
 null.fail44:                                      ; preds = %null.ok
-  %1 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -62669,7 +62653,6 @@ ifcont245:                                        ; preds = %ifcont244, %whilebo
   br i1 %null.deref, label %null.fail, label %null.ok
 
 null.fail:                                        ; preds = %ifcont245
-  %0 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -62759,7 +62742,6 @@ then288:                                          ; preds = %else284
   br i1 %null.deref299, label %null.fail300, label %null.ok301
 
 null.fail300:                                     ; preds = %then288
-  %1 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -62906,7 +62888,6 @@ then383:                                          ; preds = %else378
   br i1 %null.deref396, label %null.fail397, label %null.ok398
 
 null.fail397:                                     ; preds = %then383
-  %2 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -63164,7 +63145,6 @@ whilebody546:                                     ; preds = %whilecond541
   br i1 %null.deref559, label %null.fail560, label %null.ok561
 
 null.fail560:                                     ; preds = %whilebody546
-  %3 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -63498,7 +63478,6 @@ whilecond:                                        ; preds = %whilebody, %entry
   br i1 %null.deref, label %null.fail, label %null.ok
 
 null.fail:                                        ; preds = %whilecond
-  %0 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -64067,37 +64046,40 @@ ifcont23:                                         ; preds = %ifcont, %afterwhile
   store i64 65536, ptr %buf_size, align 4
   %buf = alloca i64, align 8
   %buf_size24 = load i64, ptr %buf_size, align 4
-  %calltmp25 = call i64 @malloc(i64 %buf_size24)
-  store i64 %calltmp25, ptr %buf, align 4
-  %buf26 = load i64, ptr %buf, align 4
-  %lttmp27 = icmp slt i64 %buf26, 0
-  %ifcond28 = icmp ne i1 %lttmp27, false
-  br i1 %ifcond28, label %then29, label %ifcont45
+  %wild_ptr = call ptr @npk_alloc(i64 %buf_size24)
+  %buf_size25 = load i64, ptr %buf_size, align 4
+  %wild_ptr26 = call ptr @npk_alloc(i64 %buf_size25)
+  %cast.ptrtoint = ptrtoint ptr %wild_ptr26 to i64
+  store i64 %cast.ptrtoint, ptr %buf, align 4
+  %buf27 = load i64, ptr %buf, align 4
+  %lttmp28 = icmp slt i64 %buf27, 0
+  %ifcond29 = icmp ne i1 %lttmp28, false
+  br i1 %ifcond29, label %then30, label %ifcont46
 
-then29:                                           ; preds = %ifcont23
-  %fd30 = load i64, ptr %fd, align 4
-  %getmp = icmp sge i64 %fd30, 0
-  %ifcond31 = icmp ne i1 %getmp, false
-  br i1 %ifcond31, label %then32, label %ifcont44
+then30:                                           ; preds = %ifcont23
+  %fd31 = load i64, ptr %fd, align 4
+  %getmp = icmp sge i64 %fd31, 0
+  %ifcond32 = icmp ne i1 %getmp, false
+  br i1 %ifcond32, label %then33, label %ifcont45
 
-then32:                                           ; preds = %then29
-  %fd33 = load i64, ptr %fd, align 4
-  %syscall_ret34 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %fd33)
-  %sys_is_err35 = icmp slt i64 %syscall_ret34, 0
-  %sys_neg_errno36 = sub i64 0, %syscall_ret34
-  %sys_err_ptr37 = inttoptr i64 %sys_neg_errno36 to ptr
-  %sys_val38 = select i1 %sys_is_err35, i64 0, i64 %syscall_ret34
-  %sys_err39 = select i1 %sys_is_err35, ptr %sys_err_ptr37, ptr null
-  %sys_flag40 = select i1 %sys_is_err35, i8 1, i8 0
-  %sys_result.val41 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val38, 0
-  %sys_result.err42 = insertvalue %struct.NpkResult_int64 %sys_result.val41, ptr %sys_err39, 1
-  %sys_result.is_error43 = insertvalue %struct.NpkResult_int64 %sys_result.err42, i8 %sys_flag40, 2
-  br label %ifcont44
+then33:                                           ; preds = %then30
+  %fd34 = load i64, ptr %fd, align 4
+  %syscall_ret35 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %fd34)
+  %sys_is_err36 = icmp slt i64 %syscall_ret35, 0
+  %sys_neg_errno37 = sub i64 0, %syscall_ret35
+  %sys_err_ptr38 = inttoptr i64 %sys_neg_errno37 to ptr
+  %sys_val39 = select i1 %sys_is_err36, i64 0, i64 %syscall_ret35
+  %sys_err40 = select i1 %sys_is_err36, ptr %sys_err_ptr38, ptr null
+  %sys_flag41 = select i1 %sys_is_err36, i8 1, i8 0
+  %sys_result.val42 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val39, 0
+  %sys_result.err43 = insertvalue %struct.NpkResult_int64 %sys_result.val42, ptr %sys_err40, 1
+  %sys_result.is_error44 = insertvalue %struct.NpkResult_int64 %sys_result.err43, i8 %sys_flag41, 2
+  br label %ifcont45
 
-ifcont44:                                         ; preds = %then32, %then29
+ifcont45:                                         ; preds = %then33, %then30
   ret { i32, ptr, i8 } { i32 1, ptr null, i8 0 }
 
-ifcont45:                                         ; preds = %ifcont23
+ifcont46:                                         ; preds = %ifcont23
   %col = alloca i64, align 8
   store i64 0, ptr %col, align 4
   %pending_spaces = alloca i64, align 8
@@ -64105,456 +64087,459 @@ ifcont45:                                         ; preds = %ifcont23
   %running = alloca i32, align 4
   store i32 1, ptr %running, align 4
   %out_buf = alloca i64, align 8
-  %calltmp46 = call i64 @malloc(i64 65536)
-  store i64 %calltmp46, ptr %out_buf, align 4
+  %wild_ptr47 = call ptr @npk_alloc(i64 65536)
+  %wild_ptr48 = call ptr @npk_alloc(i64 65536)
+  %cast.ptrtoint49 = ptrtoint ptr %wild_ptr48 to i64
+  store i64 %cast.ptrtoint49, ptr %out_buf, align 4
   %out_len = alloca i64, align 8
   store i64 0, ptr %out_len, align 4
-  br label %whilecond47
+  br label %whilecond50
 
-whilecond47:                                      ; preds = %ifcont248, %ifcont45
-  %running48 = load i32, ptr %running, align 4
-  %eqtmp = icmp eq i32 %running48, 1
-  %whilecond49 = icmp ne i1 %eqtmp, false
-  br i1 %whilecond49, label %whilebody50, label %afterwhile249
+whilecond50:                                      ; preds = %ifcont251, %ifcont46
+  %running51 = load i32, ptr %running, align 4
+  %eqtmp = icmp eq i32 %running51, 1
+  %whilecond52 = icmp ne i1 %eqtmp, false
+  br i1 %whilecond52, label %whilebody53, label %afterwhile252
 
-whilebody50:                                      ; preds = %whilecond47
+whilebody53:                                      ; preds = %whilecond50
   %n = alloca i64, align 8
-  %fd51 = load i64, ptr %fd, align 4
-  %buf52 = load i64, ptr %buf, align 4
-  %buf_size53 = load i64, ptr %buf_size, align 4
-  %syscall_ret54 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 0, i64 %fd51, i64 %buf52, i64 %buf_size53)
-  %sys_is_err55 = icmp slt i64 %syscall_ret54, 0
-  %sys_neg_errno56 = sub i64 0, %syscall_ret54
-  %sys_err_ptr57 = inttoptr i64 %sys_neg_errno56 to ptr
-  %sys_val58 = select i1 %sys_is_err55, i64 0, i64 %syscall_ret54
-  %sys_err59 = select i1 %sys_is_err55, ptr %sys_err_ptr57, ptr null
-  %sys_flag60 = select i1 %sys_is_err55, i8 1, i8 0
-  %sys_result.val61 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val58, 0
-  %sys_result.err62 = insertvalue %struct.NpkResult_int64 %sys_result.val61, ptr %sys_err59, 1
-  %sys_result.is_error63 = insertvalue %struct.NpkResult_int64 %sys_result.err62, i8 %sys_flag60, 2
-  %is_error64 = extractvalue %struct.NpkResult_int64 %sys_result.is_error63, 2
-  %is_error_bool65 = icmp ne i8 %is_error64, 0
-  br i1 %is_error_bool65, label %error_block66, label %success_block67
+  %fd54 = load i64, ptr %fd, align 4
+  %buf55 = load i64, ptr %buf, align 4
+  %buf_size56 = load i64, ptr %buf_size, align 4
+  %syscall_ret57 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 0, i64 %fd54, i64 %buf55, i64 %buf_size56)
+  %sys_is_err58 = icmp slt i64 %syscall_ret57, 0
+  %sys_neg_errno59 = sub i64 0, %syscall_ret57
+  %sys_err_ptr60 = inttoptr i64 %sys_neg_errno59 to ptr
+  %sys_val61 = select i1 %sys_is_err58, i64 0, i64 %syscall_ret57
+  %sys_err62 = select i1 %sys_is_err58, ptr %sys_err_ptr60, ptr null
+  %sys_flag63 = select i1 %sys_is_err58, i8 1, i8 0
+  %sys_result.val64 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val61, 0
+  %sys_result.err65 = insertvalue %struct.NpkResult_int64 %sys_result.val64, ptr %sys_err62, 1
+  %sys_result.is_error66 = insertvalue %struct.NpkResult_int64 %sys_result.err65, i8 %sys_flag63, 2
+  %is_error67 = extractvalue %struct.NpkResult_int64 %sys_result.is_error66, 2
+  %is_error_bool68 = icmp ne i8 %is_error67, 0
+  br i1 %is_error_bool68, label %error_block69, label %success_block70
 
-error_block66:                                    ; preds = %whilebody50
-  br label %merge_block68
+error_block69:                                    ; preds = %whilebody53
+  br label %merge_block71
 
-success_block67:                                  ; preds = %whilebody50
-  %value69 = extractvalue %struct.NpkResult_int64 %sys_result.is_error63, 0
-  br label %merge_block68
+success_block70:                                  ; preds = %whilebody53
+  %value72 = extractvalue %struct.NpkResult_int64 %sys_result.is_error66, 0
+  br label %merge_block71
 
-merge_block68:                                    ; preds = %success_block67, %error_block66
-  %unwrap_result70 = phi i64 [ -1, %error_block66 ], [ %value69, %success_block67 ]
-  store i64 %unwrap_result70, ptr %n, align 4
-  %n71 = load i64, ptr %n, align 4
-  %letmp72 = icmp sle i64 %n71, 0
-  %ifcond73 = icmp ne i1 %letmp72, false
-  br i1 %ifcond73, label %then74, label %else
+merge_block71:                                    ; preds = %success_block70, %error_block69
+  %unwrap_result73 = phi i64 [ -1, %error_block69 ], [ %value72, %success_block70 ]
+  store i64 %unwrap_result73, ptr %n, align 4
+  %n74 = load i64, ptr %n, align 4
+  %letmp75 = icmp sle i64 %n74, 0
+  %ifcond76 = icmp ne i1 %letmp75, false
+  br i1 %ifcond76, label %then77, label %else
 
-then74:                                           ; preds = %merge_block68
+then77:                                           ; preds = %merge_block71
   store i32 0, ptr %running, align 4
-  br label %ifcont248
+  br label %ifcont251
 
-else:                                             ; preds = %merge_block68
+else:                                             ; preds = %merge_block71
   %j = alloca i64, align 8
   store i64 0, ptr %j, align 4
-  br label %whilecond75
+  br label %whilecond78
 
-whilecond75:                                      ; preds = %ifcont244, %else
-  %j76 = load i64, ptr %j, align 4
-  %n77 = load i64, ptr %n, align 4
-  %lttmp78 = icmp slt i64 %j76, %n77
-  %whilecond79 = icmp ne i1 %lttmp78, false
-  br i1 %whilecond79, label %whilebody80, label %afterwhile247
+whilecond78:                                      ; preds = %ifcont247, %else
+  %j79 = load i64, ptr %j, align 4
+  %n80 = load i64, ptr %n, align 4
+  %lttmp81 = icmp slt i64 %j79, %n80
+  %whilecond82 = icmp ne i1 %lttmp81, false
+  br i1 %whilecond82, label %whilebody83, label %afterwhile250
 
-whilebody80:                                      ; preds = %whilecond75
+whilebody83:                                      ; preds = %whilecond78
   %c = alloca i64, align 8
-  %buf81 = load i64, ptr %buf, align 4
-  %j82 = load i64, ptr %j, align 4
-  %addtmp83 = add i64 %buf81, %j82
   %buf84 = load i64, ptr %buf, align 4
   %j85 = load i64, ptr %j, align 4
   %addtmp86 = add i64 %buf84, %j85
-  %cast.inttoptr = inttoptr i64 %addtmp86 to ptr
+  %buf87 = load i64, ptr %buf, align 4
+  %j88 = load i64, ptr %j, align 4
+  %addtmp89 = add i64 %buf87, %j88
+  %cast.inttoptr = inttoptr i64 %addtmp89 to ptr
   %null.deref = icmp eq ptr %cast.inttoptr, null
   br i1 %null.deref, label %null.fail, label %null.ok
 
-null.fail:                                        ; preds = %whilebody80
-  %0 = call i32 @failsafe(i32 46)
+null.fail:                                        ; preds = %whilebody83
   call void @exit(i32 46)
   unreachable
 
-null.ok:                                          ; preds = %whilebody80
+null.ok:                                          ; preds = %whilebody83
   %deref = load i32, ptr %cast.inttoptr, align 4
   %cast.sext = sext i32 %deref to i64
   store i64 %cast.sext, ptr %c, align 4
-  %c87 = load i64, ptr %c, align 4
-  %eqtmp88 = icmp eq i64 %c87, 32
-  %ifcond89 = icmp ne i1 %eqtmp88, false
-  br i1 %ifcond89, label %then90, label %else131
+  %c90 = load i64, ptr %c, align 4
+  %eqtmp91 = icmp eq i64 %c90, 32
+  %ifcond92 = icmp ne i1 %eqtmp91, false
+  br i1 %ifcond92, label %then93, label %else134
 
-then90:                                           ; preds = %null.ok
-  %pending_spaces91 = load i64, ptr %pending_spaces, align 4
-  %addtmp92 = add i64 %pending_spaces91, 1
-  store i64 %addtmp92, ptr %pending_spaces, align 4
-  %col93 = load i64, ptr %col, align 4
-  %addtmp94 = add i64 %col93, 1
-  store i64 %addtmp94, ptr %col, align 4
-  %col95 = load i64, ptr %col, align 4
+then93:                                           ; preds = %null.ok
+  %pending_spaces94 = load i64, ptr %pending_spaces, align 4
+  %addtmp95 = add i64 %pending_spaces94, 1
+  store i64 %addtmp95, ptr %pending_spaces, align 4
   %col96 = load i64, ptr %col, align 4
-  %divtmp = sdiv i64 %col96, 8
+  %addtmp97 = add i64 %col96, 1
+  store i64 %addtmp97, ptr %col, align 4
+  %col98 = load i64, ptr %col, align 4
+  %col99 = load i64, ptr %col, align 4
+  %divtmp = sdiv i64 %col99, 8
   %safe.divtmp = select i1 false, i64 9223372036854775807, i64 %divtmp
   %multmp = mul i64 %safe.divtmp, 8
-  %subtmp = sub i64 %col95, %multmp
-  %eqtmp97 = icmp eq i64 %subtmp, 0
-  %ifcond98 = icmp ne i1 %eqtmp97, false
-  br i1 %ifcond98, label %then99, label %ifcont130
+  %subtmp = sub i64 %col98, %multmp
+  %eqtmp100 = icmp eq i64 %subtmp, 0
+  %ifcond101 = icmp ne i1 %eqtmp100, false
+  br i1 %ifcond101, label %then102, label %ifcont133
 
-then99:                                           ; preds = %then90
-  %pending_spaces100 = load i64, ptr %pending_spaces, align 4
-  %gttmp = icmp sgt i64 %pending_spaces100, 0
-  %ifcond101 = icmp ne i1 %gttmp, false
-  br i1 %ifcond101, label %then102, label %ifcont129
+then102:                                          ; preds = %then93
+  %pending_spaces103 = load i64, ptr %pending_spaces, align 4
+  %gttmp = icmp sgt i64 %pending_spaces103, 0
+  %ifcond104 = icmp ne i1 %gttmp, false
+  br i1 %ifcond104, label %then105, label %ifcont132
 
-then102:                                          ; preds = %then99
-  %out_buf103 = load i64, ptr %out_buf, align 4
-  %out_len104 = load i64, ptr %out_len, align 4
-  %addtmp105 = add i64 %out_buf103, %out_len104
+then105:                                          ; preds = %then102
   %out_buf106 = load i64, ptr %out_buf, align 4
   %out_len107 = load i64, ptr %out_len, align 4
   %addtmp108 = add i64 %out_buf106, %out_len107
-  %cast.inttoptr109 = inttoptr i64 %addtmp108 to ptr
-  store i8 9, ptr %cast.inttoptr109, align 1
+  %out_buf109 = load i64, ptr %out_buf, align 4
   %out_len110 = load i64, ptr %out_len, align 4
-  %addtmp111 = add i64 %out_len110, 1
-  store i64 %addtmp111, ptr %out_len, align 4
-  %out_len112 = load i64, ptr %out_len, align 4
-  %getmp113 = icmp sge i64 %out_len112, 65536
-  %ifcond114 = icmp ne i1 %getmp113, false
-  br i1 %ifcond114, label %then115, label %ifcont128
+  %addtmp111 = add i64 %out_buf109, %out_len110
+  %cast.inttoptr112 = inttoptr i64 %addtmp111 to ptr
+  store i8 9, ptr %cast.inttoptr112, align 1
+  %out_len113 = load i64, ptr %out_len, align 4
+  %addtmp114 = add i64 %out_len113, 1
+  store i64 %addtmp114, ptr %out_len, align 4
+  %out_len115 = load i64, ptr %out_len, align 4
+  %getmp116 = icmp sge i64 %out_len115, 65536
+  %ifcond117 = icmp ne i1 %getmp116, false
+  br i1 %ifcond117, label %then118, label %ifcont131
 
-then115:                                          ; preds = %then102
-  %out_buf116 = load i64, ptr %out_buf, align 4
-  %out_len117 = load i64, ptr %out_len, align 4
-  %syscall_ret118 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 1, i64 1, i64 %out_buf116, i64 %out_len117)
-  %sys_is_err119 = icmp slt i64 %syscall_ret118, 0
-  %sys_neg_errno120 = sub i64 0, %syscall_ret118
-  %sys_err_ptr121 = inttoptr i64 %sys_neg_errno120 to ptr
-  %sys_val122 = select i1 %sys_is_err119, i64 0, i64 %syscall_ret118
-  %sys_err123 = select i1 %sys_is_err119, ptr %sys_err_ptr121, ptr null
-  %sys_flag124 = select i1 %sys_is_err119, i8 1, i8 0
-  %sys_result.val125 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val122, 0
-  %sys_result.err126 = insertvalue %struct.NpkResult_int64 %sys_result.val125, ptr %sys_err123, 1
-  %sys_result.is_error127 = insertvalue %struct.NpkResult_int64 %sys_result.err126, i8 %sys_flag124, 2
+then118:                                          ; preds = %then105
+  %out_buf119 = load i64, ptr %out_buf, align 4
+  %out_len120 = load i64, ptr %out_len, align 4
+  %syscall_ret121 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 1, i64 1, i64 %out_buf119, i64 %out_len120)
+  %sys_is_err122 = icmp slt i64 %syscall_ret121, 0
+  %sys_neg_errno123 = sub i64 0, %syscall_ret121
+  %sys_err_ptr124 = inttoptr i64 %sys_neg_errno123 to ptr
+  %sys_val125 = select i1 %sys_is_err122, i64 0, i64 %syscall_ret121
+  %sys_err126 = select i1 %sys_is_err122, ptr %sys_err_ptr124, ptr null
+  %sys_flag127 = select i1 %sys_is_err122, i8 1, i8 0
+  %sys_result.val128 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val125, 0
+  %sys_result.err129 = insertvalue %struct.NpkResult_int64 %sys_result.val128, ptr %sys_err126, 1
+  %sys_result.is_error130 = insertvalue %struct.NpkResult_int64 %sys_result.err129, i8 %sys_flag127, 2
   store i64 0, ptr %out_len, align 4
-  br label %ifcont128
+  br label %ifcont131
 
-ifcont128:                                        ; preds = %then115, %then102
+ifcont131:                                        ; preds = %then118, %then105
   store i64 0, ptr %pending_spaces, align 4
-  br label %ifcont129
+  br label %ifcont132
 
-ifcont129:                                        ; preds = %ifcont128, %then99
-  br label %ifcont130
+ifcont132:                                        ; preds = %ifcont131, %then102
+  br label %ifcont133
 
-ifcont130:                                        ; preds = %ifcont129, %then90
-  br label %ifcont244
+ifcont133:                                        ; preds = %ifcont132, %then93
+  br label %ifcont247
 
-else131:                                          ; preds = %null.ok
-  %c132 = load i64, ptr %c, align 4
-  %eqtmp133 = icmp eq i64 %c132, 9
-  %ifcond134 = icmp ne i1 %eqtmp133, false
-  br i1 %ifcond134, label %then135, label %else172
+else134:                                          ; preds = %null.ok
+  %c135 = load i64, ptr %c, align 4
+  %eqtmp136 = icmp eq i64 %c135, 9
+  %ifcond137 = icmp ne i1 %eqtmp136, false
+  br i1 %ifcond137, label %then138, label %else175
 
-then135:                                          ; preds = %else131
-  %out_buf136 = load i64, ptr %out_buf, align 4
-  %out_len137 = load i64, ptr %out_len, align 4
-  %addtmp138 = add i64 %out_buf136, %out_len137
+then138:                                          ; preds = %else134
   %out_buf139 = load i64, ptr %out_buf, align 4
   %out_len140 = load i64, ptr %out_len, align 4
   %addtmp141 = add i64 %out_buf139, %out_len140
-  %cast.inttoptr142 = inttoptr i64 %addtmp141 to ptr
-  store i8 9, ptr %cast.inttoptr142, align 1
+  %out_buf142 = load i64, ptr %out_buf, align 4
   %out_len143 = load i64, ptr %out_len, align 4
-  %addtmp144 = add i64 %out_len143, 1
-  store i64 %addtmp144, ptr %out_len, align 4
-  %out_len145 = load i64, ptr %out_len, align 4
-  %getmp146 = icmp sge i64 %out_len145, 65536
-  %ifcond147 = icmp ne i1 %getmp146, false
-  br i1 %ifcond147, label %then148, label %ifcont161
+  %addtmp144 = add i64 %out_buf142, %out_len143
+  %cast.inttoptr145 = inttoptr i64 %addtmp144 to ptr
+  store i8 9, ptr %cast.inttoptr145, align 1
+  %out_len146 = load i64, ptr %out_len, align 4
+  %addtmp147 = add i64 %out_len146, 1
+  store i64 %addtmp147, ptr %out_len, align 4
+  %out_len148 = load i64, ptr %out_len, align 4
+  %getmp149 = icmp sge i64 %out_len148, 65536
+  %ifcond150 = icmp ne i1 %getmp149, false
+  br i1 %ifcond150, label %then151, label %ifcont164
 
-then148:                                          ; preds = %then135
-  %out_buf149 = load i64, ptr %out_buf, align 4
-  %out_len150 = load i64, ptr %out_len, align 4
-  %syscall_ret151 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 1, i64 1, i64 %out_buf149, i64 %out_len150)
-  %sys_is_err152 = icmp slt i64 %syscall_ret151, 0
-  %sys_neg_errno153 = sub i64 0, %syscall_ret151
-  %sys_err_ptr154 = inttoptr i64 %sys_neg_errno153 to ptr
-  %sys_val155 = select i1 %sys_is_err152, i64 0, i64 %syscall_ret151
-  %sys_err156 = select i1 %sys_is_err152, ptr %sys_err_ptr154, ptr null
-  %sys_flag157 = select i1 %sys_is_err152, i8 1, i8 0
-  %sys_result.val158 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val155, 0
-  %sys_result.err159 = insertvalue %struct.NpkResult_int64 %sys_result.val158, ptr %sys_err156, 1
-  %sys_result.is_error160 = insertvalue %struct.NpkResult_int64 %sys_result.err159, i8 %sys_flag157, 2
+then151:                                          ; preds = %then138
+  %out_buf152 = load i64, ptr %out_buf, align 4
+  %out_len153 = load i64, ptr %out_len, align 4
+  %syscall_ret154 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 1, i64 1, i64 %out_buf152, i64 %out_len153)
+  %sys_is_err155 = icmp slt i64 %syscall_ret154, 0
+  %sys_neg_errno156 = sub i64 0, %syscall_ret154
+  %sys_err_ptr157 = inttoptr i64 %sys_neg_errno156 to ptr
+  %sys_val158 = select i1 %sys_is_err155, i64 0, i64 %syscall_ret154
+  %sys_err159 = select i1 %sys_is_err155, ptr %sys_err_ptr157, ptr null
+  %sys_flag160 = select i1 %sys_is_err155, i8 1, i8 0
+  %sys_result.val161 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val158, 0
+  %sys_result.err162 = insertvalue %struct.NpkResult_int64 %sys_result.val161, ptr %sys_err159, 1
+  %sys_result.is_error163 = insertvalue %struct.NpkResult_int64 %sys_result.err162, i8 %sys_flag160, 2
   store i64 0, ptr %out_len, align 4
-  br label %ifcont161
+  br label %ifcont164
 
-ifcont161:                                        ; preds = %then148, %then135
+ifcont164:                                        ; preds = %then151, %then138
   %add_to_col = alloca i64, align 8
-  %col162 = load i64, ptr %col, align 4
-  %col163 = load i64, ptr %col, align 4
-  %divtmp164 = sdiv i64 %col163, 8
-  %safe.divtmp165 = select i1 false, i64 9223372036854775807, i64 %divtmp164
-  %multmp166 = mul i64 %safe.divtmp165, 8
-  %subtmp167 = sub i64 %col162, %multmp166
-  %subtmp168 = sub i64 8, %subtmp167
-  store i64 %subtmp168, ptr %add_to_col, align 4
-  %col169 = load i64, ptr %col, align 4
-  %add_to_col170 = load i64, ptr %add_to_col, align 4
-  %addtmp171 = add i64 %col169, %add_to_col170
-  store i64 %addtmp171, ptr %col, align 4
+  %col165 = load i64, ptr %col, align 4
+  %col166 = load i64, ptr %col, align 4
+  %divtmp167 = sdiv i64 %col166, 8
+  %safe.divtmp168 = select i1 false, i64 9223372036854775807, i64 %divtmp167
+  %multmp169 = mul i64 %safe.divtmp168, 8
+  %subtmp170 = sub i64 %col165, %multmp169
+  %subtmp171 = sub i64 8, %subtmp170
+  store i64 %subtmp171, ptr %add_to_col, align 4
+  %col172 = load i64, ptr %col, align 4
+  %add_to_col173 = load i64, ptr %add_to_col, align 4
+  %addtmp174 = add i64 %col172, %add_to_col173
+  store i64 %addtmp174, ptr %col, align 4
   store i64 0, ptr %pending_spaces, align 4
-  br label %ifcont243
+  br label %ifcont246
 
-else172:                                          ; preds = %else131
+else175:                                          ; preds = %else134
   %k = alloca i64, align 8
   store i64 0, ptr %k, align 4
-  br label %whilecond173
+  br label %whilecond176
 
-whilecond173:                                     ; preds = %ifcont204, %else172
-  %k174 = load i64, ptr %k, align 4
-  %pending_spaces175 = load i64, ptr %pending_spaces, align 4
-  %lttmp176 = icmp slt i64 %k174, %pending_spaces175
-  %whilecond177 = icmp ne i1 %lttmp176, false
-  br i1 %whilecond177, label %whilebody178, label %afterwhile207
+whilecond176:                                     ; preds = %ifcont207, %else175
+  %k177 = load i64, ptr %k, align 4
+  %pending_spaces178 = load i64, ptr %pending_spaces, align 4
+  %lttmp179 = icmp slt i64 %k177, %pending_spaces178
+  %whilecond180 = icmp ne i1 %lttmp179, false
+  br i1 %whilecond180, label %whilebody181, label %afterwhile210
 
-whilebody178:                                     ; preds = %whilecond173
-  %out_buf179 = load i64, ptr %out_buf, align 4
-  %out_len180 = load i64, ptr %out_len, align 4
-  %addtmp181 = add i64 %out_buf179, %out_len180
+whilebody181:                                     ; preds = %whilecond176
   %out_buf182 = load i64, ptr %out_buf, align 4
   %out_len183 = load i64, ptr %out_len, align 4
   %addtmp184 = add i64 %out_buf182, %out_len183
-  %cast.inttoptr185 = inttoptr i64 %addtmp184 to ptr
-  store i8 32, ptr %cast.inttoptr185, align 1
+  %out_buf185 = load i64, ptr %out_buf, align 4
   %out_len186 = load i64, ptr %out_len, align 4
-  %addtmp187 = add i64 %out_len186, 1
-  store i64 %addtmp187, ptr %out_len, align 4
-  %out_len188 = load i64, ptr %out_len, align 4
-  %getmp189 = icmp sge i64 %out_len188, 65536
-  %ifcond190 = icmp ne i1 %getmp189, false
-  br i1 %ifcond190, label %then191, label %ifcont204
+  %addtmp187 = add i64 %out_buf185, %out_len186
+  %cast.inttoptr188 = inttoptr i64 %addtmp187 to ptr
+  store i8 32, ptr %cast.inttoptr188, align 1
+  %out_len189 = load i64, ptr %out_len, align 4
+  %addtmp190 = add i64 %out_len189, 1
+  store i64 %addtmp190, ptr %out_len, align 4
+  %out_len191 = load i64, ptr %out_len, align 4
+  %getmp192 = icmp sge i64 %out_len191, 65536
+  %ifcond193 = icmp ne i1 %getmp192, false
+  br i1 %ifcond193, label %then194, label %ifcont207
 
-then191:                                          ; preds = %whilebody178
-  %out_buf192 = load i64, ptr %out_buf, align 4
-  %out_len193 = load i64, ptr %out_len, align 4
-  %syscall_ret194 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 1, i64 1, i64 %out_buf192, i64 %out_len193)
-  %sys_is_err195 = icmp slt i64 %syscall_ret194, 0
-  %sys_neg_errno196 = sub i64 0, %syscall_ret194
-  %sys_err_ptr197 = inttoptr i64 %sys_neg_errno196 to ptr
-  %sys_val198 = select i1 %sys_is_err195, i64 0, i64 %syscall_ret194
-  %sys_err199 = select i1 %sys_is_err195, ptr %sys_err_ptr197, ptr null
-  %sys_flag200 = select i1 %sys_is_err195, i8 1, i8 0
-  %sys_result.val201 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val198, 0
-  %sys_result.err202 = insertvalue %struct.NpkResult_int64 %sys_result.val201, ptr %sys_err199, 1
-  %sys_result.is_error203 = insertvalue %struct.NpkResult_int64 %sys_result.err202, i8 %sys_flag200, 2
+then194:                                          ; preds = %whilebody181
+  %out_buf195 = load i64, ptr %out_buf, align 4
+  %out_len196 = load i64, ptr %out_len, align 4
+  %syscall_ret197 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 1, i64 1, i64 %out_buf195, i64 %out_len196)
+  %sys_is_err198 = icmp slt i64 %syscall_ret197, 0
+  %sys_neg_errno199 = sub i64 0, %syscall_ret197
+  %sys_err_ptr200 = inttoptr i64 %sys_neg_errno199 to ptr
+  %sys_val201 = select i1 %sys_is_err198, i64 0, i64 %syscall_ret197
+  %sys_err202 = select i1 %sys_is_err198, ptr %sys_err_ptr200, ptr null
+  %sys_flag203 = select i1 %sys_is_err198, i8 1, i8 0
+  %sys_result.val204 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val201, 0
+  %sys_result.err205 = insertvalue %struct.NpkResult_int64 %sys_result.val204, ptr %sys_err202, 1
+  %sys_result.is_error206 = insertvalue %struct.NpkResult_int64 %sys_result.err205, i8 %sys_flag203, 2
   store i64 0, ptr %out_len, align 4
-  br label %ifcont204
+  br label %ifcont207
 
-ifcont204:                                        ; preds = %then191, %whilebody178
-  %k205 = load i64, ptr %k, align 4
-  %addtmp206 = add i64 %k205, 1
-  store i64 %addtmp206, ptr %k, align 4
+ifcont207:                                        ; preds = %then194, %whilebody181
+  %k208 = load i64, ptr %k, align 4
+  %addtmp209 = add i64 %k208, 1
+  store i64 %addtmp209, ptr %k, align 4
   call void @npk_gc_safepoint()
-  br label %whilecond173
+  br label %whilecond176
 
-afterwhile207:                                    ; preds = %whilecond173
+afterwhile210:                                    ; preds = %whilecond176
   store i64 0, ptr %pending_spaces, align 4
-  %out_buf208 = load i64, ptr %out_buf, align 4
-  %out_len209 = load i64, ptr %out_len, align 4
-  %addtmp210 = add i64 %out_buf208, %out_len209
   %out_buf211 = load i64, ptr %out_buf, align 4
   %out_len212 = load i64, ptr %out_len, align 4
   %addtmp213 = add i64 %out_buf211, %out_len212
-  %cast.inttoptr214 = inttoptr i64 %addtmp213 to ptr
-  %c215 = load i64, ptr %c, align 4
-  %cast.trunc = trunc i64 %c215 to i8
-  store i8 %cast.trunc, ptr %cast.inttoptr214, align 1
-  %out_len216 = load i64, ptr %out_len, align 4
-  %addtmp217 = add i64 %out_len216, 1
-  store i64 %addtmp217, ptr %out_len, align 4
-  %out_len218 = load i64, ptr %out_len, align 4
-  %getmp219 = icmp sge i64 %out_len218, 65536
-  %ifcond220 = icmp ne i1 %getmp219, false
-  br i1 %ifcond220, label %then221, label %ifcont234
+  %out_buf214 = load i64, ptr %out_buf, align 4
+  %out_len215 = load i64, ptr %out_len, align 4
+  %addtmp216 = add i64 %out_buf214, %out_len215
+  %cast.inttoptr217 = inttoptr i64 %addtmp216 to ptr
+  %c218 = load i64, ptr %c, align 4
+  %cast.trunc = trunc i64 %c218 to i8
+  store i8 %cast.trunc, ptr %cast.inttoptr217, align 1
+  %out_len219 = load i64, ptr %out_len, align 4
+  %addtmp220 = add i64 %out_len219, 1
+  store i64 %addtmp220, ptr %out_len, align 4
+  %out_len221 = load i64, ptr %out_len, align 4
+  %getmp222 = icmp sge i64 %out_len221, 65536
+  %ifcond223 = icmp ne i1 %getmp222, false
+  br i1 %ifcond223, label %then224, label %ifcont237
 
-then221:                                          ; preds = %afterwhile207
-  %out_buf222 = load i64, ptr %out_buf, align 4
-  %out_len223 = load i64, ptr %out_len, align 4
-  %syscall_ret224 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 1, i64 1, i64 %out_buf222, i64 %out_len223)
-  %sys_is_err225 = icmp slt i64 %syscall_ret224, 0
-  %sys_neg_errno226 = sub i64 0, %syscall_ret224
-  %sys_err_ptr227 = inttoptr i64 %sys_neg_errno226 to ptr
-  %sys_val228 = select i1 %sys_is_err225, i64 0, i64 %syscall_ret224
-  %sys_err229 = select i1 %sys_is_err225, ptr %sys_err_ptr227, ptr null
-  %sys_flag230 = select i1 %sys_is_err225, i8 1, i8 0
-  %sys_result.val231 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val228, 0
-  %sys_result.err232 = insertvalue %struct.NpkResult_int64 %sys_result.val231, ptr %sys_err229, 1
-  %sys_result.is_error233 = insertvalue %struct.NpkResult_int64 %sys_result.err232, i8 %sys_flag230, 2
+then224:                                          ; preds = %afterwhile210
+  %out_buf225 = load i64, ptr %out_buf, align 4
+  %out_len226 = load i64, ptr %out_len, align 4
+  %syscall_ret227 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 1, i64 1, i64 %out_buf225, i64 %out_len226)
+  %sys_is_err228 = icmp slt i64 %syscall_ret227, 0
+  %sys_neg_errno229 = sub i64 0, %syscall_ret227
+  %sys_err_ptr230 = inttoptr i64 %sys_neg_errno229 to ptr
+  %sys_val231 = select i1 %sys_is_err228, i64 0, i64 %syscall_ret227
+  %sys_err232 = select i1 %sys_is_err228, ptr %sys_err_ptr230, ptr null
+  %sys_flag233 = select i1 %sys_is_err228, i8 1, i8 0
+  %sys_result.val234 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val231, 0
+  %sys_result.err235 = insertvalue %struct.NpkResult_int64 %sys_result.val234, ptr %sys_err232, 1
+  %sys_result.is_error236 = insertvalue %struct.NpkResult_int64 %sys_result.err235, i8 %sys_flag233, 2
   store i64 0, ptr %out_len, align 4
-  br label %ifcont234
+  br label %ifcont237
 
-ifcont234:                                        ; preds = %then221, %afterwhile207
-  %c235 = load i64, ptr %c, align 4
-  %eqtmp236 = icmp eq i64 %c235, 10
-  %ifcond237 = icmp ne i1 %eqtmp236, false
-  br i1 %ifcond237, label %then238, label %else239
+ifcont237:                                        ; preds = %then224, %afterwhile210
+  %c238 = load i64, ptr %c, align 4
+  %eqtmp239 = icmp eq i64 %c238, 10
+  %ifcond240 = icmp ne i1 %eqtmp239, false
+  br i1 %ifcond240, label %then241, label %else242
 
-then238:                                          ; preds = %ifcont234
+then241:                                          ; preds = %ifcont237
   store i64 0, ptr %col, align 4
-  br label %ifcont242
+  br label %ifcont245
 
-else239:                                          ; preds = %ifcont234
-  %col240 = load i64, ptr %col, align 4
-  %addtmp241 = add i64 %col240, 1
-  store i64 %addtmp241, ptr %col, align 4
-  br label %ifcont242
+else242:                                          ; preds = %ifcont237
+  %col243 = load i64, ptr %col, align 4
+  %addtmp244 = add i64 %col243, 1
+  store i64 %addtmp244, ptr %col, align 4
+  br label %ifcont245
 
-ifcont242:                                        ; preds = %else239, %then238
-  br label %ifcont243
+ifcont245:                                        ; preds = %else242, %then241
+  br label %ifcont246
 
-ifcont243:                                        ; preds = %ifcont242, %ifcont161
-  br label %ifcont244
+ifcont246:                                        ; preds = %ifcont245, %ifcont164
+  br label %ifcont247
 
-ifcont244:                                        ; preds = %ifcont243, %ifcont130
-  %j245 = load i64, ptr %j, align 4
-  %addtmp246 = add i64 %j245, 1
-  store i64 %addtmp246, ptr %j, align 4
+ifcont247:                                        ; preds = %ifcont246, %ifcont133
+  %j248 = load i64, ptr %j, align 4
+  %addtmp249 = add i64 %j248, 1
+  store i64 %addtmp249, ptr %j, align 4
   call void @npk_gc_safepoint()
-  br label %whilecond75
+  br label %whilecond78
 
-afterwhile247:                                    ; preds = %whilecond75
-  br label %ifcont248
+afterwhile250:                                    ; preds = %whilecond78
+  br label %ifcont251
 
-ifcont248:                                        ; preds = %afterwhile247, %then74
+ifcont251:                                        ; preds = %afterwhile250, %then77
   call void @npk_gc_safepoint()
-  br label %whilecond47
+  br label %whilecond50
 
-afterwhile249:                                    ; preds = %whilecond47
-  %pending_spaces250 = load i64, ptr %pending_spaces, align 4
-  %gttmp251 = icmp sgt i64 %pending_spaces250, 0
-  %ifcond252 = icmp ne i1 %gttmp251, false
-  br i1 %ifcond252, label %then253, label %ifcont290
+afterwhile252:                                    ; preds = %whilecond50
+  %pending_spaces253 = load i64, ptr %pending_spaces, align 4
+  %gttmp254 = icmp sgt i64 %pending_spaces253, 0
+  %ifcond255 = icmp ne i1 %gttmp254, false
+  br i1 %ifcond255, label %then256, label %ifcont293
 
-then253:                                          ; preds = %afterwhile249
-  %k254 = alloca i64, align 8
-  store i64 0, ptr %k254, align 4
-  br label %whilecond255
+then256:                                          ; preds = %afterwhile252
+  %k257 = alloca i64, align 8
+  store i64 0, ptr %k257, align 4
+  br label %whilecond258
 
-whilecond255:                                     ; preds = %ifcont286, %then253
-  %k256 = load i64, ptr %k254, align 4
-  %pending_spaces257 = load i64, ptr %pending_spaces, align 4
-  %lttmp258 = icmp slt i64 %k256, %pending_spaces257
-  %whilecond259 = icmp ne i1 %lttmp258, false
-  br i1 %whilecond259, label %whilebody260, label %afterwhile289
+whilecond258:                                     ; preds = %ifcont289, %then256
+  %k259 = load i64, ptr %k257, align 4
+  %pending_spaces260 = load i64, ptr %pending_spaces, align 4
+  %lttmp261 = icmp slt i64 %k259, %pending_spaces260
+  %whilecond262 = icmp ne i1 %lttmp261, false
+  br i1 %whilecond262, label %whilebody263, label %afterwhile292
 
-whilebody260:                                     ; preds = %whilecond255
-  %out_buf261 = load i64, ptr %out_buf, align 4
-  %out_len262 = load i64, ptr %out_len, align 4
-  %addtmp263 = add i64 %out_buf261, %out_len262
+whilebody263:                                     ; preds = %whilecond258
   %out_buf264 = load i64, ptr %out_buf, align 4
   %out_len265 = load i64, ptr %out_len, align 4
   %addtmp266 = add i64 %out_buf264, %out_len265
-  %cast.inttoptr267 = inttoptr i64 %addtmp266 to ptr
-  store i8 32, ptr %cast.inttoptr267, align 1
+  %out_buf267 = load i64, ptr %out_buf, align 4
   %out_len268 = load i64, ptr %out_len, align 4
-  %addtmp269 = add i64 %out_len268, 1
-  store i64 %addtmp269, ptr %out_len, align 4
-  %out_len270 = load i64, ptr %out_len, align 4
-  %getmp271 = icmp sge i64 %out_len270, 65536
-  %ifcond272 = icmp ne i1 %getmp271, false
-  br i1 %ifcond272, label %then273, label %ifcont286
+  %addtmp269 = add i64 %out_buf267, %out_len268
+  %cast.inttoptr270 = inttoptr i64 %addtmp269 to ptr
+  store i8 32, ptr %cast.inttoptr270, align 1
+  %out_len271 = load i64, ptr %out_len, align 4
+  %addtmp272 = add i64 %out_len271, 1
+  store i64 %addtmp272, ptr %out_len, align 4
+  %out_len273 = load i64, ptr %out_len, align 4
+  %getmp274 = icmp sge i64 %out_len273, 65536
+  %ifcond275 = icmp ne i1 %getmp274, false
+  br i1 %ifcond275, label %then276, label %ifcont289
 
-then273:                                          ; preds = %whilebody260
-  %out_buf274 = load i64, ptr %out_buf, align 4
-  %out_len275 = load i64, ptr %out_len, align 4
-  %syscall_ret276 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 1, i64 1, i64 %out_buf274, i64 %out_len275)
-  %sys_is_err277 = icmp slt i64 %syscall_ret276, 0
-  %sys_neg_errno278 = sub i64 0, %syscall_ret276
-  %sys_err_ptr279 = inttoptr i64 %sys_neg_errno278 to ptr
-  %sys_val280 = select i1 %sys_is_err277, i64 0, i64 %syscall_ret276
-  %sys_err281 = select i1 %sys_is_err277, ptr %sys_err_ptr279, ptr null
-  %sys_flag282 = select i1 %sys_is_err277, i8 1, i8 0
-  %sys_result.val283 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val280, 0
-  %sys_result.err284 = insertvalue %struct.NpkResult_int64 %sys_result.val283, ptr %sys_err281, 1
-  %sys_result.is_error285 = insertvalue %struct.NpkResult_int64 %sys_result.err284, i8 %sys_flag282, 2
+then276:                                          ; preds = %whilebody263
+  %out_buf277 = load i64, ptr %out_buf, align 4
+  %out_len278 = load i64, ptr %out_len, align 4
+  %syscall_ret279 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 1, i64 1, i64 %out_buf277, i64 %out_len278)
+  %sys_is_err280 = icmp slt i64 %syscall_ret279, 0
+  %sys_neg_errno281 = sub i64 0, %syscall_ret279
+  %sys_err_ptr282 = inttoptr i64 %sys_neg_errno281 to ptr
+  %sys_val283 = select i1 %sys_is_err280, i64 0, i64 %syscall_ret279
+  %sys_err284 = select i1 %sys_is_err280, ptr %sys_err_ptr282, ptr null
+  %sys_flag285 = select i1 %sys_is_err280, i8 1, i8 0
+  %sys_result.val286 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val283, 0
+  %sys_result.err287 = insertvalue %struct.NpkResult_int64 %sys_result.val286, ptr %sys_err284, 1
+  %sys_result.is_error288 = insertvalue %struct.NpkResult_int64 %sys_result.err287, i8 %sys_flag285, 2
   store i64 0, ptr %out_len, align 4
-  br label %ifcont286
+  br label %ifcont289
 
-ifcont286:                                        ; preds = %then273, %whilebody260
-  %k287 = load i64, ptr %k254, align 4
-  %addtmp288 = add i64 %k287, 1
-  store i64 %addtmp288, ptr %k254, align 4
+ifcont289:                                        ; preds = %then276, %whilebody263
+  %k290 = load i64, ptr %k257, align 4
+  %addtmp291 = add i64 %k290, 1
+  store i64 %addtmp291, ptr %k257, align 4
   call void @npk_gc_safepoint()
-  br label %whilecond255
+  br label %whilecond258
 
-afterwhile289:                                    ; preds = %whilecond255
-  br label %ifcont290
+afterwhile292:                                    ; preds = %whilecond258
+  br label %ifcont293
 
-ifcont290:                                        ; preds = %afterwhile289, %afterwhile249
-  %out_len291 = load i64, ptr %out_len, align 4
-  %gttmp292 = icmp sgt i64 %out_len291, 0
-  %ifcond293 = icmp ne i1 %gttmp292, false
-  br i1 %ifcond293, label %then294, label %ifcont307
+ifcont293:                                        ; preds = %afterwhile292, %afterwhile252
+  %out_len294 = load i64, ptr %out_len, align 4
+  %gttmp295 = icmp sgt i64 %out_len294, 0
+  %ifcond296 = icmp ne i1 %gttmp295, false
+  br i1 %ifcond296, label %then297, label %ifcont310
 
-then294:                                          ; preds = %ifcont290
-  %out_buf295 = load i64, ptr %out_buf, align 4
-  %out_len296 = load i64, ptr %out_len, align 4
-  %syscall_ret297 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 1, i64 1, i64 %out_buf295, i64 %out_len296)
-  %sys_is_err298 = icmp slt i64 %syscall_ret297, 0
-  %sys_neg_errno299 = sub i64 0, %syscall_ret297
-  %sys_err_ptr300 = inttoptr i64 %sys_neg_errno299 to ptr
-  %sys_val301 = select i1 %sys_is_err298, i64 0, i64 %syscall_ret297
-  %sys_err302 = select i1 %sys_is_err298, ptr %sys_err_ptr300, ptr null
-  %sys_flag303 = select i1 %sys_is_err298, i8 1, i8 0
-  %sys_result.val304 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val301, 0
-  %sys_result.err305 = insertvalue %struct.NpkResult_int64 %sys_result.val304, ptr %sys_err302, 1
-  %sys_result.is_error306 = insertvalue %struct.NpkResult_int64 %sys_result.err305, i8 %sys_flag303, 2
-  br label %ifcont307
+then297:                                          ; preds = %ifcont293
+  %out_buf298 = load i64, ptr %out_buf, align 4
+  %out_len299 = load i64, ptr %out_len, align 4
+  %syscall_ret300 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 1, i64 1, i64 %out_buf298, i64 %out_len299)
+  %sys_is_err301 = icmp slt i64 %syscall_ret300, 0
+  %sys_neg_errno302 = sub i64 0, %syscall_ret300
+  %sys_err_ptr303 = inttoptr i64 %sys_neg_errno302 to ptr
+  %sys_val304 = select i1 %sys_is_err301, i64 0, i64 %syscall_ret300
+  %sys_err305 = select i1 %sys_is_err301, ptr %sys_err_ptr303, ptr null
+  %sys_flag306 = select i1 %sys_is_err301, i8 1, i8 0
+  %sys_result.val307 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val304, 0
+  %sys_result.err308 = insertvalue %struct.NpkResult_int64 %sys_result.val307, ptr %sys_err305, 1
+  %sys_result.is_error309 = insertvalue %struct.NpkResult_int64 %sys_result.err308, i8 %sys_flag306, 2
+  br label %ifcont310
 
-ifcont307:                                        ; preds = %then294, %ifcont290
-  %out_buf308 = load i64, ptr %out_buf, align 4
-  %calltmp309 = call i32 @nitpick_libc_mem_free(i64 %out_buf308)
-  %fd310 = load i64, ptr %fd, align 4
-  %netmp311 = icmp ne i64 %fd310, 0
-  %ifcond312 = icmp ne i1 %netmp311, false
-  br i1 %ifcond312, label %then313, label %ifcont314
+ifcont310:                                        ; preds = %then297, %ifcont293
+  %out_buf311 = load i64, ptr %out_buf, align 4
+  %cast.inttoptr312 = inttoptr i64 %out_buf311 to ptr
+  call void @npk_free(ptr %cast.inttoptr312)
+  %fd313 = load i64, ptr %fd, align 4
+  %netmp314 = icmp ne i64 %fd313, 0
+  %ifcond315 = icmp ne i1 %netmp314, false
+  br i1 %ifcond315, label %then316, label %ifcont317
 
-then313:                                          ; preds = %ifcont307
-  br label %ifcont314
+then316:                                          ; preds = %ifcont310
+  br label %ifcont317
 
-ifcont314:                                        ; preds = %then313, %ifcont307
-  %buf315 = load i64, ptr %buf, align 4
-  %calltmp316 = call i32 @nitpick_libc_mem_free(i64 %buf315)
-  %fd317 = load i64, ptr %fd, align 4
-  %getmp318 = icmp sge i64 %fd317, 0
-  %ifcond319 = icmp ne i1 %getmp318, false
-  br i1 %ifcond319, label %then320, label %ifcont332
+ifcont317:                                        ; preds = %then316, %ifcont310
+  %buf318 = load i64, ptr %buf, align 4
+  %cast.inttoptr319 = inttoptr i64 %buf318 to ptr
+  call void @npk_free(ptr %cast.inttoptr319)
+  %fd320 = load i64, ptr %fd, align 4
+  %getmp321 = icmp sge i64 %fd320, 0
+  %ifcond322 = icmp ne i1 %getmp321, false
+  br i1 %ifcond322, label %then323, label %ifcont335
 
-then320:                                          ; preds = %ifcont314
-  %fd321 = load i64, ptr %fd, align 4
-  %syscall_ret322 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %fd321)
-  %sys_is_err323 = icmp slt i64 %syscall_ret322, 0
-  %sys_neg_errno324 = sub i64 0, %syscall_ret322
-  %sys_err_ptr325 = inttoptr i64 %sys_neg_errno324 to ptr
-  %sys_val326 = select i1 %sys_is_err323, i64 0, i64 %syscall_ret322
-  %sys_err327 = select i1 %sys_is_err323, ptr %sys_err_ptr325, ptr null
-  %sys_flag328 = select i1 %sys_is_err323, i8 1, i8 0
-  %sys_result.val329 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val326, 0
-  %sys_result.err330 = insertvalue %struct.NpkResult_int64 %sys_result.val329, ptr %sys_err327, 1
-  %sys_result.is_error331 = insertvalue %struct.NpkResult_int64 %sys_result.err330, i8 %sys_flag328, 2
-  br label %ifcont332
+then323:                                          ; preds = %ifcont317
+  %fd324 = load i64, ptr %fd, align 4
+  %syscall_ret325 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},~{rcx},~{r11},~{memory}"(i64 3, i64 %fd324)
+  %sys_is_err326 = icmp slt i64 %syscall_ret325, 0
+  %sys_neg_errno327 = sub i64 0, %syscall_ret325
+  %sys_err_ptr328 = inttoptr i64 %sys_neg_errno327 to ptr
+  %sys_val329 = select i1 %sys_is_err326, i64 0, i64 %syscall_ret325
+  %sys_err330 = select i1 %sys_is_err326, ptr %sys_err_ptr328, ptr null
+  %sys_flag331 = select i1 %sys_is_err326, i8 1, i8 0
+  %sys_result.val332 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val329, 0
+  %sys_result.err333 = insertvalue %struct.NpkResult_int64 %sys_result.val332, ptr %sys_err330, 1
+  %sys_result.is_error334 = insertvalue %struct.NpkResult_int64 %sys_result.err333, i8 %sys_flag331, 2
+  br label %ifcont335
 
-ifcont332:                                        ; preds = %then320, %ifcont314
+ifcont335:                                        ; preds = %then323, %ifcont317
   ret { i32, ptr, i8 } zeroinitializer
 }
 
@@ -64761,8 +64746,10 @@ whilecond46:                                      ; preds = %ifcont115, %ifcont4
 
 whilebody49:                                      ; preds = %whilecond46
   %buf = alloca i64, align 8
-  %calltmp50 = call i64 @malloc(i64 65536)
-  store i64 %calltmp50, ptr %buf, align 4
+  %wild_ptr = call ptr @npk_alloc(i64 65536)
+  %wild_ptr50 = call ptr @npk_alloc(i64 65536)
+  %cast.ptrtoint = ptrtoint ptr %wild_ptr50 to i64
+  store i64 %cast.ptrtoint, ptr %buf, align 4
   %len = alloca i64, align 8
   store i64 0, ptr %len, align 4
   %c = alloca i32, align 4
@@ -64881,7 +64868,8 @@ ifcont114:                                        ; preds = %ifcont113, %then95
 
 ifcont115:                                        ; preds = %ifcont114, %then57
   %buf116 = load i64, ptr %buf, align 4
-  %calltmp117 = call i32 @nitpick_libc_mem_free(i64 %buf116)
+  %cast.inttoptr117 = inttoptr i64 %buf116 to ptr
+  call void @npk_free(ptr %cast.inttoptr117)
   call void @npk_gc_safepoint()
   br label %whilecond46
 
@@ -65431,17 +65419,19 @@ then:                                             ; preds = %whilebody
 
 ifcont:                                           ; preds = %then, %whilebody
   %u_ptr25 = load i64, ptr %u_ptr, align 4
-  %calltmp26 = call i32 @nitpick_libc_mem_free(i64 %u_ptr25)
-  %l_ptr27 = load i64, ptr %l_ptr, align 4
-  %calltmp28 = call i32 @nitpick_libc_mem_free(i64 %l_ptr27)
-  %idx29 = load i64, ptr %idx, align 4
-  %addtmp30 = add i64 %idx29, 2
-  store i64 %addtmp30, ptr %idx, align 4
+  %cast.inttoptr = inttoptr i64 %u_ptr25 to ptr
+  call void @npk_free(ptr %cast.inttoptr)
+  %l_ptr26 = load i64, ptr %l_ptr, align 4
+  %cast.inttoptr27 = inttoptr i64 %l_ptr26 to ptr
+  call void @npk_free(ptr %cast.inttoptr27)
+  %idx28 = load i64, ptr %idx, align 4
+  %addtmp29 = add i64 %idx28, 2
+  store i64 %addtmp29, ptr %idx, align 4
   call void @npk_gc_safepoint()
   br label %whilecond
 
 afterwhile:                                       ; preds = %whilecond
-  %calltmp31 = call { i32, ptr, i8 } @nohup.print_str(ptr @.str.3017)
+  %calltmp30 = call { i32, ptr, i8 } @nohup.print_str(ptr @.str.3017)
   ret { i32, ptr, i8 } zeroinitializer
 }
 
@@ -66154,7 +66144,6 @@ whilebody231:                                     ; preds = %whilecond226
   br i1 %null.deref, label %null.fail, label %null.ok
 
 null.fail:                                        ; preds = %whilebody231
-  %0 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -66376,7 +66365,6 @@ whilebody356:                                     ; preds = %whilecond351
   br i1 %null.deref365, label %null.fail366, label %null.ok367
 
 null.fail366:                                     ; preds = %whilebody356
-  %1 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -66893,7 +66881,6 @@ whilebody:                                        ; preds = %whilecond
   br i1 %null.deref, label %null.fail, label %null.ok
 
 null.fail:                                        ; preds = %whilebody
-  %0 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -67233,9 +67220,11 @@ ifcont263:                                        ; preds = %ifcont262, %whilebo
   %calltmp271 = call { i32, ptr, i8 } @nohup.print_str(ptr %fmt_date270)
   %calltmp272 = call { i32, ptr, i8 } @nohup.print_str(ptr @.str.3135)
   %u_ptr273 = load i64, ptr %u_ptr, align 4
-  %calltmp274 = call i32 @nitpick_libc_mem_free(i64 %u_ptr273)
+  %cast.inttoptr274 = inttoptr i64 %u_ptr273 to ptr
+  call void @npk_free(ptr %cast.inttoptr274)
   %l_ptr275 = load i64, ptr %l_ptr, align 4
-  %calltmp276 = call i32 @nitpick_libc_mem_free(i64 %l_ptr275)
+  %cast.inttoptr276 = inttoptr i64 %l_ptr275 to ptr
+  call void @npk_free(ptr %cast.inttoptr276)
   %idx277 = load i64, ptr %idx, align 4
   %addtmp278 = add i64 %idx277, 2
   store i64 %addtmp278, ptr %idx, align 4
@@ -67385,8 +67374,10 @@ ifcont43:                                         ; preds = %ifcont
   %username = alloca ptr, align 8
   store ptr @.str.3141, ptr %username, align 8
   %cf_buf = alloca i64, align 8
-  %calltmp44 = call i64 @malloc(i64 4096)
-  store i64 %calltmp44, ptr %cf_buf, align 4
+  %wild_ptr = call ptr @npk_alloc(i64 4096)
+  %wild_ptr44 = call ptr @npk_alloc(i64 4096)
+  %cast.ptrtoint = ptrtoint ptr %wild_ptr44 to i64
+  store i64 %cast.ptrtoint, ptr %cf_buf, align 4
   %cf_len = alloca i64, align 8
   store i64 0, ptr %cf_len, align 4
   %field_index = alloca i64, align 8
@@ -67462,23 +67453,23 @@ then79:                                           ; preds = %then71
   %calltmp81 = call { i32, ptr, i8 } @tty.print_str_safe(ptr %username80)
   %calltmp82 = call { i32, ptr, i8 } @tty.print_str_safe(ptr @.str.3145)
   %cf_buf83 = load i64, ptr %cf_buf, align 4
-  %calltmp84 = call i32 @nitpick_libc_mem_free(i64 %cf_buf83)
+  %cast.inttoptr = inttoptr i64 %cf_buf83 to ptr
+  call void @npk_free(ptr %cast.inttoptr)
   %fd = alloca i64, align 8
+  %fp84 = load i64, ptr %fp, align 4
+  %addtmp = add i64 %fp84, 0
   %fp85 = load i64, ptr %fp, align 4
-  %addtmp = add i64 %fp85, 0
-  %fp86 = load i64, ptr %fp, align 4
-  %addtmp87 = add i64 %fp86, 0
-  %cast.inttoptr = inttoptr i64 %addtmp87 to ptr
-  %null.deref = icmp eq ptr %cast.inttoptr, null
+  %addtmp86 = add i64 %fp85, 0
+  %cast.inttoptr87 = inttoptr i64 %addtmp86 to ptr
+  %null.deref = icmp eq ptr %cast.inttoptr87, null
   br i1 %null.deref, label %null.fail, label %null.ok
 
 null.fail:                                        ; preds = %then79
-  %0 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
 null.ok:                                          ; preds = %then79
-  %deref = load i32, ptr %cast.inttoptr, align 4
+  %deref = load i32, ptr %cast.inttoptr87, align 4
   %init_sext = sext i32 %deref to i64
   store i64 %init_sext, ptr %fd, align 4
   %fp88 = load i64, ptr %fp, align 4
@@ -67558,7 +67549,8 @@ ifcont128:                                        ; preds = %ifcont127, %then54
 
 afterwhile:                                       ; preds = %whilecond
   %cf_buf132 = load i64, ptr %cf_buf, align 4
-  %calltmp133 = call i32 @nitpick_libc_mem_free(i64 %cf_buf132)
+  %cast.inttoptr133 = inttoptr i64 %cf_buf132 to ptr
+  call void @npk_free(ptr %cast.inttoptr133)
   %fd_fp = alloca i64, align 8
   %fp134 = load i64, ptr %fp, align 4
   %addtmp135 = add i64 %fp134, 0
@@ -67569,7 +67561,6 @@ afterwhile:                                       ; preds = %whilecond
   br i1 %null.deref139, label %null.fail140, label %null.ok141
 
 null.fail140:                                     ; preds = %afterwhile
-  %1 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -67632,8 +67623,7 @@ entry:
   %cast.inttoptr = inttoptr i64 %addtmp6 to ptr
   store i8 0, ptr %cast.inttoptr, align 1
   %pid = alloca i64, align 8
-  %SYS_FORK = load i64, ptr @SYS_FORK, align 4
-  %syscall_ret = call i64 asm sideeffect "syscall", "={rax},{rax},~{rcx},~{r11},~{memory}"(i64 %SYS_FORK)
+  %syscall_ret = call i64 asm sideeffect "syscall", "={rax},{rax},~{rcx},~{r11},~{memory}"(i64 57)
   %sys_is_err = icmp slt i64 %syscall_ret, 0
   %sys_neg_errno = sub i64 0, %syscall_ret
   %sys_err_ptr = inttoptr i64 %sys_neg_errno to ptr
@@ -67788,7 +67778,6 @@ whilebody:                                        ; preds = %whilecond
   br i1 %null.deref, label %null.fail, label %null.ok
 
 null.fail:                                        ; preds = %whilebody
-  %0 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -67868,7 +67857,6 @@ whilebody113:                                     ; preds = %whilecond108
   br i1 %null.deref121, label %null.fail122, label %null.ok123
 
 null.fail122:                                     ; preds = %whilebody113
-  %1 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -67940,11 +67928,10 @@ then161:                                          ; preds = %afterwhile148
   br label %ifcont173
 
 ifcont173:                                        ; preds = %then161, %afterwhile148
-  %SYS_EXECVE = load i64, ptr @SYS_EXECVE, align 4
   %cmd_ptr174 = load i64, ptr %cmd_ptr.addr, align 4
   %argv_ptr175 = load i64, ptr %argv_ptr.addr, align 4
   %envp176 = load i64, ptr %envp, align 4
-  %syscall_ret177 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 %SYS_EXECVE, i64 %cmd_ptr174, i64 %argv_ptr175, i64 %envp176)
+  %syscall_ret177 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 59, i64 %cmd_ptr174, i64 %argv_ptr175, i64 %envp176)
   %sys_is_err178 = icmp slt i64 %syscall_ret177, 0
   %sys_neg_errno179 = sub i64 0, %syscall_ret177
   %sys_err_ptr180 = inttoptr i64 %sys_neg_errno179 to ptr
@@ -67968,8 +67955,10 @@ success_block190:                                 ; preds = %ifcont173
 merge_block191:                                   ; preds = %success_block190, %error_block189
   %unwrap_result192 = phi i64 [ -1, %error_block189 ], [ %unwrap_value, %success_block190 ]
   %fb_cmd = alloca i64, align 8
-  %calltmp193 = call i64 @malloc(i64 1024)
-  store i64 %calltmp193, ptr %fb_cmd, align 4
+  %wild_ptr = call ptr @npk_alloc(i64 1024)
+  %wild_ptr193 = call ptr @npk_alloc(i64 1024)
+  %cast.ptrtoint = ptrtoint ptr %wild_ptr193 to i64
+  store i64 %cast.ptrtoint, ptr %fb_cmd, align 4
   %fb_cmd194 = load i64, ptr %fb_cmd, align 4
   %addtmp195 = add i64 %fb_cmd194, 0
   %fb_cmd196 = load i64, ptr %fb_cmd, align 4
@@ -68040,7 +68029,8 @@ whilebody240:                                     ; preds = %whilecond239
 then244:                                          ; preds = %whilebody240
   %calltmp245 = call { i32, ptr, i8 } @md5sum.print_err(ptr @.str.3153)
   %fb_cmd246 = load i64, ptr %fb_cmd, align 4
-  %calltmp247 = call i32 @nitpick_libc_mem_free(i64 %fb_cmd246)
+  %cast.inttoptr247 = inttoptr i64 %fb_cmd246 to ptr
+  call void @npk_free(ptr %cast.inttoptr247)
   %envp248 = load i64, ptr %envp, align 4
   %gttmp = icmp sgt i64 %envp248, 0
   %ifcond249 = icmp ne i1 %gttmp, false
@@ -68099,7 +68089,6 @@ ifcont282:                                        ; preds = %whilebody240
   br i1 %null.deref290, label %null.fail291, label %null.ok292
 
 null.fail291:                                     ; preds = %ifcont282
-  %2 = call i32 @failsafe(i32 46)
   call void @exit(i32 46)
   unreachable
 
@@ -68138,284 +68127,281 @@ ifcont310:                                        ; preds = %afterbreak, %null.o
   br label %whilecond239
 
 afterwhile313:                                    ; preds = %then309, %whilecond239
-  %SYS_EXECVE314 = load i64, ptr @SYS_EXECVE, align 4
-  %fb_cmd315 = load i64, ptr %fb_cmd, align 4
-  %argv_ptr316 = load i64, ptr %argv_ptr.addr, align 4
-  %envp317 = load i64, ptr %envp, align 4
-  %syscall_ret318 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 %SYS_EXECVE314, i64 %fb_cmd315, i64 %argv_ptr316, i64 %envp317)
-  %sys_is_err319 = icmp slt i64 %syscall_ret318, 0
-  %sys_neg_errno320 = sub i64 0, %syscall_ret318
-  %sys_err_ptr321 = inttoptr i64 %sys_neg_errno320 to ptr
-  %sys_val322 = select i1 %sys_is_err319, i64 0, i64 %syscall_ret318
-  %sys_err323 = select i1 %sys_is_err319, ptr %sys_err_ptr321, ptr null
-  %sys_flag324 = select i1 %sys_is_err319, i8 1, i8 0
-  %sys_result.val325 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val322, 0
-  %sys_result.err326 = insertvalue %struct.NpkResult_int64 %sys_result.val325, ptr %sys_err323, 1
-  %sys_result.is_error327 = insertvalue %struct.NpkResult_int64 %sys_result.err326, i8 %sys_flag324, 2
-  %is_error328 = extractvalue %struct.NpkResult_int64 %sys_result.is_error327, 2
-  %is_error_bool329 = icmp ne i8 %is_error328, 0
-  br i1 %is_error_bool329, label %error_block330, label %success_block331
+  %fb_cmd314 = load i64, ptr %fb_cmd, align 4
+  %argv_ptr315 = load i64, ptr %argv_ptr.addr, align 4
+  %envp316 = load i64, ptr %envp, align 4
+  %syscall_ret317 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 59, i64 %fb_cmd314, i64 %argv_ptr315, i64 %envp316)
+  %sys_is_err318 = icmp slt i64 %syscall_ret317, 0
+  %sys_neg_errno319 = sub i64 0, %syscall_ret317
+  %sys_err_ptr320 = inttoptr i64 %sys_neg_errno319 to ptr
+  %sys_val321 = select i1 %sys_is_err318, i64 0, i64 %syscall_ret317
+  %sys_err322 = select i1 %sys_is_err318, ptr %sys_err_ptr320, ptr null
+  %sys_flag323 = select i1 %sys_is_err318, i8 1, i8 0
+  %sys_result.val324 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val321, 0
+  %sys_result.err325 = insertvalue %struct.NpkResult_int64 %sys_result.val324, ptr %sys_err322, 1
+  %sys_result.is_error326 = insertvalue %struct.NpkResult_int64 %sys_result.err325, i8 %sys_flag323, 2
+  %is_error327 = extractvalue %struct.NpkResult_int64 %sys_result.is_error326, 2
+  %is_error_bool328 = icmp ne i8 %is_error327, 0
+  br i1 %is_error_bool328, label %error_block329, label %success_block330
 
-error_block330:                                   ; preds = %afterwhile313
-  br label %merge_block332
+error_block329:                                   ; preds = %afterwhile313
+  br label %merge_block331
 
-success_block331:                                 ; preds = %afterwhile313
-  %unwrap_value333 = extractvalue %struct.NpkResult_int64 %sys_result.is_error327, 0
-  br label %merge_block332
+success_block330:                                 ; preds = %afterwhile313
+  %unwrap_value332 = extractvalue %struct.NpkResult_int64 %sys_result.is_error326, 0
+  br label %merge_block331
 
-merge_block332:                                   ; preds = %success_block331, %error_block330
-  %unwrap_result334 = phi i64 [ -1, %error_block330 ], [ %unwrap_value333, %success_block331 ]
-  %fb_cmd335 = load i64, ptr %fb_cmd, align 4
-  %addtmp336 = add i64 %fb_cmd335, 0
-  %fb_cmd337 = load i64, ptr %fb_cmd, align 4
-  %addtmp338 = add i64 %fb_cmd337, 0
-  %cast.inttoptr339 = inttoptr i64 %addtmp338 to ptr
-  store i8 47, ptr %cast.inttoptr339, align 1
-  %fb_cmd340 = load i64, ptr %fb_cmd, align 4
-  %addtmp341 = add i64 %fb_cmd340, 1
-  %fb_cmd342 = load i64, ptr %fb_cmd, align 4
-  %addtmp343 = add i64 %fb_cmd342, 1
-  %cast.inttoptr344 = inttoptr i64 %addtmp343 to ptr
-  store i8 98, ptr %cast.inttoptr344, align 1
-  %fb_cmd345 = load i64, ptr %fb_cmd, align 4
-  %addtmp346 = add i64 %fb_cmd345, 2
-  %fb_cmd347 = load i64, ptr %fb_cmd, align 4
-  %addtmp348 = add i64 %fb_cmd347, 2
-  %cast.inttoptr349 = inttoptr i64 %addtmp348 to ptr
-  store i8 105, ptr %cast.inttoptr349, align 1
-  %fb_cmd350 = load i64, ptr %fb_cmd, align 4
-  %addtmp351 = add i64 %fb_cmd350, 3
-  %fb_cmd352 = load i64, ptr %fb_cmd, align 4
-  %addtmp353 = add i64 %fb_cmd352, 3
-  %cast.inttoptr354 = inttoptr i64 %addtmp353 to ptr
-  store i8 110, ptr %cast.inttoptr354, align 1
-  %fb_cmd355 = load i64, ptr %fb_cmd, align 4
-  %addtmp356 = add i64 %fb_cmd355, 4
-  %fb_cmd357 = load i64, ptr %fb_cmd, align 4
-  %addtmp358 = add i64 %fb_cmd357, 4
-  %cast.inttoptr359 = inttoptr i64 %addtmp358 to ptr
-  store i8 47, ptr %cast.inttoptr359, align 1
+merge_block331:                                   ; preds = %success_block330, %error_block329
+  %unwrap_result333 = phi i64 [ -1, %error_block329 ], [ %unwrap_value332, %success_block330 ]
+  %fb_cmd334 = load i64, ptr %fb_cmd, align 4
+  %addtmp335 = add i64 %fb_cmd334, 0
+  %fb_cmd336 = load i64, ptr %fb_cmd, align 4
+  %addtmp337 = add i64 %fb_cmd336, 0
+  %cast.inttoptr338 = inttoptr i64 %addtmp337 to ptr
+  store i8 47, ptr %cast.inttoptr338, align 1
+  %fb_cmd339 = load i64, ptr %fb_cmd, align 4
+  %addtmp340 = add i64 %fb_cmd339, 1
+  %fb_cmd341 = load i64, ptr %fb_cmd, align 4
+  %addtmp342 = add i64 %fb_cmd341, 1
+  %cast.inttoptr343 = inttoptr i64 %addtmp342 to ptr
+  store i8 98, ptr %cast.inttoptr343, align 1
+  %fb_cmd344 = load i64, ptr %fb_cmd, align 4
+  %addtmp345 = add i64 %fb_cmd344, 2
+  %fb_cmd346 = load i64, ptr %fb_cmd, align 4
+  %addtmp347 = add i64 %fb_cmd346, 2
+  %cast.inttoptr348 = inttoptr i64 %addtmp347 to ptr
+  store i8 105, ptr %cast.inttoptr348, align 1
+  %fb_cmd349 = load i64, ptr %fb_cmd, align 4
+  %addtmp350 = add i64 %fb_cmd349, 3
+  %fb_cmd351 = load i64, ptr %fb_cmd, align 4
+  %addtmp352 = add i64 %fb_cmd351, 3
+  %cast.inttoptr353 = inttoptr i64 %addtmp352 to ptr
+  store i8 110, ptr %cast.inttoptr353, align 1
+  %fb_cmd354 = load i64, ptr %fb_cmd, align 4
+  %addtmp355 = add i64 %fb_cmd354, 4
+  %fb_cmd356 = load i64, ptr %fb_cmd, align 4
+  %addtmp357 = add i64 %fb_cmd356, 4
+  %cast.inttoptr358 = inttoptr i64 %addtmp357 to ptr
+  store i8 47, ptr %cast.inttoptr358, align 1
   store i64 0, ptr %cmd_idx, align 4
-  br label %whilecond360
+  br label %whilecond359
 
-whilecond360:                                     ; preds = %ifcont434, %merge_block332
-  br i1 true, label %whilebody361, label %afterwhile437
+whilecond359:                                     ; preds = %ifcont433, %merge_block331
+  br i1 true, label %whilebody360, label %afterwhile436
 
-whilebody361:                                     ; preds = %whilecond360
-  %cmd_idx362 = load i64, ptr %cmd_idx, align 4
-  %getmp363 = icmp sge i64 %cmd_idx362, 1000
-  %ifcond364 = icmp ne i1 %getmp363, false
-  br i1 %ifcond364, label %then365, label %ifcont404
+whilebody360:                                     ; preds = %whilecond359
+  %cmd_idx361 = load i64, ptr %cmd_idx, align 4
+  %getmp362 = icmp sge i64 %cmd_idx361, 1000
+  %ifcond363 = icmp ne i1 %getmp362, false
+  br i1 %ifcond363, label %then364, label %ifcont403
 
-then365:                                          ; preds = %whilebody361
-  %calltmp366 = call { i32, ptr, i8 } @md5sum.print_err(ptr @.str.3155)
-  %fb_cmd367 = load i64, ptr %fb_cmd, align 4
-  %calltmp368 = call i32 @nitpick_libc_mem_free(i64 %fb_cmd367)
-  %envp369 = load i64, ptr %envp, align 4
-  %gttmp370 = icmp sgt i64 %envp369, 0
-  %ifcond371 = icmp ne i1 %gttmp370, false
-  br i1 %ifcond371, label %then372, label %ifcont387
+then364:                                          ; preds = %whilebody360
+  %calltmp365 = call { i32, ptr, i8 } @md5sum.print_err(ptr @.str.3155)
+  %fb_cmd366 = load i64, ptr %fb_cmd, align 4
+  %cast.inttoptr367 = inttoptr i64 %fb_cmd366 to ptr
+  call void @npk_free(ptr %cast.inttoptr367)
+  %envp368 = load i64, ptr %envp, align 4
+  %gttmp369 = icmp sgt i64 %envp368, 0
+  %ifcond370 = icmp ne i1 %gttmp369, false
+  br i1 %ifcond370, label %then371, label %ifcont386
 
-then372:                                          ; preds = %then365
-  %envp373 = load i64, ptr %envp, align 4
-  %envc_count374 = load i64, ptr %envc_count, align 4
-  %addtmp375 = add i64 %envc_count374, 2
-  %multmp376 = mul i64 %addtmp375, 8
-  %syscall_ret377 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 11, i64 %envp373, i64 %multmp376)
-  %sys_is_err378 = icmp slt i64 %syscall_ret377, 0
-  %sys_neg_errno379 = sub i64 0, %syscall_ret377
-  %sys_err_ptr380 = inttoptr i64 %sys_neg_errno379 to ptr
-  %sys_val381 = select i1 %sys_is_err378, i64 0, i64 %syscall_ret377
-  %sys_err382 = select i1 %sys_is_err378, ptr %sys_err_ptr380, ptr null
-  %sys_flag383 = select i1 %sys_is_err378, i8 1, i8 0
-  %sys_result.val384 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val381, 0
-  %sys_result.err385 = insertvalue %struct.NpkResult_int64 %sys_result.val384, ptr %sys_err382, 1
-  %sys_result.is_error386 = insertvalue %struct.NpkResult_int64 %sys_result.err385, i8 %sys_flag383, 2
-  br label %ifcont387
+then371:                                          ; preds = %then364
+  %envp372 = load i64, ptr %envp, align 4
+  %envc_count373 = load i64, ptr %envc_count, align 4
+  %addtmp374 = add i64 %envc_count373, 2
+  %multmp375 = mul i64 %addtmp374, 8
+  %syscall_ret376 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 11, i64 %envp372, i64 %multmp375)
+  %sys_is_err377 = icmp slt i64 %syscall_ret376, 0
+  %sys_neg_errno378 = sub i64 0, %syscall_ret376
+  %sys_err_ptr379 = inttoptr i64 %sys_neg_errno378 to ptr
+  %sys_val380 = select i1 %sys_is_err377, i64 0, i64 %syscall_ret376
+  %sys_err381 = select i1 %sys_is_err377, ptr %sys_err_ptr379, ptr null
+  %sys_flag382 = select i1 %sys_is_err377, i8 1, i8 0
+  %sys_result.val383 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val380, 0
+  %sys_result.err384 = insertvalue %struct.NpkResult_int64 %sys_result.val383, ptr %sys_err381, 1
+  %sys_result.is_error385 = insertvalue %struct.NpkResult_int64 %sys_result.err384, i8 %sys_flag382, 2
+  br label %ifcont386
 
-ifcont387:                                        ; preds = %then372, %then365
-  %env_buf388 = load i64, ptr %env_buf, align 4
-  %gttmp389 = icmp sgt i64 %env_buf388, 0
-  %ifcond390 = icmp ne i1 %gttmp389, false
-  br i1 %ifcond390, label %then391, label %ifcont403
+ifcont386:                                        ; preds = %then371, %then364
+  %env_buf387 = load i64, ptr %env_buf, align 4
+  %gttmp388 = icmp sgt i64 %env_buf387, 0
+  %ifcond389 = icmp ne i1 %gttmp388, false
+  br i1 %ifcond389, label %then390, label %ifcont402
 
-then391:                                          ; preds = %ifcont387
-  %env_buf392 = load i64, ptr %env_buf, align 4
-  %syscall_ret393 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 11, i64 %env_buf392, i64 131072)
-  %sys_is_err394 = icmp slt i64 %syscall_ret393, 0
-  %sys_neg_errno395 = sub i64 0, %syscall_ret393
-  %sys_err_ptr396 = inttoptr i64 %sys_neg_errno395 to ptr
-  %sys_val397 = select i1 %sys_is_err394, i64 0, i64 %syscall_ret393
-  %sys_err398 = select i1 %sys_is_err394, ptr %sys_err_ptr396, ptr null
-  %sys_flag399 = select i1 %sys_is_err394, i8 1, i8 0
-  %sys_result.val400 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val397, 0
-  %sys_result.err401 = insertvalue %struct.NpkResult_int64 %sys_result.val400, ptr %sys_err398, 1
-  %sys_result.is_error402 = insertvalue %struct.NpkResult_int64 %sys_result.err401, i8 %sys_flag399, 2
-  br label %ifcont403
+then390:                                          ; preds = %ifcont386
+  %env_buf391 = load i64, ptr %env_buf, align 4
+  %syscall_ret392 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 11, i64 %env_buf391, i64 131072)
+  %sys_is_err393 = icmp slt i64 %syscall_ret392, 0
+  %sys_neg_errno394 = sub i64 0, %syscall_ret392
+  %sys_err_ptr395 = inttoptr i64 %sys_neg_errno394 to ptr
+  %sys_val396 = select i1 %sys_is_err393, i64 0, i64 %syscall_ret392
+  %sys_err397 = select i1 %sys_is_err393, ptr %sys_err_ptr395, ptr null
+  %sys_flag398 = select i1 %sys_is_err393, i8 1, i8 0
+  %sys_result.val399 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val396, 0
+  %sys_result.err400 = insertvalue %struct.NpkResult_int64 %sys_result.val399, ptr %sys_err397, 1
+  %sys_result.is_error401 = insertvalue %struct.NpkResult_int64 %sys_result.err400, i8 %sys_flag398, 2
+  br label %ifcont402
 
-ifcont403:                                        ; preds = %then391, %ifcont387
+ifcont402:                                        ; preds = %then390, %ifcont386
   ret { i32, ptr, i8 } { i32 1, ptr null, i8 0 }
 
-ifcont404:                                        ; preds = %whilebody361
-  %c405 = alloca i64, align 8
-  %cmd_ptr406 = load i64, ptr %cmd_ptr.addr, align 4
-  %cmd_idx407 = load i64, ptr %cmd_idx, align 4
-  %addtmp408 = add i64 %cmd_ptr406, %cmd_idx407
-  %cmd_ptr409 = load i64, ptr %cmd_ptr.addr, align 4
-  %cmd_idx410 = load i64, ptr %cmd_idx, align 4
-  %addtmp411 = add i64 %cmd_ptr409, %cmd_idx410
-  %cast.inttoptr412 = inttoptr i64 %addtmp411 to ptr
-  %null.deref413 = icmp eq ptr %cast.inttoptr412, null
-  br i1 %null.deref413, label %null.fail414, label %null.ok415
+ifcont403:                                        ; preds = %whilebody360
+  %c404 = alloca i64, align 8
+  %cmd_ptr405 = load i64, ptr %cmd_ptr.addr, align 4
+  %cmd_idx406 = load i64, ptr %cmd_idx, align 4
+  %addtmp407 = add i64 %cmd_ptr405, %cmd_idx406
+  %cmd_ptr408 = load i64, ptr %cmd_ptr.addr, align 4
+  %cmd_idx409 = load i64, ptr %cmd_idx, align 4
+  %addtmp410 = add i64 %cmd_ptr408, %cmd_idx409
+  %cast.inttoptr411 = inttoptr i64 %addtmp410 to ptr
+  %null.deref412 = icmp eq ptr %cast.inttoptr411, null
+  br i1 %null.deref412, label %null.fail413, label %null.ok414
 
-null.fail414:                                     ; preds = %ifcont404
-  %3 = call i32 @failsafe(i32 46)
+null.fail413:                                     ; preds = %ifcont403
   call void @exit(i32 46)
   unreachable
 
-null.ok415:                                       ; preds = %ifcont404
-  %deref416 = load i32, ptr %cast.inttoptr412, align 4
-  %cast.sext417 = sext i32 %deref416 to i64
-  store i64 %cast.sext417, ptr %c405, align 4
-  %fb_cmd418 = load i64, ptr %fb_cmd, align 4
-  %cmd_idx419 = load i64, ptr %cmd_idx, align 4
-  %addtmp420 = add i64 5, %cmd_idx419
-  %addtmp421 = add i64 %fb_cmd418, %addtmp420
-  %fb_cmd422 = load i64, ptr %fb_cmd, align 4
-  %cmd_idx423 = load i64, ptr %cmd_idx, align 4
-  %addtmp424 = add i64 5, %cmd_idx423
-  %addtmp425 = add i64 %fb_cmd422, %addtmp424
-  %cast.inttoptr426 = inttoptr i64 %addtmp425 to ptr
-  %c427 = load i64, ptr %c405, align 4
-  %cast.trunc428 = trunc i64 %c427 to i8
-  store i8 %cast.trunc428, ptr %cast.inttoptr426, align 1
-  %c429 = load i64, ptr %c405, align 4
-  %eqtmp430 = icmp eq i64 %c429, 0
-  %ifcond431 = icmp ne i1 %eqtmp430, false
-  br i1 %ifcond431, label %then432, label %ifcont434
+null.ok414:                                       ; preds = %ifcont403
+  %deref415 = load i32, ptr %cast.inttoptr411, align 4
+  %cast.sext416 = sext i32 %deref415 to i64
+  store i64 %cast.sext416, ptr %c404, align 4
+  %fb_cmd417 = load i64, ptr %fb_cmd, align 4
+  %cmd_idx418 = load i64, ptr %cmd_idx, align 4
+  %addtmp419 = add i64 5, %cmd_idx418
+  %addtmp420 = add i64 %fb_cmd417, %addtmp419
+  %fb_cmd421 = load i64, ptr %fb_cmd, align 4
+  %cmd_idx422 = load i64, ptr %cmd_idx, align 4
+  %addtmp423 = add i64 5, %cmd_idx422
+  %addtmp424 = add i64 %fb_cmd421, %addtmp423
+  %cast.inttoptr425 = inttoptr i64 %addtmp424 to ptr
+  %c426 = load i64, ptr %c404, align 4
+  %cast.trunc427 = trunc i64 %c426 to i8
+  store i8 %cast.trunc427, ptr %cast.inttoptr425, align 1
+  %c428 = load i64, ptr %c404, align 4
+  %eqtmp429 = icmp eq i64 %c428, 0
+  %ifcond430 = icmp ne i1 %eqtmp429, false
+  br i1 %ifcond430, label %then431, label %ifcont433
 
-then432:                                          ; preds = %null.ok415
-  br label %afterwhile437
+then431:                                          ; preds = %null.ok414
+  br label %afterwhile436
 
-afterbreak433:                                    ; No predecessors!
-  br label %ifcont434
+afterbreak432:                                    ; No predecessors!
+  br label %ifcont433
 
-ifcont434:                                        ; preds = %afterbreak433, %null.ok415
-  %cmd_idx435 = load i64, ptr %cmd_idx, align 4
-  %addtmp436 = add i64 %cmd_idx435, 1
-  store i64 %addtmp436, ptr %cmd_idx, align 4
+ifcont433:                                        ; preds = %afterbreak432, %null.ok414
+  %cmd_idx434 = load i64, ptr %cmd_idx, align 4
+  %addtmp435 = add i64 %cmd_idx434, 1
+  store i64 %addtmp435, ptr %cmd_idx, align 4
   call void @npk_gc_safepoint()
-  br label %whilecond360
+  br label %whilecond359
 
-afterwhile437:                                    ; preds = %then432, %whilecond360
-  %SYS_EXECVE438 = load i64, ptr @SYS_EXECVE, align 4
-  %fb_cmd439 = load i64, ptr %fb_cmd, align 4
-  %argv_ptr440 = load i64, ptr %argv_ptr.addr, align 4
-  %envp441 = load i64, ptr %envp, align 4
-  %syscall_ret442 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 %SYS_EXECVE438, i64 %fb_cmd439, i64 %argv_ptr440, i64 %envp441)
-  %sys_is_err443 = icmp slt i64 %syscall_ret442, 0
-  %sys_neg_errno444 = sub i64 0, %syscall_ret442
-  %sys_err_ptr445 = inttoptr i64 %sys_neg_errno444 to ptr
-  %sys_val446 = select i1 %sys_is_err443, i64 0, i64 %syscall_ret442
-  %sys_err447 = select i1 %sys_is_err443, ptr %sys_err_ptr445, ptr null
-  %sys_flag448 = select i1 %sys_is_err443, i8 1, i8 0
-  %sys_result.val449 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val446, 0
-  %sys_result.err450 = insertvalue %struct.NpkResult_int64 %sys_result.val449, ptr %sys_err447, 1
-  %sys_result.is_error451 = insertvalue %struct.NpkResult_int64 %sys_result.err450, i8 %sys_flag448, 2
-  %is_error452 = extractvalue %struct.NpkResult_int64 %sys_result.is_error451, 2
-  %is_error_bool453 = icmp ne i8 %is_error452, 0
-  br i1 %is_error_bool453, label %error_block454, label %success_block455
+afterwhile436:                                    ; preds = %then431, %whilecond359
+  %fb_cmd437 = load i64, ptr %fb_cmd, align 4
+  %argv_ptr438 = load i64, ptr %argv_ptr.addr, align 4
+  %envp439 = load i64, ptr %envp, align 4
+  %syscall_ret440 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 59, i64 %fb_cmd437, i64 %argv_ptr438, i64 %envp439)
+  %sys_is_err441 = icmp slt i64 %syscall_ret440, 0
+  %sys_neg_errno442 = sub i64 0, %syscall_ret440
+  %sys_err_ptr443 = inttoptr i64 %sys_neg_errno442 to ptr
+  %sys_val444 = select i1 %sys_is_err441, i64 0, i64 %syscall_ret440
+  %sys_err445 = select i1 %sys_is_err441, ptr %sys_err_ptr443, ptr null
+  %sys_flag446 = select i1 %sys_is_err441, i8 1, i8 0
+  %sys_result.val447 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val444, 0
+  %sys_result.err448 = insertvalue %struct.NpkResult_int64 %sys_result.val447, ptr %sys_err445, 1
+  %sys_result.is_error449 = insertvalue %struct.NpkResult_int64 %sys_result.err448, i8 %sys_flag446, 2
+  %is_error450 = extractvalue %struct.NpkResult_int64 %sys_result.is_error449, 2
+  %is_error_bool451 = icmp ne i8 %is_error450, 0
+  br i1 %is_error_bool451, label %error_block452, label %success_block453
 
-error_block454:                                   ; preds = %afterwhile437
-  br label %merge_block456
+error_block452:                                   ; preds = %afterwhile436
+  br label %merge_block454
 
-success_block455:                                 ; preds = %afterwhile437
-  %unwrap_value457 = extractvalue %struct.NpkResult_int64 %sys_result.is_error451, 0
-  br label %merge_block456
+success_block453:                                 ; preds = %afterwhile436
+  %unwrap_value455 = extractvalue %struct.NpkResult_int64 %sys_result.is_error449, 0
+  br label %merge_block454
 
-merge_block456:                                   ; preds = %success_block455, %error_block454
-  %unwrap_result458 = phi i64 [ -1, %error_block454 ], [ %unwrap_value457, %success_block455 ]
-  %calltmp459 = call { i32, ptr, i8 } @md5sum.print_err(ptr @.str.3157)
-  %SYS_EXIT_GROUP = load i64, ptr @SYS_EXIT_GROUP, align 4
-  %syscall_ret460 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},{r10},{r8},{r9},~{rcx},~{r11},~{memory}"(i64 %SYS_EXIT_GROUP, i64 127, i64 0, i64 0, i64 0, i64 0, i64 0)
-  %fb_cmd461 = load i64, ptr %fb_cmd, align 4
-  %calltmp462 = call i32 @nitpick_libc_mem_free(i64 %fb_cmd461)
-  %envp463 = load i64, ptr %envp, align 4
-  %gttmp464 = icmp sgt i64 %envp463, 0
-  %ifcond465 = icmp ne i1 %gttmp464, false
-  br i1 %ifcond465, label %then466, label %ifcont481
+merge_block454:                                   ; preds = %success_block453, %error_block452
+  %unwrap_result456 = phi i64 [ -1, %error_block452 ], [ %unwrap_value455, %success_block453 ]
+  %calltmp457 = call { i32, ptr, i8 } @md5sum.print_err(ptr @.str.3157)
+  %syscall_ret458 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},{r10},{r8},{r9},~{rcx},~{r11},~{memory}"(i64 231, i64 127, i64 0, i64 0, i64 0, i64 0, i64 0)
+  %fb_cmd459 = load i64, ptr %fb_cmd, align 4
+  %cast.inttoptr460 = inttoptr i64 %fb_cmd459 to ptr
+  call void @npk_free(ptr %cast.inttoptr460)
+  %envp461 = load i64, ptr %envp, align 4
+  %gttmp462 = icmp sgt i64 %envp461, 0
+  %ifcond463 = icmp ne i1 %gttmp462, false
+  br i1 %ifcond463, label %then464, label %ifcont479
 
-then466:                                          ; preds = %merge_block456
-  %envp467 = load i64, ptr %envp, align 4
-  %envc_count468 = load i64, ptr %envc_count, align 4
-  %addtmp469 = add i64 %envc_count468, 2
-  %multmp470 = mul i64 %addtmp469, 8
-  %syscall_ret471 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 11, i64 %envp467, i64 %multmp470)
-  %sys_is_err472 = icmp slt i64 %syscall_ret471, 0
-  %sys_neg_errno473 = sub i64 0, %syscall_ret471
-  %sys_err_ptr474 = inttoptr i64 %sys_neg_errno473 to ptr
-  %sys_val475 = select i1 %sys_is_err472, i64 0, i64 %syscall_ret471
-  %sys_err476 = select i1 %sys_is_err472, ptr %sys_err_ptr474, ptr null
-  %sys_flag477 = select i1 %sys_is_err472, i8 1, i8 0
-  %sys_result.val478 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val475, 0
-  %sys_result.err479 = insertvalue %struct.NpkResult_int64 %sys_result.val478, ptr %sys_err476, 1
-  %sys_result.is_error480 = insertvalue %struct.NpkResult_int64 %sys_result.err479, i8 %sys_flag477, 2
-  br label %ifcont481
+then464:                                          ; preds = %merge_block454
+  %envp465 = load i64, ptr %envp, align 4
+  %envc_count466 = load i64, ptr %envc_count, align 4
+  %addtmp467 = add i64 %envc_count466, 2
+  %multmp468 = mul i64 %addtmp467, 8
+  %syscall_ret469 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 11, i64 %envp465, i64 %multmp468)
+  %sys_is_err470 = icmp slt i64 %syscall_ret469, 0
+  %sys_neg_errno471 = sub i64 0, %syscall_ret469
+  %sys_err_ptr472 = inttoptr i64 %sys_neg_errno471 to ptr
+  %sys_val473 = select i1 %sys_is_err470, i64 0, i64 %syscall_ret469
+  %sys_err474 = select i1 %sys_is_err470, ptr %sys_err_ptr472, ptr null
+  %sys_flag475 = select i1 %sys_is_err470, i8 1, i8 0
+  %sys_result.val476 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val473, 0
+  %sys_result.err477 = insertvalue %struct.NpkResult_int64 %sys_result.val476, ptr %sys_err474, 1
+  %sys_result.is_error478 = insertvalue %struct.NpkResult_int64 %sys_result.err477, i8 %sys_flag475, 2
+  br label %ifcont479
 
-ifcont481:                                        ; preds = %then466, %merge_block456
-  %env_buf482 = load i64, ptr %env_buf, align 4
-  %gttmp483 = icmp sgt i64 %env_buf482, 0
-  %ifcond484 = icmp ne i1 %gttmp483, false
-  br i1 %ifcond484, label %then485, label %ifcont497
+ifcont479:                                        ; preds = %then464, %merge_block454
+  %env_buf480 = load i64, ptr %env_buf, align 4
+  %gttmp481 = icmp sgt i64 %env_buf480, 0
+  %ifcond482 = icmp ne i1 %gttmp481, false
+  br i1 %ifcond482, label %then483, label %ifcont495
 
-then485:                                          ; preds = %ifcont481
-  %env_buf486 = load i64, ptr %env_buf, align 4
-  %syscall_ret487 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 11, i64 %env_buf486, i64 131072)
-  %sys_is_err488 = icmp slt i64 %syscall_ret487, 0
-  %sys_neg_errno489 = sub i64 0, %syscall_ret487
-  %sys_err_ptr490 = inttoptr i64 %sys_neg_errno489 to ptr
-  %sys_val491 = select i1 %sys_is_err488, i64 0, i64 %syscall_ret487
-  %sys_err492 = select i1 %sys_is_err488, ptr %sys_err_ptr490, ptr null
-  %sys_flag493 = select i1 %sys_is_err488, i8 1, i8 0
-  %sys_result.val494 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val491, 0
-  %sys_result.err495 = insertvalue %struct.NpkResult_int64 %sys_result.val494, ptr %sys_err492, 1
-  %sys_result.is_error496 = insertvalue %struct.NpkResult_int64 %sys_result.err495, i8 %sys_flag493, 2
-  br label %ifcont497
+then483:                                          ; preds = %ifcont479
+  %env_buf484 = load i64, ptr %env_buf, align 4
+  %syscall_ret485 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},~{rcx},~{r11},~{memory}"(i64 11, i64 %env_buf484, i64 131072)
+  %sys_is_err486 = icmp slt i64 %syscall_ret485, 0
+  %sys_neg_errno487 = sub i64 0, %syscall_ret485
+  %sys_err_ptr488 = inttoptr i64 %sys_neg_errno487 to ptr
+  %sys_val489 = select i1 %sys_is_err486, i64 0, i64 %syscall_ret485
+  %sys_err490 = select i1 %sys_is_err486, ptr %sys_err_ptr488, ptr null
+  %sys_flag491 = select i1 %sys_is_err486, i8 1, i8 0
+  %sys_result.val492 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val489, 0
+  %sys_result.err493 = insertvalue %struct.NpkResult_int64 %sys_result.val492, ptr %sys_err490, 1
+  %sys_result.is_error494 = insertvalue %struct.NpkResult_int64 %sys_result.err493, i8 %sys_flag491, 2
+  br label %ifcont495
 
-ifcont497:                                        ; preds = %then485, %ifcont481
-  br label %ifcont516
+ifcont495:                                        ; preds = %then483, %ifcont479
+  br label %ifcont514
 
 else:                                             ; preds = %ifcont
   %status = alloca i64, align 8
   store i64 0, ptr %status, align 4
-  %SYS_WAIT4 = load i64, ptr @SYS_WAIT4, align 4
-  %pid498 = load i64, ptr %pid, align 4
-  %syscall_ret499 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},{r10},~{rcx},~{r11},~{memory}"(i64 %SYS_WAIT4, i64 %pid498, i64 0, i64 0, i64 0)
-  %sys_is_err500 = icmp slt i64 %syscall_ret499, 0
-  %sys_neg_errno501 = sub i64 0, %syscall_ret499
-  %sys_err_ptr502 = inttoptr i64 %sys_neg_errno501 to ptr
-  %sys_val503 = select i1 %sys_is_err500, i64 0, i64 %syscall_ret499
-  %sys_err504 = select i1 %sys_is_err500, ptr %sys_err_ptr502, ptr null
-  %sys_flag505 = select i1 %sys_is_err500, i8 1, i8 0
-  %sys_result.val506 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val503, 0
-  %sys_result.err507 = insertvalue %struct.NpkResult_int64 %sys_result.val506, ptr %sys_err504, 1
-  %sys_result.is_error508 = insertvalue %struct.NpkResult_int64 %sys_result.err507, i8 %sys_flag505, 2
-  %is_error509 = extractvalue %struct.NpkResult_int64 %sys_result.is_error508, 2
-  %is_error_bool510 = icmp ne i8 %is_error509, 0
-  br i1 %is_error_bool510, label %error_block511, label %success_block512
+  %pid496 = load i64, ptr %pid, align 4
+  %syscall_ret497 = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},{r10},~{rcx},~{r11},~{memory}"(i64 61, i64 %pid496, i64 0, i64 0, i64 0)
+  %sys_is_err498 = icmp slt i64 %syscall_ret497, 0
+  %sys_neg_errno499 = sub i64 0, %syscall_ret497
+  %sys_err_ptr500 = inttoptr i64 %sys_neg_errno499 to ptr
+  %sys_val501 = select i1 %sys_is_err498, i64 0, i64 %syscall_ret497
+  %sys_err502 = select i1 %sys_is_err498, ptr %sys_err_ptr500, ptr null
+  %sys_flag503 = select i1 %sys_is_err498, i8 1, i8 0
+  %sys_result.val504 = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val501, 0
+  %sys_result.err505 = insertvalue %struct.NpkResult_int64 %sys_result.val504, ptr %sys_err502, 1
+  %sys_result.is_error506 = insertvalue %struct.NpkResult_int64 %sys_result.err505, i8 %sys_flag503, 2
+  %is_error507 = extractvalue %struct.NpkResult_int64 %sys_result.is_error506, 2
+  %is_error_bool508 = icmp ne i8 %is_error507, 0
+  br i1 %is_error_bool508, label %error_block509, label %success_block510
 
-error_block511:                                   ; preds = %else
-  br label %merge_block513
+error_block509:                                   ; preds = %else
+  br label %merge_block511
 
-success_block512:                                 ; preds = %else
-  %unwrap_value514 = extractvalue %struct.NpkResult_int64 %sys_result.is_error508, 0
-  br label %merge_block513
+success_block510:                                 ; preds = %else
+  %unwrap_value512 = extractvalue %struct.NpkResult_int64 %sys_result.is_error506, 0
+  br label %merge_block511
 
-merge_block513:                                   ; preds = %success_block512, %error_block511
-  %unwrap_result515 = phi i64 [ -1, %error_block511 ], [ %unwrap_value514, %success_block512 ]
-  br label %ifcont516
+merge_block511:                                   ; preds = %success_block510, %error_block509
+  %unwrap_result513 = phi i64 [ -1, %error_block509 ], [ %unwrap_value512, %success_block510 ]
+  br label %ifcont514
 
-ifcont516:                                        ; preds = %merge_block513, %ifcont497
+ifcont514:                                        ; preds = %merge_block511, %ifcont495
   ret { i32, ptr, i8 } zeroinitializer
 }
 
@@ -68455,8 +68441,12 @@ entry:
   %argv_ptr = alloca i64, align 8
   %max_args17 = load i64, ptr %max_args, align 4
   %multmp = mul i64 %max_args17, 8
-  %calltmp18 = call i64 @malloc(i64 %multmp)
-  store i64 %calltmp18, ptr %argv_ptr, align 4
+  %wild_ptr = call ptr @npk_alloc(i64 %multmp)
+  %max_args18 = load i64, ptr %max_args, align 4
+  %multmp19 = mul i64 %max_args18, 8
+  %wild_ptr20 = call ptr @npk_alloc(i64 %multmp19)
+  %cast.ptrtoint = ptrtoint ptr %wild_ptr20 to i64
+  store i64 %cast.ptrtoint, ptr %argv_ptr, align 4
   %argv_idx = alloca i64, align 8
   store i64 0, ptr %argv_idx, align 4
   %use_null = alloca i32, align 4
@@ -68465,19 +68455,19 @@ entry:
   store i32 0, ptr %i, align 4
   br label %whilecond
 
-whilecond:                                        ; preds = %ifcont53, %entry
-  %i19 = load i32, ptr %i, align 4
-  %argc20 = load i32, ptr %argc.addr, align 4
-  %lttmp = icmp slt i32 %i19, %argc20
-  %whilecond21 = icmp ne i1 %lttmp, false
-  br i1 %whilecond21, label %whilebody, label %afterwhile
+whilecond:                                        ; preds = %ifcont55, %entry
+  %i21 = load i32, ptr %i, align 4
+  %argc22 = load i32, ptr %argc.addr, align 4
+  %lttmp = icmp slt i32 %i21, %argc22
+  %whilecond23 = icmp ne i1 %lttmp, false
+  br i1 %whilecond23, label %whilebody, label %afterwhile
 
 whilebody:                                        ; preds = %whilecond
   %a = alloca ptr, align 8
-  %args22 = load ptr, ptr %args, align 8
-  %i23 = load i32, ptr %i, align 4
-  %calltmp24 = call { ptr, ptr, i8 } @nitpick_args.args_at(ptr %args22, i32 %i23)
-  %is_error = extractvalue { ptr, ptr, i8 } %calltmp24, 2
+  %args24 = load ptr, ptr %args, align 8
+  %i25 = load i32, ptr %i, align 4
+  %calltmp26 = call { ptr, ptr, i8 } @nitpick_args.args_at(ptr %args24, i32 %i25)
+  %is_error = extractvalue { ptr, ptr, i8 } %calltmp26, 2
   %is_error_bool = icmp ne i8 %is_error, 0
   br i1 %is_error_bool, label %error_block, label %success_block
 
@@ -68485,14 +68475,14 @@ error_block:                                      ; preds = %whilebody
   br label %merge_block
 
 success_block:                                    ; preds = %whilebody
-  %value = extractvalue { ptr, ptr, i8 } %calltmp24, 0
+  %value = extractvalue { ptr, ptr, i8 } %calltmp26, 0
   br label %merge_block
 
 merge_block:                                      ; preds = %success_block, %error_block
   %unwrap_result = phi ptr [ @.str.3169, %error_block ], [ %value, %success_block ]
   store ptr %unwrap_result, ptr %a, align 8
-  %a25 = load ptr, ptr %a, align 8
-  %str1 = load %struct.NpkString, ptr %a25, align 8
+  %a27 = load ptr, ptr %a, align 8
+  %str1 = load %struct.NpkString, ptr %a27, align 8
   %str2 = load %struct.NpkString, ptr @.str.3171, align 8
   %equals = call i1 @npk_string_equals(%struct.NpkString %str1, %struct.NpkString %str2)
   %eqtmp = icmp eq i1 %equals, false
@@ -68500,316 +68490,326 @@ merge_block:                                      ; preds = %success_block, %err
   br i1 %and.lhs, label %and.rhs, label %and.merge
 
 and.rhs:                                          ; preds = %merge_block
-  %a26 = load ptr, ptr %a, align 8
-  %str127 = load %struct.NpkString, ptr %a26, align 8
-  %str228 = load %struct.NpkString, ptr @.str.3173, align 8
-  %equals29 = call i1 @npk_string_equals(%struct.NpkString %str127, %struct.NpkString %str228)
-  %eqtmp30 = icmp eq i1 %equals29, false
-  %and.rhs31 = icmp ne i1 %eqtmp30, false
+  %a28 = load ptr, ptr %a, align 8
+  %str129 = load %struct.NpkString, ptr %a28, align 8
+  %str230 = load %struct.NpkString, ptr @.str.3173, align 8
+  %equals31 = call i1 @npk_string_equals(%struct.NpkString %str129, %struct.NpkString %str230)
+  %eqtmp32 = icmp eq i1 %equals31, false
+  %and.rhs33 = icmp ne i1 %eqtmp32, false
   br label %and.merge
 
 and.merge:                                        ; preds = %and.rhs, %merge_block
-  %and.result = phi i1 [ false, %merge_block ], [ %and.rhs31, %and.rhs ]
-  %and.lhs32 = icmp ne i1 %and.result, false
-  br i1 %and.lhs32, label %and.rhs33, label %and.merge34
+  %and.result = phi i1 [ false, %merge_block ], [ %and.rhs33, %and.rhs ]
+  %and.lhs34 = icmp ne i1 %and.result, false
+  br i1 %and.lhs34, label %and.rhs35, label %and.merge36
 
-and.rhs33:                                        ; preds = %and.merge
-  %a35 = load ptr, ptr %a, align 8
-  %index_of_result = call i64 @npk_string_index_of_simple(ptr %a35, ptr @.str.3175)
-  %lttmp36 = icmp slt i64 %index_of_result, 0
-  %and.rhs37 = icmp ne i1 %lttmp36, false
-  br label %and.merge34
+and.rhs35:                                        ; preds = %and.merge
+  %a37 = load ptr, ptr %a, align 8
+  %index_of_result = call i64 @npk_string_index_of_simple(ptr %a37, ptr @.str.3175)
+  %lttmp38 = icmp slt i64 %index_of_result, 0
+  %and.rhs39 = icmp ne i1 %lttmp38, false
+  br label %and.merge36
 
-and.merge34:                                      ; preds = %and.rhs33, %and.merge
-  %and.result38 = phi i1 [ false, %and.merge ], [ %and.rhs37, %and.rhs33 ]
-  %and.lhs39 = icmp ne i1 %and.result38, false
-  br i1 %and.lhs39, label %and.rhs40, label %and.merge41
+and.merge36:                                      ; preds = %and.rhs35, %and.merge
+  %and.result40 = phi i1 [ false, %and.merge ], [ %and.rhs39, %and.rhs35 ]
+  %and.lhs41 = icmp ne i1 %and.result40, false
+  br i1 %and.lhs41, label %and.rhs42, label %and.merge43
 
-and.rhs40:                                        ; preds = %and.merge34
-  %a42 = load ptr, ptr %a, align 8
-  %index_of_result43 = call i64 @npk_string_index_of_simple(ptr %a42, ptr @.str.3177)
-  %lttmp44 = icmp slt i64 %index_of_result43, 0
-  %and.rhs45 = icmp ne i1 %lttmp44, false
-  br label %and.merge41
+and.rhs42:                                        ; preds = %and.merge36
+  %a44 = load ptr, ptr %a, align 8
+  %index_of_result45 = call i64 @npk_string_index_of_simple(ptr %a44, ptr @.str.3177)
+  %lttmp46 = icmp slt i64 %index_of_result45, 0
+  %and.rhs47 = icmp ne i1 %lttmp46, false
+  br label %and.merge43
 
-and.merge41:                                      ; preds = %and.rhs40, %and.merge34
-  %and.result46 = phi i1 [ false, %and.merge34 ], [ %and.rhs45, %and.rhs40 ]
-  %ifcond = icmp ne i1 %and.result46, false
+and.merge43:                                      ; preds = %and.rhs42, %and.merge36
+  %and.result48 = phi i1 [ false, %and.merge36 ], [ %and.rhs47, %and.rhs42 ]
+  %ifcond = icmp ne i1 %and.result48, false
   br i1 %ifcond, label %then, label %ifcont
 
-then:                                             ; preds = %and.merge41
+then:                                             ; preds = %and.merge43
   br label %afterwhile
 
 afterbreak:                                       ; No predecessors!
   br label %ifcont
 
-ifcont:                                           ; preds = %afterbreak, %and.merge41
-  %a47 = load ptr, ptr %a, align 8
-  %str148 = load %struct.NpkString, ptr %a47, align 8
-  %str249 = load %struct.NpkString, ptr @.str.3179, align 8
-  %equals50 = call i1 @npk_string_equals(%struct.NpkString %str148, %struct.NpkString %str249)
-  %ifcond51 = icmp ne i1 %equals50, false
-  br i1 %ifcond51, label %then52, label %ifcont53
+ifcont:                                           ; preds = %afterbreak, %and.merge43
+  %a49 = load ptr, ptr %a, align 8
+  %str150 = load %struct.NpkString, ptr %a49, align 8
+  %str251 = load %struct.NpkString, ptr @.str.3179, align 8
+  %equals52 = call i1 @npk_string_equals(%struct.NpkString %str150, %struct.NpkString %str251)
+  %ifcond53 = icmp ne i1 %equals52, false
+  br i1 %ifcond53, label %then54, label %ifcont55
 
-then52:                                           ; preds = %ifcont
+then54:                                           ; preds = %ifcont
   store i32 1, ptr %use_null, align 4
-  br label %ifcont53
+  br label %ifcont55
 
-ifcont53:                                         ; preds = %then52, %ifcont
-  %i54 = load i32, ptr %i, align 4
-  %addtmp = add i32 %i54, 1
+ifcont55:                                         ; preds = %then54, %ifcont
+  %i56 = load i32, ptr %i, align 4
+  %addtmp = add i32 %i56, 1
   store i32 %addtmp, ptr %i, align 4
   call void @npk_gc_safepoint()
   br label %whilecond
 
 afterwhile:                                       ; preds = %then, %whilecond
-  %argc55 = load i32, ptr %argc.addr, align 4
-  %gttmp = icmp sgt i32 %argc55, 0
-  %ifcond56 = icmp ne i1 %gttmp, false
-  br i1 %ifcond56, label %then57, label %ifcont129
+  %argc57 = load i32, ptr %argc.addr, align 4
+  %gttmp = icmp sgt i32 %argc57, 0
+  %ifcond58 = icmp ne i1 %gttmp, false
+  br i1 %ifcond58, label %then59, label %ifcont135
 
-then57:                                           ; preds = %afterwhile
-  %args58 = load ptr, ptr %args, align 8
-  %i59 = load i32, ptr %i, align 4
-  %calltmp60 = call { ptr, ptr, i8 } @nitpick_args.args_at(ptr %args58, i32 %i59)
-  %is_error61 = extractvalue { ptr, ptr, i8 } %calltmp60, 2
-  %is_error_bool62 = icmp ne i8 %is_error61, 0
-  br i1 %is_error_bool62, label %error_block63, label %success_block64
+then59:                                           ; preds = %afterwhile
+  %args60 = load ptr, ptr %args, align 8
+  %i61 = load i32, ptr %i, align 4
+  %calltmp62 = call { ptr, ptr, i8 } @nitpick_args.args_at(ptr %args60, i32 %i61)
+  %is_error63 = extractvalue { ptr, ptr, i8 } %calltmp62, 2
+  %is_error_bool64 = icmp ne i8 %is_error63, 0
+  br i1 %is_error_bool64, label %error_block65, label %success_block66
 
-error_block63:                                    ; preds = %then57
-  br label %merge_block65
+error_block65:                                    ; preds = %then59
+  br label %merge_block67
 
-success_block64:                                  ; preds = %then57
-  %value66 = extractvalue { ptr, ptr, i8 } %calltmp60, 0
-  br label %merge_block65
+success_block66:                                  ; preds = %then59
+  %value68 = extractvalue { ptr, ptr, i8 } %calltmp62, 0
+  br label %merge_block67
 
-merge_block65:                                    ; preds = %success_block64, %error_block63
-  %unwrap_result67 = phi ptr [ @.str.3181, %error_block63 ], [ %value66, %success_block64 ]
-  store ptr %unwrap_result67, ptr %cmd, align 8
-  br label %whilecond68
+merge_block67:                                    ; preds = %success_block66, %error_block65
+  %unwrap_result69 = phi ptr [ @.str.3181, %error_block65 ], [ %value68, %success_block66 ]
+  store ptr %unwrap_result69, ptr %cmd, align 8
+  br label %whilecond70
 
-whilecond68:                                      ; preds = %afterwhile105, %merge_block65
-  %i69 = load i32, ptr %i, align 4
-  %argc70 = load i32, ptr %argc.addr, align 4
-  %lttmp71 = icmp slt i32 %i69, %argc70
-  %whilecond72 = icmp ne i1 %lttmp71, false
-  br i1 %whilecond72, label %whilebody73, label %afterwhile128
+whilecond70:                                      ; preds = %afterwhile111, %merge_block67
+  %i71 = load i32, ptr %i, align 4
+  %argc72 = load i32, ptr %argc.addr, align 4
+  %lttmp73 = icmp slt i32 %i71, %argc72
+  %whilecond74 = icmp ne i1 %lttmp73, false
+  br i1 %whilecond74, label %whilebody75, label %afterwhile134
 
-whilebody73:                                      ; preds = %whilecond68
+whilebody75:                                      ; preds = %whilecond70
   %arg_s = alloca ptr, align 8
-  %args74 = load ptr, ptr %args, align 8
-  %i75 = load i32, ptr %i, align 4
-  %calltmp76 = call { ptr, ptr, i8 } @nitpick_args.args_at(ptr %args74, i32 %i75)
-  %is_error77 = extractvalue { ptr, ptr, i8 } %calltmp76, 2
-  %is_error_bool78 = icmp ne i8 %is_error77, 0
-  br i1 %is_error_bool78, label %error_block79, label %success_block80
+  %args76 = load ptr, ptr %args, align 8
+  %i77 = load i32, ptr %i, align 4
+  %calltmp78 = call { ptr, ptr, i8 } @nitpick_args.args_at(ptr %args76, i32 %i77)
+  %is_error79 = extractvalue { ptr, ptr, i8 } %calltmp78, 2
+  %is_error_bool80 = icmp ne i8 %is_error79, 0
+  br i1 %is_error_bool80, label %error_block81, label %success_block82
 
-error_block79:                                    ; preds = %whilebody73
-  br label %merge_block81
+error_block81:                                    ; preds = %whilebody75
+  br label %merge_block83
 
-success_block80:                                  ; preds = %whilebody73
-  %value82 = extractvalue { ptr, ptr, i8 } %calltmp76, 0
-  br label %merge_block81
+success_block82:                                  ; preds = %whilebody75
+  %value84 = extractvalue { ptr, ptr, i8 } %calltmp78, 0
+  br label %merge_block83
 
-merge_block81:                                    ; preds = %success_block80, %error_block79
-  %unwrap_result83 = phi ptr [ @.str.3183, %error_block79 ], [ %value82, %success_block80 ]
-  store ptr %unwrap_result83, ptr %arg_s, align 8
+merge_block83:                                    ; preds = %success_block82, %error_block81
+  %unwrap_result85 = phi ptr [ @.str.3183, %error_block81 ], [ %value84, %success_block82 ]
+  store ptr %unwrap_result85, ptr %arg_s, align 8
   %len = alloca i64, align 8
-  %arg_s84 = load ptr, ptr %arg_s, align 8
-  %str = load %struct.NpkString, ptr %arg_s84, align 8
+  %arg_s86 = load ptr, ptr %arg_s, align 8
+  %str = load %struct.NpkString, ptr %arg_s86, align 8
   %length = extractvalue %struct.NpkString %str, 1
   store i64 %length, ptr %len, align 4
   %c_str = alloca i64, align 8
-  %len85 = load i64, ptr %len, align 4
-  %addtmp86 = add i64 %len85, 1
-  %calltmp87 = call i64 @malloc(i64 %addtmp86)
-  store i64 %calltmp87, ptr %c_str, align 4
+  %len87 = load i64, ptr %len, align 4
+  %addtmp88 = add i64 %len87, 1
+  %wild_ptr89 = call ptr @npk_alloc(i64 %addtmp88)
+  %len90 = load i64, ptr %len, align 4
+  %addtmp91 = add i64 %len90, 1
+  %wild_ptr92 = call ptr @npk_alloc(i64 %addtmp91)
+  %cast.ptrtoint93 = ptrtoint ptr %wild_ptr92 to i64
+  store i64 %cast.ptrtoint93, ptr %c_str, align 4
   %j = alloca i64, align 8
   store i64 0, ptr %j, align 4
-  br label %whilecond88
+  br label %whilecond94
 
-whilecond88:                                      ; preds = %whilebody93, %merge_block81
-  %j89 = load i64, ptr %j, align 4
-  %len90 = load i64, ptr %len, align 4
-  %lttmp91 = icmp slt i64 %j89, %len90
-  %whilecond92 = icmp ne i1 %lttmp91, false
-  br i1 %whilecond92, label %whilebody93, label %afterwhile105
-
-whilebody93:                                      ; preds = %whilecond88
-  %c_str94 = load i64, ptr %c_str, align 4
+whilecond94:                                      ; preds = %whilebody99, %merge_block83
   %j95 = load i64, ptr %j, align 4
-  %addtmp96 = add i64 %c_str94, %j95
-  %c_str97 = load i64, ptr %c_str, align 4
-  %j98 = load i64, ptr %j, align 4
-  %addtmp99 = add i64 %c_str97, %j98
-  %cast.inttoptr = inttoptr i64 %addtmp99 to ptr
-  %arg_s100 = load ptr, ptr %arg_s, align 8
-  %ffi_str_ptr_load = load %struct.NpkString, ptr %arg_s100, align 8
-  %ffi_str_ptr_data = extractvalue %struct.NpkString %ffi_str_ptr_load, 0
+  %len96 = load i64, ptr %len, align 4
+  %lttmp97 = icmp slt i64 %j95, %len96
+  %whilecond98 = icmp ne i1 %lttmp97, false
+  br i1 %whilecond98, label %whilebody99, label %afterwhile111
+
+whilebody99:                                      ; preds = %whilecond94
+  %c_str100 = load i64, ptr %c_str, align 4
   %j101 = load i64, ptr %j, align 4
-  %calltmp102 = call i64 @npk_string_byte_at(ptr %ffi_str_ptr_data, i64 %j101)
-  %cast.trunc = trunc i64 %calltmp102 to i8
+  %addtmp102 = add i64 %c_str100, %j101
+  %c_str103 = load i64, ptr %c_str, align 4
+  %j104 = load i64, ptr %j, align 4
+  %addtmp105 = add i64 %c_str103, %j104
+  %cast.inttoptr = inttoptr i64 %addtmp105 to ptr
+  %arg_s106 = load ptr, ptr %arg_s, align 8
+  %ffi_str_ptr_load = load %struct.NpkString, ptr %arg_s106, align 8
+  %ffi_str_ptr_data = extractvalue %struct.NpkString %ffi_str_ptr_load, 0
+  %j107 = load i64, ptr %j, align 4
+  %calltmp108 = call i64 @npk_string_byte_at(ptr %ffi_str_ptr_data, i64 %j107)
+  %cast.trunc = trunc i64 %calltmp108 to i8
   store i8 %cast.trunc, ptr %cast.inttoptr, align 1
-  %j103 = load i64, ptr %j, align 4
-  %addtmp104 = add i64 %j103, 1
-  store i64 %addtmp104, ptr %j, align 4
+  %j109 = load i64, ptr %j, align 4
+  %addtmp110 = add i64 %j109, 1
+  store i64 %addtmp110, ptr %j, align 4
   call void @npk_gc_safepoint()
-  br label %whilecond88
+  br label %whilecond94
 
-afterwhile105:                                    ; preds = %whilecond88
-  %c_str106 = load i64, ptr %c_str, align 4
-  %len107 = load i64, ptr %len, align 4
-  %addtmp108 = add i64 %c_str106, %len107
-  %c_str109 = load i64, ptr %c_str, align 4
-  %len110 = load i64, ptr %len, align 4
-  %addtmp111 = add i64 %c_str109, %len110
-  %cast.inttoptr112 = inttoptr i64 %addtmp111 to ptr
-  store i8 0, ptr %cast.inttoptr112, align 1
+afterwhile111:                                    ; preds = %whilecond94
+  %c_str112 = load i64, ptr %c_str, align 4
+  %len113 = load i64, ptr %len, align 4
+  %addtmp114 = add i64 %c_str112, %len113
+  %c_str115 = load i64, ptr %c_str, align 4
+  %len116 = load i64, ptr %len, align 4
+  %addtmp117 = add i64 %c_str115, %len116
+  %cast.inttoptr118 = inttoptr i64 %addtmp117 to ptr
+  store i8 0, ptr %cast.inttoptr118, align 1
   %offset = alloca i64, align 8
-  %argv_idx113 = load i64, ptr %argv_idx, align 4
-  %multmp114 = mul i64 %argv_idx113, 8
-  store i64 %multmp114, ptr %offset, align 4
-  %argv_ptr115 = load i64, ptr %argv_ptr, align 4
-  %offset116 = load i64, ptr %offset, align 4
-  %addtmp117 = add i64 %argv_ptr115, %offset116
-  %argv_ptr118 = load i64, ptr %argv_ptr, align 4
-  %offset119 = load i64, ptr %offset, align 4
-  %addtmp120 = add i64 %argv_ptr118, %offset119
-  %cast.inttoptr121 = inttoptr i64 %addtmp120 to ptr
-  %c_str122 = load i64, ptr %c_str, align 4
-  %cast.trunc123 = trunc i64 %c_str122 to i8
-  store i8 %cast.trunc123, ptr %cast.inttoptr121, align 1
-  %argv_idx124 = load i64, ptr %argv_idx, align 4
-  %addtmp125 = add i64 %argv_idx124, 1
-  store i64 %addtmp125, ptr %argv_idx, align 4
-  %i126 = load i32, ptr %i, align 4
-  %addtmp127 = add i32 %i126, 1
-  store i32 %addtmp127, ptr %i, align 4
-  call void @npk_gc_safepoint()
-  br label %whilecond68
-
-afterwhile128:                                    ; preds = %whilecond68
-  br label %ifcont129
-
-ifcont129:                                        ; preds = %afterwhile128, %afterwhile
+  %argv_idx119 = load i64, ptr %argv_idx, align 4
+  %multmp120 = mul i64 %argv_idx119, 8
+  store i64 %multmp120, ptr %offset, align 4
+  %argv_ptr121 = load i64, ptr %argv_ptr, align 4
+  %offset122 = load i64, ptr %offset, align 4
+  %addtmp123 = add i64 %argv_ptr121, %offset122
+  %argv_ptr124 = load i64, ptr %argv_ptr, align 4
+  %offset125 = load i64, ptr %offset, align 4
+  %addtmp126 = add i64 %argv_ptr124, %offset125
+  %cast.inttoptr127 = inttoptr i64 %addtmp126 to ptr
+  %c_str128 = load i64, ptr %c_str, align 4
+  %cast.trunc129 = trunc i64 %c_str128 to i8
+  store i8 %cast.trunc129, ptr %cast.inttoptr127, align 1
   %argv_idx130 = load i64, ptr %argv_idx, align 4
-  %eqtmp131 = icmp eq i64 %argv_idx130, 0
-  %ifcond132 = icmp ne i1 %eqtmp131, false
-  br i1 %ifcond132, label %then133, label %ifcont200
+  %addtmp131 = add i64 %argv_idx130, 1
+  store i64 %addtmp131, ptr %argv_idx, align 4
+  %i132 = load i32, ptr %i, align 4
+  %addtmp133 = add i32 %i132, 1
+  store i32 %addtmp133, ptr %i, align 4
+  call void @npk_gc_safepoint()
+  br label %whilecond70
 
-then133:                                          ; preds = %ifcont129
-  %c_str134 = alloca i64, align 8
-  %calltmp135 = call i64 @malloc(i64 10)
-  store i64 %calltmp135, ptr %c_str134, align 4
-  %c_str136 = load i64, ptr %c_str134, align 4
-  %addtmp137 = add i64 %c_str136, 0
-  %c_str138 = load i64, ptr %c_str134, align 4
-  %addtmp139 = add i64 %c_str138, 0
-  %cast.inttoptr140 = inttoptr i64 %addtmp139 to ptr
-  store i8 47, ptr %cast.inttoptr140, align 1
-  %c_str141 = load i64, ptr %c_str134, align 4
-  %addtmp142 = add i64 %c_str141, 1
-  %c_str143 = load i64, ptr %c_str134, align 4
-  %addtmp144 = add i64 %c_str143, 1
-  %cast.inttoptr145 = inttoptr i64 %addtmp144 to ptr
-  store i8 98, ptr %cast.inttoptr145, align 1
-  %c_str146 = load i64, ptr %c_str134, align 4
-  %addtmp147 = add i64 %c_str146, 2
-  %c_str148 = load i64, ptr %c_str134, align 4
-  %addtmp149 = add i64 %c_str148, 2
-  %cast.inttoptr150 = inttoptr i64 %addtmp149 to ptr
-  store i8 105, ptr %cast.inttoptr150, align 1
-  %c_str151 = load i64, ptr %c_str134, align 4
-  %addtmp152 = add i64 %c_str151, 3
-  %c_str153 = load i64, ptr %c_str134, align 4
-  %addtmp154 = add i64 %c_str153, 3
-  %cast.inttoptr155 = inttoptr i64 %addtmp154 to ptr
-  store i8 110, ptr %cast.inttoptr155, align 1
-  %c_str156 = load i64, ptr %c_str134, align 4
-  %addtmp157 = add i64 %c_str156, 4
-  %c_str158 = load i64, ptr %c_str134, align 4
-  %addtmp159 = add i64 %c_str158, 4
-  %cast.inttoptr160 = inttoptr i64 %addtmp159 to ptr
-  store i8 47, ptr %cast.inttoptr160, align 1
-  %c_str161 = load i64, ptr %c_str134, align 4
-  %addtmp162 = add i64 %c_str161, 5
-  %c_str163 = load i64, ptr %c_str134, align 4
-  %addtmp164 = add i64 %c_str163, 5
-  %cast.inttoptr165 = inttoptr i64 %addtmp164 to ptr
-  store i8 101, ptr %cast.inttoptr165, align 1
-  %c_str166 = load i64, ptr %c_str134, align 4
-  %addtmp167 = add i64 %c_str166, 6
-  %c_str168 = load i64, ptr %c_str134, align 4
-  %addtmp169 = add i64 %c_str168, 6
-  %cast.inttoptr170 = inttoptr i64 %addtmp169 to ptr
-  store i8 99, ptr %cast.inttoptr170, align 1
-  %c_str171 = load i64, ptr %c_str134, align 4
-  %addtmp172 = add i64 %c_str171, 7
-  %c_str173 = load i64, ptr %c_str134, align 4
-  %addtmp174 = add i64 %c_str173, 7
-  %cast.inttoptr175 = inttoptr i64 %addtmp174 to ptr
-  store i8 104, ptr %cast.inttoptr175, align 1
-  %c_str176 = load i64, ptr %c_str134, align 4
-  %addtmp177 = add i64 %c_str176, 8
-  %c_str178 = load i64, ptr %c_str134, align 4
-  %addtmp179 = add i64 %c_str178, 8
-  %cast.inttoptr180 = inttoptr i64 %addtmp179 to ptr
-  store i8 111, ptr %cast.inttoptr180, align 1
-  %c_str181 = load i64, ptr %c_str134, align 4
-  %addtmp182 = add i64 %c_str181, 9
-  %c_str183 = load i64, ptr %c_str134, align 4
-  %addtmp184 = add i64 %c_str183, 9
-  %cast.inttoptr185 = inttoptr i64 %addtmp184 to ptr
-  store i8 0, ptr %cast.inttoptr185, align 1
-  %offset186 = alloca i64, align 8
-  %argv_idx187 = load i64, ptr %argv_idx, align 4
-  %multmp188 = mul i64 %argv_idx187, 8
-  store i64 %multmp188, ptr %offset186, align 4
-  %argv_ptr189 = load i64, ptr %argv_ptr, align 4
-  %offset190 = load i64, ptr %offset186, align 4
-  %addtmp191 = add i64 %argv_ptr189, %offset190
-  %argv_ptr192 = load i64, ptr %argv_ptr, align 4
-  %offset193 = load i64, ptr %offset186, align 4
-  %addtmp194 = add i64 %argv_ptr192, %offset193
-  %cast.inttoptr195 = inttoptr i64 %addtmp194 to ptr
-  %c_str196 = load i64, ptr %c_str134, align 4
-  %cast.trunc197 = trunc i64 %c_str196 to i8
-  store i8 %cast.trunc197, ptr %cast.inttoptr195, align 1
-  %argv_idx198 = load i64, ptr %argv_idx, align 4
-  %addtmp199 = add i64 %argv_idx198, 1
-  store i64 %addtmp199, ptr %argv_idx, align 4
-  br label %ifcont200
+afterwhile134:                                    ; preds = %whilecond70
+  br label %ifcont135
 
-ifcont200:                                        ; preds = %then133, %ifcont129
+ifcont135:                                        ; preds = %afterwhile134, %afterwhile
+  %argv_idx136 = load i64, ptr %argv_idx, align 4
+  %eqtmp137 = icmp eq i64 %argv_idx136, 0
+  %ifcond138 = icmp ne i1 %eqtmp137, false
+  br i1 %ifcond138, label %then139, label %ifcont208
+
+then139:                                          ; preds = %ifcont135
+  %c_str140 = alloca i64, align 8
+  %wild_ptr141 = call ptr @npk_alloc(i64 10)
+  %wild_ptr142 = call ptr @npk_alloc(i64 10)
+  %cast.ptrtoint143 = ptrtoint ptr %wild_ptr142 to i64
+  store i64 %cast.ptrtoint143, ptr %c_str140, align 4
+  %c_str144 = load i64, ptr %c_str140, align 4
+  %addtmp145 = add i64 %c_str144, 0
+  %c_str146 = load i64, ptr %c_str140, align 4
+  %addtmp147 = add i64 %c_str146, 0
+  %cast.inttoptr148 = inttoptr i64 %addtmp147 to ptr
+  store i8 47, ptr %cast.inttoptr148, align 1
+  %c_str149 = load i64, ptr %c_str140, align 4
+  %addtmp150 = add i64 %c_str149, 1
+  %c_str151 = load i64, ptr %c_str140, align 4
+  %addtmp152 = add i64 %c_str151, 1
+  %cast.inttoptr153 = inttoptr i64 %addtmp152 to ptr
+  store i8 98, ptr %cast.inttoptr153, align 1
+  %c_str154 = load i64, ptr %c_str140, align 4
+  %addtmp155 = add i64 %c_str154, 2
+  %c_str156 = load i64, ptr %c_str140, align 4
+  %addtmp157 = add i64 %c_str156, 2
+  %cast.inttoptr158 = inttoptr i64 %addtmp157 to ptr
+  store i8 105, ptr %cast.inttoptr158, align 1
+  %c_str159 = load i64, ptr %c_str140, align 4
+  %addtmp160 = add i64 %c_str159, 3
+  %c_str161 = load i64, ptr %c_str140, align 4
+  %addtmp162 = add i64 %c_str161, 3
+  %cast.inttoptr163 = inttoptr i64 %addtmp162 to ptr
+  store i8 110, ptr %cast.inttoptr163, align 1
+  %c_str164 = load i64, ptr %c_str140, align 4
+  %addtmp165 = add i64 %c_str164, 4
+  %c_str166 = load i64, ptr %c_str140, align 4
+  %addtmp167 = add i64 %c_str166, 4
+  %cast.inttoptr168 = inttoptr i64 %addtmp167 to ptr
+  store i8 47, ptr %cast.inttoptr168, align 1
+  %c_str169 = load i64, ptr %c_str140, align 4
+  %addtmp170 = add i64 %c_str169, 5
+  %c_str171 = load i64, ptr %c_str140, align 4
+  %addtmp172 = add i64 %c_str171, 5
+  %cast.inttoptr173 = inttoptr i64 %addtmp172 to ptr
+  store i8 101, ptr %cast.inttoptr173, align 1
+  %c_str174 = load i64, ptr %c_str140, align 4
+  %addtmp175 = add i64 %c_str174, 6
+  %c_str176 = load i64, ptr %c_str140, align 4
+  %addtmp177 = add i64 %c_str176, 6
+  %cast.inttoptr178 = inttoptr i64 %addtmp177 to ptr
+  store i8 99, ptr %cast.inttoptr178, align 1
+  %c_str179 = load i64, ptr %c_str140, align 4
+  %addtmp180 = add i64 %c_str179, 7
+  %c_str181 = load i64, ptr %c_str140, align 4
+  %addtmp182 = add i64 %c_str181, 7
+  %cast.inttoptr183 = inttoptr i64 %addtmp182 to ptr
+  store i8 104, ptr %cast.inttoptr183, align 1
+  %c_str184 = load i64, ptr %c_str140, align 4
+  %addtmp185 = add i64 %c_str184, 8
+  %c_str186 = load i64, ptr %c_str140, align 4
+  %addtmp187 = add i64 %c_str186, 8
+  %cast.inttoptr188 = inttoptr i64 %addtmp187 to ptr
+  store i8 111, ptr %cast.inttoptr188, align 1
+  %c_str189 = load i64, ptr %c_str140, align 4
+  %addtmp190 = add i64 %c_str189, 9
+  %c_str191 = load i64, ptr %c_str140, align 4
+  %addtmp192 = add i64 %c_str191, 9
+  %cast.inttoptr193 = inttoptr i64 %addtmp192 to ptr
+  store i8 0, ptr %cast.inttoptr193, align 1
+  %offset194 = alloca i64, align 8
+  %argv_idx195 = load i64, ptr %argv_idx, align 4
+  %multmp196 = mul i64 %argv_idx195, 8
+  store i64 %multmp196, ptr %offset194, align 4
+  %argv_ptr197 = load i64, ptr %argv_ptr, align 4
+  %offset198 = load i64, ptr %offset194, align 4
+  %addtmp199 = add i64 %argv_ptr197, %offset198
+  %argv_ptr200 = load i64, ptr %argv_ptr, align 4
+  %offset201 = load i64, ptr %offset194, align 4
+  %addtmp202 = add i64 %argv_ptr200, %offset201
+  %cast.inttoptr203 = inttoptr i64 %addtmp202 to ptr
+  %c_str204 = load i64, ptr %c_str140, align 4
+  %cast.trunc205 = trunc i64 %c_str204 to i8
+  store i8 %cast.trunc205, ptr %cast.inttoptr203, align 1
+  %argv_idx206 = load i64, ptr %argv_idx, align 4
+  %addtmp207 = add i64 %argv_idx206, 1
+  store i64 %addtmp207, ptr %argv_idx, align 4
+  br label %ifcont208
+
+ifcont208:                                        ; preds = %then139, %ifcont135
   %initial_argv_idx = alloca i64, align 8
-  %argv_idx201 = load i64, ptr %argv_idx, align 4
-  store i64 %argv_idx201, ptr %initial_argv_idx, align 4
+  %argv_idx209 = load i64, ptr %argv_idx, align 4
+  store i64 %argv_idx209, ptr %initial_argv_idx, align 4
   %cmd_ptr = alloca i64, align 8
-  %argv_ptr202 = load i64, ptr %argv_ptr, align 4
-  %calltmp203 = call i64 @nitpick_libc_mem_read_i64(i64 %argv_ptr202, i64 0)
-  store i64 %calltmp203, ptr %cmd_ptr, align 4
+  %argv_ptr210 = load i64, ptr %argv_ptr, align 4
+  %calltmp211 = call i64 @nitpick_libc_mem_read_i64(i64 %argv_ptr210, i64 0)
+  store i64 %calltmp211, ptr %cmd_ptr, align 4
   %buf = alloca i64, align 8
-  %calltmp204 = call i64 @malloc(i64 65536)
-  store i64 %calltmp204, ptr %buf, align 4
+  %wild_ptr212 = call ptr @npk_alloc(i64 65536)
+  %wild_ptr213 = call ptr @npk_alloc(i64 65536)
+  %cast.ptrtoint214 = ptrtoint ptr %wild_ptr213 to i64
+  store i64 %cast.ptrtoint214, ptr %buf, align 4
   %token_buf = alloca i64, align 8
-  %calltmp205 = call i64 @malloc(i64 65536)
-  store i64 %calltmp205, ptr %token_buf, align 4
+  %wild_ptr215 = call ptr @npk_alloc(i64 65536)
+  %wild_ptr216 = call ptr @npk_alloc(i64 65536)
+  %cast.ptrtoint217 = ptrtoint ptr %wild_ptr216 to i64
+  store i64 %cast.ptrtoint217, ptr %token_buf, align 4
   %token_len = alloca i64, align 8
   store i64 0, ptr %token_len, align 4
   %running = alloca i32, align 4
   store i32 1, ptr %running, align 4
-  br label %whilecond206
+  br label %whilecond218
 
-whilecond206:                                     ; preds = %ifcont387, %ifcont200
-  %running207 = load i32, ptr %running, align 4
-  %eqtmp208 = icmp eq i32 %running207, 1
-  %whilecond209 = icmp ne i1 %eqtmp208, false
-  br i1 %whilecond209, label %whilebody210, label %afterwhile388
+whilecond218:                                     ; preds = %ifcont403, %ifcont208
+  %running219 = load i32, ptr %running, align 4
+  %eqtmp220 = icmp eq i32 %running219, 1
+  %whilecond221 = icmp ne i1 %eqtmp220, false
+  br i1 %whilecond221, label %whilebody222, label %afterwhile404
 
-whilebody210:                                     ; preds = %whilecond206
+whilebody222:                                     ; preds = %whilecond218
   %bytes = alloca i64, align 8
-  %buf211 = load i64, ptr %buf, align 4
-  %syscall_ret = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 0, i64 0, i64 %buf211, i64 65536)
+  %buf223 = load i64, ptr %buf, align 4
+  %syscall_ret = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(i64 0, i64 0, i64 %buf223, i64 65536)
   %sys_is_err = icmp slt i64 %syscall_ret, 0
   %sys_neg_errno = sub i64 0, %syscall_ret
   %sys_err_ptr = inttoptr i64 %sys_neg_errno to ptr
@@ -68819,500 +68819,516 @@ whilebody210:                                     ; preds = %whilecond206
   %sys_result.val = insertvalue %struct.NpkResult_int64 undef, i64 %sys_val, 0
   %sys_result.err = insertvalue %struct.NpkResult_int64 %sys_result.val, ptr %sys_err, 1
   %sys_result.is_error = insertvalue %struct.NpkResult_int64 %sys_result.err, i8 %sys_flag, 2
-  %is_error212 = extractvalue %struct.NpkResult_int64 %sys_result.is_error, 2
-  %is_error_bool213 = icmp ne i8 %is_error212, 0
-  br i1 %is_error_bool213, label %error_block214, label %success_block215
+  %is_error224 = extractvalue %struct.NpkResult_int64 %sys_result.is_error, 2
+  %is_error_bool225 = icmp ne i8 %is_error224, 0
+  br i1 %is_error_bool225, label %error_block226, label %success_block227
 
-error_block214:                                   ; preds = %whilebody210
-  br label %merge_block216
+error_block226:                                   ; preds = %whilebody222
+  br label %merge_block228
 
-success_block215:                                 ; preds = %whilebody210
-  %value217 = extractvalue %struct.NpkResult_int64 %sys_result.is_error, 0
-  br label %merge_block216
+success_block227:                                 ; preds = %whilebody222
+  %value229 = extractvalue %struct.NpkResult_int64 %sys_result.is_error, 0
+  br label %merge_block228
 
-merge_block216:                                   ; preds = %success_block215, %error_block214
-  %unwrap_result218 = phi i64 [ -1, %error_block214 ], [ %value217, %success_block215 ]
-  store i64 %unwrap_result218, ptr %bytes, align 4
-  %bytes219 = load i64, ptr %bytes, align 4
-  %letmp = icmp sle i64 %bytes219, 0
-  %ifcond220 = icmp ne i1 %letmp, false
-  br i1 %ifcond220, label %then221, label %else
+merge_block228:                                   ; preds = %success_block227, %error_block226
+  %unwrap_result230 = phi i64 [ -1, %error_block226 ], [ %value229, %success_block227 ]
+  store i64 %unwrap_result230, ptr %bytes, align 4
+  %bytes231 = load i64, ptr %bytes, align 4
+  %letmp = icmp sle i64 %bytes231, 0
+  %ifcond232 = icmp ne i1 %letmp, false
+  br i1 %ifcond232, label %then233, label %else
 
-then221:                                          ; preds = %merge_block216
+then233:                                          ; preds = %merge_block228
   store i32 0, ptr %running, align 4
-  br label %ifcont387
+  br label %ifcont403
 
-else:                                             ; preds = %merge_block216
+else:                                             ; preds = %merge_block228
   %b_i = alloca i64, align 8
   store i64 0, ptr %b_i, align 4
-  br label %whilecond222
+  br label %whilecond234
 
-whilecond222:                                     ; preds = %ifcont383, %else
-  %b_i223 = load i64, ptr %b_i, align 4
-  %bytes224 = load i64, ptr %bytes, align 4
-  %lttmp225 = icmp slt i64 %b_i223, %bytes224
-  %whilecond226 = icmp ne i1 %lttmp225, false
-  br i1 %whilecond226, label %whilebody227, label %afterwhile386
+whilecond234:                                     ; preds = %ifcont399, %else
+  %b_i235 = load i64, ptr %b_i, align 4
+  %bytes236 = load i64, ptr %bytes, align 4
+  %lttmp237 = icmp slt i64 %b_i235, %bytes236
+  %whilecond238 = icmp ne i1 %lttmp237, false
+  br i1 %whilecond238, label %whilebody239, label %afterwhile402
 
-whilebody227:                                     ; preds = %whilecond222
+whilebody239:                                     ; preds = %whilecond234
   %c = alloca i64, align 8
-  %buf228 = load i64, ptr %buf, align 4
-  %b_i229 = load i64, ptr %b_i, align 4
-  %addtmp230 = add i64 %buf228, %b_i229
-  %buf231 = load i64, ptr %buf, align 4
-  %b_i232 = load i64, ptr %b_i, align 4
-  %addtmp233 = add i64 %buf231, %b_i232
-  %cast.inttoptr234 = inttoptr i64 %addtmp233 to ptr
-  %null.deref = icmp eq ptr %cast.inttoptr234, null
+  %buf240 = load i64, ptr %buf, align 4
+  %b_i241 = load i64, ptr %b_i, align 4
+  %addtmp242 = add i64 %buf240, %b_i241
+  %buf243 = load i64, ptr %buf, align 4
+  %b_i244 = load i64, ptr %b_i, align 4
+  %addtmp245 = add i64 %buf243, %b_i244
+  %cast.inttoptr246 = inttoptr i64 %addtmp245 to ptr
+  %null.deref = icmp eq ptr %cast.inttoptr246, null
   br i1 %null.deref, label %null.fail, label %null.ok
 
-null.fail:                                        ; preds = %whilebody227
-  %0 = call i32 @failsafe(i32 46)
+null.fail:                                        ; preds = %whilebody239
   call void @exit(i32 46)
   unreachable
 
-null.ok:                                          ; preds = %whilebody227
-  %deref = load i32, ptr %cast.inttoptr234, align 4
+null.ok:                                          ; preds = %whilebody239
+  %deref = load i32, ptr %cast.inttoptr246, align 4
   %cast.sext = sext i32 %deref to i64
   store i64 %cast.sext, ptr %c, align 4
   %is_delim = alloca i32, align 4
   store i32 0, ptr %is_delim, align 4
-  %use_null235 = load i32, ptr %use_null, align 4
-  %eqtmp236 = icmp eq i32 %use_null235, 1
-  %ifcond237 = icmp ne i1 %eqtmp236, false
-  br i1 %ifcond237, label %then238, label %else244
+  %use_null247 = load i32, ptr %use_null, align 4
+  %eqtmp248 = icmp eq i32 %use_null247, 1
+  %ifcond249 = icmp ne i1 %eqtmp248, false
+  br i1 %ifcond249, label %then250, label %else256
 
-then238:                                          ; preds = %null.ok
-  %c239 = load i64, ptr %c, align 4
-  %eqtmp240 = icmp eq i64 %c239, 0
-  %ifcond241 = icmp ne i1 %eqtmp240, false
-  br i1 %ifcond241, label %then242, label %ifcont243
+then250:                                          ; preds = %null.ok
+  %c251 = load i64, ptr %c, align 4
+  %eqtmp252 = icmp eq i64 %c251, 0
+  %ifcond253 = icmp ne i1 %eqtmp252, false
+  br i1 %ifcond253, label %then254, label %ifcont255
 
-then242:                                          ; preds = %then238
+then254:                                          ; preds = %then250
   store i32 1, ptr %is_delim, align 4
-  br label %ifcont243
+  br label %ifcont255
 
-ifcont243:                                        ; preds = %then242, %then238
-  br label %ifcont274
+ifcont255:                                        ; preds = %then254, %then250
+  br label %ifcont286
 
-else244:                                          ; preds = %null.ok
-  %c245 = load i64, ptr %c, align 4
-  %eqtmp246 = icmp eq i64 %c245, 32
-  %or.lhs = icmp ne i1 %eqtmp246, false
+else256:                                          ; preds = %null.ok
+  %c257 = load i64, ptr %c, align 4
+  %eqtmp258 = icmp eq i64 %c257, 32
+  %or.lhs = icmp ne i1 %eqtmp258, false
   br i1 %or.lhs, label %or.merge, label %or.rhs
 
-or.rhs:                                           ; preds = %else244
-  %c247 = load i64, ptr %c, align 4
-  %eqtmp248 = icmp eq i64 %c247, 10
-  %or.rhs249 = icmp ne i1 %eqtmp248, false
+or.rhs:                                           ; preds = %else256
+  %c259 = load i64, ptr %c, align 4
+  %eqtmp260 = icmp eq i64 %c259, 10
+  %or.rhs261 = icmp ne i1 %eqtmp260, false
   br label %or.merge
 
-or.merge:                                         ; preds = %or.rhs, %else244
-  %or.result = phi i1 [ true, %else244 ], [ %or.rhs249, %or.rhs ]
-  %or.lhs250 = icmp ne i1 %or.result, false
-  br i1 %or.lhs250, label %or.merge252, label %or.rhs251
+or.merge:                                         ; preds = %or.rhs, %else256
+  %or.result = phi i1 [ true, %else256 ], [ %or.rhs261, %or.rhs ]
+  %or.lhs262 = icmp ne i1 %or.result, false
+  br i1 %or.lhs262, label %or.merge264, label %or.rhs263
 
-or.rhs251:                                        ; preds = %or.merge
-  %c253 = load i64, ptr %c, align 4
-  %eqtmp254 = icmp eq i64 %c253, 9
-  %or.rhs255 = icmp ne i1 %eqtmp254, false
-  br label %or.merge252
+or.rhs263:                                        ; preds = %or.merge
+  %c265 = load i64, ptr %c, align 4
+  %eqtmp266 = icmp eq i64 %c265, 9
+  %or.rhs267 = icmp ne i1 %eqtmp266, false
+  br label %or.merge264
 
-or.merge252:                                      ; preds = %or.rhs251, %or.merge
-  %or.result256 = phi i1 [ true, %or.merge ], [ %or.rhs255, %or.rhs251 ]
-  %or.lhs257 = icmp ne i1 %or.result256, false
-  br i1 %or.lhs257, label %or.merge259, label %or.rhs258
+or.merge264:                                      ; preds = %or.rhs263, %or.merge
+  %or.result268 = phi i1 [ true, %or.merge ], [ %or.rhs267, %or.rhs263 ]
+  %or.lhs269 = icmp ne i1 %or.result268, false
+  br i1 %or.lhs269, label %or.merge271, label %or.rhs270
 
-or.rhs258:                                        ; preds = %or.merge252
-  %c260 = load i64, ptr %c, align 4
-  %eqtmp261 = icmp eq i64 %c260, 13
-  %or.rhs262 = icmp ne i1 %eqtmp261, false
-  br label %or.merge259
+or.rhs270:                                        ; preds = %or.merge264
+  %c272 = load i64, ptr %c, align 4
+  %eqtmp273 = icmp eq i64 %c272, 13
+  %or.rhs274 = icmp ne i1 %eqtmp273, false
+  br label %or.merge271
 
-or.merge259:                                      ; preds = %or.rhs258, %or.merge252
-  %or.result263 = phi i1 [ true, %or.merge252 ], [ %or.rhs262, %or.rhs258 ]
-  %or.lhs264 = icmp ne i1 %or.result263, false
-  br i1 %or.lhs264, label %or.merge266, label %or.rhs265
+or.merge271:                                      ; preds = %or.rhs270, %or.merge264
+  %or.result275 = phi i1 [ true, %or.merge264 ], [ %or.rhs274, %or.rhs270 ]
+  %or.lhs276 = icmp ne i1 %or.result275, false
+  br i1 %or.lhs276, label %or.merge278, label %or.rhs277
 
-or.rhs265:                                        ; preds = %or.merge259
-  %c267 = load i64, ptr %c, align 4
-  %eqtmp268 = icmp eq i64 %c267, 0
-  %or.rhs269 = icmp ne i1 %eqtmp268, false
-  br label %or.merge266
+or.rhs277:                                        ; preds = %or.merge271
+  %c279 = load i64, ptr %c, align 4
+  %eqtmp280 = icmp eq i64 %c279, 0
+  %or.rhs281 = icmp ne i1 %eqtmp280, false
+  br label %or.merge278
 
-or.merge266:                                      ; preds = %or.rhs265, %or.merge259
-  %or.result270 = phi i1 [ true, %or.merge259 ], [ %or.rhs269, %or.rhs265 ]
-  %ifcond271 = icmp ne i1 %or.result270, false
-  br i1 %ifcond271, label %then272, label %ifcont273
+or.merge278:                                      ; preds = %or.rhs277, %or.merge271
+  %or.result282 = phi i1 [ true, %or.merge271 ], [ %or.rhs281, %or.rhs277 ]
+  %ifcond283 = icmp ne i1 %or.result282, false
+  br i1 %ifcond283, label %then284, label %ifcont285
 
-then272:                                          ; preds = %or.merge266
+then284:                                          ; preds = %or.merge278
   store i32 1, ptr %is_delim, align 4
-  br label %ifcont273
+  br label %ifcont285
 
-ifcont273:                                        ; preds = %then272, %or.merge266
-  br label %ifcont274
+ifcont285:                                        ; preds = %then284, %or.merge278
+  br label %ifcont286
 
-ifcont274:                                        ; preds = %ifcont273, %ifcont243
-  %is_delim275 = load i32, ptr %is_delim, align 4
-  %eqtmp276 = icmp eq i32 %is_delim275, 1
-  %ifcond277 = icmp ne i1 %eqtmp276, false
-  br i1 %ifcond277, label %then278, label %else359
+ifcont286:                                        ; preds = %ifcont285, %ifcont255
+  %is_delim287 = load i32, ptr %is_delim, align 4
+  %eqtmp288 = icmp eq i32 %is_delim287, 1
+  %ifcond289 = icmp ne i1 %eqtmp288, false
+  br i1 %ifcond289, label %then290, label %else375
 
-then278:                                          ; preds = %ifcont274
-  %token_len279 = load i64, ptr %token_len, align 4
-  %gttmp280 = icmp sgt i64 %token_len279, 0
-  %ifcond281 = icmp ne i1 %gttmp280, false
-  br i1 %ifcond281, label %then282, label %ifcont358
-
-then282:                                          ; preds = %then278
-  %token_buf283 = load i64, ptr %token_buf, align 4
-  %token_len284 = load i64, ptr %token_len, align 4
-  %addtmp285 = add i64 %token_buf283, %token_len284
-  %token_buf286 = load i64, ptr %token_buf, align 4
-  %token_len287 = load i64, ptr %token_len, align 4
-  %addtmp288 = add i64 %token_buf286, %token_len287
-  %cast.inttoptr289 = inttoptr i64 %addtmp288 to ptr
-  store i8 0, ptr %cast.inttoptr289, align 1
-  %c_str290 = alloca i64, align 8
+then290:                                          ; preds = %ifcont286
   %token_len291 = load i64, ptr %token_len, align 4
-  %addtmp292 = add i64 %token_len291, 1
-  %calltmp293 = call i64 @malloc(i64 %addtmp292)
-  store i64 %calltmp293, ptr %c_str290, align 4
+  %gttmp292 = icmp sgt i64 %token_len291, 0
+  %ifcond293 = icmp ne i1 %gttmp292, false
+  br i1 %ifcond293, label %then294, label %ifcont374
+
+then294:                                          ; preds = %then290
+  %token_buf295 = load i64, ptr %token_buf, align 4
+  %token_len296 = load i64, ptr %token_len, align 4
+  %addtmp297 = add i64 %token_buf295, %token_len296
+  %token_buf298 = load i64, ptr %token_buf, align 4
+  %token_len299 = load i64, ptr %token_len, align 4
+  %addtmp300 = add i64 %token_buf298, %token_len299
+  %cast.inttoptr301 = inttoptr i64 %addtmp300 to ptr
+  store i8 0, ptr %cast.inttoptr301, align 1
+  %c_str302 = alloca i64, align 8
+  %token_len303 = load i64, ptr %token_len, align 4
+  %addtmp304 = add i64 %token_len303, 1
+  %wild_ptr305 = call ptr @npk_alloc(i64 %addtmp304)
+  %token_len306 = load i64, ptr %token_len, align 4
+  %addtmp307 = add i64 %token_len306, 1
+  %wild_ptr308 = call ptr @npk_alloc(i64 %addtmp307)
+  %cast.ptrtoint309 = ptrtoint ptr %wild_ptr308 to i64
+  store i64 %cast.ptrtoint309, ptr %c_str302, align 4
   %k = alloca i64, align 8
   store i64 0, ptr %k, align 4
-  br label %whilecond294
+  br label %whilecond310
 
-whilecond294:                                     ; preds = %whilebody299, %then282
-  %k295 = load i64, ptr %k, align 4
-  %token_len296 = load i64, ptr %token_len, align 4
-  %letmp297 = icmp sle i64 %k295, %token_len296
-  %whilecond298 = icmp ne i1 %letmp297, false
-  br i1 %whilecond298, label %whilebody299, label %afterwhile313
-
-whilebody299:                                     ; preds = %whilecond294
-  %c_str300 = load i64, ptr %c_str290, align 4
-  %k301 = load i64, ptr %k, align 4
-  %addtmp302 = add i64 %c_str300, %k301
-  %c_str303 = load i64, ptr %c_str290, align 4
-  %k304 = load i64, ptr %k, align 4
-  %addtmp305 = add i64 %c_str303, %k304
-  %cast.inttoptr306 = inttoptr i64 %addtmp305 to ptr
-  %token_buf307 = load i64, ptr %token_buf, align 4
-  %k308 = load i64, ptr %k, align 4
-  %calltmp309 = call i64 @npk_mem_read_byte(i64 %token_buf307, i64 %k308)
-  %cast.trunc310 = trunc i64 %calltmp309 to i8
-  store i8 %cast.trunc310, ptr %cast.inttoptr306, align 1
+whilecond310:                                     ; preds = %whilebody315, %then294
   %k311 = load i64, ptr %k, align 4
-  %addtmp312 = add i64 %k311, 1
-  store i64 %addtmp312, ptr %k, align 4
+  %token_len312 = load i64, ptr %token_len, align 4
+  %letmp313 = icmp sle i64 %k311, %token_len312
+  %whilecond314 = icmp ne i1 %letmp313, false
+  br i1 %whilecond314, label %whilebody315, label %afterwhile329
+
+whilebody315:                                     ; preds = %whilecond310
+  %c_str316 = load i64, ptr %c_str302, align 4
+  %k317 = load i64, ptr %k, align 4
+  %addtmp318 = add i64 %c_str316, %k317
+  %c_str319 = load i64, ptr %c_str302, align 4
+  %k320 = load i64, ptr %k, align 4
+  %addtmp321 = add i64 %c_str319, %k320
+  %cast.inttoptr322 = inttoptr i64 %addtmp321 to ptr
+  %token_buf323 = load i64, ptr %token_buf, align 4
+  %k324 = load i64, ptr %k, align 4
+  %calltmp325 = call i64 @npk_mem_read_byte(i64 %token_buf323, i64 %k324)
+  %cast.trunc326 = trunc i64 %calltmp325 to i8
+  store i8 %cast.trunc326, ptr %cast.inttoptr322, align 1
+  %k327 = load i64, ptr %k, align 4
+  %addtmp328 = add i64 %k327, 1
+  store i64 %addtmp328, ptr %k, align 4
   call void @npk_gc_safepoint()
-  br label %whilecond294
+  br label %whilecond310
 
-afterwhile313:                                    ; preds = %whilecond294
-  %argv_idx314 = load i64, ptr %argv_idx, align 4
-  %max_args315 = load i64, ptr %max_args, align 4
-  %subtmp = sub i64 %max_args315, 1
-  %getmp = icmp sge i64 %argv_idx314, %subtmp
-  %ifcond316 = icmp ne i1 %getmp, false
-  br i1 %ifcond316, label %then317, label %ifcont343
+afterwhile329:                                    ; preds = %whilecond310
+  %argv_idx330 = load i64, ptr %argv_idx, align 4
+  %max_args331 = load i64, ptr %max_args, align 4
+  %subtmp = sub i64 %max_args331, 1
+  %getmp = icmp sge i64 %argv_idx330, %subtmp
+  %ifcond332 = icmp ne i1 %getmp, false
+  br i1 %ifcond332, label %then333, label %ifcont359
 
-then317:                                          ; preds = %afterwhile313
-  %cmd_ptr318 = load i64, ptr %cmd_ptr, align 4
-  %argv_ptr319 = load i64, ptr %argv_ptr, align 4
-  %argv_idx320 = load i64, ptr %argv_idx, align 4
-  %calltmp321 = call { i32, ptr, i8 } @xargs.xargs_exec_batch(i64 %cmd_ptr318, i64 %argv_ptr319, i64 %argv_idx320)
+then333:                                          ; preds = %afterwhile329
+  %cmd_ptr334 = load i64, ptr %cmd_ptr, align 4
+  %argv_ptr335 = load i64, ptr %argv_ptr, align 4
+  %argv_idx336 = load i64, ptr %argv_idx, align 4
+  %calltmp337 = call { i32, ptr, i8 } @xargs.xargs_exec_batch(i64 %cmd_ptr334, i64 %argv_ptr335, i64 %argv_idx336)
   %f_idx = alloca i64, align 8
-  %initial_argv_idx322 = load i64, ptr %initial_argv_idx, align 4
-  store i64 %initial_argv_idx322, ptr %f_idx, align 4
-  br label %whilecond323
+  %initial_argv_idx338 = load i64, ptr %initial_argv_idx, align 4
+  store i64 %initial_argv_idx338, ptr %f_idx, align 4
+  br label %whilecond339
 
-whilecond323:                                     ; preds = %ifcont338, %then317
-  %f_idx324 = load i64, ptr %f_idx, align 4
-  %argv_idx325 = load i64, ptr %argv_idx, align 4
-  %lttmp326 = icmp slt i64 %f_idx324, %argv_idx325
-  %whilecond327 = icmp ne i1 %lttmp326, false
-  br i1 %whilecond327, label %whilebody328, label %afterwhile341
+whilecond339:                                     ; preds = %ifcont354, %then333
+  %f_idx340 = load i64, ptr %f_idx, align 4
+  %argv_idx341 = load i64, ptr %argv_idx, align 4
+  %lttmp342 = icmp slt i64 %f_idx340, %argv_idx341
+  %whilecond343 = icmp ne i1 %lttmp342, false
+  br i1 %whilecond343, label %whilebody344, label %afterwhile357
 
-whilebody328:                                     ; preds = %whilecond323
+whilebody344:                                     ; preds = %whilecond339
   %c_s = alloca i64, align 8
-  %argv_ptr329 = load i64, ptr %argv_ptr, align 4
-  %f_idx330 = load i64, ptr %f_idx, align 4
-  %multmp331 = mul i64 %f_idx330, 8
-  %calltmp332 = call i64 @nitpick_libc_mem_read_i64(i64 %argv_ptr329, i64 %multmp331)
-  store i64 %calltmp332, ptr %c_s, align 4
-  %c_s333 = load i64, ptr %c_s, align 4
-  %netmp = icmp ne i64 %c_s333, 0
-  %ifcond334 = icmp ne i1 %netmp, false
-  br i1 %ifcond334, label %then335, label %ifcont338
+  %argv_ptr345 = load i64, ptr %argv_ptr, align 4
+  %f_idx346 = load i64, ptr %f_idx, align 4
+  %multmp347 = mul i64 %f_idx346, 8
+  %calltmp348 = call i64 @nitpick_libc_mem_read_i64(i64 %argv_ptr345, i64 %multmp347)
+  store i64 %calltmp348, ptr %c_s, align 4
+  %c_s349 = load i64, ptr %c_s, align 4
+  %netmp = icmp ne i64 %c_s349, 0
+  %ifcond350 = icmp ne i1 %netmp, false
+  br i1 %ifcond350, label %then351, label %ifcont354
 
-then335:                                          ; preds = %whilebody328
-  %c_s336 = load i64, ptr %c_s, align 4
-  %calltmp337 = call i32 @nitpick_libc_mem_free(i64 %c_s336)
-  br label %ifcont338
+then351:                                          ; preds = %whilebody344
+  %c_s352 = load i64, ptr %c_s, align 4
+  %cast.inttoptr353 = inttoptr i64 %c_s352 to ptr
+  call void @npk_free(ptr %cast.inttoptr353)
+  br label %ifcont354
 
-ifcont338:                                        ; preds = %then335, %whilebody328
-  %f_idx339 = load i64, ptr %f_idx, align 4
-  %addtmp340 = add i64 %f_idx339, 1
-  store i64 %addtmp340, ptr %f_idx, align 4
+ifcont354:                                        ; preds = %then351, %whilebody344
+  %f_idx355 = load i64, ptr %f_idx, align 4
+  %addtmp356 = add i64 %f_idx355, 1
+  store i64 %addtmp356, ptr %f_idx, align 4
   call void @npk_gc_safepoint()
-  br label %whilecond323
+  br label %whilecond339
 
-afterwhile341:                                    ; preds = %whilecond323
-  %initial_argv_idx342 = load i64, ptr %initial_argv_idx, align 4
-  store i64 %initial_argv_idx342, ptr %argv_idx, align 4
-  br label %ifcont343
+afterwhile357:                                    ; preds = %whilecond339
+  %initial_argv_idx358 = load i64, ptr %initial_argv_idx, align 4
+  store i64 %initial_argv_idx358, ptr %argv_idx, align 4
+  br label %ifcont359
 
-ifcont343:                                        ; preds = %afterwhile341, %afterwhile313
-  %offset344 = alloca i64, align 8
-  %argv_idx345 = load i64, ptr %argv_idx, align 4
-  %multmp346 = mul i64 %argv_idx345, 8
-  store i64 %multmp346, ptr %offset344, align 4
-  %argv_ptr347 = load i64, ptr %argv_ptr, align 4
-  %offset348 = load i64, ptr %offset344, align 4
-  %addtmp349 = add i64 %argv_ptr347, %offset348
-  %argv_ptr350 = load i64, ptr %argv_ptr, align 4
-  %offset351 = load i64, ptr %offset344, align 4
-  %addtmp352 = add i64 %argv_ptr350, %offset351
-  %cast.inttoptr353 = inttoptr i64 %addtmp352 to ptr
-  %c_str354 = load i64, ptr %c_str290, align 4
-  %cast.trunc355 = trunc i64 %c_str354 to i8
-  store i8 %cast.trunc355, ptr %cast.inttoptr353, align 1
-  %argv_idx356 = load i64, ptr %argv_idx, align 4
-  %addtmp357 = add i64 %argv_idx356, 1
-  store i64 %addtmp357, ptr %argv_idx, align 4
+ifcont359:                                        ; preds = %afterwhile357, %afterwhile329
+  %offset360 = alloca i64, align 8
+  %argv_idx361 = load i64, ptr %argv_idx, align 4
+  %multmp362 = mul i64 %argv_idx361, 8
+  store i64 %multmp362, ptr %offset360, align 4
+  %argv_ptr363 = load i64, ptr %argv_ptr, align 4
+  %offset364 = load i64, ptr %offset360, align 4
+  %addtmp365 = add i64 %argv_ptr363, %offset364
+  %argv_ptr366 = load i64, ptr %argv_ptr, align 4
+  %offset367 = load i64, ptr %offset360, align 4
+  %addtmp368 = add i64 %argv_ptr366, %offset367
+  %cast.inttoptr369 = inttoptr i64 %addtmp368 to ptr
+  %c_str370 = load i64, ptr %c_str302, align 4
+  %cast.trunc371 = trunc i64 %c_str370 to i8
+  store i8 %cast.trunc371, ptr %cast.inttoptr369, align 1
+  %argv_idx372 = load i64, ptr %argv_idx, align 4
+  %addtmp373 = add i64 %argv_idx372, 1
+  store i64 %addtmp373, ptr %argv_idx, align 4
   store i64 0, ptr %token_len, align 4
-  br label %ifcont358
+  br label %ifcont374
 
-ifcont358:                                        ; preds = %ifcont343, %then278
-  br label %ifcont383
+ifcont374:                                        ; preds = %ifcont359, %then290
+  br label %ifcont399
 
-else359:                                          ; preds = %ifcont274
-  %token_len360 = load i64, ptr %token_len, align 4
-  %getmp361 = icmp sge i64 %token_len360, 65535
-  %ifcond362 = icmp ne i1 %getmp361, false
-  br i1 %ifcond362, label %then363, label %ifcont371
+else375:                                          ; preds = %ifcont286
+  %token_len376 = load i64, ptr %token_len, align 4
+  %getmp377 = icmp sge i64 %token_len376, 65535
+  %ifcond378 = icmp ne i1 %getmp377, false
+  br i1 %ifcond378, label %then379, label %ifcont387
 
-then363:                                          ; preds = %else359
-  %calltmp364 = call { i32, ptr, i8 } @md5sum.print_err(ptr @.str.3185)
-  %token_buf365 = load i64, ptr %token_buf, align 4
-  %calltmp366 = call i32 @nitpick_libc_mem_free(i64 %token_buf365)
-  %buf367 = load i64, ptr %buf, align 4
-  %calltmp368 = call i32 @nitpick_libc_mem_free(i64 %buf367)
-  %argv_ptr369 = load i64, ptr %argv_ptr, align 4
-  %calltmp370 = call i32 @nitpick_libc_mem_free(i64 %argv_ptr369)
+then379:                                          ; preds = %else375
+  %calltmp380 = call { i32, ptr, i8 } @md5sum.print_err(ptr @.str.3185)
+  %token_buf381 = load i64, ptr %token_buf, align 4
+  %cast.inttoptr382 = inttoptr i64 %token_buf381 to ptr
+  call void @npk_free(ptr %cast.inttoptr382)
+  %buf383 = load i64, ptr %buf, align 4
+  %cast.inttoptr384 = inttoptr i64 %buf383 to ptr
+  call void @npk_free(ptr %cast.inttoptr384)
+  %argv_ptr385 = load i64, ptr %argv_ptr, align 4
+  %cast.inttoptr386 = inttoptr i64 %argv_ptr385 to ptr
+  call void @npk_free(ptr %cast.inttoptr386)
   ret { i32, ptr, i8 } { i32 1, ptr null, i8 0 }
 
-ifcont371:                                        ; preds = %else359
-  %token_buf372 = load i64, ptr %token_buf, align 4
-  %token_len373 = load i64, ptr %token_len, align 4
-  %addtmp374 = add i64 %token_buf372, %token_len373
-  %token_buf375 = load i64, ptr %token_buf, align 4
-  %token_len376 = load i64, ptr %token_len, align 4
-  %addtmp377 = add i64 %token_buf375, %token_len376
-  %cast.inttoptr378 = inttoptr i64 %addtmp377 to ptr
-  %c379 = load i64, ptr %c, align 4
-  %cast.trunc380 = trunc i64 %c379 to i8
-  store i8 %cast.trunc380, ptr %cast.inttoptr378, align 1
-  %token_len381 = load i64, ptr %token_len, align 4
-  %addtmp382 = add i64 %token_len381, 1
-  store i64 %addtmp382, ptr %token_len, align 4
-  br label %ifcont383
-
-ifcont383:                                        ; preds = %ifcont371, %ifcont358
-  %b_i384 = load i64, ptr %b_i, align 4
-  %addtmp385 = add i64 %b_i384, 1
-  store i64 %addtmp385, ptr %b_i, align 4
-  call void @npk_gc_safepoint()
-  br label %whilecond222
-
-afterwhile386:                                    ; preds = %whilecond222
-  br label %ifcont387
-
-ifcont387:                                        ; preds = %afterwhile386, %then221
-  call void @npk_gc_safepoint()
-  br label %whilecond206
-
-afterwhile388:                                    ; preds = %whilecond206
+ifcont387:                                        ; preds = %else375
+  %token_buf388 = load i64, ptr %token_buf, align 4
   %token_len389 = load i64, ptr %token_len, align 4
-  %gttmp390 = icmp sgt i64 %token_len389, 0
-  %ifcond391 = icmp ne i1 %gttmp390, false
-  br i1 %ifcond391, label %then392, label %ifcont474
-
-then392:                                          ; preds = %afterwhile388
-  %token_buf393 = load i64, ptr %token_buf, align 4
-  %token_len394 = load i64, ptr %token_len, align 4
-  %addtmp395 = add i64 %token_buf393, %token_len394
-  %token_buf396 = load i64, ptr %token_buf, align 4
+  %addtmp390 = add i64 %token_buf388, %token_len389
+  %token_buf391 = load i64, ptr %token_buf, align 4
+  %token_len392 = load i64, ptr %token_len, align 4
+  %addtmp393 = add i64 %token_buf391, %token_len392
+  %cast.inttoptr394 = inttoptr i64 %addtmp393 to ptr
+  %c395 = load i64, ptr %c, align 4
+  %cast.trunc396 = trunc i64 %c395 to i8
+  store i8 %cast.trunc396, ptr %cast.inttoptr394, align 1
   %token_len397 = load i64, ptr %token_len, align 4
-  %addtmp398 = add i64 %token_buf396, %token_len397
-  %cast.inttoptr399 = inttoptr i64 %addtmp398 to ptr
-  store i8 0, ptr %cast.inttoptr399, align 1
-  %c_str400 = alloca i64, align 8
-  %token_len401 = load i64, ptr %token_len, align 4
-  %addtmp402 = add i64 %token_len401, 1
-  %calltmp403 = call i64 @malloc(i64 %addtmp402)
-  store i64 %calltmp403, ptr %c_str400, align 4
-  %k404 = alloca i64, align 8
-  store i64 0, ptr %k404, align 4
-  br label %whilecond405
+  %addtmp398 = add i64 %token_len397, 1
+  store i64 %addtmp398, ptr %token_len, align 4
+  br label %ifcont399
 
-whilecond405:                                     ; preds = %whilebody410, %then392
-  %k406 = load i64, ptr %k404, align 4
-  %token_len407 = load i64, ptr %token_len, align 4
-  %letmp408 = icmp sle i64 %k406, %token_len407
-  %whilecond409 = icmp ne i1 %letmp408, false
-  br i1 %whilecond409, label %whilebody410, label %afterwhile424
-
-whilebody410:                                     ; preds = %whilecond405
-  %c_str411 = load i64, ptr %c_str400, align 4
-  %k412 = load i64, ptr %k404, align 4
-  %addtmp413 = add i64 %c_str411, %k412
-  %c_str414 = load i64, ptr %c_str400, align 4
-  %k415 = load i64, ptr %k404, align 4
-  %addtmp416 = add i64 %c_str414, %k415
-  %cast.inttoptr417 = inttoptr i64 %addtmp416 to ptr
-  %token_buf418 = load i64, ptr %token_buf, align 4
-  %k419 = load i64, ptr %k404, align 4
-  %calltmp420 = call i64 @npk_mem_read_byte(i64 %token_buf418, i64 %k419)
-  %cast.trunc421 = trunc i64 %calltmp420 to i8
-  store i8 %cast.trunc421, ptr %cast.inttoptr417, align 1
-  %k422 = load i64, ptr %k404, align 4
-  %addtmp423 = add i64 %k422, 1
-  store i64 %addtmp423, ptr %k404, align 4
+ifcont399:                                        ; preds = %ifcont387, %ifcont374
+  %b_i400 = load i64, ptr %b_i, align 4
+  %addtmp401 = add i64 %b_i400, 1
+  store i64 %addtmp401, ptr %b_i, align 4
   call void @npk_gc_safepoint()
-  br label %whilecond405
+  br label %whilecond234
 
-afterwhile424:                                    ; preds = %whilecond405
-  %argv_idx425 = load i64, ptr %argv_idx, align 4
-  %max_args426 = load i64, ptr %max_args, align 4
-  %subtmp427 = sub i64 %max_args426, 1
-  %getmp428 = icmp sge i64 %argv_idx425, %subtmp427
-  %ifcond429 = icmp ne i1 %getmp428, false
-  br i1 %ifcond429, label %then430, label %ifcont459
+afterwhile402:                                    ; preds = %whilecond234
+  br label %ifcont403
 
-then430:                                          ; preds = %afterwhile424
-  %cmd_ptr431 = load i64, ptr %cmd_ptr, align 4
-  %argv_ptr432 = load i64, ptr %argv_ptr, align 4
-  %argv_idx433 = load i64, ptr %argv_idx, align 4
-  %calltmp434 = call { i32, ptr, i8 } @xargs.xargs_exec_batch(i64 %cmd_ptr431, i64 %argv_ptr432, i64 %argv_idx433)
-  %f_idx435 = alloca i64, align 8
-  %initial_argv_idx436 = load i64, ptr %initial_argv_idx, align 4
-  store i64 %initial_argv_idx436, ptr %f_idx435, align 4
-  br label %whilecond437
-
-whilecond437:                                     ; preds = %ifcont454, %then430
-  %f_idx438 = load i64, ptr %f_idx435, align 4
-  %argv_idx439 = load i64, ptr %argv_idx, align 4
-  %lttmp440 = icmp slt i64 %f_idx438, %argv_idx439
-  %whilecond441 = icmp ne i1 %lttmp440, false
-  br i1 %whilecond441, label %whilebody442, label %afterwhile457
-
-whilebody442:                                     ; preds = %whilecond437
-  %c_s443 = alloca i64, align 8
-  %argv_ptr444 = load i64, ptr %argv_ptr, align 4
-  %f_idx445 = load i64, ptr %f_idx435, align 4
-  %multmp446 = mul i64 %f_idx445, 8
-  %calltmp447 = call i64 @nitpick_libc_mem_read_i64(i64 %argv_ptr444, i64 %multmp446)
-  store i64 %calltmp447, ptr %c_s443, align 4
-  %c_s448 = load i64, ptr %c_s443, align 4
-  %netmp449 = icmp ne i64 %c_s448, 0
-  %ifcond450 = icmp ne i1 %netmp449, false
-  br i1 %ifcond450, label %then451, label %ifcont454
-
-then451:                                          ; preds = %whilebody442
-  %c_s452 = load i64, ptr %c_s443, align 4
-  %calltmp453 = call i32 @nitpick_libc_mem_free(i64 %c_s452)
-  br label %ifcont454
-
-ifcont454:                                        ; preds = %then451, %whilebody442
-  %f_idx455 = load i64, ptr %f_idx435, align 4
-  %addtmp456 = add i64 %f_idx455, 1
-  store i64 %addtmp456, ptr %f_idx435, align 4
+ifcont403:                                        ; preds = %afterwhile402, %then233
   call void @npk_gc_safepoint()
-  br label %whilecond437
+  br label %whilecond218
 
-afterwhile457:                                    ; preds = %whilecond437
-  %initial_argv_idx458 = load i64, ptr %initial_argv_idx, align 4
-  store i64 %initial_argv_idx458, ptr %argv_idx, align 4
-  br label %ifcont459
+afterwhile404:                                    ; preds = %whilecond218
+  %token_len405 = load i64, ptr %token_len, align 4
+  %gttmp406 = icmp sgt i64 %token_len405, 0
+  %ifcond407 = icmp ne i1 %gttmp406, false
+  br i1 %ifcond407, label %then408, label %ifcont494
 
-ifcont459:                                        ; preds = %afterwhile457, %afterwhile424
-  %offset460 = alloca i64, align 8
-  %argv_idx461 = load i64, ptr %argv_idx, align 4
-  %multmp462 = mul i64 %argv_idx461, 8
-  store i64 %multmp462, ptr %offset460, align 4
-  %argv_ptr463 = load i64, ptr %argv_ptr, align 4
-  %offset464 = load i64, ptr %offset460, align 4
-  %addtmp465 = add i64 %argv_ptr463, %offset464
-  %argv_ptr466 = load i64, ptr %argv_ptr, align 4
-  %offset467 = load i64, ptr %offset460, align 4
-  %addtmp468 = add i64 %argv_ptr466, %offset467
-  %cast.inttoptr469 = inttoptr i64 %addtmp468 to ptr
-  %c_str470 = load i64, ptr %c_str400, align 4
-  %cast.trunc471 = trunc i64 %c_str470 to i8
-  store i8 %cast.trunc471, ptr %cast.inttoptr469, align 1
-  %argv_idx472 = load i64, ptr %argv_idx, align 4
-  %addtmp473 = add i64 %argv_idx472, 1
-  store i64 %addtmp473, ptr %argv_idx, align 4
+then408:                                          ; preds = %afterwhile404
+  %token_buf409 = load i64, ptr %token_buf, align 4
+  %token_len410 = load i64, ptr %token_len, align 4
+  %addtmp411 = add i64 %token_buf409, %token_len410
+  %token_buf412 = load i64, ptr %token_buf, align 4
+  %token_len413 = load i64, ptr %token_len, align 4
+  %addtmp414 = add i64 %token_buf412, %token_len413
+  %cast.inttoptr415 = inttoptr i64 %addtmp414 to ptr
+  store i8 0, ptr %cast.inttoptr415, align 1
+  %c_str416 = alloca i64, align 8
+  %token_len417 = load i64, ptr %token_len, align 4
+  %addtmp418 = add i64 %token_len417, 1
+  %wild_ptr419 = call ptr @npk_alloc(i64 %addtmp418)
+  %token_len420 = load i64, ptr %token_len, align 4
+  %addtmp421 = add i64 %token_len420, 1
+  %wild_ptr422 = call ptr @npk_alloc(i64 %addtmp421)
+  %cast.ptrtoint423 = ptrtoint ptr %wild_ptr422 to i64
+  store i64 %cast.ptrtoint423, ptr %c_str416, align 4
+  %k424 = alloca i64, align 8
+  store i64 0, ptr %k424, align 4
+  br label %whilecond425
+
+whilecond425:                                     ; preds = %whilebody430, %then408
+  %k426 = load i64, ptr %k424, align 4
+  %token_len427 = load i64, ptr %token_len, align 4
+  %letmp428 = icmp sle i64 %k426, %token_len427
+  %whilecond429 = icmp ne i1 %letmp428, false
+  br i1 %whilecond429, label %whilebody430, label %afterwhile444
+
+whilebody430:                                     ; preds = %whilecond425
+  %c_str431 = load i64, ptr %c_str416, align 4
+  %k432 = load i64, ptr %k424, align 4
+  %addtmp433 = add i64 %c_str431, %k432
+  %c_str434 = load i64, ptr %c_str416, align 4
+  %k435 = load i64, ptr %k424, align 4
+  %addtmp436 = add i64 %c_str434, %k435
+  %cast.inttoptr437 = inttoptr i64 %addtmp436 to ptr
+  %token_buf438 = load i64, ptr %token_buf, align 4
+  %k439 = load i64, ptr %k424, align 4
+  %calltmp440 = call i64 @npk_mem_read_byte(i64 %token_buf438, i64 %k439)
+  %cast.trunc441 = trunc i64 %calltmp440 to i8
+  store i8 %cast.trunc441, ptr %cast.inttoptr437, align 1
+  %k442 = load i64, ptr %k424, align 4
+  %addtmp443 = add i64 %k442, 1
+  store i64 %addtmp443, ptr %k424, align 4
+  call void @npk_gc_safepoint()
+  br label %whilecond425
+
+afterwhile444:                                    ; preds = %whilecond425
+  %argv_idx445 = load i64, ptr %argv_idx, align 4
+  %max_args446 = load i64, ptr %max_args, align 4
+  %subtmp447 = sub i64 %max_args446, 1
+  %getmp448 = icmp sge i64 %argv_idx445, %subtmp447
+  %ifcond449 = icmp ne i1 %getmp448, false
+  br i1 %ifcond449, label %then450, label %ifcont479
+
+then450:                                          ; preds = %afterwhile444
+  %cmd_ptr451 = load i64, ptr %cmd_ptr, align 4
+  %argv_ptr452 = load i64, ptr %argv_ptr, align 4
+  %argv_idx453 = load i64, ptr %argv_idx, align 4
+  %calltmp454 = call { i32, ptr, i8 } @xargs.xargs_exec_batch(i64 %cmd_ptr451, i64 %argv_ptr452, i64 %argv_idx453)
+  %f_idx455 = alloca i64, align 8
+  %initial_argv_idx456 = load i64, ptr %initial_argv_idx, align 4
+  store i64 %initial_argv_idx456, ptr %f_idx455, align 4
+  br label %whilecond457
+
+whilecond457:                                     ; preds = %ifcont474, %then450
+  %f_idx458 = load i64, ptr %f_idx455, align 4
+  %argv_idx459 = load i64, ptr %argv_idx, align 4
+  %lttmp460 = icmp slt i64 %f_idx458, %argv_idx459
+  %whilecond461 = icmp ne i1 %lttmp460, false
+  br i1 %whilecond461, label %whilebody462, label %afterwhile477
+
+whilebody462:                                     ; preds = %whilecond457
+  %c_s463 = alloca i64, align 8
+  %argv_ptr464 = load i64, ptr %argv_ptr, align 4
+  %f_idx465 = load i64, ptr %f_idx455, align 4
+  %multmp466 = mul i64 %f_idx465, 8
+  %calltmp467 = call i64 @nitpick_libc_mem_read_i64(i64 %argv_ptr464, i64 %multmp466)
+  store i64 %calltmp467, ptr %c_s463, align 4
+  %c_s468 = load i64, ptr %c_s463, align 4
+  %netmp469 = icmp ne i64 %c_s468, 0
+  %ifcond470 = icmp ne i1 %netmp469, false
+  br i1 %ifcond470, label %then471, label %ifcont474
+
+then471:                                          ; preds = %whilebody462
+  %c_s472 = load i64, ptr %c_s463, align 4
+  %cast.inttoptr473 = inttoptr i64 %c_s472 to ptr
+  call void @npk_free(ptr %cast.inttoptr473)
   br label %ifcont474
 
-ifcont474:                                        ; preds = %ifcont459, %afterwhile388
-  %argv_idx475 = load i64, ptr %argv_idx, align 4
-  %initial_argv_idx476 = load i64, ptr %initial_argv_idx, align 4
-  %gttmp477 = icmp sgt i64 %argv_idx475, %initial_argv_idx476
-  %ifcond478 = icmp ne i1 %gttmp477, false
-  br i1 %ifcond478, label %then479, label %ifcont484
-
-then479:                                          ; preds = %ifcont474
-  %cmd_ptr480 = load i64, ptr %cmd_ptr, align 4
-  %argv_ptr481 = load i64, ptr %argv_ptr, align 4
-  %argv_idx482 = load i64, ptr %argv_idx, align 4
-  %calltmp483 = call { i32, ptr, i8 } @xargs.xargs_exec_batch(i64 %cmd_ptr480, i64 %argv_ptr481, i64 %argv_idx482)
-  br label %ifcont484
-
-ifcont484:                                        ; preds = %then479, %ifcont474
-  %f_idx485 = alloca i64, align 8
-  store i64 0, ptr %f_idx485, align 4
-  br label %whilecond486
-
-whilecond486:                                     ; preds = %ifcont503, %ifcont484
-  %f_idx487 = load i64, ptr %f_idx485, align 4
-  %argv_idx488 = load i64, ptr %argv_idx, align 4
-  %lttmp489 = icmp slt i64 %f_idx487, %argv_idx488
-  %whilecond490 = icmp ne i1 %lttmp489, false
-  br i1 %whilecond490, label %whilebody491, label %afterwhile506
-
-whilebody491:                                     ; preds = %whilecond486
-  %c_s492 = alloca i64, align 8
-  %argv_ptr493 = load i64, ptr %argv_ptr, align 4
-  %f_idx494 = load i64, ptr %f_idx485, align 4
-  %multmp495 = mul i64 %f_idx494, 8
-  %calltmp496 = call i64 @nitpick_libc_mem_read_i64(i64 %argv_ptr493, i64 %multmp495)
-  store i64 %calltmp496, ptr %c_s492, align 4
-  %c_s497 = load i64, ptr %c_s492, align 4
-  %netmp498 = icmp ne i64 %c_s497, 0
-  %ifcond499 = icmp ne i1 %netmp498, false
-  br i1 %ifcond499, label %then500, label %ifcont503
-
-then500:                                          ; preds = %whilebody491
-  %c_s501 = load i64, ptr %c_s492, align 4
-  %calltmp502 = call i32 @nitpick_libc_mem_free(i64 %c_s501)
-  br label %ifcont503
-
-ifcont503:                                        ; preds = %then500, %whilebody491
-  %f_idx504 = load i64, ptr %f_idx485, align 4
-  %addtmp505 = add i64 %f_idx504, 1
-  store i64 %addtmp505, ptr %f_idx485, align 4
+ifcont474:                                        ; preds = %then471, %whilebody462
+  %f_idx475 = load i64, ptr %f_idx455, align 4
+  %addtmp476 = add i64 %f_idx475, 1
+  store i64 %addtmp476, ptr %f_idx455, align 4
   call void @npk_gc_safepoint()
-  br label %whilecond486
+  br label %whilecond457
 
-afterwhile506:                                    ; preds = %whilecond486
-  %token_buf507 = load i64, ptr %token_buf, align 4
-  %calltmp508 = call i32 @nitpick_libc_mem_free(i64 %token_buf507)
-  %buf509 = load i64, ptr %buf, align 4
-  %calltmp510 = call i32 @nitpick_libc_mem_free(i64 %buf509)
-  %argv_ptr511 = load i64, ptr %argv_ptr, align 4
-  %calltmp512 = call i32 @nitpick_libc_mem_free(i64 %argv_ptr511)
+afterwhile477:                                    ; preds = %whilecond457
+  %initial_argv_idx478 = load i64, ptr %initial_argv_idx, align 4
+  store i64 %initial_argv_idx478, ptr %argv_idx, align 4
+  br label %ifcont479
+
+ifcont479:                                        ; preds = %afterwhile477, %afterwhile444
+  %offset480 = alloca i64, align 8
+  %argv_idx481 = load i64, ptr %argv_idx, align 4
+  %multmp482 = mul i64 %argv_idx481, 8
+  store i64 %multmp482, ptr %offset480, align 4
+  %argv_ptr483 = load i64, ptr %argv_ptr, align 4
+  %offset484 = load i64, ptr %offset480, align 4
+  %addtmp485 = add i64 %argv_ptr483, %offset484
+  %argv_ptr486 = load i64, ptr %argv_ptr, align 4
+  %offset487 = load i64, ptr %offset480, align 4
+  %addtmp488 = add i64 %argv_ptr486, %offset487
+  %cast.inttoptr489 = inttoptr i64 %addtmp488 to ptr
+  %c_str490 = load i64, ptr %c_str416, align 4
+  %cast.trunc491 = trunc i64 %c_str490 to i8
+  store i8 %cast.trunc491, ptr %cast.inttoptr489, align 1
+  %argv_idx492 = load i64, ptr %argv_idx, align 4
+  %addtmp493 = add i64 %argv_idx492, 1
+  store i64 %addtmp493, ptr %argv_idx, align 4
+  br label %ifcont494
+
+ifcont494:                                        ; preds = %ifcont479, %afterwhile404
+  %argv_idx495 = load i64, ptr %argv_idx, align 4
+  %initial_argv_idx496 = load i64, ptr %initial_argv_idx, align 4
+  %gttmp497 = icmp sgt i64 %argv_idx495, %initial_argv_idx496
+  %ifcond498 = icmp ne i1 %gttmp497, false
+  br i1 %ifcond498, label %then499, label %ifcont504
+
+then499:                                          ; preds = %ifcont494
+  %cmd_ptr500 = load i64, ptr %cmd_ptr, align 4
+  %argv_ptr501 = load i64, ptr %argv_ptr, align 4
+  %argv_idx502 = load i64, ptr %argv_idx, align 4
+  %calltmp503 = call { i32, ptr, i8 } @xargs.xargs_exec_batch(i64 %cmd_ptr500, i64 %argv_ptr501, i64 %argv_idx502)
+  br label %ifcont504
+
+ifcont504:                                        ; preds = %then499, %ifcont494
+  %f_idx505 = alloca i64, align 8
+  store i64 0, ptr %f_idx505, align 4
+  br label %whilecond506
+
+whilecond506:                                     ; preds = %ifcont523, %ifcont504
+  %f_idx507 = load i64, ptr %f_idx505, align 4
+  %argv_idx508 = load i64, ptr %argv_idx, align 4
+  %lttmp509 = icmp slt i64 %f_idx507, %argv_idx508
+  %whilecond510 = icmp ne i1 %lttmp509, false
+  br i1 %whilecond510, label %whilebody511, label %afterwhile526
+
+whilebody511:                                     ; preds = %whilecond506
+  %c_s512 = alloca i64, align 8
+  %argv_ptr513 = load i64, ptr %argv_ptr, align 4
+  %f_idx514 = load i64, ptr %f_idx505, align 4
+  %multmp515 = mul i64 %f_idx514, 8
+  %calltmp516 = call i64 @nitpick_libc_mem_read_i64(i64 %argv_ptr513, i64 %multmp515)
+  store i64 %calltmp516, ptr %c_s512, align 4
+  %c_s517 = load i64, ptr %c_s512, align 4
+  %netmp518 = icmp ne i64 %c_s517, 0
+  %ifcond519 = icmp ne i1 %netmp518, false
+  br i1 %ifcond519, label %then520, label %ifcont523
+
+then520:                                          ; preds = %whilebody511
+  %c_s521 = load i64, ptr %c_s512, align 4
+  %cast.inttoptr522 = inttoptr i64 %c_s521 to ptr
+  call void @npk_free(ptr %cast.inttoptr522)
+  br label %ifcont523
+
+ifcont523:                                        ; preds = %then520, %whilebody511
+  %f_idx524 = load i64, ptr %f_idx505, align 4
+  %addtmp525 = add i64 %f_idx524, 1
+  store i64 %addtmp525, ptr %f_idx505, align 4
+  call void @npk_gc_safepoint()
+  br label %whilecond506
+
+afterwhile526:                                    ; preds = %whilecond506
+  %token_buf527 = load i64, ptr %token_buf, align 4
+  %cast.inttoptr528 = inttoptr i64 %token_buf527 to ptr
+  call void @npk_free(ptr %cast.inttoptr528)
+  %buf529 = load i64, ptr %buf, align 4
+  %cast.inttoptr530 = inttoptr i64 %buf529 to ptr
+  call void @npk_free(ptr %cast.inttoptr530)
+  %argv_ptr531 = load i64, ptr %argv_ptr, align 4
+  %cast.inttoptr532 = inttoptr i64 %argv_ptr531 to ptr
+  call void @npk_free(ptr %cast.inttoptr532)
   ret { i32, ptr, i8 } zeroinitializer
 }
 
@@ -71268,6 +71284,16 @@ ifcont1145:                                       ; preds = %ifcont1135
   %prog1146 = load ptr, ptr %prog, align 8
   %calltmp1147 = call { i32, ptr, i8 } @md5sum.print_err(ptr %prog1146)
   %calltmp1148 = call { i32, ptr, i8 } @md5sum.print_err(ptr @.str.3425)
+  call void @proc_exit(i32 1) #1
+  unreachable
+}
+
+define i32 @failsafe(i32 %err) {
+entry:
+  %err.addr = alloca i32, align 4
+  store i32 %err, ptr %err.addr, align 4
+  %err1 = load i32, ptr %err.addr, align 4
+  %calltmp = call { %struct.NIL, ptr, i8 } @io_utils.standard_failsafe(i32 %err1)
   call void @proc_exit(i32 1) #1
   unreachable
 }

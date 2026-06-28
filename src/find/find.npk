@@ -128,7 +128,7 @@ func:evaluate_file = int32(string:path, string:basename, FindFlags->:flags, int6
 func:walk_dir_at = int32(int64:dirfd, string:name, string:dir, FindFlags->:flags) {
     wild int8->:statbuf_alloc_alloc_ptr = alloc(4096i64);
     int64:statbuf_alloc = @cast_unchecked<int64>(statbuf_alloc_alloc_ptr);
-    defer { dalloc(statbuf_alloc_alloc_ptr); }
+    defer { dalloc(@cast_unchecked<int8->>(statbuf_alloc_alloc_ptr)); }
     int64:statbuf = @cast_unchecked<int64>(statbuf_alloc);
     
     int64:res = sys(NEWFSTATAT, dirfd, name, statbuf, 256i64) ? -1i64; // AT_SYMLINK_NOFOLLOW
@@ -156,14 +156,14 @@ func:walk_dir_at = int32(int64:dirfd, string:name, string:dir, FindFlags->:flags
     if (fd >= 0i64) {
         wild int8->:buf_alloc_alloc_ptr = alloc(32768i64);
         int64:buf_alloc = @cast_unchecked<int64>(buf_alloc_alloc_ptr);
-        defer { dalloc(buf_alloc_alloc_ptr); }
+        defer { dalloc(@cast_unchecked<int8->>(buf_alloc_alloc_ptr)); }
         int64:buf = @cast_unchecked<int64>(buf_alloc);
         
         if (buf >= 0i64) {
             int64:dirs_cap = 8192i64;
             int64:dirs_len = 0i64;
-            int64:dirs_sl = malloc(dirs_cap * 16i64); // stores name and path
-            defer { if (dirs_sl != 0i64) { drop(nitpick_libc_mem_free(dirs_sl)); } }
+            int64:dirs_sl = @cast_unchecked<int64>(alloc(dirs_cap * 16i64)); // stores name and path
+            defer { if (dirs_sl != 0i64) { drop(dalloc(@cast_unchecked<int8->>(dirs_sl))); } }
             int32:running = 1i32;
             
             while (running == 1i32) {
@@ -219,8 +219,8 @@ func:walk_dir_at = int32(int64:dirfd, string:name, string:dir, FindFlags->:flags
                 string:child_name = ptr_to_string(cname_ptr) ? "";
                 string:child_path = ptr_to_string(cpath_ptr) ? "";
                 drop(walk_dir_at(fd, child_name, child_path, flags));
-                free(@cast_unchecked<int8->>(cname_ptr));
-                free(@cast_unchecked<int8->>(cpath_ptr));
+                dalloc(@cast_unchecked<int8->>(cname_ptr));
+                dalloc(@cast_unchecked<int8->>(cpath_ptr));
                 s_idx = s_idx + 1i64;
             }
             drop(0i32);
@@ -243,8 +243,8 @@ pub func:find_main = int32(int32:argc, wild int8->:argv) {
     
     int64:roots_cap = 1024i64;
     int64:roots_len = 0i64;
-    int64:roots_sl = malloc(roots_cap * 8i64);
-    defer { if (roots_sl != 0i64) { drop(nitpick_libc_mem_free(roots_sl)); } }
+    int64:roots_sl = @cast_unchecked<int64>(alloc(roots_cap * 8i64));
+    defer { if (roots_sl != 0i64) { drop(dalloc(@cast_unchecked<int8->>(roots_sl))); } }
     
     int32:i = 0i32;
     int32:parsing_args = 0i32;
@@ -335,15 +335,15 @@ pub func:find_main = int32(int32:argc, wild int8->:argv) {
         int64:r_ptr = raw mem_read_64(roots_sl, r_idx * 8i64);
         string:root = ptr_to_string(r_ptr) ? "";
         drop(walk_dir_at(-100i64, root, root, flags));
-        free(@cast_unchecked<int8->>(r_ptr));
+        dalloc(@cast_unchecked<int8->>(r_ptr));
         r_idx = r_idx + 1i64;
     }
-    drop(nitpick_libc_mem_free(roots_sl));
+    drop(dalloc(@cast_unchecked<int8->>(roots_sl)));
     drop(0i32);
     
     int32:has_name2 = flags->has_name;
     if (has_name2 == 1i32) {
-        free(@cast_unchecked<int8->>(flags->name_ptr)); }
+        dalloc(@cast_unchecked<int8->>(flags->name_ptr)); }
     
     
     pass 0i32;
