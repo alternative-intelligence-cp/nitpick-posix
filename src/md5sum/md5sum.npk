@@ -40,22 +40,22 @@ func:md5sum_hash_file = int32(string:filename) {
         pass 1i32;
     }
 
-    int64:buf = sys!!(SYS_MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    int64:buf = sys(MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
     if (buf <= 0i64) {
         drop(Crypto.md5_free(ctx));
         pass 1i32;
     }
 
-    int64:file_size = sys!!(SYS_LSEEK, fd, 0i64, 2i64) ? -1i64; // SEEK_END
+    int64:file_size = sys(LSEEK, fd, 0i64, 2i64) ? -1i64; // SEEK_END
     int64:mmap_ptr = -1i64;
     
     if (file_size > 0i64) {
-        mmap_ptr = sys!!(SYS_MMAP, 0i64, file_size, 1i64, 2i64, fd, 0i64) ? -1i64;
+        mmap_ptr = sys(MMAP, 0i64, file_size, 1i64, 2i64, fd, 0i64) ? -1i64;
         if (mmap_ptr > 0i64) {
             drop(Crypto.md5_update(ctx, mmap_ptr, file_size));
-            drop(sys!!(SYS_MUNMAP, mmap_ptr, file_size));
+            drop(sys(MUNMAP, mmap_ptr, file_size));
         } else {
-            drop(sys!!(SYS_LSEEK, fd, 0i64, 0i64)); // Rewind
+            drop(sys(LSEEK, fd, 0i64, 0i64)); // Rewind
         }
     }
     
@@ -73,7 +73,7 @@ func:md5sum_hash_file = int32(string:filename) {
 
     string:digest = raw Crypto.md5_finalize(ctx);
     drop(Crypto.md5_free(ctx));
-    drop(sys!!(SYS_MUNMAP, buf, 65536i64));
+    drop(sys(MUNMAP, buf, 65536i64));
 
     drop(print_out(digest));
     drop(print_out("  "));

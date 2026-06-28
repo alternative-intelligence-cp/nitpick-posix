@@ -50,7 +50,7 @@ pub func:cksum_main = int32(int32:argc, wild int8->:argv) {
         } else {
             int64:crc = 0i64;
             int64:total_bytes = 0i64;
-            int64:buf = sys!!(SYS_MMAP, 0i64, 8192i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+            int64:buf = sys(MMAP, 0i64, 8192i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
             if (buf > 0i64) {
                 int64:bytes = sys(READ, fd, buf, 8192i64) ? -1i64;
                 while (bytes > 0i64) {
@@ -58,7 +58,7 @@ pub func:cksum_main = int32(int32:argc, wild int8->:argv) {
                     total_bytes = total_bytes + bytes;
                     bytes = sys(READ, fd, buf, 8192i64) ? -1i64;
                 }
-                drop(sys!!(SYS_MUNMAP, buf, 8192i64));
+                drop(sys(MUNMAP, buf, 8192i64));
             }
             
             crc = raw Crypto.cksum_finalize(crc, total_bytes);

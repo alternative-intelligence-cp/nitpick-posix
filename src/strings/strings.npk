@@ -70,7 +70,7 @@ pub func:strings_main = int32(int32:argc, wild int8->:argv) {
                 } else {
                     int64:j = 0i64;
                     while (j < n) {
-                        int64:c = npk_mem_read_byte(buf, j);
+                        int64:c = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((buf) + (j))));
                         if (raw is_printable(c) == 1i32) {
                             if (str_len < 4i64) {
                                 current_str = string_concat(current_str, string_from_char(cast_unchecked<int8>(c)));

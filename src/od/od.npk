@@ -96,7 +96,7 @@ pub func:od_main = int32(int32:argc, wild int8->:argv) {
     int64:addr = 0i64;
     int32:running = 1i32;
     
-    int64:buf = sys!!(SYS_MMAP, 0i64, 16i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
+    int64:buf = sys(MMAP, 0i64, 16i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
     if (buf < 0i64) { pass 1; }
     
     int64:out_state = raw io_buf_new(1i64);
@@ -113,7 +113,7 @@ pub func:od_main = int32(int32:argc, wild int8->:argv) {
                     running = 0i32;
                     inner_run = 0i32;
                 } else {
-                    drop(npk_mem_write_byte(buf, cast_unchecked<int64>(read_count), cast_unchecked<int64>(c)));
+                    drop((<-(@cast_unchecked<int8->>((buf) + (cast_unchecked<int64>(read_count)))) = @cast_unchecked<int8>(cast_unchecked<int64>(c))));
                     read_count = read_count + 1i32;
                 }
             }
@@ -126,7 +126,7 @@ pub func:od_main = int32(int32:argc, wild int8->:argv) {
             int32:i = 0i32;
             while (i < 16i32) {
                 if (i < read_count) {
-                    int32:b = cast_unchecked<int32>(npk_mem_read_byte(buf, cast_unchecked<int64>(i)));
+                    int32:b = cast_unchecked<int32>(@cast_unchecked<int64>(<-(@cast_unchecked<int8->>((buf) + (cast_unchecked<int64>(i))))));
                     int32:hi = b / 16i32;
                     int32:lo = b - hi * 16i32;
                     drop(io_buf_putc(out_state, raw hex_char(hi)));
@@ -144,7 +144,7 @@ pub func:od_main = int32(int32:argc, wild int8->:argv) {
             
             i = 0i32;
             while (i < read_count) {
-                int32:b = cast_unchecked<int32>(npk_mem_read_byte(buf, cast_unchecked<int64>(i)));
+                int32:b = cast_unchecked<int32>(@cast_unchecked<int64>(<-(@cast_unchecked<int8->>((buf) + (cast_unchecked<int64>(i))))));
                 if (b >= 32i32) {
                     if (b <= 126i32) {
                         drop(io_buf_putc(out_state, b));
@@ -165,6 +165,6 @@ pub func:od_main = int32(int32:argc, wild int8->:argv) {
     
     int64:fd_fp = (<- (cast_unchecked<int64->>(fp + 0i64)));
     drop(raw io_buf_free(fp));
-    drop(sys!!(SYS_MUNMAP, buf, 16i64));
+    drop(sys(MUNMAP, buf, 16i64));
     pass 0;
 };

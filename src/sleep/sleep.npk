@@ -28,7 +28,7 @@ func:mem_write_64 = int32(int64:ptr, int64:offset, int64:value) {
     int64:v = value;
     int64:i = 0i64;
     while (i < 8i64) {
-        drop(npk_mem_write_byte(ptr, offset + i, v & 255i64));
+        drop((<-(@cast_unchecked<int8->>((ptr) + (offset + i))) = @cast_unchecked<int8>(v & 255i64)));
         v = v >> 8i64;
         i = i + 1i64;
     }
@@ -54,7 +54,7 @@ pub func:sleep_main = int32(int32:argc, wild int8->:argv) {
     }
     
     // allocate 16 bytes for struct timespec
-    int64:req = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
+    int64:req = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
     if (req < 0i64) {
         pass 1;
     }
@@ -64,7 +64,7 @@ pub func:sleep_main = int32(int32:argc, wild int8->:argv) {
     
     int64:res = sys(NANOSLEEP, req, 0i64) ? -1i64;
     
-    drop(sys!!(SYS_MUNMAP, req, 4096i64));
+    drop(sys(MUNMAP, req, 4096i64));
     
     if (res < 0i64) {
         pass 1;

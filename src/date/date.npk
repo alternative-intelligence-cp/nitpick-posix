@@ -13,8 +13,8 @@ extern func:npk_mem_read_byte = int64(int64:ptr, int64:offset);
 func:ptr_to_string = string(int64:ptr) {
     string:s = "";
     int64:i = 0i64;
-    while (npk_mem_read_byte(ptr, i) != 0i64) {
-        int64:c = npk_mem_read_byte(ptr, i);
+    while (@cast_unchecked<int64>(<-(@cast_unchecked<int8->>((ptr) + (i)))) != 0i64) {
+        int64:c = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((ptr) + (i))));
         s = string_concat(s, string_from_char(cast_unchecked<int8>(c)));
         i = i + 1i64;
     }
@@ -23,7 +23,7 @@ func:ptr_to_string = string(int64:ptr) {
 
 func:print_str = int32(int64:s) {
     int64:len = 0i64;
-    while (npk_mem_read_byte(s, len) != 0i64) {
+    while (@cast_unchecked<int64>(<-(@cast_unchecked<int8->>((s) + (len)))) != 0i64) {
         len = len + 1i64;
     }
     pass cast_unchecked<int32>(sys(WRITE, 1i64, s, len) ? -1i64);
@@ -39,7 +39,7 @@ func:mem_read_64 = int64(int64:ptr, int64:offset) {
     int64:res = 0i64;
     int64:i = 0i64;
     while (i < 8i64) {
-        int64:b = npk_mem_read_byte(ptr, offset + i);
+        int64:b = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((ptr) + (offset + i))));
         res = res | (b << (i * 8i64));
         i = i + 1i64;
     }
@@ -59,7 +59,7 @@ pub func:date_main = int32(int32:argc, wild int8->:argv) {
         }
     }
 
-    int64:ts = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
+    int64:ts = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
     if (ts < 0i64) { pass 1; }
 
     int64:res = sys(CLOCK_GETTIME, 0i64, ts) ? -1i64;
@@ -67,7 +67,7 @@ pub func:date_main = int32(int32:argc, wild int8->:argv) {
 
     int64:sec = raw mem_read_64(ts, 0i64);
 
-    int64:t_buf = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    int64:t_buf = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
     <- (cast_unchecked<int64->>(t_buf + 0i64)) = sec;
     
     if (string_length(fmt) > 0i64) {
@@ -87,7 +87,7 @@ pub func:date_main = int32(int32:argc, wild int8->:argv) {
             int64:j = 0i64;
             int32:reading = 1i32;
             while (reading == 1i32) {
-                int64:c = npk_mem_read_byte(c_ptr, j);
+                int64:c = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((c_ptr) + (j))));
                 if (c == 0i64) {
                     reading = 0i32;
                 } else {
@@ -108,7 +108,7 @@ pub func:date_main = int32(int32:argc, wild int8->:argv) {
 "));
     }
 
-    drop(sys!!(SYS_MUNMAP, t_buf, 4096i64));
-    drop(sys!!(SYS_MUNMAP, ts, 4096i64));
+    drop(sys(MUNMAP, t_buf, 4096i64));
+    drop(sys(MUNMAP, ts, 4096i64));
     pass 0;
 };

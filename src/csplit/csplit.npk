@@ -111,7 +111,7 @@ pub func:csplit_main = int32(int32:argc, wild int8->:argv) {
     if (out_fd < 0i64) { drop(print_err("csplit: cannot create output\n")); pass 1; }
     
     int64:state = raw io_buf_new(fd);
-    int64:buf = sys!!(SYS_MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    int64:buf = sys(MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
     if (buf == 0i64) { pass 1; }
     
     int64:current_line = 1i64;
@@ -210,7 +210,7 @@ pub func:csplit_main = int32(int32:argc, wild int8->:argv) {
                     } else {
                         int32:do_split = 0i32;
                         if (rule_type == 1i32) {
-                            string:line_str = npk_mem_read_string(buf, read_len);
+                            string:line_str = raw read_string_native(buf, read_len);
                             if (raw regex_match(rule_regex, line_str, 0i32) == 1i32) {
                                 // Match!
                                 // Wait, offset handling is complex, for simplicity in A14, split immediately if offset <= 0.
@@ -249,7 +249,7 @@ pub func:csplit_main = int32(int32:argc, wild int8->:argv) {
     }
     
     drop(sys(CLOSE, out_fd));
-    drop(sys!!(SYS_MUNMAP, buf, 65536i64));
+    drop(sys(MUNMAP, buf, 65536i64));
     drop(io_buf_free(state));
     pass 0;
 };

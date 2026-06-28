@@ -35,8 +35,8 @@ func:print_out = int32(string:s) {
 func:ptr_to_string = string(int64:ptr) {
     string:s = "";
     int64:i = 0i64;
-    while (npk_mem_read_byte(ptr, i) != 0i64) {
-        int64:c = npk_mem_read_byte(ptr, i);
+    while (@cast_unchecked<int64>(<-(@cast_unchecked<int8->>((ptr) + (i)))) != 0i64) {
+        int64:c = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((ptr) + (i))));
         s = string_concat(s, string_from_char(cast_unchecked<int8>(c)));
         i = i + 1i64;
     }
@@ -45,24 +45,24 @@ func:ptr_to_string = string(int64:ptr) {
 
 func:str_clone = int64(int64:s) {
     int64:len = 0i64;
-    while (npk_mem_read_byte(s, len) != 0i64) {
+    while (@cast_unchecked<int64>(<-(@cast_unchecked<int8->>((s) + (len)))) != 0i64) {
         len = len + 1i64;
     }
     int64:copy = malloc(len + 1i64);
     int64:i = 0i64;
     while (i < len) {
-        npk_mem_write_byte(copy, i, npk_mem_read_byte(s, i));
+        (<-(@cast_unchecked<int8->>((copy) + (i))) = @cast_unchecked<int8>(npk_mem_read_byte(s, i)));
         i = i + 1i64;
     }
-    npk_mem_write_byte(copy, len, 0i64);
+    (<-(@cast_unchecked<int8->>((copy) + (len))) = @cast_unchecked<int8>(0i64));
     pass copy;
 };
 
 func:strcmp = int32(int64:s1, int64:s2) {
     int64:i = 0i64;
     while (1i32 == 1i32) {
-        int64:c1 = npk_mem_read_byte(s1, i);
-        int64:c2 = npk_mem_read_byte(s2, i);
+        int64:c1 = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((s1) + (i))));
+        int64:c2 = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((s2) + (i))));
         if (c1 != c2) {
             if (c1 < c2) { pass -1i32; }
             pass 1i32;
@@ -85,7 +85,7 @@ func:read_lines = int64(string:filename, int64:sl) {
     }
     defer { if (fd >= 0i64) { drop(sys(CLOSE, fd)); } }
 
-    int64:buf = sys!!(SYS_MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    int64:buf = sys(MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
     if (buf <= 0i64) { pass 0i64; }
     
     int32:running = 1i32;
@@ -99,11 +99,11 @@ func:read_lines = int64(string:filename, int64:sl) {
         } else {
             int64:pos = 0i64;
             while (pos < nread) {
-                int64:c = npk_mem_read_byte(buf, pos);
-                npk_mem_write_byte(line_buf, line_len, c);
+                int64:c = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((buf) + (pos))));
+                (<-(@cast_unchecked<int8->>((line_buf) + (line_len))) = @cast_unchecked<int8>(c));
                 line_len = line_len + 1i64;
                 if (c == 10i64) { // '\n'
-                    npk_mem_write_byte(line_buf, line_len, 0i64);
+                    (<-(@cast_unchecked<int8->>((line_buf) + (line_len))) = @cast_unchecked<int8>(0i64));
                     drop(raw alist_push(sl, raw str_clone(line_buf)));
                     line_len = 0i64;
                 }
@@ -113,12 +113,12 @@ func:read_lines = int64(string:filename, int64:sl) {
     }
 
     if (line_len > 0i64) {
-        npk_mem_write_byte(line_buf, line_len, 0i64);
+        (<-(@cast_unchecked<int8->>((line_buf) + (line_len))) = @cast_unchecked<int8>(0i64));
         drop(raw alist_push(sl, raw str_clone(line_buf)));
     }
 
     drop(nitpick_libc_mem_free(line_buf));
-    drop(sys!!(SYS_MUNMAP, buf, 65536i64));
+    drop(sys(MUNMAP, buf, 65536i64));
     pass sl;
 };
 

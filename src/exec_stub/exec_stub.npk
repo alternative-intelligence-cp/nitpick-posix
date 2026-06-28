@@ -47,10 +47,10 @@ pub func:exec_stub_main = int32(int32:argc, wild int8->:argv) {
     
     if (found == 1i32) {
         int64:cmd_cstr = strdup(cmd);
-    int64:envp_arr = sys!!(SYS_MMAP, 0i64, 8i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    int64:envp_arr = sys(MMAP, 0i64, 8i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
     drop(<- (cast_unchecked<int64->>(envp_arr + 0i64)) = 0i64);
     
-    int64:argv_arr = sys!!(SYS_MMAP, 0i64, 16i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    int64:argv_arr = sys(MMAP, 0i64, 16i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
     drop(<- (cast_unchecked<int64->>(argv_arr + 0i64)) = cmd_cstr);
     drop(<- (cast_unchecked<int64->>(argv_arr + 8i64)) = 0i64);
     int64:exec_res = sys!!(EXECVE, cmd_cstr, argv_arr, envp_arr) ? -1i64; // SYS_EXECVE

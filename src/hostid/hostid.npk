@@ -26,7 +26,7 @@ func:write_hex = int32(int64:buf, int64:val, int64:len) {
         } else {
             c = 97i64 + (nibble - 10i64);
         }
-        drop(npk_mem_write_byte(buf, i, c));
+        drop((<-(@cast_unchecked<int8->>((buf) + (i))) = @cast_unchecked<int8>(c)));
         i = i - 1i64;
     }
     pass 0i32;
@@ -37,16 +37,16 @@ func:write_hex = int32(int64:buf, int64:val, int64:len) {
 pub func:hostid_main = int32(int32:argc, wild int8->:argv) {
     int64:id = gethostid();
     
-    int64:out_buf = sys!!(SYS_MMAP, 0i64, 16i64, 3i64, 34i64, -1i64, 0i64) ? 0i64; // MMAP
+    int64:out_buf = sys(MMAP, 0i64, 16i64, 3i64, 34i64, -1i64, 0i64) ? 0i64; // MMAP
     if (out_buf <= 0i64) { pass 1; }
     
     // hostid is usually printed as 8 hex digits
     drop(write_hex(out_buf, id, 8i64));
-    drop(npk_mem_write_byte(out_buf, 8i64, 10i64)); // \n
+    drop((<-(@cast_unchecked<int8->>((out_buf) + (8i64))) = @cast_unchecked<int8>(10i64))); // \n
     
     drop(sys(WRITE, 1i64, out_buf, 9i64)); // WRITE
     
-    drop(sys!!(SYS_MUNMAP, out_buf, 16i64)); // MUNMAP
+    drop(sys(MUNMAP, out_buf, 16i64)); // MUNMAP
     
     pass 0;
 };

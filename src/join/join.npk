@@ -66,17 +66,17 @@ pub func:join_main = int32(int32:argc, wild int8->:argv) {
     
     int64:state1 = raw io_buf_new(fd1);
     int64:state2 = raw io_buf_new(fd2);
-    int64:buf1 = sys!!(SYS_MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    int64:buf1 = sys(MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
     if (buf1 <= 0i64) { pass 1; }
-    int64:buf2 = sys!!(SYS_MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    int64:buf2 = sys(MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
     if (buf2 <= 0i64) { pass 1; }
     
     int64:len1 = raw io_buf_readline(state1, cast_unchecked<uint8->>(buf1), 4096i64);
     int64:len2 = raw io_buf_readline(state2, cast_unchecked<uint8->>(buf2), 4096i64);
     
     while (len1 > 0i64 && len2 > 0i64) {
-        string:line1 = npk_mem_read_string(buf1, len1);
-        string:line2 = npk_mem_read_string(buf2, len2);
+        string:line1 = raw read_string_native(buf1, len1);
+        string:line2 = raw read_string_native(buf2, len2);
         
         string:key1 = raw split_field(line1, 1i32);
         string:key2 = raw split_field(line2, 1i32);
@@ -103,8 +103,8 @@ pub func:join_main = int32(int32:argc, wild int8->:argv) {
         }
     }
     
-    drop(sys!!(SYS_MUNMAP, buf1, 65536i64));
-    drop(sys!!(SYS_MUNMAP, buf2, 65536i64));
+    drop(sys(MUNMAP, buf1, 65536i64));
+    drop(sys(MUNMAP, buf2, 65536i64));
     drop(io_buf_free(state1));
     drop(io_buf_free(state2));
     pass 0;

@@ -34,7 +34,7 @@ func:write_num = int64(int64:out_buf, int64:out_idx, int64:num) {
     
     // special case 0
     if (n == 0i64) {
-        drop(npk_mem_write_byte(out_buf, idx, 48i64));
+        drop((<-(@cast_unchecked<int8->>((out_buf) + (idx))) = @cast_unchecked<int8>(48i64)));
         idx = idx + 1i64;
     } else {
         int64:digits = 0i64;
@@ -48,13 +48,13 @@ func:write_num = int64(int64:out_buf, int64:out_idx, int64:num) {
         temp = n;
         while (i >= 0i64) {
             int64:d = temp % 10i64;
-            drop(npk_mem_write_byte(out_buf, idx + i, 48i64 + d));
+            drop((<-(@cast_unchecked<int8->>((out_buf) + (idx + i))) = @cast_unchecked<int8>(48i64 + d)));
             temp = temp / 10i64;
             i = i - 1i64;
         }
         idx = idx + digits;
     }
-    drop(npk_mem_write_byte(out_buf, idx, 32i64)); // space
+    drop((<-(@cast_unchecked<int8->>((out_buf) + (idx))) = @cast_unchecked<int8>(32i64))); // space
     idx = idx + 1i64;
 
     pass idx;
@@ -98,10 +98,10 @@ pub func:wc_main = int32(int32:argc, wild int8->:argv) {
         }
     }
 
-    int64:buf = sys!!(SYS_MMAP, 0i64, 8192i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    int64:buf = sys(MMAP, 0i64, 8192i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
     if (buf <= 0i64) { pass 1; }
     
-    int64:out_buf = sys!!(SYS_MMAP, 0i64, 128i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    int64:out_buf = sys(MMAP, 0i64, 128i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
     if (out_buf <= 0i64) { pass 1; }
 
     int32:exit_status = 0i32;
@@ -152,16 +152,16 @@ pub func:wc_main = int32(int32:argc, wild int8->:argv) {
                 int32:in_word = 0i32;
                 
                 int32:running = 1i32;
-                int64:file_size = sys!!(SYS_LSEEK, fd, 0i64, 2i64) ? -1i64; // SEEK_END
+                int64:file_size = sys(LSEEK, fd, 0i64, 2i64) ? -1i64; // SEEK_END
                 
                 int64:mmap_ptr = -1i64;
                 if (file_size > 0i64) {
-                    mmap_ptr = sys!!(SYS_MMAP, 0i64, file_size, 1i64, 2i64, fd, 0i64) ? -1i64; // PROT_READ, MAP_PRIVATE
+                    mmap_ptr = sys(MMAP, 0i64, file_size, 1i64, 2i64, fd, 0i64) ? -1i64; // PROT_READ, MAP_PRIVATE
                     if (mmap_ptr > 0i64) {
                         file_bytes = file_size;
                         int64:in_idx = 0i64;
                         while (in_idx < file_size) {
-                            int64:c = npk_mem_read_byte(mmap_ptr, in_idx);
+                            int64:c = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((mmap_ptr) + (in_idx))));
                             if (c == 10i64) { file_lines = file_lines + 1i64; }
                             
                             int32:is_space = 0i32;
@@ -182,10 +182,10 @@ pub func:wc_main = int32(int32:argc, wild int8->:argv) {
                             }
                             in_idx = in_idx + 1i64;
                         }
-                        drop(sys!!(SYS_MUNMAP, mmap_ptr, file_size));
+                        drop(sys(MUNMAP, mmap_ptr, file_size));
                         running = 0i32;
                     } else {
-                        drop(sys!!(SYS_LSEEK, fd, 0i64, 0i64)); // Rewind to start
+                        drop(sys(LSEEK, fd, 0i64, 0i64)); // Rewind to start
                     }
                 }
                 
@@ -197,7 +197,7 @@ pub func:wc_main = int32(int32:argc, wild int8->:argv) {
                         file_bytes = file_bytes + bytes_read;
                         int64:in_idx = 0i64;
                         while (in_idx < bytes_read) {
-                            int64:c = npk_mem_read_byte(buf, in_idx);
+                            int64:c = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((buf) + (in_idx))));
                             
                             if (c == 10i64) { file_lines = file_lines + 1i64; }
                             
@@ -252,7 +252,7 @@ pub func:wc_main = int32(int32:argc, wild int8->:argv) {
         drop(print_str("total\n"));
     }
 
-    drop(sys!!(SYS_MUNMAP, out_buf, 128i64));
-    drop(sys!!(SYS_MUNMAP, buf, 8192i64));
+    drop(sys(MUNMAP, out_buf, 128i64));
+    drop(sys(MUNMAP, buf, 8192i64));
     pass exit_status;
 };

@@ -9,8 +9,8 @@ extern func:npk_mem_write_byte = int32(int64:ptr, int64:offset, int64:val);
 pub func:ptr_to_string = string(int64:ptr) {
     string:s = "";
     int64:i = 0i64;
-    while (npk_mem_read_byte(ptr, i) != 0i64) {
-        int64:c = npk_mem_read_byte(ptr, i);
+    while (@cast_unchecked<int64>(<-(@cast_unchecked<int8->>((ptr) + (i)))) != 0i64) {
+        int64:c = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((ptr) + (i))));
         s = string_concat(s, string_from_char(@cast_unchecked<int8>(c)));
         i = i + 1i64;
     }
@@ -19,16 +19,16 @@ pub func:ptr_to_string = string(int64:ptr) {
 
 pub func:str_clone = int64(int64:s) {
     int64:len = 0i64;
-    while (npk_mem_read_byte(s, len) != 0i64) {
+    while (@cast_unchecked<int64>(<-(@cast_unchecked<int8->>((s) + (len)))) != 0i64) {
         len = len + 1i64;
     }
     int64:copy = malloc(len + 1i64);
     int64:i = 0i64;
     while (i < len) {
-        drop(npk_mem_write_byte(copy, i, npk_mem_read_byte(s, i)));
+        drop((<-(@cast_unchecked<int8->>((copy) + (i))) = @cast_unchecked<int8>(npk_mem_read_byte(s, i))));
         i = i + 1i64;
     }
-    drop(npk_mem_write_byte(copy, len, 0i64));
+    drop((<-(@cast_unchecked<int8->>((copy) + (len))) = @cast_unchecked<int8>(0i64)));
     pass copy;
 };
 extern func:malloc = int64(int64:bytes);
@@ -36,4 +36,19 @@ extern func:malloc = int64(int64:bytes);
 pub func:nitpick_libc_mem_free = int32(int64:ptr) {
     // GC handles all memory. Stub to satisfy legacy callers.
     pass 0i32;
+};
+
+
+pub func:read_string_native = string(int64:ptr, int64:max_len) {
+    string:s = "";
+    int64:i = 0i64;
+    while (i < max_len) {
+        int64:c = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((ptr) + (i))));
+        if (c == 0i64) {
+            pass s;
+        }
+        s = string_concat(s, string_from_char(@cast_unchecked<int8>(c)));
+        i = i + 1i64;
+    }
+    pass s;
 };

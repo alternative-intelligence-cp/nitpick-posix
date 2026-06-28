@@ -94,7 +94,7 @@ pub func:dd_main = int32(int32:argc, wild int8->:argv) {
         }
     defer { if (fd_out >= 0i64) { drop(sys(CLOSE, fd_out)); } }
     
-    int64:buf = sys!!(SYS_MMAP, 0i64, bs, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    int64:buf = sys(MMAP, 0i64, bs, 3i64, 34i64, -1i64, 0i64) ? 0i64;
     if (buf <= 0i64) {
         drop(print_err("dd: memory error\n"));
         pass 1;
@@ -124,7 +124,7 @@ pub func:dd_main = int32(int32:argc, wild int8->:argv) {
         }
     }
     
-    drop(sys!!(SYS_MUNMAP, buf, bs));
+    drop(sys(MUNMAP, buf, bs));
     
     pass 0;
 };

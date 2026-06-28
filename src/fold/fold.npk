@@ -85,20 +85,20 @@ pub func:fold_main = int32(int32:argc, wild int8->:argv) {
         } else {
             int64:j = 0i64;
             while (j < n) {
-                int64:c = npk_mem_read_byte(buf, j);
+                int64:c = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((buf) + (j))));
                 if (c == 10i64) {
-                    npk_mem_write_byte(out_buf, out_len, 10i64);
+                    (<-(@cast_unchecked<int8->>((out_buf) + (out_len))) = @cast_unchecked<int8>(10i64));
                     out_len = out_len + 1i64;
                     if (out_len >= 65536i64) { drop(sys(WRITE, 1i64, out_buf, out_len)); out_len = 0i64; }
                     col = 0i64;
                 } else {
                     if (col >= width) {
-                        npk_mem_write_byte(out_buf, out_len, 10i64);
+                        (<-(@cast_unchecked<int8->>((out_buf) + (out_len))) = @cast_unchecked<int8>(10i64));
                         out_len = out_len + 1i64;
                         if (out_len >= 65536i64) { drop(sys(WRITE, 1i64, out_buf, out_len)); out_len = 0i64; }
                         col = 0i64;
                     }
-                    npk_mem_write_byte(out_buf, out_len, c);
+                    (<-(@cast_unchecked<int8->>((out_buf) + (out_len))) = @cast_unchecked<int8>(c));
                     out_len = out_len + 1i64;
                     if (out_len >= 65536i64) { drop(sys(WRITE, 1i64, out_buf, out_len)); out_len = 0i64; }
                     col = col + 1i64;

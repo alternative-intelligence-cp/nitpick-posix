@@ -68,7 +68,7 @@ pub func:sum_main = int32(int32:argc, wild int8->:argv) {
                 } else {
                     int64:j = 0i64;
                     while (j < n) {
-                        int64:c = npk_mem_read_byte(buf, j);
+                        int64:c = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((buf) + (j))));
                         int64:bit = checksum - (checksum / 2i64) * 2i64;
                         checksum = (checksum / 2i64) + (bit * 32768i64);
                         checksum = checksum + c;

@@ -24,7 +24,7 @@ func:print_str_safe = int32(string:s) {
 
 
 pub func:stty_main = int32(int32:argc, wild int8->:argv) {
-    int64:buf = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
+    int64:buf = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
     if (buf < 0i64) { pass 1; }
     
     // TCGETS is 0x5401
@@ -35,6 +35,6 @@ pub func:stty_main = int32(int32:argc, wild int8->:argv) {
         pass 1;
     }
     
-    drop(sys!!(SYS_MUNMAP, buf, 4096i64));
+    drop(sys(MUNMAP, buf, 4096i64));
     pass 0;
 };

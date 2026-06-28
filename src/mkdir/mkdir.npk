@@ -46,22 +46,22 @@ pub func:mkdir_main = int32(int32:argc, wild int8->:argv) {
                         // wait, actually we shouldn't fail if EEXIST. But if we use sys? it collapses to -1.
                         // Let's use sys!! instead.
                         // But wait! Nitpick sys!! is a macro. 
-                        // I will just use sys!!(MKDIR) and ignore it.
+                        // I will just use sys(MKDIR) and ignore it.
                     } else {
                         string:ch = string_substring(dir, pos, pos+1i64);
                         if (string_equals(ch, "/")) {
                             if (pos > 0i64) {
                                 string:sub = string_substring(dir, 0i64, pos);
-                                drop(sys!!(SYS_MKDIR, sub, 511i64)); // ignore errors
+                                drop(sys(MKDIR, sub, 511i64)); // ignore errors
                             }
                         }
                     }
                     pos = pos + 1i64;
                 }
                 // Finally create the last one and ignore EEXIST by doing a stat check
-                int64:statbuf = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+                int64:statbuf = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
                 int64:stat_res = sys!!(4i64, dir, statbuf) ? -1i64;
-                drop(sys!!(SYS_MUNMAP, statbuf, 4096i64));
+                drop(sys(MUNMAP, statbuf, 4096i64));
                 if (stat_res < 0i64) {
                     // Try one last time to create and fail if it really fails
                     int64:res = sys(MKDIR, dir, 511i64) ? -1i64;

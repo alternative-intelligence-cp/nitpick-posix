@@ -20,7 +20,7 @@ func:read_string = string(int64:ptr, int64:offset, int64:max_len) {
         if (i >= max_len) {
             running = 0i32;
         } else {
-            int64:b = npk_mem_read_byte(ptr, offset + i);
+            int64:b = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((ptr) + (offset + i))));
             if (b == 0i64) {
                 running = 0i32;
             } else {
@@ -35,7 +35,7 @@ func:read_string = string(int64:ptr, int64:offset, int64:max_len) {
 
 
 pub func:arch_main = int32(int32:argc, wild int8->:argv) {
-    int64:buf = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
+    int64:buf = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
     if (buf < 0i64) { pass 1; }
     
     int64:res = sys!!(UNAME, buf) ? -1i64;
@@ -47,6 +47,6 @@ pub func:arch_main = int32(int32:argc, wild int8->:argv) {
     drop(print_str_safe(arch_name));
     drop(print_str_safe("\n"));
     
-    drop(sys!!(SYS_MUNMAP, buf, 4096i64));
+    drop(sys(MUNMAP, buf, 4096i64));
     pass 0;
 };

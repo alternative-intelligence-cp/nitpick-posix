@@ -96,15 +96,15 @@ pub func:timeout_main = int32(int32:argc, wild int8->:argv) {
     } else {
         if (pid > 0i64) {
             // Parent: poll every 10ms
-            int64:ts_buf = sys!!(SYS_MMAP, 0i64, 16i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
-            drop(npk_mem_write_byte(ts_buf, 0i64, 0i64)); // 0 sec
+            int64:ts_buf = sys(MMAP, 0i64, 16i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+            drop((<-(@cast_unchecked<int8->>((ts_buf) + (0i64))) = @cast_unchecked<int8>(0i64))); // 0 sec
             // 10,000,000 ns = 10 ms = 0x00989680
-            drop(npk_mem_write_byte(ts_buf, 8i64, 128i64));
-            drop(npk_mem_write_byte(ts_buf, 9i64, 150i64));
-            drop(npk_mem_write_byte(ts_buf, 10i64, 152i64));
-            drop(npk_mem_write_byte(ts_buf, 11i64, 0i64));
+            drop((<-(@cast_unchecked<int8->>((ts_buf) + (8i64))) = @cast_unchecked<int8>(128i64)));
+            drop((<-(@cast_unchecked<int8->>((ts_buf) + (9i64))) = @cast_unchecked<int8>(150i64)));
+            drop((<-(@cast_unchecked<int8->>((ts_buf) + (10i64))) = @cast_unchecked<int8>(152i64)));
+            drop((<-(@cast_unchecked<int8->>((ts_buf) + (11i64))) = @cast_unchecked<int8>(0i64)));
             
-            int64:status_buf = sys!!(SYS_MMAP, 0i64, 8i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+            int64:status_buf = sys(MMAP, 0i64, 8i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
             
             int32:running = 1i32;
             int64:polls = 0i64;
@@ -132,8 +132,8 @@ pub func:timeout_main = int32(int32:argc, wild int8->:argv) {
                             drop(sys!!(SYS_KILL, pid, 15i64)); // SYS_KILL SIGTERM
                             drop(sys!!(SYS_WAIT4, pid, status_buf, 0i64, 0i64)); // wait4 blocking to reap
                             running = 0i32;
-                            drop(sys!!(SYS_MUNMAP, ts_buf, 16i64));
-                            drop(sys!!(SYS_MUNMAP, status_buf, 8i64));
+                            drop(sys(MUNMAP, ts_buf, 16i64));
+                            drop(sys(MUNMAP, status_buf, 8i64));
                             pass 124; // standard timeout pass code
                         } else {
                             drop(sys!!(35i64, ts_buf, 0i64)); // nanosleep
@@ -141,8 +141,8 @@ pub func:timeout_main = int32(int32:argc, wild int8->:argv) {
                     }
                 }
             }
-            drop(sys!!(SYS_MUNMAP, ts_buf, 16i64));
-            drop(sys!!(SYS_MUNMAP, status_buf, 8i64));
+            drop(sys(MUNMAP, ts_buf, 16i64));
+            drop(sys(MUNMAP, status_buf, 8i64));
             
             if (child_exited == 1i32) {
                 pass exit_status;

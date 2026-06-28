@@ -13,7 +13,7 @@ func:print_str_safe = int32(string:s) {
 
 
 pub func:id_main = int32(int32:argc, wild int8->:argv) {
-    int64:uid = sys!!(SYS_GETUID) ? -1i64;
+    int64:uid = sys(GETUID) ? -1i64;
     int64:gid = sys(GETGID) ? -1i64;
     int64:euid = sys(GETEUID) ? -1i64;
     int64:egid = sys(GETEGID) ? -1i64;

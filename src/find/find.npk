@@ -30,7 +30,7 @@ func:glob_match_impl = int32(string:p, string:t, int64:pi, int64:ti) {
     if (pi == plen && ti == tlen) { pass 1i32; }
     if (pi == plen) { pass 0i32; }
     
-    int64:pc = npk_mem_read_byte(string_to_cstr(p), pi);
+    int64:pc = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((string_to_cstr(p)) + (pi))));
     
     if (pc == 42i64) { // '*'
         if (ti < tlen) {
@@ -40,7 +40,7 @@ func:glob_match_impl = int32(string:p, string:t, int64:pi, int64:ti) {
     }
     
     if (ti == tlen) { pass 0i32; }
-    int64:tc = npk_mem_read_byte(string_to_cstr(t), ti);
+    int64:tc = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((string_to_cstr(t)) + (ti))));
     
     if (pc == 63i64 || pc == tc) { // '?'
         pass raw glob_match_impl(p, t, pi + 1i64, ti + 1i64);
@@ -68,7 +68,7 @@ func:mem_write_64 = int32(int64:ptr, int64:offset, int64:val) {
     int64:i = 0i64;
     while (i < 8i64) {
         int64:b = (val >> (i * 8i64)) & 255i64;
-        drop(npk_mem_write_byte(ptr, offset + i, cast_unchecked<int32>(b)));
+        drop((<-(@cast_unchecked<int8->>((ptr) + (offset + i))) = @cast_unchecked<int8>(cast_unchecked<int32>(b))));
         i = i + 1i64;
     }
     pass 0i32;
@@ -78,7 +78,7 @@ func:mem_read_64 = int64(int64:ptr, int64:offset) {
     int64:res = 0i64;
     int64:i = 0i64;
     while (i < 8i64) {
-        int64:b = npk_mem_read_byte(ptr, offset + i);
+        int64:b = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((ptr) + (offset + i))));
         res = res | (b << (i * 8i64));
         i = i + 1i64;
     }
@@ -89,7 +89,7 @@ func:mem_read_32 = int64(int64:ptr, int64:offset) {
     int64:res = 0i64;
     int64:i = 0i64;
     while (i < 4i64) {
-        int64:b = @cast_unchecked<int64>((npk_mem_read_byte(ptr, offset + i)));
+        int64:b = @cast_unchecked<int64>((@cast_unchecked<int64>(<-(@cast_unchecked<int8->>((ptr) + (offset + i))))));
         res = res | (b << (i * 8i64));
         i = i + 1i64;
     }
@@ -131,7 +131,7 @@ func:walk_dir_at = int32(int64:dirfd, string:name, string:dir, FindFlags->:flags
     defer { dalloc(statbuf_alloc_alloc_ptr); }
     int64:statbuf = @cast_unchecked<int64>(statbuf_alloc);
     
-    int64:res = sys!!(SYS_NEWFSTATAT, dirfd, name, statbuf, 256i64) ? -1i64; // AT_SYMLINK_NOFOLLOW
+    int64:res = sys(NEWFSTATAT, dirfd, name, statbuf, 256i64) ? -1i64; // AT_SYMLINK_NOFOLLOW
     if (res >= 0i64) {
         int64:mode = raw mem_read_32(statbuf, 24i64);
         int64:dtype = 8i64; // Default to file
@@ -140,7 +140,7 @@ func:walk_dir_at = int32(int64:dirfd, string:name, string:dir, FindFlags->:flags
         
         int64:len = string_length(dir);
         int64:idx = len - 1i64;
-        while (idx >= 0i64 && npk_mem_read_byte(string_to_cstr(dir), idx) != 47i64) { idx = idx - 1i64; }
+        while (idx >= 0i64 && @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((string_to_cstr(dir)) + (idx)))) != 47i64) { idx = idx - 1i64; }
         string:basename = dir;
         if (idx >= 0i64 && idx < len - 1i64) {
             basename = string_substring(dir, idx + 1i64, len);
@@ -152,7 +152,7 @@ func:walk_dir_at = int32(int64:dirfd, string:name, string:dir, FindFlags->:flags
         }
     }
     
-    int64:fd = sys!!(SYS_OPENAT, dirfd, name, 196608i64, 0i64) ? -1i64; // O_RDONLY | O_DIRECTORY | O_NOFOLLOW
+    int64:fd = sys(OPENAT, dirfd, name, 196608i64, 0i64) ? -1i64; // O_RDONLY | O_DIRECTORY | O_NOFOLLOW
     if (fd >= 0i64) {
         wild int8->:buf_alloc_alloc_ptr = alloc(32768i64);
         int64:buf_alloc = @cast_unchecked<int64>(buf_alloc_alloc_ptr);
@@ -167,15 +167,15 @@ func:walk_dir_at = int32(int64:dirfd, string:name, string:dir, FindFlags->:flags
             int32:running = 1i32;
             
             while (running == 1i32) {
-                int64:nread = sys!!(SYS_GETDENTS64, fd, buf, 32768i64) ? -1i64; // GETDENTS64
+                int64:nread = sys(GETDENTS64, fd, buf, 32768i64) ? -1i64; // GETDENTS64
                 if (nread <= 0i64) {
                     running = 0i32;
                 } else {
                     int64:bpos = 0i64;
                     while (bpos < nread) {
                         int64:ent_ptr = @cast_unchecked<int64>(buf) + bpos;
-                        int64:reclen = @cast_unchecked<int64>((npk_mem_read_byte(ent_ptr, 16i64))) | (@cast_unchecked<int64>((npk_mem_read_byte(ent_ptr, 17i64))) << 8i64);
-                        int64:dtype = @cast_unchecked<int64>((npk_mem_read_byte(ent_ptr, 18i64)));
+                        int64:reclen = @cast_unchecked<int64>((@cast_unchecked<int64>(<-(@cast_unchecked<int8->>((ent_ptr) + (16i64)))))) | (@cast_unchecked<int64>((@cast_unchecked<int64>(<-(@cast_unchecked<int8->>((ent_ptr) + (17i64)))))) << 8i64);
+                        int64:dtype = @cast_unchecked<int64>((@cast_unchecked<int64>(<-(@cast_unchecked<int8->>((ent_ptr) + (18i64))))));
                         int64:name_ptr = ent_ptr + 19i64;
                         
                         string:cname = raw ptr_to_string(name_ptr);
@@ -196,7 +196,7 @@ func:walk_dir_at = int32(int64:dirfd, string:name, string:dir, FindFlags->:flags
                                     pass 0i32;
                                 }
                             } else {
-                                int64:cres = sys!!(SYS_NEWFSTATAT, dir, cname, statbuf, 256i64) ? -1i64;
+                                int64:cres = sys(NEWFSTATAT, dir, cname, statbuf, 256i64) ? -1i64;
                                 if (cres >= 0i64) {
                                     if (raw evaluate_file(child_path, cname, flags, dtype, statbuf) == 1i32) {
                                         drop(print_out(child_path));
@@ -277,29 +277,29 @@ pub func:find_main = int32(int32:argc, wild int8->:argv) {
                 flags->has_size = 1i32;
                 int64:cmp = 0i64;
                 int64:start_idx = 0i64;
-                if (npk_mem_read_byte(string_to_cstr(s), 0i64) == 43i64) { cmp = 1i64; start_idx = 1i64; } // '+'
-                else if (npk_mem_read_byte(string_to_cstr(s), 0i64) == 45i64) { cmp = -1i64; start_idx = 1i64; } // '-'
+                if (@cast_unchecked<int64>(<-(@cast_unchecked<int8->>((string_to_cstr(s)) + (0i64)))) == 43i64) { cmp = 1i64; start_idx = 1i64; } // '+'
+                else if (@cast_unchecked<int64>(<-(@cast_unchecked<int8->>((string_to_cstr(s)) + (0i64)))) == 45i64) { cmp = -1i64; start_idx = 1i64; } // '-'
                 
                 int64:val = 0i64;
                 int64:len = string_length(s);
                 int64:multiplier = 1i64;
                 
-                if (npk_mem_read_byte(string_to_cstr(s), len - 1i64) == 99i64) { // 'c' bytes
+                if (@cast_unchecked<int64>(<-(@cast_unchecked<int8->>((string_to_cstr(s)) + (len - 1i64)))) == 99i64) { // 'c' bytes
                     len = len - 1i64;
-                } else if (npk_mem_read_byte(string_to_cstr(s), len - 1i64) == 107i64) { // 'k' kilobytes
+                } else if (@cast_unchecked<int64>(<-(@cast_unchecked<int8->>((string_to_cstr(s)) + (len - 1i64)))) == 107i64) { // 'k' kilobytes
                     multiplier = 1024i64;
                     len = len - 1i64;
-                } else if (npk_mem_read_byte(string_to_cstr(s), len - 1i64) == 77i64) { // 'M' megabytes
+                } else if (@cast_unchecked<int64>(<-(@cast_unchecked<int8->>((string_to_cstr(s)) + (len - 1i64)))) == 77i64) { // 'M' megabytes
                     multiplier = 1048576i64;
                     len = len - 1i64;
-                } else if (npk_mem_read_byte(string_to_cstr(s), len - 1i64) == 71i64) { // 'G' gigabytes
+                } else if (@cast_unchecked<int64>(<-(@cast_unchecked<int8->>((string_to_cstr(s)) + (len - 1i64)))) == 71i64) { // 'G' gigabytes
                     multiplier = 1073741824i64;
                     len = len - 1i64;
                 }
                 
                 int64:k = start_idx;
                 while (k < len) {
-                    val = val * 10i64 + (npk_mem_read_byte(string_to_cstr(s), k) - 48i64);
+                    val = val * 10i64 + (@cast_unchecked<int64>(<-(@cast_unchecked<int8->>((string_to_cstr(s)) + (k)))) - 48i64);
                     k = k + 1i64;
                 }
                 

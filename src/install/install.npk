@@ -54,7 +54,7 @@ pub func:install_main = int32(int32:argc, wild int8->:argv) {
     }
     defer { if (dst_fd >= 0i64) { drop(sys(CLOSE, dst_fd)); } }
 
-    int64:buf = sys!!(SYS_MMAP, 0i64, 8192i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    int64:buf = sys(MMAP, 0i64, 8192i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
     if (buf <= 0i64) {
         drop(print_err("install: internal memory allocation error\n"));
         pass 1;
@@ -81,7 +81,7 @@ pub func:install_main = int32(int32:argc, wild int8->:argv) {
         }
     }
 
-    drop(sys!!(SYS_MUNMAP, buf, 8192i64));
+    drop(sys(MUNMAP, buf, 8192i64));
     
     if (exit_status == 0i32) {
         // SYS_CHMOD = 90

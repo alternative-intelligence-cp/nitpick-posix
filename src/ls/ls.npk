@@ -15,7 +15,7 @@ extern func:npk_string_byte_at = int64(string:s, int64:offset);
 
 func:print_str = int32(int64:s) {
     int64:len = 0i64;
-    while (npk_mem_read_byte(s, len) != 0i64) {
+    while (@cast_unchecked<int64>(<-(@cast_unchecked<int8->>((s) + (len)))) != 0i64) {
         len = len + 1i64;
     }
     pass cast_unchecked<int32>(sys(WRITE, 1i64, s, len) ? -1i64);
@@ -35,24 +35,24 @@ func:print_err = int32(string:s) {
 
 func:str_clone = int64(int64:s) {
     int64:len = 0i64;
-    while (npk_mem_read_byte(s, len) != 0i64) {
+    while (@cast_unchecked<int64>(<-(@cast_unchecked<int8->>((s) + (len)))) != 0i64) {
         len = len + 1i64;
     }
     int64:copy = malloc(len + 1i64);
     int64:i = 0i64;
     while (i < len) {
-        npk_mem_write_byte(copy, i, npk_mem_read_byte(s, i));
+        (<-(@cast_unchecked<int8->>((copy) + (i))) = @cast_unchecked<int8>(npk_mem_read_byte(s, i)));
         i = i + 1i64;
     }
-    npk_mem_write_byte(copy, len, 0i64);
+    (<-(@cast_unchecked<int8->>((copy) + (len))) = @cast_unchecked<int8>(0i64));
     pass copy;
 };
 
 func:ptr_to_string = string(int64:ptr) {
     string:s = "";
     int64:i = 0i64;
-    while (npk_mem_read_byte(ptr, i) != 0i64) {
-        int64:c = npk_mem_read_byte(ptr, i);
+    while (@cast_unchecked<int64>(<-(@cast_unchecked<int8->>((ptr) + (i)))) != 0i64) {
+        int64:c = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((ptr) + (i))));
         s = string_concat(s, string_from_char(cast_unchecked<int8>(c)));
         i = i + 1i64;
     }
@@ -62,8 +62,8 @@ func:ptr_to_string = string(int64:ptr) {
 func:ptr_strcmp = int32(int64:a, int64:b) {
     int64:i = 0i64;
     while (1i32 == 1i32) {
-        int64:ca = npk_mem_read_byte(a, i);
-        int64:cb = npk_mem_read_byte(b, i);
+        int64:ca = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((a) + (i))));
+        int64:cb = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((b) + (i))));
         if (ca < cb) { pass -1i32; }
         if (ca > cb) { pass 1i32; }
         if (ca == 0i64) { pass 0i32; }
@@ -110,18 +110,18 @@ func:print_num_padded = int32(int64:n, int64:width) {
         temp = temp / 10i64;
     }
     
-    int64:buf = sys!!(SYS_MMAP, 0i64, 32i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    int64:buf = sys(MMAP, 0i64, 32i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
     int64:i = digits - 1i64;
     temp = n;
     while (i >= 0i64) {
         int64:d2 = temp % 10i64;
-        npk_mem_write_byte(buf, i, 48i64 + d2);
+        (<-(@cast_unchecked<int8->>((buf) + (i))) = @cast_unchecked<int8>(48i64 + d2));
         temp = temp / 10i64;
         i = i - 1i64;
     }
-    npk_mem_write_byte(buf, digits, 0i64);
+    (<-(@cast_unchecked<int8->>((buf) + (digits))) = @cast_unchecked<int8>(0i64));
     drop(print_str_safe(raw ptr_to_string(ok(buf))));
-    drop(sys!!(SYS_MUNMAP, buf, 32i64));
+    drop(sys(MUNMAP, buf, 32i64));
     pass 0i32;
 };
 
@@ -177,7 +177,7 @@ func:list_dir = int32(string:dir, int32:print_header, int32:recursive, int32:sho
     }
     defer { if (fd >= 0i64) { drop(sys(CLOSE, fd)); } }
 
-    int64:buf = sys!!(SYS_MMAP, 0i64, 32768i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
+    int64:buf = sys(MMAP, 0i64, 32768i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
     if (buf < 0i64) { pass 1i32; }
     
     int64:lst = raw alist(1024i64);
@@ -185,8 +185,8 @@ func:list_dir = int32(string:dir, int32:print_header, int32:recursive, int32:sho
     int64:sl_size = 0i64;
     int32:running = 1i32;
 
-    int64:statbuf = sys!!(SYS_MMAP, 0i64, 144i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
-    int64:pathbuf = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    int64:statbuf = sys(MMAP, 0i64, 144i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    int64:pathbuf = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
 
     while (running == 1i32) {
         int64:nread = sys(GETDENTS64, fd, buf, 32768i64) ? -1i64;
@@ -196,15 +196,15 @@ func:list_dir = int32(string:dir, int32:print_header, int32:recursive, int32:sho
             int64:bpos = 0i64;
             while (bpos < nread) {
                 int64:ent_ptr = buf + bpos;
-                int64:b0 = npk_mem_read_byte(ent_ptr, 16i64);
-                int64:b1 = npk_mem_read_byte(ent_ptr, 17i64);
+                int64:b0 = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((ent_ptr) + (16i64))));
+                int64:b1 = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((ent_ptr) + (17i64))));
                 int64:reclen = b0 | (b1 << 8i64);
-                int64:dtype = npk_mem_read_byte(ent_ptr, 18i64);
+                int64:dtype = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((ent_ptr) + (18i64))));
                 
                 int64:name_ptr = ent_ptr + 19i64;
-                int64:c0 = npk_mem_read_byte(name_ptr, 0i64);
-                int64:c1 = npk_mem_read_byte(name_ptr, 1i64);
-                int64:c2 = npk_mem_read_byte(name_ptr, 2i64);
+                int64:c0 = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((name_ptr) + (0i64))));
+                int64:c1 = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((name_ptr) + (1i64))));
+                int64:c2 = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((name_ptr) + (2i64))));
                 
                 int32:skip = 0i32;
                 if (c0 == 46i64) {
@@ -265,19 +265,19 @@ func:list_dir = int32(string:dir, int32:print_header, int32:recursive, int32:sho
             int64:d_len = string_length(d);
             int64:idx = 0i64;
             while (idx < d_len) {
-                npk_mem_write_byte(pathbuf, idx, npk_string_byte_at(d, idx));
+                (<-(@cast_unchecked<int8->>((pathbuf) + (idx))) = @cast_unchecked<int8>(npk_string_byte_at(d, idx)));
                 idx = idx + 1i64;
             }
             if (d_len > 0i64 && npk_string_byte_at(d, d_len - 1i64) != 47i64) {
-                npk_mem_write_byte(pathbuf, idx, 47i64);
+                (<-(@cast_unchecked<int8->>((pathbuf) + (idx))) = @cast_unchecked<int8>(47i64));
                 idx = idx + 1i64;
             }
             int64:k = 0i64;
-            while (npk_mem_read_byte(name_ptr, k) != 0i64) {
-                npk_mem_write_byte(pathbuf, idx + k, npk_mem_read_byte(name_ptr, k));
+            while (@cast_unchecked<int64>(<-(@cast_unchecked<int8->>((name_ptr) + (k)))) != 0i64) {
+                (<-(@cast_unchecked<int8->>((pathbuf) + (idx + k))) = @cast_unchecked<int8>(npk_mem_read_byte(name_ptr, k)));
                 k = k + 1i64;
             }
-            npk_mem_write_byte(pathbuf, idx + k, 0i64);
+            (<-(@cast_unchecked<int8->>((pathbuf) + (idx + k))) = @cast_unchecked<int8>(0i64));
             
             int64:res_stat = sys!!(SYS_LSTAT, pathbuf, statbuf) ? -1i64;
             if (res_stat >= 0i64) {
@@ -301,19 +301,19 @@ func:list_dir = int32(string:dir, int32:print_header, int32:recursive, int32:sho
             int64:d_len = string_length(d);
             int64:idx = 0i64;
             while (idx < d_len) {
-                npk_mem_write_byte(pathbuf, idx, npk_string_byte_at(d, idx));
+                (<-(@cast_unchecked<int8->>((pathbuf) + (idx))) = @cast_unchecked<int8>(npk_string_byte_at(d, idx)));
                 idx = idx + 1i64;
             }
             if (d_len > 0i64 && npk_string_byte_at(d, d_len - 1i64) != 47i64) {
-                npk_mem_write_byte(pathbuf, idx, 47i64);
+                (<-(@cast_unchecked<int8->>((pathbuf) + (idx))) = @cast_unchecked<int8>(47i64));
                 idx = idx + 1i64;
             }
             int64:k = 0i64;
-            while (npk_mem_read_byte(name_ptr, k) != 0i64) {
-                npk_mem_write_byte(pathbuf, idx + k, npk_mem_read_byte(name_ptr, k));
+            while (@cast_unchecked<int64>(<-(@cast_unchecked<int8->>((name_ptr) + (k)))) != 0i64) {
+                (<-(@cast_unchecked<int8->>((pathbuf) + (idx + k))) = @cast_unchecked<int8>(npk_mem_read_byte(name_ptr, k)));
                 k = k + 1i64;
             }
-            npk_mem_write_byte(pathbuf, idx + k, 0i64);
+            (<-(@cast_unchecked<int8->>((pathbuf) + (idx + k))) = @cast_unchecked<int8>(0i64));
             
             int64:res_stat = sys!!(SYS_LSTAT, pathbuf, statbuf) ? -1i64;
             if (res_stat >= 0i64) {
@@ -355,9 +355,9 @@ func:list_dir = int32(string:dir, int32:print_header, int32:recursive, int32:sho
         i = i + 1i64;
     }
 
-    drop(sys!!(SYS_MUNMAP, buf, 32768i64));
-    drop(sys!!(SYS_MUNMAP, pathbuf, 4096i64));
-    drop(sys!!(SYS_MUNMAP, statbuf, 144i64));
+    drop(sys(MUNMAP, buf, 32768i64));
+    drop(sys(MUNMAP, pathbuf, 4096i64));
+    drop(sys(MUNMAP, statbuf, 144i64));
 
     if (recursive == 1i32) {
         while (sl_size > 0i64) {

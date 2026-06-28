@@ -71,13 +71,13 @@ pub func:expand_main = int32(int32:argc, wild int8->:argv) {
         } else {
             int64:j = 0i64;
             while (j < n) {
-                int64:c = npk_mem_read_byte(buf, j);
+                int64:c = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((buf) + (j))));
                 if (c == 9i64) {
                     // tab
                     int64:spaces = 8i64 - (col - (col / 8i64) * 8i64);
                     int64:k = 0i64;
                     while (k < spaces) {
-                        npk_mem_write_byte(out_buf, out_len, 32i64);
+                        (<-(@cast_unchecked<int8->>((out_buf) + (out_len))) = @cast_unchecked<int8>(32i64));
                         out_len = out_len + 1i64;
                         if (out_len >= 65536i64) {
                             drop(sys(WRITE, 1i64, out_buf, out_len));
@@ -93,7 +93,7 @@ pub func:expand_main = int32(int32:argc, wild int8->:argv) {
                         // ignore backspace handling for simplicity
                         col = col + 1i64;
                     }
-                    npk_mem_write_byte(out_buf, out_len, c);
+                    (<-(@cast_unchecked<int8->>((out_buf) + (out_len))) = @cast_unchecked<int8>(c));
                     out_len = out_len + 1i64;
                     if (out_len >= 65536i64) {
                         drop(sys(WRITE, 1i64, out_buf, out_len));

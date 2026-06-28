@@ -15,14 +15,14 @@ use "vendor/nitpick_args.npk".*;
 
 
 func:read_int64 = int64(int64:ptr) {
-    int64:b0 = npk_mem_read_byte(ptr, 0i64);
-    int64:b1 = npk_mem_read_byte(ptr, 1i64);
-    int64:b2 = npk_mem_read_byte(ptr, 2i64);
-    int64:b3 = npk_mem_read_byte(ptr, 3i64);
-    int64:b4 = npk_mem_read_byte(ptr, 4i64);
-    int64:b5 = npk_mem_read_byte(ptr, 5i64);
-    int64:b6 = npk_mem_read_byte(ptr, 6i64);
-    int64:b7 = npk_mem_read_byte(ptr, 7i64);
+    int64:b0 = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((ptr) + (0i64))));
+    int64:b1 = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((ptr) + (1i64))));
+    int64:b2 = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((ptr) + (2i64))));
+    int64:b3 = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((ptr) + (3i64))));
+    int64:b4 = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((ptr) + (4i64))));
+    int64:b5 = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((ptr) + (5i64))));
+    int64:b6 = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((ptr) + (6i64))));
+    int64:b7 = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((ptr) + (7i64))));
     pass b0 + (b1 * 256i64) + (b2 * 65536i64) + (b3 * 16777216i64) + (b4 * 4294967296i64) + (b5 * 1099511627776i64) + (b6 * 281474976710656i64) + (b7 * 72057594037927936i64);
 };
 
@@ -125,15 +125,15 @@ func:print_cal = int32(int64:year, int64:month) {
             wild int8->:dbuf_alloc_ptr = alloc(1i64);
     int64:dbuf = @cast_unchecked<int64>(dbuf_alloc_ptr);
     defer { free(dbuf_alloc_ptr); }
-            drop(npk_mem_write_byte(dbuf, 0i64, cast_unchecked<int32>(day + 48i64)));
+            drop((<-(@cast_unchecked<int8->>((dbuf) + (0i64))) = @cast_unchecked<int8>(cast_unchecked<int32>(day + 48i64))));
             drop(sys(WRITE, 1i64, dbuf, 1i64));
             
         } else {
             wild int8->:dbuf_alloc_ptr = alloc(2i64);
     int64:dbuf = @cast_unchecked<int64>(dbuf_alloc_ptr);
             defer { free(dbuf_alloc_ptr); }
-            drop(npk_mem_write_byte(dbuf, 0i64, cast_unchecked<int32>((day / 10i64) + 48i64)));
-            drop(npk_mem_write_byte(dbuf, 1i64, cast_unchecked<int32>((day % 10i64) + 48i64)));
+            drop((<-(@cast_unchecked<int8->>((dbuf) + (0i64))) = @cast_unchecked<int8>(cast_unchecked<int32>((day / 10i64) + 48i64))));
+            drop((<-(@cast_unchecked<int8->>((dbuf) + (1i64))) = @cast_unchecked<int8>(cast_unchecked<int32>((day % 10i64) + 48i64))));
             drop(sys(WRITE, 1i64, dbuf, 2i64));
         }
         

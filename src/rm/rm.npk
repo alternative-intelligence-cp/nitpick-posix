@@ -31,24 +31,24 @@ func:print_err = int32(string:s) {
 
 func:str_clone = int64(int64:s) {
     int64:len = 0i64;
-    while (npk_mem_read_byte(s, len) != 0i64) {
+    while (@cast_unchecked<int64>(<-(@cast_unchecked<int8->>((s) + (len)))) != 0i64) {
         len = len + 1i64;
     }
     int64:copy = malloc(len + 1i64);
     int64:i = 0i64;
     while (i < len) {
-        npk_mem_write_byte(copy, i, npk_mem_read_byte(s, i));
+        (<-(@cast_unchecked<int8->>((copy) + (i))) = @cast_unchecked<int8>(npk_mem_read_byte(s, i)));
         i = i + 1i64;
     }
-    npk_mem_write_byte(copy, len, 0i64);
+    (<-(@cast_unchecked<int8->>((copy) + (len))) = @cast_unchecked<int8>(0i64));
     pass copy;
 };
 
 func:ptr_to_string = string(int64:ptr) {
     string:s = "";
     int64:i = 0i64;
-    while (npk_mem_read_byte(ptr, i) != 0i64) {
-        int64:c = npk_mem_read_byte(ptr, i);
+    while (@cast_unchecked<int64>(<-(@cast_unchecked<int8->>((ptr) + (i)))) != 0i64) {
+        int64:c = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((ptr) + (i))));
         s = string_concat(s, string_from_char(cast_unchecked<int8>(c)));
         i = i + 1i64;
     }
@@ -58,10 +58,10 @@ func:ptr_to_string = string(int64:ptr) {
 
 
 func:rm_recursive = int32(string:path, int32:recursive, int32:force) {
-    int64:statbuf = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    int64:statbuf = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
     int64:res = sys!!(6i64, path, statbuf) ? -1i64; // LSTAT first
     if (res < 0i64) {
-        drop(sys!!(SYS_MUNMAP, statbuf, 4096i64));
+        drop(sys(MUNMAP, statbuf, 4096i64));
         if (force == 1i32) { pass 0i32; }
         drop(print_err("rm: cannot remove '"));
         drop(print_err(path));
@@ -69,13 +69,13 @@ func:rm_recursive = int32(string:path, int32:recursive, int32:force) {
         pass 1i32;
     }
     
-    int64:b0 = npk_mem_read_byte(statbuf, 24i64);
-    int64:b1 = npk_mem_read_byte(statbuf, 25i64);
-    int64:b2 = npk_mem_read_byte(statbuf, 26i64);
-    int64:b3 = npk_mem_read_byte(statbuf, 27i64);
+    int64:b0 = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((statbuf) + (24i64))));
+    int64:b1 = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((statbuf) + (25i64))));
+    int64:b2 = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((statbuf) + (26i64))));
+    int64:b3 = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((statbuf) + (27i64))));
     int64:mode = b0 | (b1 << 8i64) | (b2 << 16i64) | (b3 << 24i64);
     int64:is_dir = mode & 16384i64;
-    drop(sys!!(SYS_MUNMAP, statbuf, 4096i64));
+    drop(sys(MUNMAP, statbuf, 4096i64));
 
     if (is_dir != 0i64) {
         if (recursive == 0i32) {
@@ -94,7 +94,7 @@ func:rm_recursive = int32(string:path, int32:recursive, int32:force) {
         }
         defer { if (fd >= 0i64) { drop(sys(CLOSE, fd)); } }
 
-        int64:buf = sys!!(SYS_MMAP, 0i64, 32768i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
+        int64:buf = sys(MMAP, 0i64, 32768i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
         if (buf < 0i64) {
             pass 1i32;
         }
@@ -111,14 +111,14 @@ func:rm_recursive = int32(string:path, int32:recursive, int32:force) {
                 int64:bpos = 0i64;
                 while (bpos < nread) {
                     int64:ent_ptr = buf + bpos;
-                    int64:b0_r = npk_mem_read_byte(ent_ptr, 16i64);
-                    int64:b1_r = npk_mem_read_byte(ent_ptr, 17i64);
+                    int64:b0_r = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((ent_ptr) + (16i64))));
+                    int64:b1_r = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((ent_ptr) + (17i64))));
                     int64:reclen = b0_r | (b1_r << 8i64);
                     
                     int64:name_ptr = ent_ptr + 19i64;
-                    int64:c0 = npk_mem_read_byte(name_ptr, 0i64);
-                    int64:c1 = npk_mem_read_byte(name_ptr, 1i64);
-                    int64:c2 = npk_mem_read_byte(name_ptr, 2i64);
+                    int64:c0 = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((name_ptr) + (0i64))));
+                    int64:c1 = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((name_ptr) + (1i64))));
+                    int64:c2 = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((name_ptr) + (2i64))));
                     
                     int32:skip = 0i32;
                     if (c0 == 46i64) { // '.'
@@ -139,7 +139,7 @@ func:rm_recursive = int32(string:path, int32:recursive, int32:force) {
             }
         }
         
-        drop(sys!!(SYS_MUNMAP, buf, 32768i64));
+        drop(sys(MUNMAP, buf, 32768i64));
 
         while (raw alist_size(sl) > 0i64) {
             int64:child_ptr = raw alist_pop_front(sl);
@@ -155,7 +155,7 @@ func:rm_recursive = int32(string:path, int32:recursive, int32:force) {
         /* alist sl auto-destroyed */
 
         // Delete the empty directory itself
-        int64:rmdir_res = sys!!(SYS_RMDIR, path) ? -1i64; // RMDIR
+        int64:rmdir_res = sys(RMDIR, path) ? -1i64; // RMDIR
         if (rmdir_res < 0i64) {
             drop(print_err("rm: cannot remove directory '"));
             drop(print_err(path));

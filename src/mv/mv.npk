@@ -37,8 +37,8 @@ func:basename = string(string:path) {
 func:ptr_to_string = string(int64:ptr) {
     string:s = "";
     int64:i = 0i64;
-    while (npk_mem_read_byte(ptr, i) != 0i64) {
-        int64:c = npk_mem_read_byte(ptr, i);
+    while (@cast_unchecked<int64>(<-(@cast_unchecked<int8->>((ptr) + (i)))) != 0i64) {
+        int64:c = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((ptr) + (i))));
         s = string_concat(s, string_from_char(cast_unchecked<int8>(c)));
         i = i + 1i64;
     }
@@ -74,18 +74,18 @@ pub func:mv_main = int32(int32:argc, wild int8->:argv) {
     dst = raw ptr_to_string(raw alist_get(src_list, last_idx));
     drop(raw alist_remove(src_list, last_idx));
     
-    int64:statbuf = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    int64:statbuf = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
     int64:res = sys!!(4i64, dst, statbuf) ? -1i64; // STAT
     int64:is_dir = 0i64;
     if (res >= 0i64) {
-        int64:b0 = npk_mem_read_byte(statbuf, 24i64);
-        int64:b1 = npk_mem_read_byte(statbuf, 25i64);
-        int64:b2 = npk_mem_read_byte(statbuf, 26i64);
-        int64:b3 = npk_mem_read_byte(statbuf, 27i64);
+        int64:b0 = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((statbuf) + (24i64))));
+        int64:b1 = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((statbuf) + (25i64))));
+        int64:b2 = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((statbuf) + (26i64))));
+        int64:b3 = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((statbuf) + (27i64))));
         int64:mode = b0 | (b1 << 8i64) | (b2 << 16i64) | (b3 << 24i64);
         is_dir = mode & 16384i64;
     }
-    drop(sys!!(SYS_MUNMAP, statbuf, 4096i64));
+    drop(sys(MUNMAP, statbuf, 4096i64));
     
     if (non_flags > 2i32) {
         if (is_dir == 0i64) {

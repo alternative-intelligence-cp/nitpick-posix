@@ -84,12 +84,12 @@ pub func:groups_main = int32(int32:argc, wild int8->:argv) {
                     cf_len = 0i64; field_index = 0i64;
                 } else {
                     if (c == 58i32) {
-                        if (field_index == 0i64) { u = npk_mem_read_string(cf_buf, cf_len); }
-                        if (field_index == 3i64) { g = npk_mem_read_string(cf_buf, cf_len); }
+                        if (field_index == 0i64) { u = raw read_string_native(cf_buf, cf_len); }
+                        if (field_index == 3i64) { g = raw read_string_native(cf_buf, cf_len); }
                         cf_len = 0i64; field_index = field_index + 1i64;
                     } else {
                         if (cf_len < 4096i64) {
-                            npk_mem_write_byte(cf_buf, cf_len, cast_unchecked<int64>(c));
+                            (<-(@cast_unchecked<int8->>((cf_buf) + (cf_len))) = @cast_unchecked<int8>(cast_unchecked<int64>(c)));
                             cf_len = cf_len + 1i64;
                         }
                     }
@@ -100,7 +100,7 @@ pub func:groups_main = int32(int32:argc, wild int8->:argv) {
             drop(raw io_buf_free(fp_pw));
         }
     } else {
-        int64:uid = sys!!(SYS_GETUID) ? -1i64;
+        int64:uid = sys(GETUID) ? -1i64;
         string:uid_str = string_from_int(uid);
         
         int64:fd_pw = sys(OPEN, "/etc/passwd", 0i64, 0i64) ? -1i64;
@@ -123,13 +123,13 @@ pub func:groups_main = int32(int32:argc, wild int8->:argv) {
                     cf_len = 0i64; field_index = 0i64;
                 } else {
                     if (c == 58i32) {
-                        if (field_index == 0i64) { u = npk_mem_read_string(cf_buf, cf_len); }
-                        if (field_index == 2i64) { i_uid = npk_mem_read_string(cf_buf, cf_len); }
-                        if (field_index == 3i64) { g = npk_mem_read_string(cf_buf, cf_len); }
+                        if (field_index == 0i64) { u = raw read_string_native(cf_buf, cf_len); }
+                        if (field_index == 2i64) { i_uid = raw read_string_native(cf_buf, cf_len); }
+                        if (field_index == 3i64) { g = raw read_string_native(cf_buf, cf_len); }
                         cf_len = 0i64; field_index = field_index + 1i64;
                     } else {
                         if (cf_len < 4096i64) {
-                            npk_mem_write_byte(cf_buf, cf_len, cast_unchecked<int64>(c));
+                            (<-(@cast_unchecked<int8->>((cf_buf) + (cf_len))) = @cast_unchecked<int8>(cast_unchecked<int64>(c)));
                             cf_len = cf_len + 1i64;
                         }
                     }
@@ -184,13 +184,13 @@ pub func:groups_main = int32(int32:argc, wild int8->:argv) {
             cf_len = 0i64; field_index = 0i64;
         } else {
             if (c == 58i32) {
-                if (field_index == 0i64) { g_name = npk_mem_read_string(cf_buf, cf_len); }
-                if (field_index == 2i64) { g_id = npk_mem_read_string(cf_buf, cf_len); }
-                if (field_index == 3i64) { g_list = npk_mem_read_string(cf_buf, cf_len); }
+                if (field_index == 0i64) { g_name = raw read_string_native(cf_buf, cf_len); }
+                if (field_index == 2i64) { g_id = raw read_string_native(cf_buf, cf_len); }
+                if (field_index == 3i64) { g_list = raw read_string_native(cf_buf, cf_len); }
                 cf_len = 0i64; field_index = field_index + 1i64;
             } else {
                 if (cf_len < 4096i64) {
-                    npk_mem_write_byte(cf_buf, cf_len, cast_unchecked<int64>(c));
+                    (<-(@cast_unchecked<int8->>((cf_buf) + (cf_len))) = @cast_unchecked<int8>(cast_unchecked<int64>(c)));
                     cf_len = cf_len + 1i64;
                 }
             }

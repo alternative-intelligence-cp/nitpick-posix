@@ -31,7 +31,7 @@ func:mem_write_64 = int32(int64:ptr, int64:offset, int64:value) {
     int64:v = value;
     int64:i = 0i64;
     while (i < 8i64) {
-        drop(npk_mem_write_byte(ptr, offset + i, v & 255i64));
+        drop((<-(@cast_unchecked<int8->>((ptr) + (offset + i))) = @cast_unchecked<int8>(v & 255i64)));
         v = v >> 8i64;
         i = i + 1i64;
     }
@@ -42,7 +42,7 @@ func:mem_read_64 = int64(int64:ptr, int64:offset) {
     int64:res = 0i64;
     int64:i = 0i64;
     while (i < 8i64) {
-        int64:b = npk_mem_read_byte(ptr, offset + i);
+        int64:b = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((ptr) + (offset + i))));
         res = res | (b << (i * 8i64));
         i = i + 1i64;
     }
@@ -54,7 +54,7 @@ pub func:tee_main = int32(int32:argc, wild int8->:argv) {
     int32:arg_count = raw args_count(args);
     
     // allocate Fd array / list memory
-    int64:mem = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
+    int64:mem = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
     if (mem < 0i64) { pass 1; }
     
     int64:head = mem;
@@ -96,7 +96,7 @@ pub func:tee_main = int32(int32:argc, wild int8->:argv) {
         i = i + 1i32;
     }
     
-    int64:buf = sys!!(SYS_MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
+    int64:buf = sys(MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
     if (buf < 0i64) { pass 1; }
     
     int64:nread = sys(READ, 0i64, buf, 65536i64) ? -1i64;
@@ -117,8 +117,8 @@ pub func:tee_main = int32(int32:argc, wild int8->:argv) {
         node2 = raw mem_read_64(node2, 8i64);
     }
     
-    drop(sys!!(SYS_MUNMAP, mem, 4096i64));
-    drop(sys!!(SYS_MUNMAP, buf, 65536i64));
+    drop(sys(MUNMAP, mem, 4096i64));
+    drop(sys(MUNMAP, buf, 65536i64));
     
     pass exit_status;
 };

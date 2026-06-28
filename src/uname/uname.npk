@@ -20,7 +20,7 @@ func:print_err = int32(string:s) {
 
 func:print_str = int32(int64:ptr) {
     int64:len = 0i64;
-    while (npk_mem_read_byte(ptr, len) != 0i64) {
+    while (@cast_unchecked<int64>(<-(@cast_unchecked<int8->>((ptr) + (len)))) != 0i64) {
         len = len + 1i64;
     }
     if (len > 0i64) {
@@ -71,7 +71,7 @@ pub func:uname_main = int32(int32:argc, wild int8->:argv) {
     }
     
     // allocate 390 bytes via mmap
-    int64:buf = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
+    int64:buf = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
     if (buf < 0i64) {
         drop(print_err("uname: mmap failed\n"));
         pass 1;
@@ -113,6 +113,6 @@ pub func:uname_main = int32(int32:argc, wild int8->:argv) {
     
     drop(print_str_safe("\n"));
     
-    drop(sys!!(SYS_MUNMAP, buf, 4096i64));
+    drop(sys(MUNMAP, buf, 4096i64));
     pass 0;
 };

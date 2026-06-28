@@ -71,13 +71,13 @@ pub func:unexpand_main = int32(int32:argc, wild int8->:argv) {
         } else {
             int64:j = 0i64;
             while (j < n) {
-                int64:c = npk_mem_read_byte(buf, j);
+                int64:c = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((buf) + (j))));
                 if (c == 32i64) { // space
                     pending_spaces = pending_spaces + 1i64;
                     col = col + 1i64;
                     if ((col - (col / 8i64) * 8i64) == 0i64) {
                         if (pending_spaces > 0i64) {
-                            npk_mem_write_byte(out_buf, out_len, 9i64);
+                            (<-(@cast_unchecked<int8->>((out_buf) + (out_len))) = @cast_unchecked<int8>(9i64));
                             out_len = out_len + 1i64;
                             if (out_len >= 65536i64) { drop(sys(WRITE, 1i64, out_buf, out_len)); out_len = 0i64; }
                             pending_spaces = 0i64;
@@ -85,7 +85,7 @@ pub func:unexpand_main = int32(int32:argc, wild int8->:argv) {
                     }
                 } else {
                     if (c == 9i64) { // tab
-                        npk_mem_write_byte(out_buf, out_len, 9i64);
+                        (<-(@cast_unchecked<int8->>((out_buf) + (out_len))) = @cast_unchecked<int8>(9i64));
                         out_len = out_len + 1i64;
                         if (out_len >= 65536i64) { drop(sys(WRITE, 1i64, out_buf, out_len)); out_len = 0i64; }
                         int64:add_to_col = 8i64 - (col - (col / 8i64) * 8i64);
@@ -95,13 +95,13 @@ pub func:unexpand_main = int32(int32:argc, wild int8->:argv) {
                         // flush spaces
                         int64:k = 0i64;
                         while (k < pending_spaces) {
-                            npk_mem_write_byte(out_buf, out_len, 32i64);
+                            (<-(@cast_unchecked<int8->>((out_buf) + (out_len))) = @cast_unchecked<int8>(32i64));
                             out_len = out_len + 1i64;
                             if (out_len >= 65536i64) { drop(sys(WRITE, 1i64, out_buf, out_len)); out_len = 0i64; }
                             k = k + 1i64;
                         }
                         pending_spaces = 0i64;
-                        npk_mem_write_byte(out_buf, out_len, c);
+                        (<-(@cast_unchecked<int8->>((out_buf) + (out_len))) = @cast_unchecked<int8>(c));
                         out_len = out_len + 1i64;
                         if (out_len >= 65536i64) { drop(sys(WRITE, 1i64, out_buf, out_len)); out_len = 0i64; }
                         if (c == 10i64) {
@@ -119,7 +119,7 @@ pub func:unexpand_main = int32(int32:argc, wild int8->:argv) {
     if (pending_spaces > 0i64) {
         int64:k = 0i64;
         while (k < pending_spaces) {
-            npk_mem_write_byte(out_buf, out_len, 32i64);
+            (<-(@cast_unchecked<int8->>((out_buf) + (out_len))) = @cast_unchecked<int8>(32i64));
             out_len = out_len + 1i64;
             if (out_len >= 65536i64) { drop(sys(WRITE, 1i64, out_buf, out_len)); out_len = 0i64; }
             k = k + 1i64;

@@ -57,7 +57,7 @@ pub func:b2sum_main = int32(int32:argc, wild int8->:argv) {
             }
 
             int64:total_bytes = 0i64;
-            int64:buf = sys!!(SYS_MMAP, 0i64, 8192i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+            int64:buf = sys(MMAP, 0i64, 8192i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
             if (buf > 0i64) {
                 int64:bytes = sys(READ, fd, buf, 8192i64) ? -1i64;
                 while (bytes > 0i64) {
@@ -65,7 +65,7 @@ pub func:b2sum_main = int32(int32:argc, wild int8->:argv) {
                     drop(Crypto.blake2b_update(ctx, buf, bytes));
                     bytes = sys(READ, fd, buf, 8192i64) ? -1i64;
                 }
-                drop(sys!!(SYS_MUNMAP, buf, 8192i64));
+                drop(sys(MUNMAP, buf, 8192i64));
             }
             
             string:hash = raw Crypto.blake2b_finalize(ctx);

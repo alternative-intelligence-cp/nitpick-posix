@@ -28,7 +28,7 @@ func:mem_read_64 = int64(int64:ptr, int64:offset) {
     int64:res = 0i64;
     int64:i = 0i64;
     while (i < 8i64) {
-        int64:b = npk_mem_read_byte(ptr, offset + i);
+        int64:b = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((ptr) + (offset + i))));
         res = res | (b << (i * 8i64));
         i = i + 1i64;
     }
@@ -39,7 +39,7 @@ func:mem_read_32 = int64(int64:ptr, int64:offset) {
     int64:res = 0i64;
     int64:i = 0i64;
     while (i < 4i64) {
-        int64:b = npk_mem_read_byte(ptr, offset + i);
+        int64:b = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((ptr) + (offset + i))));
         res = res | (b << (i * 8i64));
         i = i + 1i64;
     }
@@ -59,7 +59,7 @@ pub func:stat_main = int32(int32:argc, wild int8->:argv) {
     
     string:file = raw args_at(args, 1i32);
     
-    int64:buf = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
+    int64:buf = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
     if (buf < 0i64) { pass 1; }
     
     // NEWFSTATAT(dirfd, pathname, statbuf, flags)
@@ -108,6 +108,6 @@ pub func:stat_main = int32(int32:argc, wild int8->:argv) {
     drop(print_str_safe(string_from_int(st_gid)));
     drop(print_str_safe(")\n"));
     
-    drop(sys!!(SYS_MUNMAP, buf, 4096i64));
+    drop(sys(MUNMAP, buf, 4096i64));
     pass 0;
 };

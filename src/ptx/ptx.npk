@@ -53,17 +53,17 @@ pub func:ptx_main = int32(int32:argc, wild int8->:argv) {
     if (fd < 0i64) { pass 1; }
     
     int64:state = raw io_buf_new(fd);
-    int64:buf = sys!!(SYS_MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    int64:buf = sys(MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
     if (buf <= 0i64) { pass 1; }
     
     while (1 == 1) {
         int64:len = raw io_buf_readline(state, cast_unchecked<uint8->>(buf), 4096i64);
         if (len == 0i64) { break; }
-        string:line = npk_mem_read_string(buf, len);
+        string:line = raw read_string_native(buf, len);
         drop(print_permutation(line));
     }
     
-    drop(sys!!(SYS_MUNMAP, buf, 65536i64));
+    drop(sys(MUNMAP, buf, 65536i64));
     drop(io_buf_free(state));
     pass 0;
 };

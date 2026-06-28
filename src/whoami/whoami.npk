@@ -21,7 +21,7 @@ func:print_str_safe = int32(string:s) {
 
 
 pub func:whoami_main = int32(int32:argc, wild int8->:argv) {
-    int64:uid = sys!!(SYS_GETUID) ? -1i64;
+    int64:uid = sys(GETUID) ? -1i64;
     string:uid_str = string_from_int(uid);
     
     int64:fd_pw = sys(OPEN, "/etc/passwd", 0i64, 0i64) ? -1i64;
@@ -50,10 +50,10 @@ pub func:whoami_main = int32(int32:argc, wild int8->:argv) {
         } else {
             if (c == 58i32) { // colon
                 if (field_index == 0i64) {
-                    username = npk_mem_read_string(cf_buf, cf_len);
+                    username = raw read_string_native(cf_buf, cf_len);
                 } else {
                     if (field_index == 2i64) {
-                        string:current_field = npk_mem_read_string(cf_buf, cf_len);
+                        string:current_field = raw read_string_native(cf_buf, cf_len);
                         if (string_equals(current_field, uid_str)) {
                             // Match!
                             drop(print_str_safe(username));
@@ -69,7 +69,7 @@ pub func:whoami_main = int32(int32:argc, wild int8->:argv) {
                 field_index = field_index + 1i64;
             } else {
                 if (cf_len < 4096i64) {
-                    npk_mem_write_byte(cf_buf, cf_len, cast_unchecked<int64>(c));
+                    (<-(@cast_unchecked<int8->>((cf_buf) + (cf_len))) = @cast_unchecked<int8>(cast_unchecked<int64>(c)));
                     cf_len = cf_len + 1i64;
                 }
             }

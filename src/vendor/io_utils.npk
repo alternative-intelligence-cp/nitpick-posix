@@ -35,7 +35,7 @@ pub func:print_str_safe = int32(string:s) {
 
 pub func:print_str_ptr = int32(int64:ptr) {
     int64:len = 0i64;
-    while (npk_mem_read_byte(ptr, len) != 0i64) {
+    while (@cast_unchecked<int64>(<-(@cast_unchecked<int8->>((ptr) + (len)))) != 0i64) {
         len = len + 1i64;
     }
     drop(sys(WRITE, 1i64, ptr, len));

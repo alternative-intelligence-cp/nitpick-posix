@@ -72,7 +72,7 @@ pub func:head_main = int32(int32:argc, wild int8->:argv) {
         i = i + 1i32;
     }
 
-    int64:buf = sys!!(SYS_MMAP, 0i64, 8192i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    int64:buf = sys(MMAP, 0i64, 8192i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
     if (buf <= 0i64) { pass 1; }
     
     int32:exit_status = 0i32;
@@ -152,7 +152,7 @@ pub func:head_main = int32(int32:argc, wild int8->:argv) {
                             if (limit_n >= 0i64) {
                                 int64:in_idx = 0i64;
                                 while (in_idx < bytes_read) {
-                                    int64:c = npk_mem_read_byte(buf, in_idx);
+                                    int64:c = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((buf) + (in_idx))));
                                     if (c == 10i64) {
                                         rem_n = rem_n - 1i64;
                                         if (rem_n <= 0i64) {
@@ -177,6 +177,6 @@ pub func:head_main = int32(int32:argc, wild int8->:argv) {
         i = i + 1i32;
     }
     
-    drop(sys!!(SYS_MUNMAP, buf, 8192i64));
+    drop(sys(MUNMAP, buf, 8192i64));
     pass exit_status;
 };

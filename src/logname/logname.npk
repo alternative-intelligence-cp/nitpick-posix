@@ -21,7 +21,7 @@ func:print_str_safe = int32(string:s) {
 
 
 pub func:logname_main = int32(int32:argc, wild int8->:argv) {
-    int64:uid = sys!!(SYS_GETUID) ? -1i64;
+    int64:uid = sys(GETUID) ? -1i64;
     string:uid_str = string_from_int(uid);
     
     int64:fp = fopen("/etc/passwd", "r");
@@ -47,10 +47,10 @@ pub func:logname_main = int32(int32:argc, wild int8->:argv) {
         } else {
             if (c == 58i32) { // colon
                 if (field_index == 0i64) {
-                    username = npk_mem_read_string(buf, len);
+                    username = raw read_string_native(buf, len);
                 } else {
                     if (field_index == 2i64) {
-                        if (string_equals(npk_mem_read_string(buf, len), uid_str)) {
+                        if (string_equals(raw read_string_native(buf, len), uid_str)) {
                             // Match!
                             drop(print_str_safe(username));
                             drop(print_str_safe("\n"));
@@ -64,7 +64,7 @@ pub func:logname_main = int32(int32:argc, wild int8->:argv) {
                 field_index = field_index + 1i64;
             } else {
                 if (len < 65536i64) {
-                    npk_mem_write_byte(buf, len, cast_unchecked<int64>(c));
+                    (<-(@cast_unchecked<int8->>((buf) + (len))) = @cast_unchecked<int8>(cast_unchecked<int64>(c)));
                     len = len + 1i64;
                 }
             }

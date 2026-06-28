@@ -6,7 +6,7 @@ use "mem_utils.npk".*;
 
 pub func:read_file_to_string = string(string:path) {
     int64:fd = sys(OPEN, path, 0i64, 0i64) ? -1i64;
-    defer { drop(sys!!(CLOSE, fd) ? -1i64); }
+    defer { drop(sys(CLOSE, fd) ? -1i64); }
     
     int64:buf_capacity = 65536i64;
     wild int8->:buf_alloc_ptr = alloc(buf_capacity);
@@ -31,6 +31,6 @@ pub func:read_file_to_string = string(string:path) {
     }
     
     
-    string:s = npk_mem_read_string(@cast_unchecked<int64>(buf), total_read);
+    string:s = raw read_string_native(@cast_unchecked<int64>(buf), total_read);
     pass s;
 };

@@ -25,9 +25,9 @@ pub func:utmp_read_users = int64() {
         int64:bytes = sys(READ, fd, buf, 384i64) ?! -1i64;
         if (bytes < 384i64) { break; }
         
-        int16:ut_type = @cast_unchecked<int16>(npk_mem_read_byte(@cast_unchecked<int64>(buf), 0i64)); // simplified, usually 2 bytes
+        int16:ut_type = @cast_unchecked<int16>(@cast_unchecked<int64>(<-(@cast_unchecked<int8->>((@cast_unchecked<int64>(buf)) + (0i64))))); // simplified, usually 2 bytes
         // On linux, ut_type is short. let's just read first byte if little endian
-        int64:type_val = npk_mem_read_byte(@cast_unchecked<int64>(buf), 0i64);
+        int64:type_val = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((@cast_unchecked<int64>(buf)) + (0i64))));
         
         if (type_val == 7i64) { // USER_PROCESS
             // Read ut_user
@@ -35,24 +35,24 @@ pub func:utmp_read_users = int64() {
             defer { if (user_str != 0i64) { drop(nitpick_libc_mem_free(user_str)); } }
             int64:i = 0i64;
             while (i < 32i64) {
-                int64:c = npk_mem_read_byte(@cast_unchecked<int64>(buf), 44i64 + i);
+                int64:c = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((@cast_unchecked<int64>(buf)) + (44i64 + i))));
                 if (c == 0i64) { break; }
-                drop(npk_mem_write_byte(@cast_unchecked<int64>(user_str), i, c));
+                drop((<-(@cast_unchecked<int8->>((@cast_unchecked<int64>(user_str)) + (i))) = @cast_unchecked<int8>(c)));
                 i = i + 1i64;
             }
-            drop(npk_mem_write_byte(@cast_unchecked<int64>(user_str), i, 0i64));
+            drop((<-(@cast_unchecked<int8->>((@cast_unchecked<int64>(user_str)) + (i))) = @cast_unchecked<int8>(0i64)));
             
             // Read ut_line
             int64:line_str = malloc(33i64);
             defer { if (line_str != 0i64) { drop(nitpick_libc_mem_free(line_str)); } }
             int64:j = 0i64;
             while (j < 32i64) {
-                int64:c = npk_mem_read_byte(@cast_unchecked<int64>(buf), 8i64 + j);
+                int64:c = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((@cast_unchecked<int64>(buf)) + (8i64 + j))));
                 if (c == 0i64) { break; }
-                drop(npk_mem_write_byte(@cast_unchecked<int64>(line_str), j, c));
+                drop((<-(@cast_unchecked<int8->>((@cast_unchecked<int64>(line_str)) + (j))) = @cast_unchecked<int8>(c)));
                 j = j + 1i64;
             }
-            drop(npk_mem_write_byte(@cast_unchecked<int64>(line_str), j, 0i64));
+            drop((<-(@cast_unchecked<int8->>((@cast_unchecked<int64>(line_str)) + (j))) = @cast_unchecked<int8>(0i64)));
             
             // Store as a pair (we can just put them sequentially in alist or return a struct)
             // Nitpick doesn't easily let us return complex objects without structs.

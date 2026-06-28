@@ -44,13 +44,13 @@ pub func:resolve_uid = int64(string:name) {
     while (i < nread) {
         int64:line_start = i;
         while (i < nread) {
-            int64:c = npk_mem_read_byte(buf, i);
+            int64:c = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((buf) + (i))));
             if (c == 10i64) { break; }
             i = i + 1i64;
         }
         int64:line_len = i - line_start;
         if (line_len > 0i64) {
-            string:line = npk_mem_read_string(@cast_unchecked<int64>(@cast_unchecked<int64>(buf) + line_start), line_len);
+            string:line = raw read_string_native(@cast_unchecked<int64>(@cast_unchecked<int64>(buf) + line_start), line_len);
             
             // format: name:pwd:uid:gid:...
             int64:col = 0i64;
@@ -101,13 +101,13 @@ pub func:resolve_gid = int64(string:name) {
     while (i < nread) {
         int64:line_start = i;
         while (i < nread) {
-            int64:c = npk_mem_read_byte(buf, i);
+            int64:c = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((buf) + (i))));
             if (c == 10i64) { break; }
             i = i + 1i64;
         }
         int64:line_len = i - line_start;
         if (line_len > 0i64) {
-            string:line = npk_mem_read_string(@cast_unchecked<int64>(@cast_unchecked<int64>(buf) + line_start), line_len);
+            string:line = raw read_string_native(@cast_unchecked<int64>(@cast_unchecked<int64>(buf) + line_start), line_len);
             
             // format: name:pwd:gid:...
             int64:col = 0i64;

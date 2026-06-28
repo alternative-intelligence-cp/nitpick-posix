@@ -40,7 +40,7 @@ func:sha1sum_hash_file = int32(string:filename) {
         pass 1i32;
     }
 
-    int64:buf = sys!!(SYS_MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    int64:buf = sys(MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
     if (buf <= 0i64) {
         drop(Crypto.sha1_free(ctx));
         pass 1i32;
@@ -58,7 +58,7 @@ func:sha1sum_hash_file = int32(string:filename) {
 
     string:digest = raw Crypto.sha1_finalize(ctx);
     drop(Crypto.sha1_free(ctx));
-    drop(sys!!(SYS_MUNMAP, buf, 65536i64));
+    drop(sys(MUNMAP, buf, 65536i64));
 
     drop(print_out(digest));
     drop(print_out("  "));

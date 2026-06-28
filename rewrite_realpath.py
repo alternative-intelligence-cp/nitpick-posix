@@ -1,4 +1,5 @@
-// realpath.npk
+with open("src/realpath/realpath.npk", "w") as f:
+    f.write("""// realpath.npk
 
 use "../vendor/io_utils.npk".*;
 use "../vendor/mem_utils.npk".*;
@@ -32,7 +33,7 @@ pub func:realpath_main = int32(int32:argc, wild int8->:argv) {
     int32:arg_count = raw args_count(args);
     
     if (arg_count < 1i32) {
-        drop(print_err("realpath: missing operand\n"));
+        drop(print_err("realpath: missing operand\\n"));
         pass 1;
     }
     
@@ -56,7 +57,7 @@ pub func:realpath_main = int32(int32:argc, wild int8->:argv) {
             // But realpath by default errors if file doesn't exist!
             drop(print_err("realpath: '"));
             drop(print_err(path));
-            drop(print_err("': No such file or directory\n"));
+            drop(print_err("': No such file or directory\\n"));
             ret = 1i32;
             isdir = -1i32;
         }
@@ -68,7 +69,7 @@ pub func:realpath_main = int32(int32:argc, wild int8->:argv) {
             drop(sys(CHDIR, path)); // SYS_CHDIR
             string:cwd = raw get_cwd();
             drop(print_str_safe(cwd));
-            drop(print_str_safe("\n"));
+            drop(print_str_safe("\\n"));
             drop(sys(CHDIR, orig_cwd)); // restore
         } else {
             if (isdir == 0i32) {
@@ -114,12 +115,12 @@ pub func:realpath_main = int32(int32:argc, wild int8->:argv) {
                     } else {
                         drop(print_str_safe(string_concat(cwd, string_concat("/", basename))));
                     }
-                    drop(print_str_safe("\n"));
+                    drop(print_str_safe("\\n"));
                     drop(sys(CHDIR, orig_cwd));
                 } else {
                     drop(print_err("realpath: '"));
                     drop(print_err(path));
-                    drop(print_err("': Not a directory\n"));
+                    drop(print_err("': Not a directory\\n"));
                     ret = 1i32;
                 }
             }
@@ -130,3 +131,4 @@ pub func:realpath_main = int32(int32:argc, wild int8->:argv) {
     
     pass ret;
 };
+""")

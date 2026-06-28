@@ -41,10 +41,10 @@ pub func:tr_main = int32(int32:argc, wild int8->:argv) {
     if (len1 == 0i64) { pass 0; }
     if (len2 == 0i64) { pass 0; }
     
-    int64:tr_map = sys!!(SYS_MMAP, 0i64, 256i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
+    int64:tr_map = sys(MMAP, 0i64, 256i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
     int64:i_init = 0i64;
     while (i_init < 256i64) {
-        npk_mem_write_byte(tr_map, i_init, i_init);
+        (<-(@cast_unchecked<int8->>((tr_map) + (i_init))) = @cast_unchecked<int8>(i_init));
         i_init = i_init + 1i64;
     }
     
@@ -74,7 +74,7 @@ pub func:tr_main = int32(int32:argc, wild int8->:argv) {
             k2 = k2 + 1i64;
         }
         
-        npk_mem_write_byte(tr_map, v1, v2);
+        (<-(@cast_unchecked<int8->>((tr_map) + (v1))) = @cast_unchecked<int8>(v2));
         i_set = i_set + 1i64;
     }
     
@@ -92,10 +92,10 @@ pub func:tr_main = int32(int32:argc, wild int8->:argv) {
         } else {
             int64:j = 0i64;
             while (j < n) {
-                int64:c = npk_mem_read_byte(buf, j);
-                int64:mapped_c = npk_mem_read_byte(tr_map, c);
+                int64:c = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((buf) + (j))));
+                int64:mapped_c = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((tr_map) + (c))));
                 if (mapped_c != c) {
-                    drop(npk_mem_write_byte(buf, j, mapped_c));
+                    drop((<-(@cast_unchecked<int8->>((buf) + (j))) = @cast_unchecked<int8>(mapped_c)));
                 }
                 j = j + 1i64;
             }
@@ -103,7 +103,7 @@ pub func:tr_main = int32(int32:argc, wild int8->:argv) {
         }
     }
     
-    drop(sys!!(SYS_MUNMAP, tr_map, 256i64));
+    drop(sys(MUNMAP, tr_map, 256i64));
     drop(nitpick_libc_mem_free(buf));
     pass 0;
 };

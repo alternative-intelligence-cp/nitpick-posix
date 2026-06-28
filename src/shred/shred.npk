@@ -23,8 +23,8 @@ pub func:shred_main = int32(int32:argc, wild int8->:argv) {
     
     if (arg_count < 1i32) { pass 0; }
     
-    int64:stat_buf = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
-    int64:rand_buf = sys!!(SYS_MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
+    int64:stat_buf = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
+    int64:rand_buf = sys(MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
     if (stat_buf < 0i64) { pass 1; }
     if (rand_buf < 0i64) { pass 1; }
     
@@ -85,7 +85,7 @@ pub func:shred_main = int32(int32:argc, wild int8->:argv) {
         i = i + 1i32;
     }
     
-    drop(sys!!(SYS_MUNMAP, stat_buf, 4096i64));
-    drop(sys!!(SYS_MUNMAP, rand_buf, 65536i64));
+    drop(sys(MUNMAP, stat_buf, 4096i64));
+    drop(sys(MUNMAP, rand_buf, 65536i64));
     pass ret;
 };

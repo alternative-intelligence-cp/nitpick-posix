@@ -58,7 +58,7 @@ pub func:ln_main = int32(int32:argc, wild int8->:argv) {
     int64:res = 0i64;
     if (use_symlink != 0i64) {
         // SYMLINK(target, linkname)
-        res = sys!!(SYMLINK, target, linkname) ? -1i64;
+        res = sys(SYMLINK, target, linkname) ? -1i64;
     } else {
         // LINK(target, linkname)
         res = sys!!(LINK, target, linkname) ? -1i64;

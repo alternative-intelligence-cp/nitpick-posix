@@ -122,7 +122,7 @@ pub func:split_main = int32(int32:argc, wild int8->:argv) {
                     file_idx = file_idx + 1i64;
                 }
                 
-                int64:c = npk_mem_read_byte(buf, j);
+                int64:c = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((buf) + (j))));
                 if (c == 10i64) {
                     lines_in_current = lines_in_current + 1i64;
                     if (lines_in_current == lines_per_file) {

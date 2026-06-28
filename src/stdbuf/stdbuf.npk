@@ -66,18 +66,18 @@ pub func:stdbuf_main = int32(int32:argc, wild int8->:argv) {
     
     if (cmd_idx > cast_unchecked<int64>(arg_count)) { pass 0; }
     
-    int64:buf = sys!!(SYS_MMAP, 0i64, 16384i64, 3i64, 34i64, -1i64, 0i64) ?! 0i64;
+    int64:buf = sys(MMAP, 0i64, 16384i64, 3i64, 34i64, -1i64, 0i64) ?! 0i64;
     int64:fd = sys(OPEN, "/proc/self/cmdline", 0i64, 0i64) ?! -1i64;
     defer { if (fd >= 0i64) { drop(sys(CLOSE, fd)); } }
     int64:bytes = sys(READ, fd, buf, 16384i64) ?! -1i64;
     
-    int64:env_buf = sys!!(SYS_MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ?! 0i64;
+    int64:env_buf = sys(MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ?! 0i64;
     int64:env_fd = sys(OPEN, "/proc/self/environ", 0i64, 0i64) ?! -1i64;
     defer { if (env_fd >= 0i64) { drop(sys(CLOSE, env_fd)); } }
     int64:env_bytes = sys(READ, env_fd, env_buf, 65536i64) ?! -1i64;
     
-    int64:n_argv = sys!!(SYS_MMAP, 0i64, 1024i64, 3i64, 34i64, -1i64, 0i64) ?! 0i64;
-    int64:n_envp = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ?! 0i64;
+    int64:n_argv = sys(MMAP, 0i64, 1024i64, 3i64, 34i64, -1i64, 0i64) ?! 0i64;
+    int64:n_envp = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ?! 0i64;
     
     int64:arg_idx = 0i64;
     int64:argv_idx = 0i64;
@@ -85,7 +85,7 @@ pub func:stdbuf_main = int32(int32:argc, wild int8->:argv) {
     int64:current_str = buf;
     
     while (i < bytes) {
-        int64:c = npk_mem_read_byte(buf, i);
+        int64:c = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((buf) + (i))));
         if (c == 0i64) {
             if (arg_idx >= cmd_idx) {
                 drop(<- (cast_unchecked<int64->>(n_argv + argv_idx * 8i64)) = current_str);
@@ -103,10 +103,10 @@ pub func:stdbuf_main = int32(int32:argc, wild int8->:argv) {
     current_str = env_buf;
     int64:path_ptr = 0i64;
     while (i < env_bytes) {
-        int64:c = npk_mem_read_byte(env_buf, i);
+        int64:c = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((env_buf) + (i))));
         if (c == 0i64) {
             drop(<- (cast_unchecked<int64->>(n_envp + envp_idx * 8i64)) = current_str);
-            if (npk_mem_read_byte(current_str, 0i64) == 80i64 && npk_mem_read_byte(current_str, 1i64) == 65i64 && npk_mem_read_byte(current_str, 2i64) == 84i64 && npk_mem_read_byte(current_str, 3i64) == 72i64 && npk_mem_read_byte(current_str, 4i64) == 61i64) {
+            if (@cast_unchecked<int64>(<-(@cast_unchecked<int8->>((current_str) + (0i64)))) == 80i64 && @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((current_str) + (1i64)))) == 65i64 && @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((current_str) + (2i64)))) == 84i64 && @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((current_str) + (3i64)))) == 72i64 && @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((current_str) + (4i64)))) == 61i64) {
                 path_ptr = current_str + 5i64;
             }
             envp_idx = envp_idx + 1i64;
@@ -137,41 +137,41 @@ pub func:stdbuf_main = int32(int32:argc, wild int8->:argv) {
     int64:cmd_ptr = 0i64;
     if (argv_idx > 0i64) {
         cmd_ptr = (<- (cast_unchecked<int64->>(n_argv + 0i64)));
-        int64:c0 = npk_mem_read_byte(cmd_ptr, 0i64);
+        int64:c0 = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((cmd_ptr) + (0i64))));
         if (c0 == 47i64 || c0 == 46i64 || path_ptr == 0i64) {
             drop(sys!!(SYS_EXECVE, cmd_ptr, n_argv, n_envp));
         }
         
-        int64:statbuf = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ?! 0i64;
-        int64:pathbuf = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ?! 0i64;
+        int64:statbuf = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ?! 0i64;
+        int64:pathbuf = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ?! 0i64;
         
         int64:cmd_len = 0i64;
-        while (npk_mem_read_byte(cmd_ptr, cmd_len) != 0i64) { cmd_len = cmd_len + 1i64; }
+        while (@cast_unchecked<int64>(<-(@cast_unchecked<int8->>((cmd_ptr) + (cmd_len)))) != 0i64) { cmd_len = cmd_len + 1i64; }
         
         int64:p_i = 0i64;
         int32:run = 1i32;
         while (run == 1i32) {
-            int64:pc = npk_mem_read_byte(path_ptr, p_i);
+            int64:pc = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((path_ptr) + (p_i))));
             if (pc == 0i64) { run = 0i32; }
             
             int64:j = 0i64;
             int64:tok_i = p_i;
             while (1i32 == 1i32) {
-                int64:tc = npk_mem_read_byte(path_ptr, tok_i);
+                int64:tc = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((path_ptr) + (tok_i))));
                 if (tc == 0i64 || tc == 58i64) { break; }
                 <- (cast_unchecked<uint8->>(pathbuf + j)) = (cast_unchecked<uint8>(tc));
                 j = j + 1i64;
                 tok_i = tok_i + 1i64;
             }
             
-            if (j > 0i64 && npk_mem_read_byte(pathbuf, j - 1i64) != 47i64) {
+            if (j > 0i64 && @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((pathbuf) + (j - 1i64)))) != 47i64) {
                 <- (cast_unchecked<uint8->>(pathbuf + j)) = (cast_unchecked<uint8>(47i64));
                 j = j + 1i64;
             }
             
             int64:k = 0i64;
             while (k < cmd_len) {
-                <- (cast_unchecked<uint8->>(pathbuf + j)) = cast_unchecked<uint8>(npk_mem_read_byte(cmd_ptr, k));
+                <- (cast_unchecked<uint8->>(pathbuf + j)) = cast_unchecked<uint8>(@cast_unchecked<int64>(<-(@cast_unchecked<int8->>((cmd_ptr) + (k)))));
                 j = j + 1i64;
                 k = k + 1i64;
             }

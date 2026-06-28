@@ -30,21 +30,21 @@ func:print_uint = int32(int64:val) {
         drop(print_out("0"));
         pass 0i32;
     }
-    int64:buf = sys!!(SYS_MMAP, 0i64, 32i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
-    defer { drop(sys!!(SYS_MUNMAP, buf, 32i64)); }
+    int64:buf = sys(MMAP, 0i64, 32i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    defer { drop(sys(MUNMAP, buf, 32i64)); }
     int64:v = val;
     int64:i = 0i64;
     while (v > 0i64) {
-        drop(npk_mem_write_byte(buf, i, (v % 10i64) + 48i64));
+        drop((<-(@cast_unchecked<int8->>((buf) + (i))) = @cast_unchecked<int8>((v % 10i64) + 48i64)));
         v = v / 10i64;
         i = i + 1i64;
     }
     int64:j = 0i64;
     int64:k = i - 1i64;
     while (j < k) {
-        int64:tmp = npk_mem_read_byte(buf, j);
-        drop(npk_mem_write_byte(buf, j, npk_mem_read_byte(buf, k)));
-        drop(npk_mem_write_byte(buf, k, tmp));
+        int64:tmp = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((buf) + (j))));
+        drop((<-(@cast_unchecked<int8->>((buf) + (j))) = @cast_unchecked<int8>(npk_mem_read_byte(buf, k))));
+        drop((<-(@cast_unchecked<int8->>((buf) + (k))) = @cast_unchecked<int8>(tmp)));
         j = j + 1i64;
         k = k - 1i64;
     }
@@ -55,7 +55,7 @@ func:print_uint = int32(int64:val) {
 
 
 func:npk_string_from_buf = string(int64:buf, int64:offset, int64:len) {
-    drop(npk_mem_write_byte(buf, offset + len, 0i64));
+    drop((<-(@cast_unchecked<int8->>((buf) + (offset + len))) = @cast_unchecked<int8>(0i64)));
     pass string_from_cstr(buf + offset);
 };
 
@@ -71,13 +71,13 @@ func:process_file = int32(string:filename, int64:preg, GrepFlags:flags, int32:pr
     defer { if (fd > 2i64) { drop(sys(CLOSE, fd)); } }
     
     
-    int64:buf = sys!!(SYS_MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
-    defer { if (buf > 0i64) { drop(sys!!(SYS_MUNMAP, buf, 65536i64)); } }
+    int64:buf = sys(MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    defer { if (buf > 0i64) { drop(sys(MUNMAP, buf, 65536i64)); } }
     if (buf <= 0i64) { fail 1; }
     
     int64:line_cap = 65536i64;
-    int64:line_buf = sys!!(SYS_MMAP, 0i64, line_cap, 3i64, 34i64, -1i64, 0i64) ? 0i64;
-    defer { if (line_buf > 0i64) { drop(sys!!(SYS_MUNMAP, line_buf, line_cap)); } }
+    int64:line_buf = sys(MMAP, 0i64, line_cap, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    defer { if (line_buf > 0i64) { drop(sys(MUNMAP, line_buf, line_cap)); } }
     if (line_buf <= 0i64) { fail 1; }
     int64:line_len = 0i64;
     int64:line_num = 1i64;
@@ -89,11 +89,11 @@ func:process_file = int32(string:filename, int64:preg, GrepFlags:flags, int32:pr
     int64:mmap_ptr = -1i64;
     
     if (file_size > 0i64) {
-        mmap_ptr = sys!!(SYS_MMAP, 0i64, file_size, 1i64, 2i64, fd, 0i64) ? -1i64; // PROT_READ, MAP_PRIVATE
+        mmap_ptr = sys(MMAP, 0i64, file_size, 1i64, 2i64, fd, 0i64) ? -1i64; // PROT_READ, MAP_PRIVATE
         if (mmap_ptr > 0i64) {
             int64:i = 0i64;
             while (i < file_size) {
-                int64:c = npk_mem_read_byte(mmap_ptr, i);
+                int64:c = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((mmap_ptr) + (i))));
                 if (c == 10i64) {
                     string:line_str = raw npk_string_from_buf(@cast_unchecked<int64>(line_buf), 0i64, line_len);
                     int32:matched = 0i32;
@@ -132,12 +132,12 @@ func:process_file = int32(string:filename, int64:preg, GrepFlags:flags, int32:pr
                         line_buf = new_line_buf;
                         line_cap = line_cap * 2i64;
                     }
-                    drop(npk_mem_write_byte(line_buf, line_len, cast_unchecked<int32>(c)));
+                    drop((<-(@cast_unchecked<int8->>((line_buf) + (line_len))) = @cast_unchecked<int8>(cast_unchecked<int32>(c))));
                     line_len = line_len + 1i64;
                 }
                 i = i + 1i64;
             }
-            drop(sys!!(SYS_MUNMAP, mmap_ptr, file_size));
+            drop(sys(MUNMAP, mmap_ptr, file_size));
             running = 0i32;
         } else {
             drop(sys(LSEEK, fd, 0i64, 0i64)); // Rewind to start
@@ -151,7 +151,7 @@ func:process_file = int32(string:filename, int64:preg, GrepFlags:flags, int32:pr
         } else {
             int64:i = 0i64;
             while (i < bytes_read) {
-                int64:c = npk_mem_read_byte(buf, i);
+                int64:c = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((buf) + (i))));
                 if (c == 10i64) {
                     string:line_str = raw npk_string_from_buf(@cast_unchecked<int64>(line_buf), 0i64, line_len);
                     int32:matched = 0i32;
@@ -190,7 +190,7 @@ func:process_file = int32(string:filename, int64:preg, GrepFlags:flags, int32:pr
                         line_buf = new_line_buf;
                         line_cap = line_cap * 2i64;
                     }
-                    drop(npk_mem_write_byte(line_buf, line_len, cast_unchecked<int32>(c)));
+                    drop((<-(@cast_unchecked<int8->>((line_buf) + (line_len))) = @cast_unchecked<int8>(cast_unchecked<int32>(c))));
                     line_len = line_len + 1i64;
                 }
                 i = i + 1i64;
@@ -238,8 +238,8 @@ func:process_file = int32(string:filename, int64:preg, GrepFlags:flags, int32:pr
         drop(print_out("\n"));
     }
     
-    drop(sys!!(SYS_MUNMAP, buf, 65536i64)); // MUNMAP
-    drop(sys!!(SYS_MUNMAP, line_buf, line_cap));
+    drop(sys(MUNMAP, buf, 65536i64)); // MUNMAP
+    drop(sys(MUNMAP, line_buf, line_cap));
     
     
     if (has_matched_any == 1i32) { pass 0i32; }

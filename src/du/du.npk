@@ -131,7 +131,7 @@ pub func:du_main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     
-    int64:statbuf = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ?! -1i64;
+    int64:statbuf = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ?! -1i64;
     if (statbuf < 0i64) { pass 1; }
     
     int32:i = 1i32;
@@ -145,6 +145,6 @@ pub func:du_main = int32(int32:argc, wild int8->:argv) {
         }
     }
     
-    drop(sys!!(SYS_MUNMAP, statbuf, 4096i64));
+    drop(sys(MUNMAP, statbuf, 4096i64));
     pass 0;
 };

@@ -53,7 +53,7 @@ func:pr_file = int32(string:filename) {
     }
     defer { if (fd >= 0i64) { drop(sys(CLOSE, fd)); } }
 
-    int64:buf = sys!!(SYS_MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    int64:buf = sys(MMAP, 0i64, 65536i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
     if (buf <= 0i64) { pass 1i32; }
     
     int32:running = 1i32;
@@ -72,8 +72,8 @@ func:pr_file = int32(string:filename) {
         } else {
             int64:pos = 0i64;
             while (pos < nread) {
-                int64:c = npk_mem_read_byte(buf, pos);
-                npk_mem_write_byte(out_buf, out_len, c);
+                int64:c = @cast_unchecked<int64>(<-(@cast_unchecked<int8->>((buf) + (pos))));
+                (<-(@cast_unchecked<int8->>((out_buf) + (out_len))) = @cast_unchecked<int8>(c));
                 out_len = out_len + 1i64;
                 if (out_len >= 65536i64) { drop(sys(WRITE, 1i64, out_buf, out_len)); out_len = 0i64; }
                 
@@ -95,7 +95,7 @@ func:pr_file = int32(string:filename) {
     
     // padding for last page
     while (line_count < 56i64) {
-        npk_mem_write_byte(out_buf, out_len, 10i64);
+        (<-(@cast_unchecked<int8->>((out_buf) + (out_len))) = @cast_unchecked<int8>(10i64));
         out_len = out_len + 1i64;
         if (out_len >= 65536i64) { drop(sys(WRITE, 1i64, out_buf, out_len)); out_len = 0i64; }
         line_count = line_count + 1i64;
@@ -104,7 +104,7 @@ func:pr_file = int32(string:filename) {
     drop(print_out("\n\n\n\n\n")); // footer
 
     drop(nitpick_libc_mem_free(out_buf));
-    drop(sys!!(SYS_MUNMAP, buf, 65536i64));
+    drop(sys(MUNMAP, buf, 65536i64));
     pass 0i32;
 };
 

@@ -24,7 +24,7 @@ pub func:stub_main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
 
-    int64:buf = sys!!(SYS_MMAP, 0i64, 8192i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
+    int64:buf = sys(MMAP, 0i64, 8192i64, 3i64, 34i64, -1i64, 0i64) ? 0i64;
     if (buf <= 0i64) { pass 1; }
 
     int32:i = 1i32;
@@ -55,6 +55,6 @@ pub func:stub_main = int32(int32:argc, wild int8->:argv) {
         }
     }
 
-    drop(sys!!(SYS_MUNMAP, buf, 8192i64));
+    drop(sys(MUNMAP, buf, 8192i64));
     pass 0;
 };

@@ -51,7 +51,7 @@ pub func:df_main = int32(int32:argc, wild int8->:argv) {
     string:args = raw args_load_native(argc, argv);
     int32:arg_count = raw args_count(args);
     
-    int64:buf = sys!!(SYS_MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
+    int64:buf = sys(MMAP, 0i64, 4096i64, 3i64, 34i64, -1i64, 0i64) ? -1i64;
     if (buf < 0i64) { pass 1; }
     
     drop(print_str_safe("Filesystem     1K-blocks      Used Available Use% Mounted on\n"));
@@ -129,6 +129,6 @@ pub func:df_main = int32(int32:argc, wild int8->:argv) {
         }
     }
     
-    drop(sys!!(SYS_MUNMAP, buf, 4096i64));
+    drop(sys(MUNMAP, buf, 4096i64));
     pass 0;
 };

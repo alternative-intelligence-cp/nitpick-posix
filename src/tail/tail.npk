@@ -48,7 +48,7 @@ pub func:tail_main = int32(int32:argc, wild int8->:argv) {
     defer { if (fd >= 0i64) { drop(sys(CLOSE, fd)); } }
     
     // check if it's seekable
-    int64:file_size = sys!!(LSEEK, fd, 0i64, 2i64) ? -1i64; // SEEK_END
+    int64:file_size = sys(LSEEK, fd, 0i64, 2i64) ? -1i64; // SEEK_END
     if (file_size > 0i64) {
         int64:chunk_size = 65536i64;
         int64:buf = malloc(chunk_size);
@@ -67,7 +67,7 @@ pub func:tail_main = int32(int32:argc, wild int8->:argv) {
             }
             pos = pos - read_size;
             
-            drop(sys!!(SYS_LSEEK, fd, pos, 0i64)); // SEEK_SET
+            drop(sys(LSEEK, fd, pos, 0i64)); // SEEK_SET
             int64:n = sys(READ, fd, buf, read_size) ? -1i64;
             if (n <= 0i64) {
                 running = 0i32;
@@ -106,7 +106,7 @@ pub func:tail_main = int32(int32:argc, wild int8->:argv) {
             }
         }
         
-        drop(sys!!(LSEEK, fd, start_pos, 0i64));
+        drop(sys(LSEEK, fd, start_pos, 0i64));
         running = 1i32;
         while (running == 1i32) {
             int64:n = sys(READ, fd, buf, chunk_size) ? -1i64;
