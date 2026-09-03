@@ -1,0 +1,30 @@
+# Build output.
+build/
+*.o
+*.a
+*.ll
+!tests/fixtures/**/*.ll
+a.out
+*.bin
+
+# The Python harness's bytecode, and run transcripts.
+__pycache__/
+*.pyc
+*.log
+verdicts*.txt
+
+# Gitignored scratch. Never commit anything from here.
+.internal
+
+# Editor and OS residue.
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+.claude/settings.local.json
+
+# NOT ignored, deliberately:
+#   tests/fixtures/  — captured inputs and expected outputs for the conformance
+#                      suite. They are the evidence behind a conformance claim
+#                      and must be byte-stable.
