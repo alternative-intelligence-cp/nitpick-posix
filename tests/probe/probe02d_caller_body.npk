@@ -1,0 +1,49 @@
+// expect-exit: 70
+//
+// PROBE 02 — THE ONE THAT GATES THIS REPOSITORY'S SHAPE.
+//
+// PX-010 makes `failsafe` a macro, because sixty utilities each carrying a
+// hand-written exhaustive `pick` is twelve hundred lines that must stay in
+// sync, and REACH-002 checks exhaustiveness IN `failsafe`'s own body -- so a
+// shared helper function discharges nothing.
+//
+// THE QUESTION: can `#posix_failsafe(e)`, invoked in statement position inside
+// `func:failsafe`, expand to a `pick` that REACH-002 accepts as exhaustive?
+//
+// THE DOUBT, from MACRO_REFERENCE.md §4: a statement-position expansion
+// "becomes A BLOCK holding the statements". If the reach analysis looks for a
+// `pick` in failsafe's body and the macro puts one inside a nested block, the
+// analysis may not see it -- and the refusal would be REACH-001 ("no pick").
+//
+// A negative answer changes this repository's shape and the fallback is
+// 0.0.0.md P-3: a generated failsafe per utility, written by the harness.
+//
+// Paired with 02b, which is the same program with the pick written by hand.
+mod:probe02d_caller_body;
+
+// The shared arms, in one place, for every utility in the set.
+macro:posix_failsafe = () {
+    pick (#caller(e)) {
+        (DivByZero)        { exit 70i32; },
+        (DivOverflow)      { exit 70i32; },
+        (OutOfBounds)      { exit 70i32; },
+        (IntOverflow)      { exit 70i32; },
+        (Unreachable)      { exit 70i32; },
+        (HeapOom)          { exit 70i32; },
+        (HeapBadRequest)   { exit 70i32; },
+        (WildLeak)         { exit 70i32; },
+        (*)                { exit 70i32; }
+    }
+    exit 70i32;
+};
+
+func:main = int32(cstring[]:argv) {
+    int32[4]:a = [1i32, 2i32, 3i32, 4i32];
+    int64:i = argv.len * 10i64;
+    int32:v = a[i];
+    exit v;
+};
+
+func:failsafe = int32(Error:e) {
+    #posix_failsafe();
+};

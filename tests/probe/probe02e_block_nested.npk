@@ -1,0 +1,35 @@
+// expect-exit: 70
+//
+// PROBE 02, CONTROL HALF. A hand-written exhaustive `failsafe`, reached by a
+// real trap. This establishes that the trap path, the arm set and the expected
+// exit are right, so that if 02a (the macro form) fails, the failure is
+// attributable to the MACRO and not to anything else in the shape.
+//
+// Asked by: nitpick-posix PX-010 / meta/roadmap/0.0/0.0.0.md probe 02.
+mod:probe02e_block_nested;
+
+func:main = int32(cstring[]:argv) {
+    int32[4]:a = [1i32, 2i32, 3i32, 4i32];
+    // argv.len is at least 1 and is not known at compile time, so this index
+    // cannot be folded away -- it must reach the runtime bounds check.
+    int64:i = argv.len * 10i64;
+    int32:v = a[i];
+    exit v;
+};
+
+func:failsafe = int32(Error:e) {
+    {
+    pick (e) {
+        (DivByZero)        { exit 70i32; },
+        (DivOverflow)      { exit 70i32; },
+        (OutOfBounds)      { exit 70i32; },
+        (IntOverflow)      { exit 70i32; },
+        (Unreachable)      { exit 70i32; },
+        (HeapOom)          { exit 70i32; },
+        (HeapBadRequest)   { exit 70i32; },
+        (WildLeak)         { exit 70i32; },
+        (*)                { exit 70i32; }
+    }
+    }
+    exit 70i32;
+};

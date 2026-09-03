@@ -1,0 +1,22 @@
+// The shared macro, in ITS OWN MODULE -- which is where src/posix/ would put
+// it. Probe 02f had macro and caller in one file, which cannot show whether a
+// caller-declared error name resolves.
+mod:pxfail;
+
+pub macro:posix_failsafe_with = (EXTRA) {
+    func:failsafe = int32(Error:e) {
+        pick (e) {
+            (EXTRA)            { exit 71i32; },
+            (DivByZero)        { exit 70i32; },
+            (DivOverflow)      { exit 70i32; },
+            (OutOfBounds)      { exit 70i32; },
+            (IntOverflow)      { exit 70i32; },
+            (Unreachable)      { exit 70i32; },
+            (HeapOom)          { exit 70i32; },
+            (HeapBadRequest)   { exit 70i32; },
+            (WildLeak)         { exit 70i32; },
+            (*)                { exit 70i32; }
+        }
+        exit 70i32;
+    };
+};

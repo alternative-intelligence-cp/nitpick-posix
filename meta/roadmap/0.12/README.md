@@ -18,7 +18,7 @@ the previous cycle taught.
 
 - [ ] every utility in this cycle has its `OptSpec` table before its code
       (`ARGUMENTS.md` G-11) and its generated synopsis checked against it (G-17)
-- [ ] every utility's `failsafe` is the macro, never a hand-written `pick`
+- [ ] every utility's `failsafe` is the **generated** file, unedited — `check_failsafe_current` regenerates and diffs (PX-100)
       (`SAFETY.md` S-2)
 - [ ] every utility has **conformance** cases carrying their citation and
       **differential** cases against the recorded reference (`TESTING.md` §§1–2)

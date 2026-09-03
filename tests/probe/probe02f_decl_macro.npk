@@ -1,0 +1,50 @@
+// expect-exit: 70
+//
+// PROBE 02, THE THIRD SHAPE — and the one 0.0.0.md did not consider.
+//
+// 02a/02c/02d established that a macro cannot supply the `pick` INSIDE
+// `failsafe`: a statement-position expansion becomes a nested block
+// (MACRO_REFERENCE.md §4), and `reach.npk` scans only the TOP LEVEL of
+// failsafe's body -- its own comment reads "Find the ONE top-level pick over
+// the parameter in failsafe's body". 02e proved the cause is the block and not
+// the macro, by wrapping a hand-written pick in a bare block and getting the
+// same NITPICK-REACH-001.
+//
+// So: let the macro emit the WHOLE FUNCTION, at module level, where
+// MACRO_REFERENCE.md §2 says a declaration body splices declarations. The
+// `pick` then lands at the top level of the generated body, where the analysis
+// looks -- and the block problem never arises.
+//
+// If this works, PX-010 survives in a BETTER form than it was written: a
+// utility writes one line at module level rather than a four-line stub, and
+// there is no `#caller` and no hygiene subtlety, because `e` is declared by the
+// macro itself.
+mod:probe02f_decl_macro;
+
+// The whole handler, for every utility in the set, in one place.
+macro:posix_failsafe = () {
+    func:failsafe = int32(Error:e) {
+        pick (e) {
+            (DivByZero)        { exit 70i32; },
+            (DivOverflow)      { exit 70i32; },
+            (OutOfBounds)      { exit 70i32; },
+            (IntOverflow)      { exit 70i32; },
+            (Unreachable)      { exit 70i32; },
+            (HeapOom)          { exit 70i32; },
+            (HeapBadRequest)   { exit 70i32; },
+            (WildLeak)         { exit 70i32; },
+            (*)                { exit 70i32; }
+        }
+        exit 70i32;
+    };
+};
+
+func:main = int32(cstring[]:argv) {
+    int32[4]:a = [1i32, 2i32, 3i32, 4i32];
+    int64:i = argv.len * 10i64;
+    int32:v = a[i];
+    exit v;
+};
+
+// One line, at module level. This is what every utility would write.
+#posix_failsafe();

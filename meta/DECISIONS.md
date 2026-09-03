@@ -93,6 +93,9 @@ and its cycle is the largest in this plan.
 
 ### PX-010 — sixty `failsafe` handlers are written by a macro
 **2026-09-03. The decision that shapes the repository.**
+**SUPERSEDED by PX-100 on 2026-09-03**, by probe 02: a macro is invocable only
+in the module that declares it, so it cannot be shared. The text below stands
+as written; the handler is generated instead.
 
 REACH-002 requires `failsafe`'s `pick` to name every reachable error, and the
 check happens **in that function's own body** — so a shared helper discharges
@@ -201,3 +204,64 @@ advance, so a bad number produces a stop rather than an improvisation — the
 instrument `ntime` established for the tzdb. If `true` is 900 KB, the
 mitigations (a smaller floor, or PX-001's declined BusyBox form) are decisions
 taken with the measurement in hand.
+
+---
+
+## Settled by measurement — cycle 0.0
+
+These come from probes that ran, and each cites the probe that produced it.
+Where one supersedes a decision above, the superseded text stands unaltered.
+
+### PX-100 — `failsafe` is **generated**, not written by a macro. *Supersedes PX-010.*
+**2026-09-03. Probe 02, seven programs, `tests/probe/probe02*.npk`.**
+
+PX-010 said one macro definition would serve sixty utilities. It cannot, for
+two independent reasons, and the second is fatal.
+
+**A macro cannot supply the `pick` inside `failsafe`.** A statement-position
+expansion "becomes **a block** holding the statements"
+(`MACRO_REFERENCE.md` §4), and the reachability analysis walks only the
+**immediate** statements of `failsafe`'s body — `reach.npk`'s own comment reads
+*"Find the ONE top-level pick over the parameter in failsafe's body"*. The
+`pick` is one level too deep and the program is refused `NITPICK-REACH-001`.
+Probe 02e attributes this to the **block** and not to macros, by wrapping a
+hand-written `pick` in a bare block and drawing the same diagnostic.
+
+**A macro emitting the whole function does work** (probe 02f, exit 70): spliced
+at module level, the `pick` lands where the analysis looks. For an hour this
+looked like PX-010 surviving in a better form.
+
+**But a macro is invocable only in the module that declares it**
+(`NITPICK-MACRO-007`, on D-124: an invocation's meaning depends on which module
+it is in). Probe 02g draws it. A macro therefore cannot be *shared at all* —
+and sharing was the entire proposition. A copy in each of sixty utilities is
+PX-010's own twelve-hundred-line problem with an extra layer of indirection.
+
+**So the handler is generated.** `tools/gen_failsafe.py` reads a utility's
+declared errors and the system error set, and writes
+`src/util/<name>/failsafe.npk`, which is **committed**. CI regenerates and
+diffs; a difference is a failure. This is the same instrument the ecosystem
+already uses for the Unicode tables and the capability table, and it is better
+than the macro in three respects the macro could not have offered: the handler
+is greppable, it is diffable in review, and a reader sees the arms rather than
+an invocation that hides them.
+
+*The cost that is real:* a new system error edits sixty files instead of one.
+It is one regeneration and one commit, and the diff is the point — sixty
+handlers changed, visibly.
+
+*What was right in PX-010:* writing the fallback down before probing. The
+answer here was chosen from a plan, under no pressure, in the twenty minutes
+after the mechanism died.
+
+### PX-101 — a test program's filename may not begin with a digit
+**2026-09-03. Probe 02, incidentally.**
+
+A file's `mod:` declaration must equal its basename, and no identifier may
+begin with a decimal digit — D-147 gives every numeric literal that opening so
+that a lexer's first character decides. `mod:02a_failsafe_macro;` is refused
+`NITPICK-LEX-003`, with `NITPICK-RESOLVE-005` behind it.
+
+Probes are therefore named `probeNN_topic.npk`, cases `caseNN_topic.npk`. The
+convention is stated here rather than in a style guide because the compiler
+enforces it and a reader should meet it as a rule of the language.

@@ -64,12 +64,27 @@ Inherited from the library workbench: the loader's dependency-root list is
 created empty and never populated, so `grep`'s import of `nregex` is a relative
 path. Same workaround, same request.
 
-### O-N6 — a macro's ability to splice a `pick` into a function body is unverified
-PX-010 rests on it entirely. `MACRO_REFERENCE.md` describes expansion in four
-positions and splicing into structs and impls; a statement-position expansion
-containing a `pick` is the shape this repository needs and it is not
-demonstrated anywhere in the compiler's own tree. **Cycle 0.0's probe 02 is the
-verification**, and a negative result changes this repository's shape.
+### ~~O-N6 — a macro's ability to splice a `pick` into a function body~~ — **ANSWERED by probe 02, PX-100**
+**It cannot, and more decisively, a macro cannot be shared between modules at
+all** (`NITPICK-MACRO-007`). `failsafe` is generated instead. The full chain of
+seven probes is in `meta/roadmap/0.0/0.0.0.md` §6.
+
+### O-N7 — the reachability walk reads only the top level of `failsafe`'s body
+**Raised by probe 02e**, which is a **hand-written** `pick` wrapped in a bare
+block — no macro anywhere — refused `NITPICK-REACH-001`. `reach.npk` says it
+plainly: *"Find the ONE top-level pick over the parameter in failsafe's body."*
+
+This is defensible as written — one obvious `pick`, no hunting — and this
+repository does not need it changed. It is recorded because the **diagnostic**
+does not say it. `REACH-001` reports that `failsafe` has no `pick` over its
+parameter when a `pick` is right there, one block down, and a reader whose
+handler is inside an `if` will lose an afternoon.
+
+**Ask:** not a behaviour change — a **sentence in the diagnostic**. When the
+body contains a `pick` over the parameter at any depth, say so: *"a `pick` over
+`e` was found inside a nested block; it must be at the top level of
+`failsafe`'s body."* The information is already in hand at the point of
+refusal.
 
 ---
 

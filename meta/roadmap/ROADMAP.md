@@ -22,11 +22,18 @@ and being used; `date` and `crontab` (0.7) are `ntime`'s, gating its 0.7. That
 is a genuine mutual dependency between repositories and the plan says so rather
 than discovering it.
 
-**The riskiest thing is in cycle 0.0 and it is not code.** PX-010 rests
-entirely on a macro being able to splice a `pick` into a function body, which
-nothing in the compiler's own tree demonstrates. Probe 02 answers it on day
-one; a negative answer changes the repository's shape, and the fallback is
-written down rather than improvised.
+**The riskiest thing was in cycle 0.0, it was not code, and it has been
+answered.** PX-010 rested entirely on a macro being able to splice a `pick`
+into a function body, which nothing in the compiler's own tree demonstrated.
+**Probe 02 ran on 2026-09-03 and the answer was no** — twice over, the second
+time fatally: a macro is invocable only in the module that declares it, so it
+cannot be shared. The repository's shape changed in exactly one place, PX-100
+took the fallback that had been written down in advance, and `failsafe` is
+generated. It cost part of a day at cycle 0.0 instead of a rewrite at 0.6.
+
+That is the whole argument for probing first, and it is worth stating plainly:
+the plan was wrong about its riskiest assumption, and the plan is what caught
+it.
 
 ---
 

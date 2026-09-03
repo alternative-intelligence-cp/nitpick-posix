@@ -1,0 +1,15 @@
+// expect-exit: 71
+//
+// PROBE 02, S-4: the shared macro in ANOTHER module, extended with an error the
+// CALLING utility declares. This is the shape src/posix/ would actually have,
+// and 02f could not test it because macro and caller shared a file.
+mod:probe02g_cross_module;
+use "./shared/pxfail.npk".*;
+
+error:EProbeOwn;
+
+func:main = int32(cstring[]:_~argv) {
+    !!! EProbeOwn;
+};
+
+#posix_failsafe_with(#caller(EProbeOwn));

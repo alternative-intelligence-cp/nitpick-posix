@@ -112,7 +112,7 @@ Not tests. Checks that diff the repository against the documents describing it.
 |---|---|
 | `check_catalogue` | the utilities built against `SCOPE.md`'s table and `CONFORMANCE.md`'s departures — a utility that exists and is in neither fails |
 | `check_synopsis` | each utility's generated usage text against its `OptSpec` table (G-17) |
-| `check_failsafe_macro` | every utility's `failsafe` is the macro, not a hand-written `pick` |
+| `check_failsafe_current` | every `src/util/*/failsafe.npk` regenerated and diffed against what is committed; any difference fails. *Replaced `check_failsafe_macro` under PX-100, when probe 02 established that a macro cannot be shared between modules* |
 | `check_no_raw_accumulate` | no input-derived multiply outside `src/posix/num.npk` |
 | `check_no_isatty` | no utility branches on whether output is a terminal (U-13) |
 | `check_no_shell` | no case's `cmd` is a shell invocation, and no utility spawns another (U-13) |
