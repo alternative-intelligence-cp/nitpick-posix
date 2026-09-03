@@ -37,6 +37,15 @@ The POSIX utility set in Nitpick — **many programs from one tree**. Status:
 - **This is where error budgets are paid.** `grep` owes one arm beyond the
   system set because `nregex` declares one identity.
 
+## The toolchain
+
+The compiler binary is the **pinned toolchain** the board names (`../../nitpick-libs/BOARD.md`,
+W-18): `$NPKC` and `$NPKRT` are supplied by the orchestrator, or set by hand
+from `../../nitpick-libs/.internal/toolchain/<commit>/`. Never build the compiler from here
+and never read its `build/` directly — the guard refuses the first, and the
+second is rebuilt under you. Probe 02 already ran against a copy for exactly
+this reason.
+
 ## Non-negotiable
 
 - A utility in neither `SCOPE.md`'s catalogue nor `CONFORMANCE.md`'s departures
