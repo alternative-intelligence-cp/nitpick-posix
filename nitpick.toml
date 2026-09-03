@@ -1,0 +1,39 @@
+# nitpick-posix — the manifest.
+#
+# The compiler's schema exactly (BUILD_REFERENCE.md §1). `npkg` cannot build
+# this yet -- `npkg build` is the compiler's own bootstrap ladder and
+# `[dependencies]` resolves to nothing -- so `harness/` drives `npkc`, `llc`
+# and `ld.lld` directly, and every import of a library is a relative path.
+# See meta/specs/BUILD.md.
+#
+# `target = "executable"` is a simplification the schema forces: this tree
+# produces MANY executables, one per utility, and the schema has one `entry`.
+# The harness builds each utility from `src/util/<name>/main.npk`; `[build]`
+# names the one the schema demands and nothing reads it until npkg grows a
+# multi-artifact form. Recorded as O-N5 rather than worked around silently.
+
+[project]
+name        = "nitpick-posix"
+version     = "0.0.0"
+description = "The POSIX utility set in Nitpick — no libc, no C, no dependency in any artifact"
+authors     = ["Randy"]
+target      = "executable"
+
+[build]
+entry     = "src/util/true/main.npk"
+output    = "build/true"
+opt-level = 0
+
+[toolchain]
+llvm          = "20.1.2"
+llc-flags     = ["-O0", "-filetype=obj", "-relocation-model=static"]
+llc-opt-flags = ["-O2", "-filetype=obj", "-relocation-model=static"]
+opt-flags     = ["-O2", "-S"]
+lld-flags     = ["-static"]
+
+# Empty. The libraries this consumes are reached by relative path until the
+# compiler's dependency resolution lands; adding an entry here would be a plan
+# against tooling that does not exist.
+[dependencies]
+
+# Each cycle adds its entries as its suite is created.
