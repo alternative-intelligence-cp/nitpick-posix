@@ -4,6 +4,14 @@ Guidance for Claude Code sessions in this repository.
 
 ## What this is
 
+## Before starting a session here
+
+Check **[`../../../nitpick-libs/BOARD.md`](../../../nitpick-libs/BOARD.md)** — it says whether this repository
+is claimed by a stream, and by which. **One writer per repository, always.**
+[`../../../nitpick-libs/WORKSTREAMS.md`](../../../nitpick-libs/WORKSTREAMS.md) is the dependency graph and the
+stream partition: what gates this repository, what this repository gates, and
+what to do when a cross-stream gate is not ready yet.
+
 The POSIX utility set in Nitpick — **many programs from one tree**. Status:
 **planning**. No code yet.
 
